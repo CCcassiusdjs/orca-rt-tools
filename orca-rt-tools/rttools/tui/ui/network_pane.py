@@ -81,13 +81,15 @@ class NetworkPane(Widget):
     NetworkPane #net-files { height: auto; padding: 0 1; background: $panel; }
     NetworkPane #net-settings { height: 1; }
     NetworkPane #net-settings Label { width: auto; }
-    NetworkPane #net-settings Input { width: 12; }
+    NetworkPane #net-settings Input { width: 9; }
+    NetworkPane #net-settings #n-freq { width: 12; }
     NetworkPane #net-settings Select { width: 10; }
     NetworkPane #net-status { height: auto; padding: 0 1; }
     NetworkPane #net-main { height: 1fr; }
     NetworkPane #net-mesh { width: 40; max-width: 60%; padding: 0 1; border-right: solid $panel; }
-    NetworkPane #net-settings #n-opt { width: 22; }
-    NetworkPane #net-settings #n-example { width: 24; }
+    NetworkPane #net-settings #n-opt { width: 20; }
+    NetworkPane #net-settings Button { min-width: 8; width: 10; }
+    NetworkPane #net-settings #n-example { width: 22; }
     NetworkPane TabbedContent { width: 1fr; }
     NetworkPane DataTable { height: 1fr; }
     NetworkPane RichLog { height: 1fr; }
