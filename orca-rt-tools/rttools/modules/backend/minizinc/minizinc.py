@@ -11,10 +11,16 @@ from rttools.modules.mapping.mapper import getMap
 from rttools.modules.io.vhdl import generateVhdlSimInput
 from rttools.modules.routing.router import getNumFlits
 
-from os.path import dirname, realpath
+from os.path import dirname, realpath, join
+from os import environ
+
+# repository root: five levels above this file
+# (minizinc -> backend -> modules -> rttools -> orca-rt-tools -> raiz)
+_REPO_ROOT = realpath(join(dirname(realpath(__file__)), *([".."] * 5)))
 
 ZINC_APP   = 'minizinc'
-ZINC_MODEL  = './minizinc/CM/CM-v20220427.mzn'
+# ORT_ZINC_MODEL permite indicar outro modelo
+ZINC_MODEL  = environ.get("ORT_ZINC_MODEL", join(_REPO_ROOT, "apps", "CM-v20220427.mzn"))
 ZINC_SOLVER = 'Gecode'
 ZINC_INPUT_PAD = 7
 ZINC_THREADS = 4
