@@ -14,10 +14,14 @@
     $write("%0s", $sformatf A); \
     $write("%0s\n", ENDL)
 
+  // the Verilator simulator reserves the `error directive; the active code
+  // does not use this macro
+  `ifndef VERILATOR
   `define error(A) \
     $write("%0s", RED); \
     $write("%0s", $sformatf A); \
     $write("%0s\n", ENDL)
+  `endif
 
   `define notice(A) \
     $write("%0s", CYAN); \
@@ -47,7 +51,9 @@
 `else
   `define info(A) $display("%0s", $sformatf A)
   `define warn(A) $display("%0s", $sformatf A)
+  `ifndef VERILATOR
   `define error(A) $display("%0s", $sformatf A)
+  `endif
   `define notice(A) $display("%0s", $sformatf A)
   `define debug(A) $display("%0s", $sformatf A)
   `define link(A) $display("%0s", $sformatf A)
