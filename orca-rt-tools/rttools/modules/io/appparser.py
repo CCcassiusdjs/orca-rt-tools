@@ -20,15 +20,9 @@ def loadFromFile(app_csv):
   else: 
     gml = csv2app(app_csv)
 
-    tmpFile = ".__tmp"
-
-    with open(tmpFile, "w+") as f:
-      f.write(gml)
-
-
-    
-    graph = nx.read_gml(tmpFile)
-    delete_file(tmpFile)
+    # converts the GML text in memory (no temporary file in the
+    # current directory)
+    graph = nx.parse_gml(gml.splitlines())
 
     # for n in graph.nodes(data=True):
     #   print(n)
@@ -53,12 +47,33 @@ def getTaskIdByName(taskName, tasks):
 #     "description" : par[5]
 #   }
 
-def parseTaskRow(par):
+def parseTaskRowWcet(par):
   return {
     "id": par[0],
     "wcet" : par[1],
     "label": par[2]
   }
+
+# old schema: Task,Period,Capacity|Data,Deadline,Acronym,Description;
+# the Capacity (or Data) column carries the WCET
+def parseTaskRowLegacy(par):
+  return {
+    "id": par[0],
+    "wcet" : par[2],
+    "label": par[4]
+  }
+
+# picks the task row reader from the table header
+def selectTaskRowParser(header):
+  fields = [h.strip().lower() for h in header]
+  if len(fields) > 1 and fields[1] == "wcet":
+    return parseTaskRowWcet
+  if len([h for h in fields if h != ""]) >= 5:
+    return parseTaskRowLegacy
+  return parseTaskRowWcet
+
+def parseTaskRow(par):
+  return parseTaskRowWcet(par)
 
 def parseFlowRow(par):
   return {
@@ -70,6 +85,10 @@ def parseFlowRow(par):
     "target" : par[5],
   }
 
+# GML requires quotes around labels with spaces or special characters
+def gmlString(text):
+  return '"' + str(text).replace('"', "'") + '"'
+
 def exportGmlTasks(tasks):
   gmlTasks = []
   for t in tasks:
@@ -80,7 +99,7 @@ def exportGmlTasks(tasks):
 
     task_text =             f"  node [{NEWLINE}"
     task_text = task_text + f"    id {t_id} {NEWLINE}"
-    task_text = task_text + f"    label {t_label}{NEWLINE}"
+    task_text = task_text + f"    label {gmlString(t_label)}{NEWLINE}"
     task_text = task_text + f"    wcet {t_wcet}{NEWLINE}"
     task_text = task_text + f"  ]"
     
@@ -122,6 +141,7 @@ def csv2app(filename):
   # 3: ignoring fields header
   # 4: parsing flows
   mode = 0
+  rowParser = parseTaskRowWcet
 
   with open(filename) as csvfile:
     rows = csv.reader(csvfile)
@@ -135,13 +155,14 @@ def csv2app(filename):
           mode = 1
       # ignore fields header line
       elif mode == 1:
+        rowParser = selectTaskRowParser(row)
         mode = 2
       # parse line as a task
       elif mode == 2:
         if row[0] == "#flows":
           mode = 3
         else:
-          tasks.append(parseTaskRow(row))
+          tasks.append(rowParser(row))
       # ignoring fields header line
       elif mode == 3:
         mode = 4
