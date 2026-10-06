@@ -43,7 +43,10 @@ class SingleCoreEngine:
 					wcet = int(data["wcet"])
 					period = int(data["period"]) if "period" in data else None
 					deadline = int(data["deadline"]) if "deadline" in data else period
+					if wcet < 0 or (period is not None and period <= 0):
+						raise ValueError("task " + str(data["label"]) + ": wcet >= 0 and period > 0 required")
 					tlb = TaskControlBlock(n._id, data["label"], period, wcet, deadline)
+					tlb._miss_flagged = False   # miss of the current job already recorded
 					self._blocked.append(tlb)
 
 				self._algorithm = algorithm
@@ -86,6 +89,7 @@ class SingleCoreEngine:
 						if self._system_time >= time:
 								for t in self._running:
 										t._current_capacity += self._elapsed_time
+								self.check_pending_misses(self._running + self._ready)
 								break
 
 						# call the scheduler
@@ -141,9 +145,11 @@ class SingleCoreEngine:
 
 						# case B: task has finished; check deadline at completion
 						else:
-								if t._next_deadline is not None and self._system_time > t._next_deadline:
+								if (t._next_deadline is not None and self._system_time > t._next_deadline
+												and not t._miss_flagged):
 										self._misses.append((t._name, t._next_deadline, self._system_time))
 										error("missed deadline!", t._name)
+								t._miss_flagged = False
 								if t._period is None:
 										t._release_time = inf          # one-shot job
 								else:
@@ -164,6 +170,9 @@ class SingleCoreEngine:
 				# preempted tasks go to the tail (after newly released ones)
 				self._ready.extend(preempted)
 
+				# jobs not finished past their deadline (registered once per job)
+				self.check_pending_misses(self._ready)
+
 				# sort ready list (using sort algorithm)
 				self._ready = algorithm.schedule(self._ready)
 
@@ -173,6 +182,14 @@ class SingleCoreEngine:
 						self._running.append(task)
 
 				return self._system_time
+
+		def check_pending_misses(self: "SingleCoreEngine", tasks):
+				for t in tasks:
+						if (t._next_deadline is not None and self._system_time > t._next_deadline
+								and not t._miss_flagged):
+								t._miss_flagged = True
+								self._misses.append((t._name, t._next_deadline, None))
+								error("missed deadline (job not finished)!", t._name)
 
 		def get_next_release(self:"SingleCoreEngine", r: list[TaskControlBlock] ):
 				releases = [t._release_time for t in r if t._release_time != inf]

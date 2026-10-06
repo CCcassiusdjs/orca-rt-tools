@@ -64,3 +64,29 @@ def test_one_shot_jobs_finish_and_simulation_stops():
     end = eng.simulate(1000, False)
     assert eng.merged_trace() == [(0, 3, "A"), (3, 5, "B")]
     assert end == 5          # with no pending events, the simulation ends
+
+
+# --- independent review: deadline misses of unfinished jobs and
+# --- zero period
+from rttools.bench.scheduling import RateMonotonicScheduling
+import pytest
+
+
+def test_starved_job_deadline_miss_reported():
+    # RM, quantum 1: A ocupa o processador; B nunca executa e perde o prazo 10
+    eng = SingleCoreEngine(graph(("A", 5, 5, 5), ("B", 1, 10, 10)),
+                           RateMonotonicScheduling, quantum=1)
+    eng.simulate(100, False)
+    assert ("B", 10, None) in eng._misses
+
+
+def test_unfinished_job_miss_reported_once():
+    eng = SingleCoreEngine(graph(("A", 50, 10, 10),), EarliestDeadlineFirst, quantum=1)
+    eng.simulate(30, False)
+    assert eng._misses[0] == ("A", 10, None)
+    assert len([m for m in eng._misses if m[1] == 10]) == 1
+
+
+def test_zero_period_rejected():
+    with pytest.raises(ValueError):
+        SingleCoreEngine(graph(("A", 0, 0, None),), RateMonotonicScheduling, quantum=1)
