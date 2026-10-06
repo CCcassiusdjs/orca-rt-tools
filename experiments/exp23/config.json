@@ -1,0 +1,45 @@
+{
+  "_doc": "Experiment of Ch. 8 (application E on a 2x2 manycore, pkt-sim/software/ucx-os/app/weird_a.c). PE labels follow the log of commit 4c299fc; the analysis swaps X and Y of logs of the fixed RTL automatically. Times in seconds or cycles of the 500 MHz clock.",
+  "clock_hz": 500000000,
+  "pe_tasks": {
+    "0-0": ["IDLE", "F", "D", "B", "A"],
+    "0-1": ["IDLE", "C"],
+    "1-1": ["IDLE", "J", "G"],
+    "1-0": ["IDLE", "H", "I", "E"]
+  },
+  "clusters": {"0-0": "ABDF", "0-1": "C", "1-0": "EHI", "1-1": "GJ"},
+  "release_period_s": 0.0005,
+  "iterations_per_hyperperiod": 4,
+  "warmup_s": 0.003,
+  "first_hyperperiod_s": 0.004,
+  "response_deadline_s": 0.002,
+  "source": {"pe": "0-0", "task": "A"},
+  "join": {"pe": "1-1", "task": "J", "tags": ["8900", "5670", "1230"], "packets_per_iteration": 3},
+  "estimate": {
+    "_doc": "ORT/BENCH estimates of rttools/bench_t/main.py: tasks of each cluster in order, WCET in thesis scale (10 times weird_a.c), scheduler cost included in each WCET.",
+    "scale": 10,
+    "scheduler_cycles": 110000,
+    "clusters": {
+      "ABDF": [["A", 285300], ["B", 586000], ["D", 140000], ["F", 808000]],
+      "C": [["C", 963300]],
+      "EHI": [["E", 527000], ["I", 753700], ["H", 453000]],
+      "GJ": [["G", 1098800], ["J", 1075700]]
+    }
+  },
+  "flows": [
+    {"name": "F1", "source": "A", "target": "C", "tag": "1230", "src_pe": "0-0", "dst_pe": "0-1"},
+    {"name": "F2", "source": "F", "target": "G", "tag": "6780", "src_pe": "0-0", "dst_pe": "1-1"},
+    {"name": "F3", "source": "C", "target": "E", "tag": "1200", "src_pe": "0-1", "dst_pe": "1-0"},
+    {"name": "F4", "source": "I", "target": "J", "tag": "5670", "src_pe": "1-0", "dst_pe": "1-1"},
+    {"name": "F5", "source": "H", "target": "J", "tag": "8900", "src_pe": "1-0", "dst_pe": "1-1"}
+  ],
+  "thesis": {
+    "_doc": "Values printed in the thesis (Ch. 8), in the units the thesis states.",
+    "tab83_measured_cycles": {"ABDF": 1439000, "C": 801300, "EHI": 2174500, "GJ": 2384400},
+    "tab83_estimated_cycles": {"ABDF": 1819300, "C": 963300, "EHI": 2667900, "GJ": 3014400},
+    "tab83_mean_overestimation_percent": 23.934,
+    "release_period_ms": 5,
+    "hyperperiod_ms": 20,
+    "iterations_ms": [16.793, 12.799, 16.438, 12.486]
+  }
+}

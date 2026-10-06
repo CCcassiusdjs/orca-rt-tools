@@ -1,0 +1,112 @@
+{
+ "_doc": "Expected results of make paper (simulation of this tree: fixed RTL and fixed software, timescale 1ns/100ps). Derived from run C (fixed RTL and software, 100 ps units): the analysis works in cycles, and the later commits do not change the simulated behavior. To be confirmed by make paper on the simulation server.",
+ "unit": {
+  "name": "1 ns"
+ },
+ "parameters": {
+  "release_period_ms": 0.5,
+  "hyperperiod_ms": 2.0,
+  "release_period_cycles": 250000,
+  "hyperperiods": 7
+ },
+ "tab83": {
+  "rows": [
+   {
+    "cluster": "ABDF",
+    "measured": 144096,
+    "estimated": 181930,
+    "difference": 37834
+   },
+   {
+    "cluster": "C",
+    "measured": 80967.5,
+    "estimated": 96330,
+    "difference": 15362.5
+   },
+   {
+    "cluster": "EHI",
+    "measured": 119334,
+    "estimated": 173370,
+    "difference": 54036
+   },
+   {
+    "cluster": "GJ",
+    "measured": 183086,
+    "estimated": 217450,
+    "difference": 34364
+   }
+  ],
+  "mean_difference_percent": 27.320100527568737
+ },
+ "iterations": {
+  "per_release_offset": [
+   {
+    "release_offset_ms": 0.0,
+    "count": 8,
+    "max_ms": 1.414386
+   },
+   {
+    "release_offset_ms": 0.5,
+    "count": 8,
+    "max_ms": 1.179304
+   },
+   {
+    "release_offset_ms": 1.0,
+    "count": 8,
+    "max_ms": 1.860738
+   },
+   {
+    "release_offset_ms": 1.5,
+    "count": 8,
+    "max_ms": 1.36071
+   }
+  ],
+  "max_ms": 1.860738
+ },
+ "tab82": [
+  {
+   "flow": "F1",
+   "min_release": 28530,
+   "deadline": 11000,
+   "volume_bytes": 1230,
+   "latency_min_cycles": 1896,
+   "latency_max_cycles": 1986
+  },
+  {
+   "flow": "F2",
+   "min_release": 181930,
+   "deadline": 11000,
+   "volume_bytes": 6780,
+   "latency_min_cycles": 3297,
+   "latency_max_cycles": 3442
+  },
+  {
+   "flow": "F3",
+   "min_release": 96330,
+   "deadline": 11000,
+   "volume_bytes": 1200,
+   "latency_min_cycles": 1915,
+   "latency_max_cycles": 2154
+  },
+  {
+   "flow": "F4",
+   "min_release": 128070,
+   "deadline": 120880,
+   "volume_bytes": 5670,
+   "latency_min_cycles": 2995,
+   "latency_max_cycles": 3166
+  },
+  {
+   "flow": "F5",
+   "min_release": 173370,
+   "deadline": 120880,
+   "volume_bytes": 8900,
+   "latency_min_cycles": 3804,
+   "latency_max_cycles": 3996
+  }
+ ],
+ "monitor": {
+  "errors": 0,
+  "nodes": 4
+ }
+}
