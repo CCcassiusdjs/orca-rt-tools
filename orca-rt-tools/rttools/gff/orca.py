@@ -21,16 +21,18 @@ def import_graph(filename: str) -> Graph:
                     if line.startswith("#"):
                         state = PARSE_EDGES
                     else:
-                        # parse nodes here
-                        v = line.replace("\n", "").split(" ")
-                        n: GraphNode = GraphNode(g.get_new_id(), {
-                            "label": v[0],
-                            "wcet": v[1]
-                        })
+                        # parse nodes here: label wcet [period [deadline]]
+                        v = line.split()
+                        data = {"label": v[0], "wcet": v[1]}
+                        if len(v) >= 3:
+                            data["period"] = v[2]
+                        if len(v) >= 4:
+                            data["deadline"] = v[3]
+                        n: GraphNode = GraphNode(g.get_new_id(), data)
                         g._nodes.append(n)
                 elif state == PARSE_EDGES:
                     # parse edges here
-                    v = line.replace("\n", "").split(" ")
+                    v = line.split()
                     nfrom = [x for x in g._nodes
                                 if x._data["label"] == v[0]][0]  # label
                     nto = [x for x in g._nodes  
@@ -47,7 +49,12 @@ def export_graph(filename: str, graph: Graph) -> None:
     with (open(filename, mode='w+') as f):
         f.write("# nodes\n")
         for n in graph._nodes:
-            f.write(n._data["label"] + " " + n._data["wcet"] + "\n")
+            fields = [n._data["label"], n._data["wcet"]]
+            if "period" in n._data:
+                fields.append(n._data["period"])
+                if "deadline" in n._data:
+                    fields.append(n._data["deadline"])
+            f.write(" ".join(fields) + "\n")
         f.write("\n")
         f.write("# edges\n")
         for e in graph._edges:

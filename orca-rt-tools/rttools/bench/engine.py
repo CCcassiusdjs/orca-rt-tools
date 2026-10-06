@@ -29,27 +29,17 @@ class SingleCoreEngine:
 				self._blocked = []
 				self._ready = []
 
-				# populate blocked list with tasks from the graph
-				i = 0
+				# populate blocked list with tasks from the graph; nodes carry
+				# wcet and, optionally, period and deadline. A node without
+				# period is a one-shot job (released once at time 0).
 				for n in task_graph._nodes:
-					print(n)
-					tlb = TaskControlBlock(
-						i,
-						n._data["label"],
-						n._data["wcet"], 0, 0
-					)
-					i = i + 1
-			
+					data = n._data
+					wcet = int(data["wcet"])
+					period = int(data["period"]) if "period" in data else None
+					deadline = int(data["deadline"]) if "deadline" in data else period
+					tlb = TaskControlBlock(n._id, data["label"], period, wcet, deadline)
+					self._blocked.append(tlb)
 
-				# for n in task_graph._nodes:
-				# 		tlb = TaskControlBlock(
-				# 				n.get_data()["id"],
-				# 				n.get_data()["name"],
-				# 				n.get_data()["period"],
-				# 				n.get_data()["capacity"],
-				# 				n.get_data()["deadline"],
-				# 		)
-				self._blocked.append(tlb)				
 				self._algorithm = algorithm
 
 
