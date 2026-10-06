@@ -16,7 +16,7 @@ from textual.widgets import (
 
 from rttools.tui.model import network
 from rttools.tui.model.timeunit import format_frequency
-from rttools.tui.ui.dialogs import Field, FormDialog, parse_number
+from rttools.tui.ui.dialogs import Field, FormDialog, guarded, parse_number
 from rttools.tui.ui.gantt import GanttView
 from rttools.tui.ui.tables import esc, fill
 
@@ -226,7 +226,7 @@ class NetworkPane(Widget):
             Field("app", "Application (CSV)", a, "path"),
             Field("map", "Mapping (.map)", m, "path"),
             Field("noc", "NoC (GML)", n, "path"),
-        ], tree_root=network.repo_root()), done)
+        ], tree_root=network.repo_root()), guarded(self.app, done))
 
     # ----------------------------------------------------------- search
 
@@ -275,16 +275,16 @@ class NetworkPane(Widget):
     def running(self):
         return self.proc is not None and self.proc.poll() is None
 
-    @work(thread=True, exclusive=True, group="net-search")
+    @work(thread=True, group="net-search")
     def monitor(self, proc):
         finished = False
         for msg in network.read_messages(proc.stdout):
             if msg[0] in ("result", "error"):
                 finished = True
-            self.app.call_from_thread(self.on_worker_message, msg)
+            self.app.call_from_thread(self.on_worker_message, msg, proc)
         code = proc.wait()
         if not finished:
-            self.app.call_from_thread(self.on_worker_message, ("ended", code))
+            self.app.call_from_thread(self.on_worker_message, ("ended", code), proc)
 
     def update_status(self, force=False):
         if self.started is None or (not force and not self.running()):
@@ -298,7 +298,9 @@ class NetworkPane(Widget):
             f"{format_frequency(self.current_frequency or 0)}, search nodes entered {p.get('entered', 0):,}, "
             f"ignored {p.get('ignored', 0):,}, restarts {p.get('skipped', 0)}, elapsed {el:,.0f} s")
 
-    def on_worker_message(self, msg):
+    def on_worker_message(self, msg, proc=None):
+        if proc is not None and proc is not self.proc:
+            return      # message of an earlier (cancelled) search
         kind, data = msg
         log = self.query_one("#n-log", RichLog)
         if kind == "log":
@@ -326,6 +328,7 @@ class NetworkPane(Widget):
             self.show_result(data)
         elif kind == "error":
             self.proc = None
+            self.update_status(True)
             log.write(data)
             self.app.notify("search failed; see the Log tab", severity="error", timeout=8)
         elif kind == "ended":

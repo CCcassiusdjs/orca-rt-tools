@@ -195,9 +195,12 @@ def validate(result):
                 issues.append(f"{pkt['name']} on {d['label']}: end {st + occ} after deadline {pkt['abs_deadline']}")
             iv.append((st, st + occ, pkt["name"]))
         iv.sort()
-        for (a0, a1, an), (b0, b1, bn) in zip(iv, iv[1:]):
-            if b0 < a1:
+        active = []
+        for b0, b1, bn in iv:
+            active = [a for a in active if a[1] > b0]
+            for a0, a1, an in active:
                 issues.append(f"{an} and {bn} overlap on {d['label']} ([{a0}, {a1}) and [{b0}, {b1}))")
+            active.append((b0, b1, bn))
     return issues
 
 

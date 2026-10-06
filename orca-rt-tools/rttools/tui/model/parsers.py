@@ -31,6 +31,8 @@ DEFAULT_RTL_NAMES = {
 RE_SCHED = re.compile(r"^(\d+)\s+(\d+-\d+)\s+scheduled\s+(\d+)\s*$")
 RE_TAG = re.compile(r"^(\d+)\s+(\d+-\d+)\s+(->|<-)\s+TAG\s+(\S+)\s*$")
 RE_TIMESCALE = re.compile(r"Time scale of \(([^)]*)\) is\s*(\d+)\s*(fs|ps|ns|us|ms|s)\b")
+# a component of the hierarchical path that names the PE (manycore_pe, pe0)
+RE_PE_PATH = re.compile(r"(?:^|\.)(?:manycore_pe|pe\d*)(?:$|[.\[])")
 RE_BENCH = re.compile(r"^(\d+)\s+(\d+)\s+(\S+)\s*$")
 
 
@@ -99,7 +101,7 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
     for raw in lines:
         if "Time scale of" in raw and detected is None:
             m = RE_TIMESCALE.search(raw)
-            if m and "pe" in m.group(1).lower():
+            if m and RE_PE_PATH.search(m.group(1)):
                 detected = (m.group(2), m.group(3))
         s = _strip(raw)
         m = RE_SCHED.match(s)
@@ -242,8 +244,9 @@ def parse_csv(lines, name="csv"):
         opts = dict(kv.split("=", 1) for kv in lines[0][1:].split() if "=" in kv)
         sec = opts.get("unit_seconds")
         clk = opts.get("clock_hz")
+        from urllib.parse import unquote
         unit = TimeUnit(float(sec) if sec not in (None, "None") else None,
-                        opts.get("unit_name", "unit").replace("_", " "),
+                        unquote(opts.get("unit_name", "unit")),
                         float(clk) if clk not in (None, "None") else None)
         body = lines[1:]
     reader = csv.DictReader(io.StringIO("".join(body)))

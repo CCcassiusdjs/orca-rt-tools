@@ -75,7 +75,15 @@ def bursts(trace, lane, t0=None, t1=None):
                 cur["labels"].append(s.label)
     if cur is not None:
         out.append(cur)
+    def busy_at(t):
+        s = trace.slice_at(lane, t)
+        return s is not None and not trace.is_idle(s) and s.duration > 0
+
     for b in out:
+        if b["start"] == t0 and busy_at(t0 - 1):
+            b["clipped"] = True
+        if b["end"] == t1 and busy_at(t1):
+            b["clipped"] = True
         b["duration"] = b["end"] - b["start"]
         b["sequence"] = "".join(b["labels"]) if all(len(x) == 1 for x in b["labels"]) \
             else ",".join(b["labels"])

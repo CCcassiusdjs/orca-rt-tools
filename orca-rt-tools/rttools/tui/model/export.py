@@ -20,16 +20,18 @@ def query_end(trace, t1):
 def write_csv(trace, path, t0=None, t1=None):
     t0 = trace.t0 if t0 is None else t0
     t1 = query_end(trace, trace.t1 if t1 is None else t1)
+    import csv
+    from urllib.parse import quote
     u = trace.unit
-    with open(path, "w") as f:
-        f.write(f"# unit_seconds={u.seconds} unit_name={u.name.replace(' ', '_')} "
-                f"clock_hz={u.clock_hz}\n")
-        f.write("lane,start,end,label,kind\n")
+    with open(path, "w", newline="") as f:
+        f.write(f"# unit_seconds={u.seconds} unit_name={quote(u.name)} clock_hz={u.clock_hz}\n")
+        w = csv.writer(f)
+        w.writerow(["lane", "start", "end", "label", "kind"])
         for lane in trace.lanes:
             for s in trace.slices_between(lane, t0, t1):
-                f.write(f"{lane},{s.start},{s.end},{s.label},{s.kind}\n")
+                w.writerow([lane, s.start, s.end, s.label, s.kind])
             for m in trace.marks_between(lane, t0, t1):
-                f.write(f"{lane},{m.time},{m.time},{m.label},{m.kind}\n")
+                w.writerow([lane, m.time, m.time, m.label, m.kind])
 
 
 def label_color(label, idle=False):
@@ -60,12 +62,15 @@ def ticks(trace, t0, t1, mode, target=8):
     if a is None or b is None:
         mode, a, b = "raw", t0, t1
     step = nice_step(b - a, target)
-    v = math.ceil(a / step) * step
     out = []
-    while v <= b + 1e-9:
+    first = math.ceil(a / step)
+    last = math.floor(b / step + 1e-9)
+    # integer index: `v += step` stops changing v when step is below the
+    # float spacing at v (very large times)
+    for i in range(first, min(last, first + 4 * max(1, target)) + 1):
+        v = i * step
         raw = u.from_display(v, mode) if mode != "raw" else v
         out.append((raw, format_value(v, mode)))
-        v += step
     return out
 
 

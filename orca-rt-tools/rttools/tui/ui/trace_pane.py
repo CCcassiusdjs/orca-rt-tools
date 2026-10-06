@@ -15,7 +15,7 @@ from rttools.tui.model.timeunit import (
     DISPLAY_MODES, RTL_CLOCK_HZ, RTL_PRESETS, SI, TimeUnit, format_frequency, format_value,
 )
 from rttools.tui.model.trace import Trace
-from rttools.tui.ui.dialogs import Field, FormDialog, parse_number
+from rttools.tui.ui.dialogs import Field, FormDialog, guarded, parse_number
 from rttools.tui.ui.gantt import GanttView
 from rttools.tui.ui.tables import esc, fill
 
@@ -209,12 +209,15 @@ class TracePane(Widget):
             Field("map", "RTL task map (JSON)", "", "path", placeholder="empty: map of rttools/log2gannt"),
             Field("swap", "RTL swap X and Y", False, "switch"),
             Field("clock", "Bench clock (Hz)", "", "text", placeholder="for ns/ms display, e.g. 500M"),
-        ], hint="RTL map: JSON object PE -> list of task names by index, as in log2gannt --map."), done)
+        ], hint="RTL map: JSON object PE -> list of task names by index, as in log2gannt --map."), guarded(self.app, done))
 
     def action_reload(self):
         if self.source:
             s = self.source
-            self.load_file(s["path"], s["fmt"], s["names"], s["swap_xy"], s["unit"], s["clock_hz"])
+            try:
+                self.load_file(s["path"], s["fmt"], s["names"], s["swap_xy"], s["unit"], s["clock_hz"])
+            except Exception as exc:   # noqa: BLE001
+                self.app.notify(f"{type(exc).__name__}: {exc}", severity="error", timeout=8)
 
     def action_cycle_mode(self):
         g = self.gantt
@@ -239,11 +242,18 @@ class TracePane(Widget):
                 txt = res["custom"].replace(" ", "")
                 num = "".join(ch for ch in txt if ch.isdigit() or ch == ".")
                 suf = txt[len(num):] or "ns"
-                if suf not in SI or not num:
-                    self.app.notify("raw unit: number + fs|ps|ns|us|ms|s, e.g. 100ps", severity="error")
+                try:
+                    value = float(num)
+                except ValueError:
+                    value = 0.0
+                if suf not in SI or value <= 0:
+                    self.app.notify("raw unit: positive number + fs|ps|ns|us|ms|s, e.g. 100ps", severity="error")
                     return
-                unit = TimeUnit(float(num) * SI[suf], f"{num} {suf}")
+                unit = TimeUnit(value * SI[suf], f"{num} {suf}")
             clk = parse_number(res["clock"], None)
+            if clk is not None and clk <= 0:
+                self.app.notify("clock: positive number of Hz", severity="error")
+                return
             unit = unit.with_clock(clk if clk else unit.clock_hz)
             for tr in {id(self.base): self.base, id(g.trace): g.trace}.values():
                 tr.unit = unit
@@ -263,7 +273,7 @@ class TracePane(Widget):
             Field("clock", "Clock (Hz)", f"{u.clock_hz:g}" if u.clock_hz else "", "text",
                   placeholder="500M"),
         ], hint="The thesis (Ch. 8) read logs of 4c299fc as 1 ns; the PE prints $time in units of 100 ps."),
-            done)
+            guarded(self.app, done))
 
     def action_goto(self):
         g = self.gantt
@@ -285,7 +295,7 @@ class TracePane(Widget):
             g.focus()
 
         self.app.push_screen(FormDialog(f"Go to time ({g.mode})", [
-            Field("value", "Time", "", "text", placeholder="value in the current display unit")]), done)
+            Field("value", "Time", "", "text", placeholder="value in the current display unit")]), guarded(self.app, done))
 
     def action_toggle_window(self):
         self.stats_on_view = not self.stats_on_view
@@ -317,7 +327,7 @@ class TracePane(Widget):
             Field("fmt", "Format", "svg", "select", [("SVG", "svg"), ("PNG (matplotlib)", "png"), ("CSV", "csv")]),
             Field("range", "Range", "view", "select", [("visible window", "view"), ("whole trace", "all")]),
             Field("path", "File", base + ".svg", "path"),
-        ], hint="The axis of SVG and PNG uses the current display unit."), done)
+        ], hint="The axis of SVG and PNG uses the current display unit."), guarded(self.app, done))
 
     def action_compare(self):
         if self.base is None:
@@ -341,7 +351,7 @@ class TracePane(Widget):
             Field("scale", "Scale of B times", "1", "text",
                   placeholder="10 compares a 1 ns log (B) with a 100 ps log (A)"),
             Field("swap", "Swap X and Y in B", False, "switch"),
-        ], hint="Lanes are matched by name; events by index of the slice in each lane."), done)
+        ], hint="Lanes are matched by name; events by index of the slice in each lane."), guarded(self.app, done))
 
     def show_comparison(self, other, scale):
         base = self.base

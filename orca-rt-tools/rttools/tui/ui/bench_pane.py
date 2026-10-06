@@ -10,7 +10,7 @@ from textual.widgets import Button, DataTable, Input, Label, Select, Static, Tab
 
 from rttools.tui.model import benchmodel, schedtests
 from rttools.tui.model.timeunit import format_value
-from rttools.tui.ui.dialogs import Field, FormDialog, parse_number
+from rttools.tui.ui.dialogs import Field, FormDialog, guarded, parse_number
 from rttools.tui.ui.gantt import GanttView
 from rttools.tui.ui.tables import fill
 
@@ -155,8 +155,8 @@ class BenchPane(Widget):
         if wcet is None:
             self.app.notify("WCET is required", severity="error")
             return
-        task = {"name": name, "wcet": int(wcet), "period": int(period) if period else None,
-                "deadline": int(deadline) if deadline else None}
+        task = {"name": name, "wcet": int(wcet), "period": None if period is None else int(period),
+                "deadline": None if deadline is None else int(deadline)}
         others = [t for t in self.tasks if t["name"] != name]
         errs = benchmodel.validate(others + [task])
         if errs:
@@ -186,7 +186,7 @@ class BenchPane(Widget):
                 self.app.notify(f"{type(exc).__name__}: {exc}", severity="error", timeout=8)
         self.app.push_screen(FormDialog("Load task set (ORCA graph format)", [
             Field("path", "File", self.path or "", "path")],
-            hint="Lines `label wcet [period [deadline]]` after `# nodes`; edges are ignored by the bench."), done)
+            hint="Lines `label wcet [period [deadline]]` after `# nodes`; edges are ignored by the bench."), guarded(self.app, done))
 
     def action_save(self):
         def done(res):
@@ -196,7 +196,7 @@ class BenchPane(Widget):
             self.path = res["path"]
             self.app.notify("saved " + res["path"])
         self.app.push_screen(FormDialog("Save task set", [Field("path", "File", self.path or "tasks.txt", "path")]),
-                             done)
+                             guarded(self.app, done))
 
     def action_run(self):
         if not self.tasks:
@@ -219,6 +219,13 @@ class BenchPane(Widget):
         if quantum <= 0:
             self.app.notify("quantum > 0 required", severity="error")
             return
+        # the simulation runs on the interface thread: about one event per
+        # quantum, so the horizon is capped
+        cap = quantum * 2_000_000
+        if horizon > cap:
+            self.app.notify(f"horizon {horizon:,} cut to {cap:,} (2,000,000 quanta); "
+                            f"raise the quantum for a longer horizon", severity="warning", timeout=10)
+            horizon = cap
         trace, misses, end, _ = benchmodel.simulate(self.tasks, algo, horizon, quantum, clock)
         self.last_trace = trace
         g = self.query_one("#b-gantt", GanttView)

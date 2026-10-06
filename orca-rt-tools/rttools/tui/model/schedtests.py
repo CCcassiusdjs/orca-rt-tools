@@ -59,9 +59,12 @@ def response_times(tasks, policy, jitter=0, limit_factor=100):
     Returns a list of dicts name, C, T, D, R (None if the iteration passes
     limit_factor * D), ok."""
     order = priority_order(tasks, policy)
+    key = (lambda t: t["T"]) if policy == "RM" else (lambda t: t["D"])
     out = []
     for i, t in enumerate(order):
-        hp = order[:i]
+        # every other task with the same or higher priority: the engine
+        # breaks ties by ready-queue order, so equal keys interfere both ways
+        hp = [h for j, h in enumerate(order) if j != i and key(h) <= key(t)]
         w = t["C"]
         r = None
         while True:
@@ -93,7 +96,8 @@ def busy_period(tasks):
 
 def edf_demand(tasks, max_points=200000):
     """Processor demand test. Returns (ok, first failing t or None,
-    number of checked points). U > 1 fails at once."""
+    number of checked points); ok is None (inconclusive) when the number
+    of points passes max_points. U > 1 fails at once (t None)."""
     p = periodic(tasks)
     if not p:
         return True, None, 0
@@ -110,7 +114,9 @@ def edf_demand(tasks, max_points=200000):
         dbf = sum(max(0, floor((x - t["D"]) / t["T"]) + 1) * t["C"] for t in p)
         if dbf > x:
             return False, x, n + 1
-    return True, None, min(len(points), max_points)
+    if len(points) > max_points:
+        return None, None, max_points
+    return True, None, len(points)
 
 
 def analyze(tasks, policy, quantum=0):
@@ -141,7 +147,13 @@ def analyze(tasks, policy, quantum=0):
             rows.append((name, "pass" if ok else "fail", ok))
     if policy == "EDF" and constrained:
         ok, x, npts = edf_demand(tasks)
-        rows.append(("EDF demand", "pass" if ok else f"fail at t = {x}", ok))
+        if ok is None:
+            text = f"inconclusive ({npts} points checked)"
+        elif ok:
+            text = "pass"
+        else:
+            text = "fail (U > 1)" if x is None else f"fail at t = {x}"
+        rows.append(("EDF demand", text, ok))
     if not constrained:
         rows.append(("D > T", "exact tests skipped", None))
     return rows

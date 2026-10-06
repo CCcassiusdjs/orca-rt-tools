@@ -112,12 +112,17 @@ def cmd_compare(argv):
     ta = _load(a.a, a)
     tb = _load(a.b, a, swap=a.swap_xy_b)
     res = compare.compare(ta, tb, a.scale_b)
+
+    def num(v):
+        if v is None:
+            return "-"
+        return str(int(v)) if float(v).is_integer() else f"{v:g}"
     print("| Lane | Slices A | Slices B | Same label | Same time | First label diff | Δ min | Δ max |")
     print("|---|---:|---:|---:|---:|---:|---:|---:|")
     for lane, r in res.items():
         print(f"| {lane} | {r['count_a']} | {r['count_b']} | {r['matched']} | {r['equal_times']} | "
               f"{'-' if r['first_label_mismatch'] is None else r['first_label_mismatch']} | "
-              f"{r['min_delta']} | {r['max_delta']} |")
+              f"{num(r['min_delta'])} | {num(r['max_delta'])} |")
     same = compare.identical(res)
     print("identical" if same else "different")
     return 0 if same else 1

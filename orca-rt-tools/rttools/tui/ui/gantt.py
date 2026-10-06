@@ -175,6 +175,9 @@ class GanttView(Widget, can_focus=True):
             t1 = t0 + 1
         self.view_t0 = float(t0)
         self.view_span = float(t1 - t0)
+        if self.trace is not None:
+            lo, hi = self.span_limits()
+            self.view_span = min(hi, max(lo, self.view_span))
         self._invalidate()
 
     # ---------------------------------------------------------- actions
@@ -193,11 +196,21 @@ class GanttView(Widget, can_focus=True):
         self._invalidate()
         self._notify()
 
+    def span_limits(self):
+        """Smallest span: 4 columns per raw unit; largest: 100 times the
+        trace (at least 100 units)."""
+        lo = float(self.plot_width) / 4
+        hi = max(100.0 * (self.trace.t1 - self.trace.t0), 100.0, lo)
+        return lo, hi
+
     def action_zoom(self, factor, center=None):
         if self.trace is None:
             return
         center = self.cursor if center is None else center
-        new_span = max(float(self.plot_width) / 4, self.view_span * float(factor))
+        lo, hi = self.span_limits()
+        new_span = min(hi, max(lo, self.view_span * float(factor)))
+        if float(factor) < 1 and new_span > self.view_span:
+            new_span = self.view_span
         frac = (center - self.view_t0) / self.view_span if self.view_span else 0.5
         frac = min(max(frac, 0.0), 1.0)
         self.view_t0 = center - frac * new_span
@@ -258,11 +271,22 @@ class GanttView(Widget, can_focus=True):
 
     # ------------------------------------------------------------ mouse
 
+    def _content_xy(self, event):
+        """Mouse position inside the content region (the focus border adds
+        a gutter on the left)."""
+        off = event.get_content_offset(self)
+        if off is None:
+            return None, None
+        return off.x, off.y
+
     def on_click(self, event):
         if self.trace is None:
             return
-        col = event.x - self.label_width
-        row = event.y - 2
+        x, y = self._content_xy(event)
+        if x is None:
+            return
+        col = x - self.label_width
+        row = y - 2
         lane = self.lane_offset + row if row >= 0 else None
         if lane is not None and lane >= len(self.trace.lanes):
             lane = None
@@ -275,13 +299,15 @@ class GanttView(Widget, can_focus=True):
         self.focus()
 
     def on_mouse_scroll_up(self, event):
-        col = event.x - self.label_width
+        x, _ = self._content_xy(event)
+        col = (x if x is not None else 0) - self.label_width
         center = self.time_of(col) if col >= 0 else None
         self.action_zoom(0.8, center)
         event.stop()
 
     def on_mouse_scroll_down(self, event):
-        col = event.x - self.label_width
+        x, _ = self._content_xy(event)
+        col = (x if x is not None else 0) - self.label_width
         center = self.time_of(col) if col >= 0 else None
         self.action_zoom(1.25, center)
         event.stop()
@@ -364,6 +390,8 @@ class GanttView(Widget, can_focus=True):
                     ov = max(0.0, min(b, cs + dt) - max(a, cs))
                     if s.start == s.end:
                         ov = 1e-9
+                    elif ov <= 0:
+                        continue
                     key = (s.label, self.trace.is_idle(s))
                     acc[c][key] = acc[c].get(key, 0.0) + ov
             for c in range(pw):

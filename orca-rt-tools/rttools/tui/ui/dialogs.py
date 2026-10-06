@@ -173,6 +173,17 @@ class TextDialog(ModalScreen):
         self.dismiss(None)
 
 
+def guarded(app, callback):
+    """Dialog callback that reports exceptions as notifications instead of
+    ending the application."""
+    def run(result):
+        try:
+            callback(result)
+        except Exception as exc:   # noqa: BLE001 - shown to the user
+            app.notify(f"{type(exc).__name__}: {exc}", severity="error", timeout=10)
+    return run
+
+
 def parse_number(text, default=None):
     """Integer or float from text with optional separators and SI suffix
     (k, M, G): '2M' -> 2000000, '1_000' -> 1000."""
@@ -184,4 +195,6 @@ def parse_number(text, default=None):
         mult = {"k": 1e3, "K": 1e3, "M": 1e6, "G": 1e9}[t[-1]]
         t = t[:-1]
     v = float(t) * mult
+    if v != v or v in (float("inf"), float("-inf")):
+        raise ValueError("not a finite number: " + str(text))
     return int(v) if v == int(v) else v

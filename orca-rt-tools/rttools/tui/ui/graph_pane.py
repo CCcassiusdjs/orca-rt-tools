@@ -11,7 +11,7 @@ from textual.widget import Widget
 from textual.widgets import Button, DataTable, Input, Label, Select, Static, TabbedContent, TabPane
 
 from rttools.tui.model import graphs
-from rttools.tui.ui.dialogs import Field, FormDialog, parse_number
+from rttools.tui.ui.dialogs import Field, FormDialog, guarded, parse_number
 from rttools.tui.ui.tables import esc, fill
 
 
@@ -136,7 +136,7 @@ class GraphPane(Widget):
         def done(res):
             if res and res["path"]:
                 self.load(res["path"])
-        self.app.push_screen(FormDialog("Load task graph", [Field("path", "File", self.path or "", "path")]), done)
+        self.app.push_screen(FormDialog("Load task graph", [Field("path", "File", self.path or "", "path")]), guarded(self.app, done))
 
     def action_cluster(self):
         if self.graph is None:
@@ -172,4 +172,4 @@ class GraphPane(Widget):
             if res and res["path"]:
                 graphs.save(res["path"], self.clustered)
                 self.app.notify("saved " + res["path"])
-        self.app.push_screen(FormDialog("Save clustered graph", [Field("path", "File", default, "path")]), done)
+        self.app.push_screen(FormDialog("Save clustered graph", [Field("path", "File", default, "path")]), guarded(self.app, done))
