@@ -42,6 +42,34 @@ def parseMinimumReleaseTime(sched, p, hp):
     return min
 
 
+def parse_args(args):
+    """Converts the positional arguments into a configuration.
+
+    Ordem: <app> <map> <arch> [<freq>] [<pruning factor>]
+    [<fail threshold>] [<optimize True|False>]. Argumentos ausentes
+    receive the global values of the module."""
+    cfg = {
+        "app_file": args[0],
+        "map_file": args[1],
+        "noc_file": args[2],
+        "frequency": RTTOOLS_DEFAULT_FREQUENCY,
+        "pruning_factor": RTTOOLS_PRUNNING_FACTOR,
+        "fail_threshold": RTTOOLS_FAIL_THRESHOULD,
+        "optimize": RTTOOLS_OPTIMIZE,
+        "heuristic": RTTOOLS_HEURISTIC,
+        "scaling_tolerance": RTTOOLS_SCALING_TOLERANCE,
+    }
+    if len(args) >= 4:
+        cfg["frequency"] = int(args[3])
+    if len(args) >= 5:
+        cfg["pruning_factor"] = int(args[4])
+    if len(args) >= 6:
+        cfg["fail_threshold"] = int(args[5])
+    if len(args) >= 7:
+        cfg["optimize"] = (args[6] == "True")
+    return cfg
+
+
 def main():
     welcome_msg = '''
                                                                 
@@ -72,29 +100,22 @@ def main():
     # [3] frequency
     if len(args) not in [3, 4, 5, 6, 7]:
         error("Usage: ")
-        error("  __main__.py <app> <map> <arch> [<freq>] [<step>] [<tries>]")
+        error("  __main__.py <app> <map> <arch> [<freq>] [<pruning factor>] [<fail threshold>] [<optimize True|False>]")
         return 1
 
     # cfg_file = "rttools.ini"
-    app_file = args[0]
-    map_file = args[1]
-    noc_file = args[2]
+    cfg = parse_args(args)
+    app_file = cfg["app_file"]
+    map_file = cfg["map_file"]
+    noc_file = cfg["noc_file"]
 
-    if len(args) >= 4:
-        RTTOOLS_DEFAULT_FREQUENCY = int(args[3])
-
-    if len(args) >= 5:
-        RTTOOLS_PRUNNING_FACTOR = int(args[4])
-
-    if len(args) >= 6:
-        RTTOOLS_FAIL_THRESHOULD = int(args[5])
-
-    if len(args) >= 7:
-        if(args[6] == "True"):
-          RTTOOLS_OPTIMIZE = True
-        else:
-          RTTOOLS_OPTIMIZE = False
-            
+    # local values; the module globals act as defaults
+    RTTOOLS_DEFAULT_FREQUENCY = cfg["frequency"]
+    RTTOOLS_PRUNNING_FACTOR = cfg["pruning_factor"]
+    RTTOOLS_FAIL_THRESHOULD = cfg["fail_threshold"]
+    RTTOOLS_OPTIMIZE = cfg["optimize"]
+    RTTOOLS_HEURISTIC = cfg["heuristic"]
+    RTTOOLS_SCALING_TOLERANCE = cfg["scaling_tolerance"]
 
     # parse configuration
     # info("Loading configuration file. `" + cfg_file + "`")
@@ -270,4 +291,4 @@ def main():
 # Executable script name is removed from the params list,
 # and the list itself is passed to the real main() function.
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
