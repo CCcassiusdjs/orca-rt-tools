@@ -297,3 +297,24 @@ def test_cli_stats_export_compare(tmp_path):
     q.write_text(RTL_LOG.replace("1400 0-0", "1401 0-0"))
     r = run_module("rttools.tui", "compare", str(p), str(q))
     assert r.returncode == 1
+
+
+# ------------------------------------------------- real logs (exp-23)
+
+def exp23_log(run):
+    return os.path.join(REPO_ROOT, "experiments", "exp23", "logs", f"{run}.events.txt")
+
+
+def test_real_logs_unit_trigger_and_swap():
+    a = parsers.load_trace(exp23_log("A"), swap_xy="auto")
+    d = parsers.load_trace(exp23_log("D"), swap_xy="auto")
+    # "Time scale of (manycore_top.pe_x[0].pe_y[0].pe_mod) is 100ps / 100ps"
+    assert a.unit.name == "100 ps" and not a.unit.assumed
+    assert d.unit.name == "1 ns" and not d.unit.assumed
+    # the fixed RTL prints X and Y in the other order
+    assert a.meta["swap_xy"] is False and d.meta["swap_xy"] is True
+    assert [s.label for s in a.lane_slices("0-1") if s.label != "IDLE"][:1] == ["C"]
+    assert [s.label for s in d.lane_slices("0-1") if s.label != "IDLE"][:1] == ["C"]
+    # TRIGGER lines: release of A every 0.5 ms from 3 ms
+    rel = [m.time for m in a.lane_marks("TRIGGER")]
+    assert rel[0] == 30007530 and rel[1] - rel[0] == 5000020

@@ -31,8 +31,12 @@ DEFAULT_RTL_NAMES = {
 RE_SCHED = re.compile(r"^(\d+)\s+(\d+-\d+)\s+scheduled\s+(\d+)\s*$")
 RE_TAG = re.compile(r"^(\d+)\s+(\d+-\d+)\s+(->|<-)\s+TAG\s+(\S+)\s*$")
 RE_TIMESCALE = re.compile(r"Time scale of \(([^)]*)\) is\s*(\d+)\s*(fs|ps|ns|us|ms|s)\b")
-# a component of the hierarchical path that names the PE (manycore_pe, pe0)
-RE_PE_PATH = re.compile(r"(?:^|\.)(?:manycore_pe|pe\d*)(?:$|[.\[])")
+# a component of the hierarchical path that names the PE
+# (manycore_pe, pe0, pe_x[0], pe_mod; not pipeline or perf)
+RE_PE_PATH = re.compile(r"(?:^|\.)(?:manycore_pe|pe(?:\d+|_\w*)?)(?:$|[.\[])")
+# release of the source task, printed by manycore_pe.sv with $time of the
+# PE (the "ns" in the text is the label of the format string, not the unit)
+RE_TRIGGER = re.compile(r"TRIGGER: workflow iteration at (\d+)")
 RE_BENCH = re.compile(r"^(\d+)\s+(\d+)\s+(\S+)\s*$")
 
 
@@ -50,6 +54,14 @@ def _strip(line):
 def swap_node(node):
     a, b = node.split("-")
     return b + "-" + a
+
+
+def _swap_line(line):
+    s = _strip(line)
+    m = RE_SCHED.match(s)
+    if m:
+        return f"{m.group(1)} {swap_node(m.group(2))} scheduled {m.group(3)}"
+    return s
 
 
 def detect_format(lines, filename=""):
@@ -81,6 +93,16 @@ def rtl_task_name(names, node, idx):
     return "IDLE" if idx == 0 else f"T{idx}"
 
 
+def map_mismatch(lines, names):
+    """True when a `scheduled` index falls outside the task list of its
+    PE, the sign of logs whose X-Y order differs from the map."""
+    for raw in lines:
+        m = RE_SCHED.match(_strip(raw))
+        if m and m.group(2) in names and int(m.group(3)) >= len(names[m.group(2)]):
+            return True
+    return False
+
+
 def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
     """Trace of the manycore RTL. Each `scheduled` event opens a slice on
     the PE until the next `scheduled` event of the same PE; the last slice
@@ -90,8 +112,12 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
     The raw unit is $time of manycore_pe. The parser reads it from a
     `$printtimescale` line when the log has one; otherwise it assumes
     1 ns and flags the unit as assumed (the commit 4c299fc prints in units
-    of 100 ps, see the TUI unit presets)."""
+    of 100 ps, see the TUI unit presets). swap_xy "auto" swaps X and Y when
+    a task index falls outside the map and the swapped labels fit it."""
     names = DEFAULT_RTL_NAMES if names is None else names
+    if swap_xy == "auto":
+        swap_xy = map_mismatch(lines, names) and not map_mismatch(
+            [_swap_line(l) for l in lines], names)
     sched = {}
     marks = []
     sends = []
@@ -104,6 +130,12 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
             if m and RE_PE_PATH.search(m.group(1)):
                 detected = (m.group(2), m.group(3))
         s = _strip(raw)
+        m = RE_TRIGGER.search(s)
+        if m:
+            t = int(m.group(1))
+            marks.append(Mark("TRIGGER", t, "release", "workflow iteration"))
+            t_end = max(t_end, t)
+            continue
         m = RE_SCHED.match(s)
         if m:
             t, node, idx = int(m.group(1)), m.group(2), int(m.group(3))

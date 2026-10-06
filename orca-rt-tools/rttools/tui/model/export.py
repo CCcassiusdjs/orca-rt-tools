@@ -128,8 +128,10 @@ def write_svg(trace, path, t0=None, t1=None, mode="raw", width=1400, lane_h=22,
         f.write("\n".join(out))
 
 
-def write_png(trace, path, t0=None, t1=None, mode="raw", dpi=200):
-    """PNG through matplotlib (optional dependency)."""
+def write_png(trace, path, t0=None, t1=None, mode="raw", dpi=200, title=None, width_in=12):
+    """PNG (or PDF/SVG, from the extension) through matplotlib (optional
+    dependency). title None writes the trace name and unit; "" writes
+    none."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -137,13 +139,16 @@ def write_png(trace, path, t0=None, t1=None, mode="raw", dpi=200):
     t0 = trace.t0 if t0 is None else t0
     t1 = trace.t1 if t1 is None else t1
     n = len(trace.lanes)
-    fig, ax = plt.subplots(figsize=(12, 0.45 * n + 1.2))
+    fig, ax = plt.subplots(figsize=(width_in, 0.45 * n + 1.2))
+    span = max(t1 - t0, 1)
     for i, lane in enumerate(trace.lanes):
         y = n - 1 - i
         for s in trace.slices_between(lane, t0, query_end(trace, t1)):
             a, b = max(s.start, t0), min(s.end, t1)
-            ax.broken_barh([(a, max(b - a, 0))], (y - 0.35, 0.7),
-                           facecolors=label_color(s.label, trace.is_idle(s)))
+            idle = trace.is_idle(s)
+            ax.broken_barh([(a, max(b - a, 0))], (y - 0.35, 0.7), facecolors=label_color(s.label, idle))
+            if not idle and (b - a) / span * width_in * 72 > 7 * len(s.label) + 4:
+                ax.text((a + b) / 2, y, s.label, ha="center", va="center", fontsize=7, color="white")
     ax.set_yticks(range(n))
     ax.set_yticklabels(list(reversed(trace.lanes)))
     ax.set_xlim(t0, t1)
@@ -151,7 +156,10 @@ def write_png(trace, path, t0=None, t1=None, mode="raw", dpi=200):
     ax.set_xticks([r for r, _ in tk])
     ax.set_xticklabels([t for _, t in tk])
     ax.grid(True, axis="x", color="#e4e4e4")
-    ax.set_title(trace.name + "  (" + trace.unit.describe() + ")", fontsize=10)
+    if title is None:
+        title = trace.name + "  (" + trace.unit.describe() + ")"
+    if title:
+        ax.set_title(title, fontsize=10)
     fig.tight_layout()
     fig.savefig(path, dpi=dpi)
     plt.close(fig)
