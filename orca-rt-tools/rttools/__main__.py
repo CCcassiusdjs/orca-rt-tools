@@ -255,6 +255,7 @@ def main():
 
         if hp == 0:
           error("Unable to find a hyperperiod value for the given flow set")
+          return 1
         else:
           problem, schedule = ags.agsExport(
             packets,

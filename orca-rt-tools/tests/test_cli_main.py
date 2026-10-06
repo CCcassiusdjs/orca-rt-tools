@@ -53,3 +53,17 @@ def test_optional_args_are_applied():
 def test_usage_error_returns_nonzero():
     r = run_module("rttools", "only_one_arg")
     assert r.returncode != 0
+
+
+def test_fixed_frequency_zero_hyperperiod_exits_cleanly(tmp_path):
+    """Non-optimized mode with hyperperiod 0 (periods shorter than one cycle
+    at the given frequency): the CLI ended with a TypeError when unpacking
+    schedule = None."""
+    app_dir = os.path.join(REPO_ROOT, "apps", "synthetic-flow-a")
+    for f in ("SyntheticA.csv", "Synthetic-Flow-A-ONTO-hermes2x2.map"):
+        shutil.copy(os.path.join(app_dir, f), tmp_path)
+    shutil.copy(NOC, tmp_path)
+    r = run_module("rttools", "SyntheticA.csv", "Synthetic-Flow-A-ONTO-hermes2x2.map",
+                   "hermes-2x2.gml", "1", "1", "500", "False", cwd=str(tmp_path))
+    assert "Traceback" not in r.stderr, r.stderr[-2000:]
+    assert r.returncode == 1
