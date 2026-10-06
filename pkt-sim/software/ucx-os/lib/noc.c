@@ -6,6 +6,14 @@ uint16_t pktdrv_ports[MAX_TASKS];
 // queues of packets for each task
 struct queue_s* pktdrv_tqueue[MAX_TASKS];
 
+// Sink buffer for packets that cannot be stored (heap exhausted). The
+// DDMA always writes the incoming packet to the address given in
+// irq2; with no heap, it writes here and irq3 drops the packet.
+#ifndef NOC_SINK_FLITS
+#define NOC_SINK_FLITS 64
+#endif
+static uint32_t pktdrv_sink[NOC_SINK_FLITS];
+
 // Gets the address of the current NoC node. Nodes are identified by
 // their XY address, which is compressed in a 32-bit word such that
 // XY = (X << 16) | Y;
@@ -47,6 +55,16 @@ void irq2_handler(void){
   noc_packet_t* pkt = (noc_packet_t*) ucx_malloc(pkt_size * 4); // malloc in bytes
   // printf("irq2_handler(): ucx_malloc returned 0x%x\n", (uint32_t)pkt);
 
+  if (pkt == NULL) {
+    if (pkt_size > NOC_SINK_FLITS) {
+      // no place to receive the packet: halt instead of corrupting memory
+      printf("irq2_handler(): out of memory for %d flits, halting\n", pkt_size);
+      for (;;);
+    }
+    printf("irq2_handler(): out of memory, packet will be dropped\n");
+    pkt = (noc_packet_t*) pktdrv_sink;
+  }
+
   _ddma_set_recv_addr((uint32_t)pkt); // send packet address to the ddma
   _ddma_recv_ack();
   _ei();
@@ -63,8 +81,13 @@ void irq3_handler(void){
   _di();
   noc_packet_t* pkt = (noc_packet_t*) _ddma_get_recv_addr();
 
+  // packet received into the sink buffer (heap exhausted in irq2)
+  if (pkt == (noc_packet_t*) pktdrv_sink)
+  {
+    printf("noc_driver_isr(): packet dropped (out of memory).\n");
+  }
   // get rid of packets which address is not the same of this cpu
-  if (pkt->target_node != ucx_noc_cpu_id())
+  else if (pkt->target_node != ucx_noc_cpu_id())
   {
     printf("noc_driver_isr(): wrong destination %x (expected %x).\n",
       pkt->target_node, ucx_noc_cpu_id());
@@ -73,22 +96,30 @@ void irq3_handler(void){
   } else {
 
     // get the queue associated to the port indicated in the packet
+    // (only slots with an open comm count)
     int k;
     for (k = 0; k < MAX_TASKS; k++)
-      if (pktdrv_ports[k] == pkt->target_port)
+      if (pktdrv_tqueue[k] != NULL && pktdrv_ports[k] == pkt->target_port)
         break;
 
+    if (k == MAX_TASKS)
+    {
+      printf("noc_driver_isr(): no task on port %d, dropping...\n",
+        pkt->target_port);
+      ucx_free(pkt);
+    }
     // check whether the task has room for more packets in that queue
-    if (ucx_queue_enqueue(pktdrv_tqueue[k], pkt) != 0)
+    else if (ucx_queue_enqueue(pktdrv_tqueue[k], pkt) != 0)
     {
       printf("noc_driver_isr(): task (on port %d) cannot receive more packets, dropping...\n", 
         pkt->target_port);
-      free(pkt);
-      // ucx_queue_enqueue(pktdrv_queue, pkt);
+      ucx_free(pkt);
     }
-
-    set_counter_4(pkt->tag);
-    enable_receiver(k);
+    else
+    {
+      set_counter_4(pkt->tag);
+      enable_receiver(k);
+    }
   }
   _ddma_recv_ack();
   asm("nop;nop;");
@@ -118,21 +149,27 @@ int32_t ucx_noc_comm_create(uint16_t port)
   int task_id = ucx_task_id();
 
   // check whether this task has allocated a port before
-  if (pktdrv_tqueue[task_id] != NULL)
+  if (pktdrv_tqueue[task_id] != NULL) {
+    _ei();
     return UCX_NOC_TASK_BIND_ALREADY;
+  }
 
-  // port already in use by another task
+  // port already in use by another task (only slots with an open comm)
   for (int k = 0; k < MAX_TASKS; k++)
-    if (pktdrv_ports[k] == port)
+    if (pktdrv_tqueue[k] != NULL && pktdrv_ports[k] == port) {
+      _ei();
       return UCX_NOC_PORT_BIND_ALREADY;
+    }
 
   // add a new queue to receive packets for that task
   pktdrv_tqueue[task_id] = ucx_queue_create(MAX_PKT_QUEUE_SLOTS);
 
   // if we cannot create a new queue due to unavailable memory
   // space, return ERR_OUT_OF_MEMORY
-  if (pktdrv_tqueue[task_id] == NULL)
+  if (pktdrv_tqueue[task_id] == NULL) {
+    _ei();
     return UCX_NOC_OUT_OF_MEMORY;
+  }
 
   // connect the port to the task and return ERR_OK
   pktdrv_ports[task_id] = port;
@@ -151,21 +188,28 @@ uint32_t ucx_noc_comm_destroy(uint16_t port)
   _di();
   int task_id = ucx_task_id();
 
+  if (pktdrv_tqueue[task_id] == NULL) {
+    _ei();
+    return UCX_NOC_TASK_NOT_BOUND;
+  }
 
   // removes all elements from the comm queue, adding them
   // to the queue of shared packets
   while (ucx_queue_count(pktdrv_tqueue[task_id])){
     noc_packet_t* pkt = ucx_queue_dequeue(pktdrv_tqueue[task_id]);
-    free(pkt);
+    ucx_free(pkt);
     //ucx_queue_enqueue(pktdrv_queue, ucx_queue_dequeue(pktdrv_tqueue[task_id]));
   }
 
 
   // check whether the comm queue was gracefully destroyed. If not,
   // return ERR_COMM_ERROR
-  if (ucx_queue_destroy(pktdrv_tqueue[task_id]))
+  if (ucx_queue_destroy(pktdrv_tqueue[task_id])) {
+    _ei();
     return UCX_NOC_UNABLE_TO_DESTROY;
+  }
 
+  pktdrv_tqueue[task_id] = NULL;
   pktdrv_ports[task_id] = 0;
 
   _ei();

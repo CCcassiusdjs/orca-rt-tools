@@ -17,4 +17,16 @@ static int host_failures = 0;
 #define RUN(t) do { int f0 = host_failures; t(); \
 	printf("%s %s\n", host_failures == f0 ? "PASS" : "FAIL", #t); fflush(stdout); } while (0)
 #define DONE() return host_failures ? 1 : 0
+
+/* runs the test in a child process: a memory error (ASan)
+ * brings down only that test */
+#include <unistd.h>
+#include <sys/wait.h>
+#define RUN_FORK(t) do { fflush(stdout); fflush(stderr); pid_t pid = fork(); \
+	if (pid == 0) { t(); fflush(stdout); _exit(host_failures ? 1 : 0); } \
+	int st = 0; waitpid(pid, &st, 0); \
+	int ok = WIFEXITED(st) && WEXITSTATUS(st) == 0; \
+	if (!ok) host_failures++; \
+	printf("%s %s\n", ok ? "PASS" : (WIFEXITED(st) && WEXITSTATUS(st) == 1 ? "FAIL" : "CRASH"), #t); \
+	fflush(stdout); } while (0)
 #endif
