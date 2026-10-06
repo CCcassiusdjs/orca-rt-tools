@@ -1,0 +1,38 @@
+{
+  "_doc": "Tables 6.5, 6.6 and 6.7 of the thesis. Thesis values as printed; Table 6.7 is labeled MHz in the thesis.",
+  "pruning_factors": [10, 20, 40],
+  "start_frequency_hz": 2000000,
+  "tolerance_hz": 5000,
+  "apps": {
+    "synthetic_d": {
+      "problem": "problem_syntheticA",
+      "files": ["apps/synthetic-flow-d/SyntheticD.csv", "apps/synthetic-flow-d/Synthetic-Flow-D-ONTO-hermes4x4.map", "arch/hermes-4x4.gml"],
+      "thesis": {
+        "visited": {"lstf": {"10": 40, "20": 16, "40": 6}, "mbcf": {"10": 40, "20": 16, "40": 6}, "mcpf": {"10": 6, "20": 6, "40": 10}},
+        "skipped": {"lstf": {"10": 96, "20": 12, "40": 2}, "mbcf": {"10": 96, "20": 12, "40": 2}, "mcpf": {"10": 4, "20": 2, "40": 3}},
+        "frequency": {"lstf": {"10": 1929, "20": 1929, "40": 2183}, "mbcf": {"10": 1929, "20": 1929, "40": 2183}, "mcpf": {"10": 1929, "20": 1929, "40": 2183}}
+      }
+    },
+    "dct_verify": {
+      "problem": "problem_dctVerify",
+      "files": ["apps/str2rts-dct-verify/DCT-Verify.csv", "apps/str2rts-dct-verify/STR2RST-DCT-verify-ONTO-hermes3x2.map", "arch/hermes-2x3.gml"],
+      "thesis": {
+        "visited": {"lstf": {"10": 8, "20": 8, "40": 8}, "mbcf": {"10": 8, "20": 8, "40": 8}, "mcpf": {"10": 214, "20": 111, "40": 60}},
+        "skipped": {"lstf": {"10": 158, "20": 314, "40": 80}, "mbcf": {"10": 416, "20": 209, "40": 105}, "mcpf": {"10": 8970, "20": 2322, "40": 626}},
+        "frequency": {"lstf": {"10": 793, "20": 795, "40": 800}, "mbcf": {"10": 1701, "20": 1707, "40": 1707}, "mcpf": {"10": 792, "20": 795, "40": 800}}
+      }
+    },
+    "car": {
+      "_doc": "CAR (Shi et al., 2010): PF and threshold multiplied by 100 (Sec. 6.5). Hours per run; not in the default set.",
+      "default": false,
+      "pf_multiplier": 100,
+      "problem": "problem_carshi2",
+      "files": ["apps/shi-2010/SHI2010.csv", "apps/shi-2010/shi2010-ONTO-hermes4x4.map", "arch/hermes-4x4.gml"],
+      "thesis": {
+        "visited": {"lstf": {"10": 660, "20": 660, "40": 660}, "mbcf": {"10": 660, "20": 660, "40": 660}, "mcpf": {"10": 660, "20": 660, "40": 660}},
+        "skipped": {"lstf": {"10": 13629, "20": 7267, "40": 3683}, "mbcf": {"10": 13641, "20": 7282, "40": 3684}, "mcpf": {"10": 5073, "20": 3002, "40": 1762}},
+        "frequency": {"lstf": {"10": 2813, "20": 2813, "40": 2813}, "mbcf": {"10": 2438, "20": 2438, "40": 2813}, "mcpf": {"10": 4219, "20": 4219, "40": 4688}}
+      }
+    }
+  }
+}

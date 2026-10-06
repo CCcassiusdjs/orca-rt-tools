@@ -1,0 +1,339 @@
+{
+ "_doc": "Values of the current code for Synthetic-Application-D and DCT-Verify (make). Only the keys below are compared.",
+ "tab65": [
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 10,
+   "run": 30
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 10,
+   "run": 30
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 10,
+   "run": 6
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 20,
+   "run": 16
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 20,
+   "run": 16
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 20,
+   "run": 6
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 40,
+   "run": 4
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 40,
+   "run": 4
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 40,
+   "run": 4
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 10,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 10,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 10,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 20,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 20,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 20,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 40,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 40,
+   "run": 8
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 40,
+   "run": 8
+  }
+ ],
+ "tab66": [
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 10,
+   "run": 80
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 10,
+   "run": 80
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 10,
+   "run": 4
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 20,
+   "run": 12
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 20,
+   "run": 12
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 20,
+   "run": 2
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 40,
+   "run": 1
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 40,
+   "run": 1
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 40,
+   "run": 1
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 10,
+   "run": 314
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 10,
+   "run": 416
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 10,
+   "run": 428
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 20,
+   "run": 158
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 20,
+   "run": 209
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 20,
+   "run": 217
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 40,
+   "run": 80
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 40,
+   "run": 105
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 40,
+   "run": 110
+  }
+ ],
+ "tab67": [
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 10,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 10,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 10,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 20,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 20,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 20,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 40,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 40,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 40,
+   "run_hz": 3906.25
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 10,
+   "run_hz": 79376.220703125
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 10,
+   "run_hz": 112163.54370117188
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 10,
+   "run_hz": 112163.54370117188
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 20,
+   "run_hz": 79376.220703125
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 20,
+   "run_hz": 112163.54370117188
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 20,
+   "run_hz": 112163.54370117188
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "LSTF",
+   "pf": 40,
+   "run_hz": 79376.220703125
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MBCF",
+   "pf": 40,
+   "run_hz": 112163.54370117188
+  },
+  {
+   "app": "dct_verify",
+   "criterion": "MCPF",
+   "pf": 40,
+   "run_hz": 79376.220703125
+  }
+ ],
+ "summary": {
+  "tab65_agree": 10,
+  "tab65_cells": 18,
+  "tab66_agree": 8,
+  "tab66_cells": 18
+ }
+}
