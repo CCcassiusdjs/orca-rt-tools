@@ -54,6 +54,16 @@ static void test_square_mesh_unchanged(void)
 	CHECK(_ddma_atox(3) == 1 && _ddma_atoy(3) == 1);
 }
 
+/* zero-size packet: a size flit of 0 corrupts the Hermes port
+ * (Hermes_buffer.vhd reads the next flit as the size); the driver refuses */
+static void test_send_zero_size_rejected(void)
+{
+	host_ddma_map(2, 2, 0, 0);
+	uint32_t payload[1];
+	CHECK(_ddma_send(1, 0, payload) != 0);
+	CHECK(host_ddma_regs[4] == 0);          /* command not triggered */
+}
+
 int main(void)
 {
 	host_arena_init();
@@ -62,5 +72,6 @@ int main(void)
 	RUN(test_xyta);
 	RUN(test_send_registers);
 	RUN(test_square_mesh_unchanged);
+	RUN(test_send_zero_size_rejected);
 	DONE();
 }

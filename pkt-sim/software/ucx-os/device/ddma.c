@@ -58,6 +58,11 @@ uint32_t _ddma_send(uint32_t dest, uint32_t size, uint32_t* payload){
   // size is measured in flits, not bytes
   uint32_t data_size = (size % 4 == 0) ? (size / 4) : ((size / 4) + 1);
 
+  // a size flit equal to 0 corrupts the router input port (the Hermes
+  // buffer reads the next flit as the size); refuse empty packets
+  if (data_size == 0)
+    return 1;
+
   *DDMA_SEND_SIZE_IN = data_size;
   *DDMA_SEND_ADDR_IN = (uint32_t) payload;
   *DDMA_SEND_CMD_IN  = 0x1; // starts dma copy
