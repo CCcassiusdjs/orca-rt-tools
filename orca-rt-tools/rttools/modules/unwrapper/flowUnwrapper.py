@@ -38,30 +38,24 @@ def extractFlows(edges):
     return flows
 
 
-# @TODO: replace by cache
-__task_wcet_requirement = None
+def task_wcet_table(app):
+    """GCPA cost of each task of the application instance (task id -> cost).
+
+    The previous version kept the table in a module variable filled on the
+    first call, so a second application in the same process read the table
+    of the first one (KeyError, or the costs of the other application when
+    task ids coincide)."""
+    graph = to_orca(app)
+    table = {}
+    tmp_task_wcet = calculate_gcpa(graph)
+    for wcet in tmp_task_wcet:
+        table[wcet._id] = tmp_task_wcet[wcet]
+    return table
+
+
 def get_task_wcet(task_id, tasks, app):
+    return task_wcet_table(app)[task_id]
 
-    global __task_wcet_requirement
-
-    # calculate wcets if empty
-    if __task_wcet_requirement is None:
-        
-        # convert graph to ORCA notation
-        graph = to_orca(app)
-
-        # instantiate global variable
-        __task_wcet_requirement = {}
-
-        # collect wcet dictionary
-        tmp_task_wcet = calculate_gcpa(graph)
-
-        # adjust to key-value format
-        for wcet in tmp_task_wcet:
-            __task_wcet_requirement[wcet._id] = tmp_task_wcet[wcet]
-
-    return __task_wcet_requirement[task_id]
-        
 
 # def get_task_wcet(task_id, tasks, app):    
 #     for t in tasks:
@@ -79,8 +73,9 @@ def get_task_wcet(task_id, tasks, app):
 # are generated for the whole hyperperiod hp
 def getPacketsFromFlows(flows, hp, tasks, app):
     packets = []
+    wcet_table = task_wcet_table(app)
     for f in flows:
-        task_wcet = get_task_wcet(f["source"], tasks, app)
+        task_wcet = wcet_table[f["source"]]
         #task_wcet = external_cycle_requirements(f["source"], tasks)
         min_start = 0
         i = 0
