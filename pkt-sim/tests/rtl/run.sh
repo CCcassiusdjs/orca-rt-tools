@@ -35,9 +35,10 @@ ghdl_hermes() { # ghdl_hermes <nome> <generics...>
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
 	$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/ddma/ddma.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
+	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
 	tb_hermes_local)
 		ghdl_hermes A -gSRC=4 -gDST=4 -gP=4 -gM=0 -gNAME=A
 		ghdl_hermes B -gSRC=0 -gDST=8 -gP=4 -gM=4 -gNAME=B ;;

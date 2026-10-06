@@ -14,6 +14,7 @@ TESTS = {
     "tb_ddma_send": "verilator",     # fix 20 (and 21, concurrent reception)
     "tb_ddma_recv": "verilator",     # fixes 21 and 22
     "tb_hermes_local": "ghdl",       # fix 23
+    "tb_tcd": "verilator",           # fix 24
 }
 
 
