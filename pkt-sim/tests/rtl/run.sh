@@ -35,10 +35,27 @@ ghdl_hermes() { # ghdl_hermes <nome> <generics...>
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
 	$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/ddma/ddma.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
 	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
+	tb_manycore_pe)
+		PE_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
+			$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/memory/single_port_ram.sv \
+			$HW/ddma/ddma.sv $HW/router/interface_router.sv $HW/cpu/interface_core_rv32e.sv \
+			$HW/peripherals/interface_peripherals.sv $HW/tcd/interface_tcd.sv $HW/interface_pe.sv \
+			$T/pe_stubs.sv $MC/manycore_pe.sv"
+		# lint of the read block: no COMBDLY or LATCH in manycore_pe.sv
+		verilator --lint-only -Wall -Wno-fatal -I"$MC" --top-module manycore_pe \
+			-GMEMORY_WIDTH=32 -GFLIT_WIDTH=32 -GRAM_MSIZE=4096 -GBOOT_MSIZE=4096 -GADDRESS=0 \
+			-GINTERLEAVING_GRAIN=10 -GNOC_DIM_X=2 -GNOC_DIM_Y=2 $PE_SRC > "$OUT/pe_lint.log" 2>&1 || true
+		if grep -E "Warning-(COMBDLY|LATCH).*manycore_pe.sv" "$OUT/pe_lint.log"; then
+			echo "FAIL lint manycore_pe (COMBDLY/LATCH)"
+		else
+			echo "lint manycore_pe: no COMBDLY or LATCH"
+		fi
+		mkdir -p "$OUT/pe_run/sim" "$OUT/logs"
+		(cd "$OUT/pe_run/sim" && mkdir -p ../logs && vl tb_manycore_pe $PE_SRC "$T/tb_manycore_pe.sv") ;;
 	tb_hermes_local)
 		ghdl_hermes A -gSRC=4 -gDST=4 -gP=4 -gM=0 -gNAME=A
 		ghdl_hermes B -gSRC=0 -gDST=8 -gP=4 -gM=4 -gNAME=B ;;

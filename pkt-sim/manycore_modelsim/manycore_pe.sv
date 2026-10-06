@@ -27,12 +27,13 @@ module manycore_pe #(parameter
   const int PRINTCHAR_ADDR    = 'hf00000d0;  
 
 
+  // ADDRESS = DIMX[31:24] | DIMY[23:16] | X[15:8] | Y[7:0] (manycore_top.sv)
   function int addr_x();
-    addr_x = ADDRESS & 'h000F;
+    addr_x = (ADDRESS >> 8) & 'h00FF;
   endfunction
 
   function int addr_y();
-    addr_y = (ADDRESS >> 8 ) & 'h000F;
+    addr_y = ADDRESS & 'h00FF;
   endfunction
 
   function string log_filename();
@@ -238,6 +239,8 @@ module manycore_pe #(parameter
 
   // registered memory access to cpu.data_in
   always_comb begin
+    cpu_if.data_in = 0; // default: no latch
+
     // boot mem
     if (dly_address >= BOOT_START && dly_address <= BOOT_END) begin
       cpu_if.data_in = mem_if_boot.data_out;
@@ -258,25 +261,25 @@ module manycore_pe #(parameter
     end else if (dly_address >= DDMA_CONFIG_START && dly_address <= DDMA_CONFIG_END) begin
 
       case (a_dly_address)
-        'h20000000: cpu_if.data_in <= endianess(ADDRESS);
-        'h20000004: cpu_if.data_in <= endianess(ddma_if.send_dest_in[7:0]);
-        'h20000008: cpu_if.data_in <= endianess(ddma_if.send_addr_in);
-        'h2000000C: cpu_if.data_in <= endianess(ddma_if.send_size_in);
-        'h20000010: cpu_if.data_in <= endianess(ddma_if.send_cmd_in);
-        'h20000014: cpu_if.data_in <= endianess({ 16'b0,
+        'h20000000: cpu_if.data_in = endianess(ADDRESS);
+        'h20000004: cpu_if.data_in = endianess(ddma_if.send_dest_in[7:0]);
+        'h20000008: cpu_if.data_in = endianess(ddma_if.send_addr_in);
+        'h2000000C: cpu_if.data_in = endianess(ddma_if.send_size_in);
+        'h20000010: cpu_if.data_in = endianess(ddma_if.send_cmd_in);
+        'h20000014: cpu_if.data_in = endianess({ 16'b0,
                                                   ddma_if.state_send_out,
                                                   ddma_if.state_recv_out
                                                 });
-        'h20000018: cpu_if.data_in <= endianess(ddma_if.recv_addr_in);
-        'h2000001C: cpu_if.data_in <= endianess(ddma_if.recv_addr_out);
-        'h20000020: cpu_if.data_in <= endianess(ddma_if.recv_size_out);
-        'h20000024: cpu_if.data_in <= endianess(ddma_if.recv_cmd_in);
-        'h20000028: cpu_if.data_in <= endianess(cacc_reg);
-        'h2000002C: cpu_if.data_in <= endianess(cacc_counter);
-        'h20000030: cpu_if.data_in <= endianess(cacc_counter_2);
-        'h20000034: cpu_if.data_in <= endianess(cacc_counter_3);
-        'h20000038: cpu_if.data_in <= endianess(cacc_counter_4);
-        'h2000004C: cpu_if.data_in <= endianess(wakeup_ack_flip);
+        'h20000018: cpu_if.data_in = endianess(ddma_if.recv_addr_in);
+        'h2000001C: cpu_if.data_in = endianess(ddma_if.recv_addr_out);
+        'h20000020: cpu_if.data_in = endianess(ddma_if.recv_size_out);
+        'h20000024: cpu_if.data_in = endianess(ddma_if.recv_cmd_in);
+        'h20000028: cpu_if.data_in = endianess(cacc_reg);
+        'h2000002C: cpu_if.data_in = endianess(cacc_counter);
+        'h20000030: cpu_if.data_in = endianess(cacc_counter_2);
+        'h20000034: cpu_if.data_in = endianess(cacc_counter_3);
+        'h20000038: cpu_if.data_in = endianess(cacc_counter_4);
+        'h2000004C: cpu_if.data_in = endianess(wakeup_ack_flip);
         default: begin
             $display("[%0d ns] illegal read to ddma %h %h.", ($time), 
               dly_address, a_dly_address);
@@ -353,6 +356,9 @@ module manycore_pe #(parameter
     end else begin
       cacc_reg <= 0;
       cacc_counter <= 0;
+      cacc_counter_2 <= 0;
+      cacc_counter_3 <= 0;
+      cacc_counter_4 <= 0;
     end
   end 
 
