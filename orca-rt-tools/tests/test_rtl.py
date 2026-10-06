@@ -13,6 +13,7 @@ RTL = os.path.join(REPO_ROOT, "pkt-sim", "tests", "rtl")
 TESTS = {
     "tb_ddma_send": "verilator",     # fix 20 (and 21, concurrent reception)
     "tb_ddma_recv": "verilator",     # fixes 21 and 22
+    "tb_hermes_local": "ghdl",       # fix 23
 }
 
 
@@ -27,3 +28,4 @@ def test_rtl(name, tmp_path):
     out = r.stdout + r.stderr
     assert r.returncode == 0, out[-4000:]
     assert ("PASS " + name) in r.stdout, out[-4000:]
+    assert "FAIL" not in r.stdout, out[-4000:]
