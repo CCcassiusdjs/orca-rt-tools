@@ -28,9 +28,8 @@ class DeadlineMonotonicSchedule():
 class RoundRobinSchedule():
     @classmethod
     def schedule(self: "RoundRobinSchedule", r: "list[TaskControlBlock]"):
-        top_element = r[0]
-        r = r[1::]
-        r.append(top_element)
-        return r
+        # the engine already puts the preempted task at the queue tail: the
+        # arrival order (FIFO) produces the round robin
+        return list(r)
         
 
