@@ -36,3 +36,35 @@ The output must show a couple of debugging information, followed by a section na
 ## ...in a nutshell
 1) `python3 rt_tools/__main__.py pkt applications/app.gml mappings/map.gml architectures/arch.gml > output.dnz`
 2) `minizinc minizinc/DM/dmxxx.dmz output.dnz`
+
+## Tests
+
+The repository includes regression tests for the Python tools, the UCX-OS NoC driver and the RTL of the DDMA, the Hermes crossbar, the TCD and the manycore PE.
+
+| Part | Location | Tools |
+|---|---|---|
+| Python tools (`rttools`, bench, gff, rgg, log2gannt, appparser) | `orca-rt-tools/tests` | Python 3.10+, `orca-rt-tools/requirements.txt`, pytest |
+| UCX-OS driver (`lib/noc.c`, `device/ddma.c`) on the host | `pkt-sim/software/ucx-os/tests/host` | gcc with AddressSanitizer and UBSan |
+| RTL (DDMA, Hermes crossbar, TCD, manycore PE) | `pkt-sim/tests/rtl` | Verilator 5, GHDL 4 |
+
+Run all tests:
+
+```
+pip install -r orca-rt-tools/requirements.txt pytest
+cd orca-rt-tools && python -m pytest -q
+```
+
+The RTL tests skip when Verilator or GHDL is missing. `pkt-sim/software/ucx-os/tests/host/run.sh` and `pkt-sim/tests/rtl/run.sh` run the C and RTL tests without pytest.
+
+## Command-line options added by the fixes
+
+| Tool | Option |
+|---|---|
+| `python -m rttools <app> <map> <arch> [<freq>] [<pruning factor>] [<fail threshold>] [<optimize True\|False>]` | All optional arguments work; the exit code is 1 on errors |
+| `python -m rttools.bench <file> <mode> <RR\|RM\|DM\|EDF> [<horizon>]` | Scheduling policy and simulation horizon. The ORCA graph format accepts `label wcet [period [deadline]]` |
+| `python -m rttools.rgg <a> <b> <c> <x> <y> <z> <ofile> [<seed>]` | Seed for reproducible graphs |
+| `python -m rttools.log2gannt <log> [--map <json>] [--out <png>] [--units-per-ms <n>] [--swap-xy]` | Task map, output file, time unit, and X-Y order of the log |
+
+## Time unit of the RTL logs
+
+`pkt-sim/manycore_modelsim/manycore_pe.sv` declares `` `timescale 1ns/100ps ``, so the simulation logs (`scheduled`, `TAG`, `TRIGGER`) report time in ns. Commit 4c299fc ran without this directive; in that configuration the simulator assigns 100 ps to the PE, and the logs of that commit report time in units of 100 ps (`log2gannt --units-per-ms 10000000`). Logs produced before the fix of `addr_x()`/`addr_y()` print X and Y swapped (`log2gannt --swap-xy` reads logs of the fixed RTL with the default map).
