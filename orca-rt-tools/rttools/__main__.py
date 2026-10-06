@@ -5,12 +5,14 @@ from os import path
 from rttools.terminal.terminal import error, header, info, warn, debug
 
 from rttools.modules.io import configurator, appparser, nocparser, mapparser, svg, systemverilog
-from rttools.modules.frequency import guesser
+from rttools.modules.frequency import guesser, search
 from rttools.modules.instances import instantiator
 from rttools.modules.unwrapper import flowUnwrapper
 from rttools.modules.backend.ags import ags, heuristics
 from rttools.modules.backend.minizinc import minizinc
 
+# the frequency search uses the AGS backend only (see
+# rttools/modules/frequency/search.py)
 RTTOOLS_ENABLE_MINIZINC = False
 
 
@@ -136,157 +138,55 @@ def main():
         RTTOOLS_DEFAULT_FREQUENCY = guesser.guess()
         warn("No default frequency indicated, scaling for " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz...")
 
-    schedule = None
+    if RTTOOLS_OPTIMIZE == True:
+        result = search.search_minimum_frequency(app, noc, mapping, appname, {
+            "frequency": RTTOOLS_DEFAULT_FREQUENCY,
+            "pruning_factor": RTTOOLS_PRUNNING_FACTOR,
+            "fail_threshold": RTTOOLS_FAIL_THRESHOULD,
+            "heuristic": RTTOOLS_HEURISTIC,
+            "scaling_tolerance": RTTOOLS_SCALING_TOLERANCE,
+        })
 
+        if result is not None:
+            warn("Unable to optmize minimum frequency any further.")
+            info("Minimum frequency found at " + str(result["frequency"]) + "Hz")
 
-    low_frequency = 0
-    center_frequency = RTTOOLS_DEFAULT_FREQUENCY
-    upper_frequency = RTTOOLS_DEFAULT_FREQUENCY * 10
+            debug(result["problem"]["packets"])
 
-    last_working_frequency = None
-    last_working_schedule = None
-    last_skipped_list = None
-    last_working_instance = None
-    last_working_hp = None
-
-    if RTTOOLS_OPTIMIZE == True: 
-
-      while True:
-          # generate instance
-          instance = instantiator.createInstance(app, noc, center_frequency)
-          info("Tentative frequency is " + str(center_frequency) + "Hz")
-
-          # print(instance)
-
-          # unwrap flows into packets
-          packets, hp, nlinks = flowUnwrapper.unwrap(instance, noc, mapping)
-
-          if hp == 0:
-              break
-
-          # pre-tests here!
-          # testsres = prelaunchtest(problem)
-
-          # select which scheduler to use
-          if RTTOOLS_ENABLE_MINIZINC:
-              schedule = minizinc.minizincExport(
-                  packets, nlinks, hp, mapping, noc, appname
-              )
-          else:  # adaptive guided search
-              problem, schedule = ags.agsExport(
-                  packets,
-                  nlinks,
-                  hp,
-                  mapping,
-                  noc,
-                  appname,
-                  RTTOOLS_PRUNNING_FACTOR,
-                  RTTOOLS_FAIL_THRESHOULD,
-                  RTTOOLS_HEURISTIC,
-              )
-
-          # print(schedule)
-          if schedule is not None:
-              sched, skipped = schedule
-
-              if len(skipped) == 0:
-                  warn(
-                      "Found a schedule at " + str(center_frequency) + "Hz. Scaling frequency down."
-                  )
-                  last_working_frequency = center_frequency
-                  last_working_schedule = sched
-                  last_skipped_list = skipped
-                  last_working_instance = instance
-                  last_working_hp = hp
-                  
-                  upper_frequency = center_frequency
-                  center_frequency = (upper_frequency + low_frequency) / 2
-              else:
-                  # unfeasible
-                  error("Could not find a schedule at " + str(center_frequency) + "Hz.")
-                  error("Skip list is not empty (" + str(len(skipped)) + ")!")
-                  error("Scaling frequency up...")
-                  upper_frequency = center_frequency * 2
-                  low_frequency = center_frequency
-                  center_frequency = (upper_frequency + low_frequency) / 2
-                  
-
-          else:
-              # unfeasible
-              error("Could not find a schedule at " + str(center_frequency) + "Hz.")
-              error("Scaling frequency up...")
-              upper_frequency = center_frequency * 2
-              low_frequency = center_frequency
-              center_frequency = (upper_frequency + low_frequency) / 2
-
-          if (upper_frequency - low_frequency) < RTTOOLS_SCALING_TOLERANCE:
-              break
-          
-      if last_working_frequency is not None:
-          warn("Unable to optmize minimum frequency any further.")
-          info("Minimum frequency found at " + str(last_working_frequency) + "Hz")
-
-          debug(packets)
-
-          filename = "results.svg"
-          svg.saveSvg(
-              filename, last_working_schedule, problem, last_skipped_list, SVG_SCALE
-          )
-          info("Schedule visualization exported to `" + filename + "`")
-
-          # expDir = "pkt-sim/packets"
-          # systemverilog.exportPackets(
-          #     expDir, last_working_schedule, problem, last_working_frequency
-          # )
-          # systemverilog.genWaveform(expDir, noc)
-          # systemverilog.genRunFile(expDir, hp)
-          # info("SystemVerilog mimics exported to `" + expDir + "`")
-
-      else:
-          warn("Could not find a suitable frequency for the given flow set")
+            filename = "results.svg"
+            svg.saveSvg(
+                filename, result["schedule"], result["problem"], result["skipped"], SVG_SCALE
+            )
+            info("Schedule visualization exported to `" + filename + "`")
+        else:
+            warn("Could not find a suitable frequency for the given flow set")
 
     else:
-        # generate instance
-        instance = instantiator.createInstance(app, noc, RTTOOLS_DEFAULT_FREQUENCY)
-        info("Target frequency is " + str(center_frequency) + "Hz")
+        info("Target frequency is " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz")
+        result = search.schedule_at(app, noc, mapping, appname, RTTOOLS_DEFAULT_FREQUENCY, {
+            "pruning_factor": RTTOOLS_PRUNNING_FACTOR,
+            "fail_threshold": RTTOOLS_FAIL_THRESHOULD,
+            "heuristic": RTTOOLS_HEURISTIC,
+        })
 
-        # unwrap flows into packets
-        packets, hp, nlinks = flowUnwrapper.unwrap(instance, noc, mapping)
-
-        if hp == 0:
-          error("Unable to find a hyperperiod value for the given flow set")
-          return 1
-        else:
-          problem, schedule = ags.agsExport(
-            packets,
-            nlinks,
-            hp,
-            mapping,
-            noc,
-            appname,
-            RTTOOLS_PRUNNING_FACTOR,
-            RTTOOLS_FAIL_THRESHOULD,
-            RTTOOLS_HEURISTIC,
-          )
-
-        sched, skipped = schedule
+        if result is None:
+            error("Unable to find a hyperperiod value for the given flow set")
+            return 1
+        if result["schedule"] is None:
+            error("Could not find a schedule at " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz.")
+            return 1
 
         app_file_path = Path(app_file)
         filename = path.join(app_file_path.parent, "results.svg")
-        
+
         svg.saveSvg(
-            filename, sched, problem, skipped, SVG_SCALE
+            filename, result["schedule"], result["problem"], result["skipped"], SVG_SCALE
         )
 
         info("Schedule visualization exported to `" + filename + "`")
 
-        # expDir = "pkt-sim/packets"
-        # systemverilog.exportPackets(
-        #     expDir, schedule, problem, RTTOOLS_DEFAULT_FREQUENCY
-        # )
-        # systemverilog.genWaveform(expDir, noc)
-        # systemverilog.genRunFile(expDir, hp)
-        # info("SystemVerilog mimics exported to `" + expDir + "`")
+    return 0
+
 
 # Automatically jumps to main if called from command line.
 # Executable script name is removed from the params list,
