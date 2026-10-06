@@ -5,7 +5,7 @@
 #   make check     compare the metrics with $(REF) (reference_D.json; make paper uses reference_head.json)
 #   make all       analyze + check (default; uses the stored log of run D)
 #   make paper     sim + analyze + check
-#   make runs      analyze the four stored runs (logs/A..D) into build/runs
+#   make runs      analyze the five stored runs (logs/A..E) into build/runs
 #
 # LOG defaults to logs/D.events.txt (fixed RTL, `timescale 1ns/100ps).
 # After `make sim`, use LOG=build/sim/events.txt (make paper does it).
@@ -37,7 +37,7 @@ paper:
 	$(MAKE) analyze check LOG=$(BUILD)/sim/events.txt REF=reference_head.json
 
 runs:
-	for r in A B C D; do $(RUN) analyze logs/$$r.events.txt --config config.json --out $(BUILD)/runs/$$r || exit 1; done
+	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --out $(BUILD)/runs/$$r || exit 1; done
 
 clean:
 	rm -rf $(BUILD)

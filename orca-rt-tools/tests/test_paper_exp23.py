@@ -20,7 +20,7 @@ def cfg():
 @pytest.fixture(scope="module")
 def runs(tmp_path_factory):
     out = {}
-    for r in "ABCD":
+    for r in "ABCDE":
         d = tmp_path_factory.mktemp(r)
         out[r] = (exp23.analyze(os.path.join(EXP, "logs", f"{r}.events.txt"), cfg(), str(d)), str(d))
     return out
@@ -53,10 +53,20 @@ def test_units_detected_and_runs_equal_in_cycles(runs):
         assert json.dumps(a[key], sort_keys=True) == json.dumps(d[key], sort_keys=True)
 
 
-def test_run_c_matches_head_reference_except_unit(runs):
-    _, d = runs["C"]
-    diffs = exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_head.json"))
-    assert diffs == ["unit.name: expected '1 ns', got '100 ps'"]
+def test_run_e_matches_head_reference(runs):
+    _, d = runs["E"]
+    assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_head.json")) == []
+
+
+def test_run_e_close_to_run_c(runs):
+    """E (this tree) against C (fixed RTL and software of b920605). The
+    only change to the simulated software between them is the zero-size
+    check of ddma.c (828835f)."""
+    c, e = runs["C"][0], runs["E"][0]
+    for rc, re_ in zip(c["tab83"]["rows"], e["tab83"]["rows"]):
+        assert abs(rc["measured"] - re_["measured"]) <= 2
+    for fc, fe in zip(c["tab82"], e["tab82"]):
+        assert 0 <= fc["latency_min_cycles"] - fe["latency_min_cycles"] <= 6
 
 
 def test_outputs_and_macros(runs):

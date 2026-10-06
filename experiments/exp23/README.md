@@ -7,7 +7,7 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 | Command | Effect | Needs |
 |---|---|---|
 | `make` | Analyzes the stored log of run D and checks it against `reference_D.json` | Python with `orca-rt-tools/requirements.txt` |
-| `make runs` | Analyzes the four stored runs into `build/runs/{A,B,C,D}` | Python |
+| `make runs` | Analyzes the five stored runs into `build/runs/{A,B,C,D,E}` | Python |
 | `make sim` | Simulates this tree (`simulate.sh build/sim`) | Questa or ModelSim, `riscv64-elf` toolchain |
 | `make paper` | `sim`, then analysis and check against `reference_head.json` | Questa or ModelSim, toolchain, Python |
 
@@ -47,5 +47,6 @@ The files keep only the lines that the analysis reads (`grep` of the transcript,
 | B | fixed (b920605) | 4c299fc | 100 ps | Same events as A |
 | C | fixed (b920605) | fixed (b920605) | 100 ps | `noc.c` fix delays the events by 446 to 870 cycles |
 | D | fixed with `timescale 1ns/100ps (6a049b5) | 4c299fc | 1 ns | Same events as A with times divided by 10 |
+| E | this tree (`make paper`) | this tree | 1 ns | Differs from C by up to 2 cycles of CPU time per iteration and 2 to 6 cycles of packet latency; the only change to the simulated software after b920605 is the zero-size check of `ddma.c` (828835f) |
 
-`reference_head.json` (for `make paper`) comes from run C in cycles. A simulation of this tree confirms it.
+`reference_head.json` (for `make paper`) holds the values of run E: `make paper` on the GAPH server, Questa 2025.3, riscv64-elf-gcc 12.2.0, 6 minutes of simulation.
