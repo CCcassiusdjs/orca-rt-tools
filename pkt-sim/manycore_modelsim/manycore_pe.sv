@@ -1,3 +1,8 @@
+// Explicit time unit: $time counts ns. Without this directive (commit
+// 4c299fc), the simulator assigned the 100 ps unit to this module, and the
+// logs (scheduled, TAG, TRIGGER) came out in tenths of ns.
+`timescale 1ns/100ps
+
 import orca_pkg::*;
 
 module manycore_pe #(parameter
@@ -147,8 +152,8 @@ module manycore_pe #(parameter
   // workflow controller, mimics external comm system
   logic   wake_up_irq;
   integer wake_up_counter_next;
-  integer wake_up_alarm = 5_000_000;               // 250k nanoseconds
-  integer wake_up_delay = 30_000_000;               // 500k nanoseconds
+  integer wake_up_alarm = 500_000;    // ns: release of A every 0.5 ms (same effective value as exp-23)
+  integer wake_up_delay = 3_000_000;  // ns: 3 ms warm-up (same effective value as exp-23)
   wake_up_state_s wake_up_state;
   
   logic wakeup_ack_flip; // written by memory
