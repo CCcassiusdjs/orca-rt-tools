@@ -61,3 +61,28 @@ def test_main_with_map_and_output(tmp_path):
     out = tmp_path / "g.png"
     matplot.l2g_main([LOG, "--map", str(mfile), "--out", str(out), "--units-per-ms", "100000"])
     assert out.exists() and out.stat().st_size > 1000
+
+
+# --- independent review: logs from the fixed RTL carry X and Y in the correct
+# --- order; the default map follows the swapped order of the versioned logs
+def swap_line(line):
+    parts = line.split(" ")
+    for i, p in enumerate(parts):
+        if "-" in p and p.replace("-", "").isdigit():
+            a, b = p.split("-")
+            parts[i] = b + "-" + a
+    return " ".join(parts)
+
+
+def test_swap_xy_reads_new_logs():
+    lines = open(LOG).readlines()
+    new = [swap_line(l) for l in lines]
+    a = matplot.parse_log(lines, matplot.task_names)
+    b = matplot.parse_log(new, matplot.task_names, swap_xy=True)
+    assert a == b
+
+
+def test_mismatched_map_gives_clear_error():
+    new = [swap_line(l) for l in open(LOG).readlines()]
+    with pytest.raises(ValueError, match="--swap-xy"):
+        matplot.parse_log(new, matplot.task_names)

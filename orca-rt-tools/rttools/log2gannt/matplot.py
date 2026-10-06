@@ -3,8 +3,11 @@ from sys import argv
 
 KERNEL_SCHED_TIME = 200
 
-# default map: application E (Ch. 8.3), PE "x-y" -> tasks by index;
-# the key order defines the panel order
+# default map: application E (Ch. 8.3), PE -> tasks by index; the order
+# of the keys sets the order of the panels. The keys follow the
+# versioned logs (pkt-sim/schedule*.txt), generated before the fix of
+# addr_x()/addr_y() in manycore_pe.sv, with X and Y swapped. For logs from the
+# fixed RTL, use --swap-xy.
 task_names = {
 	"0-0": ['IDLE', 'F', 'D', 'B', 'A'],
 	"0-1": ['IDLE', 'C'],
@@ -52,8 +55,13 @@ def make_time_formatter(units_per_ms):
 	return lambda x, pos: str(f"{x / units_per_ms} ms")
 
 
+def swap_node(node):
+	a, b = node.split("-")
+	return b + "-" + a
+
+
 # converts the log lines into intervals per PE
-def parse_log(lines, names):
+def parse_log(lines, names, swap_xy=False):
 
 	lines = [x.replace("\n","").replace("#", "").strip() for x in lines]
 	lines = [x for x in lines if x.find("Elapsed") < 0]
@@ -62,6 +70,13 @@ def parse_log(lines, names):
 
 	lines_sched = [x for x in lines if x.find("scheduled") >= 0]
 	lines_sched = [x.split(" ") for x in lines_sched]
+	if swap_xy:
+		for x in lines_sched:
+			x[1] = swap_node(x[1])
+	for x in lines_sched:
+		if x[1] in names and int(x[3]) >= len(names[x[1]]):
+			raise ValueError("task index " + x[3] + " out of the map for PE " + x[1]
+				+ " (log with X-Y in the other order? try --swap-xy)")
 	lines_sched = [{"time": int(x[0]), "node": x[1], "task": names[x[1]][int(x[3])]}
 		for x in lines_sched if x[1] in names]
 
@@ -94,9 +109,13 @@ def parse_log(lines, names):
 
 def parse_args(argv):
 	opts = {"log": argv[0], "map": None, "out": DEFAULT_OUTPUT,
-		"units_per_ms": DEFAULT_UNITS_PER_MS}
+		"units_per_ms": DEFAULT_UNITS_PER_MS, "swap_xy": False}
 	i = 1
 	while i < len(argv):
+		if argv[i] == "--swap-xy":
+			opts["swap_xy"] = True
+			i += 1
+			continue
 		if argv[i] == "--map":
 			opts["map"] = argv[i + 1]
 		elif argv[i] == "--out":
@@ -119,7 +138,7 @@ def l2g_main(argv):
 			names = json.load(f)
 
 	with open(opts["log"]) as f:
-		bins = parse_log(f.readlines(), names)
+		bins = parse_log(f.readlines(), names, opts["swap_xy"])
 
 	import matplotlib
 	matplotlib.use("Agg")
