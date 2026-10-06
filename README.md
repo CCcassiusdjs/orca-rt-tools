@@ -37,13 +37,32 @@ The output must show a couple of debugging information, followed by a section na
 1) `python3 rt_tools/__main__.py pkt applications/app.gml mappings/map.gml architectures/arch.gml > output.dnz`
 2) `minizinc minizinc/DM/dmxxx.dmz output.dnz`
 
+## Terminal user interface
+
+`python -m rttools.tui` (run from `orca-rt-tools/`) opens a terminal user interface with four tabs. It runs over SSH on the simulation server; with `pip install textual-dev`, `textual serve "python -m rttools.tui"` serves the same interface to a web browser.
+
+| Tab | Content |
+|---|---|
+| Trace | Gantt of RTL logs (ModelSim/Questa transcript or extracted events), `rttools.bench` output, KProfiler `.sch` and CSV. Cursor and mark with the interval in raw units, cycles, ns, µs and ms; raw unit presets for the RTL (100 ps for commit 4c299fc, 1 ns); time per task and utilization per lane; bursts between passes through IDLE; latency of the packets (`->`/`<-` TAG lines); comparison of two runs with a time scale; export to SVG, PNG and CSV |
+| Bench | Task set editor; ORT/BENCH simulation (RM, DM, EDF, RR) with configurable quantum; utilization, Liu-Layland, hyperbolic, response time (also with release jitter equal to the quantum) and EDF processor demand tests; observed response times |
+| Network | Application, mapping and NoC (or an example of `apps/`); flows at a frequency (hops, flits, network time); frequency search in a child process with live progress and cancel; link schedule, link utilization, packets with slack, independent validation of the schedule |
+| Graphs | Task graph in ORCA format: GDE metrics, GCPA cost and critical path, layers, GCM clustering (MAX_PROC with 4 clusters on `apps/sample-graph-b` gives ABDF, C, EHI and GJ) |
+
+The Help tab (F1) lists the keys. Commands without the interface, for batch use:
+
+| Command | Output |
+|---|---|
+| `python -m rttools.tui stats <trace> [--unit 100ps] [--display cycles]` | Lane metrics, bursts and packet latency as Markdown tables |
+| `python -m rttools.tui export <trace> <out.svg\|out.png\|out.csv> [--display ms]` | Gantt or CSV |
+| `python -m rttools.tui compare <A> <B> [--scale-b 10]` | Comparison per lane; exit code 0 when identical |
+
 ## Tests
 
 The repository includes regression tests for the Python tools, the UCX-OS NoC driver and the RTL of the DDMA, the Hermes crossbar, the TCD and the manycore PE.
 
 | Part | Location | Tools |
 |---|---|---|
-| Python tools (`rttools`, bench, gff, rgg, log2gannt, appparser) | `orca-rt-tools/tests` | Python 3.10+, `orca-rt-tools/requirements.txt`, pytest |
+| Python tools (`rttools`, bench, gff, rgg, log2gannt, appparser, TUI) | `orca-rt-tools/tests` | Python 3.10+, `orca-rt-tools/requirements.txt`, pytest |
 | UCX-OS driver (`lib/noc.c`, `device/ddma.c`) on the host | `pkt-sim/software/ucx-os/tests/host` | gcc with AddressSanitizer and UBSan |
 | RTL (DDMA, Hermes crossbar, TCD, manycore PE) | `pkt-sim/tests/rtl` | Verilator 5, GHDL 4 |
 

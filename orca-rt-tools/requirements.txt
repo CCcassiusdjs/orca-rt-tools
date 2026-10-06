@@ -6,3 +6,6 @@ matplotlib==3.5.1
 numpy>=1.21,<2
 # pygraphviz==1.9 is no longer required by the main flow
 # (only the legacy code in __rt_tools_old and porca uses it)
+# terminal user interface (python -m rttools.tui); textual 8 needs Python 3.9+
+textual>=8.2,<9
+rich>=14.2
