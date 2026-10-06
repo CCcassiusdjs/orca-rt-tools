@@ -21,8 +21,8 @@ module router #(parameter ADDRESS = 0) (
 
   initial begin
     $display("router_info: x:%0d y:%0d dimx:%0d dimy:%0d", 
-      ADDRESS & 'h000000FF,
-      (ADDRESS & 'h0000FF00) >> 8,
+      (ADDRESS & 'h0000FF00) >> 8,   // x: bits 15:8
+      ADDRESS & 'h000000FF,          // y: bits 7:0
       (ADDRESS & 'h00FF0000) >> 16,
       (ADDRESS & 'hFF000000) >> 24
     );
