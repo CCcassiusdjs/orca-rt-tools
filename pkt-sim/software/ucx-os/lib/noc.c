@@ -360,8 +360,9 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
     // test whether the target port has a comm open
     int target_task = -1;
 
+    // only slots with an open comm count (unbound slots keep port 0)
     for (int i = 0; i < MAX_TASKS; i++)
-      if (pktdrv_ports[i] == target_port) 
+      if (pktdrv_tqueue[i] != NULL && pktdrv_ports[i] == target_port)
         target_task = i;
 
     if(target_task == -1) {
@@ -374,9 +375,12 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
       return UCX_NOC_WUT;
     }
 
-    set_counter_4(pkt->tag);
-    enable_receiver(target_task);    
-    
-    return ucx_queue_enqueue(pktdrv_tqueue[target_task], pkt);
+    // wake the receiver only when the packet entered its queue
+    int32_t res = ucx_queue_enqueue(pktdrv_tqueue[target_task], pkt);
+    if (res == 0) {
+      set_counter_4(pkt->tag);
+      enable_receiver(target_task);
+    }
+    return res;
   }
 }

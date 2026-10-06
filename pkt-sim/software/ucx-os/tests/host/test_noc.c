@@ -156,6 +156,23 @@ static void test_comm_destroy(void)                  /* 19 */
 	CHECK(ucx_noc_comm_create(5) == UCX_NOC_OK);  /* port released */
 }
 
+/* review: local send (same node) only considers ports with an open queue */
+static void test_local_send_bound_port(void)
+{
+	setup();
+	host_current_task = 1;
+	CHECK(ucx_noc_comm_create(0) == UCX_NOC_OK);   /* port 0 */
+	host_current_task = 2;
+	noc_packet_t *p = ucx_noc_create_packet(4);
+	CHECK(p != NULL);
+	CHECK(ucx_noc_send(NODE, 0, p, 33) == 0);
+	host_current_task = 1;
+	CHECK(ucx_noc_probe() == 1);
+	CHECK(host_task_state(1) == TASK_READY);
+	CHECK(host_counter4 == 33);
+	CHECK(host_irq_enabled == 1);
+}
+
 int main(void)
 {
 	RUN_FORK(test_deliver_ok);
@@ -165,5 +182,6 @@ int main(void)
 	RUN_FORK(test_irq2_malloc_failure);
 	RUN_FORK(test_comm_create_errors_restore_irq);
 	RUN_FORK(test_comm_destroy);
+	RUN_FORK(test_local_send_bound_port);
 	DONE();
 }
