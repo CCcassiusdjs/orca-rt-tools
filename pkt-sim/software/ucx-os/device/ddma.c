@@ -30,8 +30,9 @@ volatile uint32_t* DDMA_RECV_SIZE_OUT = (volatile uint32_t*)(0x20000020);
 volatile uint32_t* DDMA_RECV_CMD_IN   = (volatile uint32_t*)(0x20000024);
 
 
+// linear node address: a = y * DIMX + x (inverse of _ddma_atox/_ddma_atoy)
 uint32_t _ddma_node_addr(){
-  return DDMA_NODE_Y * DDMA_NODE_DIMY + DDMA_NODE_X;
+  return DDMA_NODE_Y * DDMA_NODE_DIMX + DDMA_NODE_X;
 }
 
 uint32_t _ddma_atox(uint32_t addr){
@@ -39,11 +40,11 @@ uint32_t _ddma_atox(uint32_t addr){
 }
 
 uint32_t _ddma_atoy(uint32_t addr){
-  return (addr / DDMA_NODE_DIMY);
+  return (addr / DDMA_NODE_DIMX);
 }
 
 uint32_t _ddma_xyta(uint32_t x, uint32_t y){
-  return (x << 8) & y;
+  return (x << 8) | y;
 }
 
 void _ddma_init(){
