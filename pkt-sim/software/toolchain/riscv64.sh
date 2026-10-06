@@ -11,6 +11,8 @@
 # a symbolic link in the riscv64-unknown-elf directory (gcc-8.3.0 -> gcc) to support multiple
 # versions of the toolchain.
 #
+set -e
+
 binutils_base="binutils-2.40"
 gcc_base="gcc-12.2.0"
 newlib_base="newlib-4.1.0"
@@ -30,10 +32,10 @@ src_dir="${root_dir}/source"
 bld_dir="${root_dir}/build"
 install_dir="${root_dir}/install"
 
-mkdir ${src_dir}
-mkdir ${bld_dir}
-mkdir ${install_dir}
-mkdir ${dl_dir}
+mkdir -p ${src_dir}
+mkdir -p ${bld_dir}
+mkdir -p ${install_dir}
+mkdir -p ${dl_dir}
 
 # download all sources
 # wget -c ftp://sources.redhat.com/pub/newlib/${newlib_base}.tar.gz
@@ -54,11 +56,11 @@ tar -zxvf ${dl_dir}/"${gdb_base}.tar.gz"
 # build binutils
 #
 cd ${bld_dir}
-mkdir ${binutils_base}
+mkdir -p ${binutils_base}
 cd ${binutils_base}
-${src_dir}/${binutils_base}/configure --prefix=$PREFIX --target=$TARGET
+${src_dir}/${binutils_base}/configure --prefix=$PREFIX --target=$TARGET \
 	--with-arch=rv64i --with-sysroot --disable-nls --disable-werror
-make -j${nproc} all
+make -j$(nproc) all
 make install
 
 #
@@ -68,25 +70,25 @@ cd ${src_dir}/${gcc_base}
 ./contrib/download_prerequisites
 
 cd ${bld_dir}
-mkdir ${gcc_base}
+mkdir -p ${gcc_base}
 cd ${gcc_base}
 ${src_dir}/${gcc_base}/configure --prefix=$PREFIX --target=$TARGET \
 	--with-arch=rv64i --with-abi=lp64 --disable-nls --enable-languages=c \
 	--enable-interwork --enable-multilib --with-system-zlib --with-newlib \
 	--disable-shared --without-headers
-make -j${nproc} all-gcc
+make -j$(nproc) all-gcc
 make install-gcc
 
 #
 # build newlib
 #
 cd ${bld_dir}
-mkdir ${newlib_base}
+mkdir -p ${newlib_base}
 cd ${newlib_base}
 ${src_dir}/${newlib_base}/configure --prefix=$PREFIX --target=$TARGET \
 	--with-arch=rv64i --with-abi=lp64 --disable-nls --enable-interwork \
 	--enable-multilib --disable-newlib-supplied-syscalls
-make -j${nproc} all
+make -j$(nproc) all
 make install
 
 #
@@ -98,16 +100,16 @@ ${src_dir}/${gcc_base}/configure --prefix=$PREFIX --target=$TARGET \
 	--with-arch=rv64i --with-abi=lp64  --disable-nls --enable-languages=c,c++ \
 	--enable-interwork --enable-multilib --with-system-zlib --with-newlib \
 	--disable-shared
-make -j${nproc} all
+make -j$(nproc) all
 make install
 
 #
 # build GDB
 #
 cd ${bld_dir}
-mkdir ${gdb_base}
+mkdir -p ${gdb_base}
 cd ${gdb_base}
 ${src_dir}/${gdb_base}/configure --prefix=$PREFIX --target=$TARGET \
  --enable-interwork --enable-multilib
-make -j${nproc} all
+make -j$(nproc) all
 make install
