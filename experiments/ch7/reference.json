@@ -1,0 +1,48 @@
+{
+ "_doc": "make (|V| = 20 to 100, N = 4): every cell agrees with Table 7.1.",
+ "n": 4,
+ "summary": {
+  "rows": 9,
+  "rows_agree": 9,
+  "cells_agree": 108,
+  "cells": 108
+ },
+ "rows": [
+  {
+   "V": 20,
+   "all_agree": true
+  },
+  {
+   "V": 30,
+   "all_agree": true
+  },
+  {
+   "V": 40,
+   "all_agree": true
+  },
+  {
+   "V": 50,
+   "all_agree": true
+  },
+  {
+   "V": 60,
+   "all_agree": true
+  },
+  {
+   "V": 70,
+   "all_agree": true
+  },
+  {
+   "V": 80,
+   "all_agree": true
+  },
+  {
+   "V": 90,
+   "all_agree": true
+  },
+  {
+   "V": 100,
+   "all_agree": true
+  }
+ ]
+}
