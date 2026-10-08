@@ -317,20 +317,67 @@ void task_i()
 }
 
 // ------------------------------ TASK J
+// J joins the flows G->J, H->J and I->J. Each producer sends one packet
+// per iteration and every queue is FIFO, so the k-th packet of a producer
+// belongs to iteration k. J runs iteration k after it has received the
+// k-th packet of each of the three producers; a packet that arrives ahead
+// of the slowest producer only increments the count of its producer.
+#define J_INPUTS 3
+
+// input of J that corresponds to the source port of a packet
+int j_input(uint16_t source_port)
+{
+  switch (source_port) {
+  case PORT_G: return 0;
+  case PORT_H: return 1;
+  case PORT_I: return 2;
+  default:     return -1;
+  }
+}
+
+// blocking receive as recv_and_print(); returns the source port
+uint16_t recv_source_port()
+{
+  while(ucx_noc_probe() <= 0){
+    kcb_p->tcb_p->state = TASK_BLOCKED;
+    ucx_task_yield();
+  }
+
+  noc_packet_t *pkt = ucx_noc_receive();
+  uint16_t port = pkt->source_port;
+
+  if (pkt->source_node != ucx_noc_cpu_id())
+    ucx_free(pkt);
+
+  return port;
+}
+
 void task_j()
 {
   ucx_noc_comm_create(PORT_J);
+
+  // packets received from each input; iterations completed
+  uint32_t received[J_INPUTS] = {0, 0, 0};
+  uint32_t done = 0;
 
   int it = ITERATIONS;
 
   do
   {
-    recv_and_print();
-    recv_and_print();
-    recv_and_print();
+    // wait for the packet of iteration done + 1 from each input
+    while (received[0] <= done || received[1] <= done || received[2] <= done) {
+      uint16_t port = recv_source_port();
+      int k = j_input(port);
+
+      if (k < 0)
+        printf("J: packet from unknown port %d\n", port);
+      else
+        received[k]++;
+    }
 
     // simulate processing
     ucx_sleep(TASK_J_WORKLOAD);
+    done++;
 
   }while (--it);
 
