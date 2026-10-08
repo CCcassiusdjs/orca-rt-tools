@@ -91,10 +91,10 @@ def flows_at(case, frequency):
         net = None
         if src is not None and dst is not None:
             hops = router.manhattan(src, dst, case["noc"])
-            flits = router.getNumFlits(int(d["datasize"]))
-            net = flits + (hops + 1) * router.getRoutingTime() + 1
+            flits = router.getPacketFlits(int(d["datasize"]))
+            net = router.occupancy(hops, int(d["datasize"]))
         else:
-            flits = router.getNumFlits(int(d["datasize"]))
+            flits = router.getPacketFlits(int(d["datasize"]))
         n_packets = sum(1 for p in (packets or []) if p["flow"] == d["label"])
         rows.append({
             "flow": d["label"], "source": s, "target": t, "src_node": src, "dst_node": dst,

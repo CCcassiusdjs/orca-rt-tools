@@ -46,53 +46,94 @@ def feasible(attempt):
             and len(attempt["skipped"]) == 0)
 
 
+def _converged(lower, upper, cfg):
+    """Stop rule: the interval (lower, upper] is narrower than the absolute
+    tolerance cfg["scaling_tolerance"] (Hz) or, when the configuration has
+    "relative_tolerance" r, narrower than r * upper (the stop rule of the
+    thesis, lower / upper >= ITF = 0.98, is r = 1 - ITF = 0.02)."""
+    width = upper - lower
+    if width <= cfg["scaling_tolerance"]:
+        return True
+    rel = cfg.get("relative_tolerance")
+    return rel is not None and width <= rel * upper
+
+
 def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
-    """Bisection on the frequency, starting at cfg["frequency"].
+    """Lowest frequency at which the AGS backend schedules every packet,
+    within the tolerance of _converged.
 
-    A feasible attempt lowers the upper bound; an infeasible attempt
-    doubles the upper bound. The search stops when the interval is
-    narrower than cfg["scaling_tolerance"] or when the hyperperiod is 0.
+    The search keeps an interval (lower, upper]: `upper` is the lowest
+    frequency with a feasible attempt and `lower` the highest frequency
+    below `upper` without one. It starts at f0 = cfg["frequency"] with
+    lower = 0. While no attempt is feasible, the search doubles the
+    candidate (lower = c, c = 2c), at most cfg.get("max_doublings", 32)
+    times. Afterwards each step tries the midpoint c of the interval: a
+    feasible attempt sets upper = c, any other attempt sets lower = c, so a
+    feasible frequency is never discarded. The search stops when the
+    interval converges and returns the attempt at `upper`.
 
-    `on_attempt(attempt, ok)` receives each attempt. Returns the last
-    feasible attempt (same keys as schedule_at, plus "attempts", the list
-    of (frequency, ok, number of skipped packets)) or None."""
-    low_frequency = 0
-    center_frequency = cfg["frequency"]
-    upper_frequency = cfg["frequency"] * 10
+    An attempt whose hyperperiod is undefined (lcm of the periods in cycles
+    not found, schedule_at returns None) gives no schedule at c; the search
+    records it with skipped count None and treats c as not feasible.
 
-    last = None
+    `on_attempt(attempt, ok)` receives each attempt with a hyperperiod.
+    Returns None when no attempt is feasible; otherwise the attempt at
+    `upper` (keys of schedule_at) plus "attempts" (list of (frequency, ok,
+    number of skipped packets or None)), "steps" (number of attempts),
+    "lower" (final lower bound, Hz)."""
     attempts = []
+    best = None
+    lower = 0
+    upper = None
 
-    while True:
-        info("Tentative frequency is " + str(center_frequency) + "Hz")
-        attempt = schedule_at(app, noc, mapping, appname, center_frequency, cfg)
+    def attempt_at(frequency):
+        info("Tentative frequency is " + str(frequency) + "Hz")
+        attempt = schedule_at(app, noc, mapping, appname, frequency, cfg)
         if attempt is None:
-            break
-
+            error("No hyperperiod at " + str(frequency) + "Hz; the attempt counts as not feasible.")
+            attempts.append((frequency, False, None))
+            return None, False
         ok = feasible(attempt)
         nskipped = len(attempt["skipped"])
-        attempts.append((center_frequency, ok, nskipped))
+        attempts.append((frequency, ok, nskipped))
         if on_attempt is not None:
             on_attempt(attempt, ok)
-
         if ok:
-            warn("Found a schedule at " + str(center_frequency) + "Hz. Scaling frequency down.")
-            last = attempt
-            upper_frequency = center_frequency
-            center_frequency = (upper_frequency + low_frequency) / 2
+            warn("Found a schedule at " + str(frequency) + "Hz. Scaling frequency down.")
         else:
-            error("Could not find a schedule at " + str(center_frequency) + "Hz.")
+            error("Could not find a schedule at " + str(frequency) + "Hz.")
             if attempt["schedule"] is not None:
                 error("Skip list is not empty (" + str(nskipped) + ")!")
-            error("Scaling frequency up...")
-            upper_frequency = center_frequency * 2
-            low_frequency = center_frequency
-            center_frequency = (upper_frequency + low_frequency) / 2
+        return attempt, ok
 
-        if (upper_frequency - low_frequency) < cfg["scaling_tolerance"]:
+    # bracket: find a feasible upper bound
+    center = cfg["frequency"]
+    for _ in range(cfg.get("max_doublings", 32) + 1):
+        attempt, ok = attempt_at(center)
+        if ok:
+            best, upper = attempt, center
             break
+        lower = center
+        error("Scaling frequency up...")
+        center = center * 2
+    if best is None:
+        return None
 
-    if last is not None:
-        last = dict(last)
-        last["attempts"] = attempts
-    return last
+    # bisection on (lower, upper]
+    while not _converged(lower, upper, cfg):
+        center = (lower + upper) / 2
+        if not lower < center < upper:
+            break   # no representable midpoint (tolerance 0)
+        attempt, ok = attempt_at(center)
+        if ok:
+            best, upper = attempt, center
+        else:
+            lower = center
+
+    info("Converged: " + str(lower) + "Hz < f <= " + str(upper) + "Hz after "
+         + str(len(attempts)) + " attempts")
+    best = dict(best)
+    best["attempts"] = attempts
+    best["steps"] = len(attempts)
+    best["lower"] = lower
+    return best

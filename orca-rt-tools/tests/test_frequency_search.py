@@ -31,16 +31,67 @@ def test_search_returns_problem_of_feasible_frequency(monkeypatch):
     assert res["frequency"] >= LIMIT
     assert res["problem"]["hyperperiod"] == int(res["frequency"])
     assert [(f, ok) for (f, ok, _) in res["attempts"]] == seen
-    # the result is the LAST feasible attempt; an infeasible attempt sets
-    # upper = 2 * center and discards the lower feasible bound, so an
-    # earlier attempt can be feasible at a lower frequency (here 3000 Hz
-    # against the reported ~3082 Hz). The TUI lists all attempts.
-    feasible = [f for (f, ok) in seen if ok]
-    assert res["frequency"] == feasible[-1]
-    assert min(feasible) < res["frequency"]
-    # an infeasible attempt sets upper = 2 * center, so the interval only
-    # closes after a feasible attempt
-    assert seen[-1][1] is True
+    assert res["steps"] == len(seen)
+
+
+def test_search_returns_lowest_feasible_attempt(monkeypatch):
+    # the previous search set upper = 2 * center after an infeasible
+    # attempt and returned 3082.03 Hz with 3000 Hz already feasible
+    monkeypatch.setattr(search, "schedule_at", fake_schedule_at)
+    res = search.search_minimum_frequency(None, None, None, "x", CFG)
+    feasible = [f for (f, ok, _) in res["attempts"] if ok]
+    assert res["frequency"] == min(feasible) == 3000
+    assert res["frequency"] - res["lower"] <= CFG["scaling_tolerance"]
+    assert res["lower"] < LIMIT
+    # 8000 (ok), 4000 (ok), 2000, 3000 (ok), 2500, 2750, 2875, 2937.5
+    assert res["steps"] == 8
+
+
+def limit_case(limit):
+    def fake(app, noc, mapping, appname, frequency, cfg):
+        res = fake_schedule_at(app, noc, mapping, appname, frequency * LIMIT / limit, cfg)
+        res["frequency"] = frequency
+        return res
+    return fake
+
+
+def test_search_brackets_from_infeasible_start(monkeypatch):
+    for limit in (1234.5, 3000, 7999, 8000, 8001, 50000, 1e6):
+        monkeypatch.setattr(search, "schedule_at", limit_case(limit))
+        res = search.search_minimum_frequency(None, None, None, "x", CFG)
+        feasible = [f for (f, ok, _) in res["attempts"] if ok]
+        infeasible = [f for (f, ok, _) in res["attempts"] if not ok]
+        assert res["frequency"] == min(feasible) >= limit
+        assert res["frequency"] - CFG["scaling_tolerance"] <= res["lower"] < limit
+        assert res["lower"] == max([0] + [f for f in infeasible if f < res["frequency"]])
+
+
+def test_relative_tolerance(monkeypatch):
+    monkeypatch.setattr(search, "schedule_at", limit_case(1e6))
+    cfg = dict(CFG, scaling_tolerance=0, relative_tolerance=0.02)
+    res = search.search_minimum_frequency(None, None, None, "x", cfg)
+    assert res["frequency"] >= 1e6
+    assert res["lower"] / res["frequency"] >= 0.98
+
+
+def test_undefined_hyperperiod_keeps_feasible_bound(monkeypatch):
+    # schedule_at returns None when the lcm of the periods fails; the
+    # previous search stopped there and returned the last feasible attempt
+    def fake(app, noc, mapping, appname, frequency, cfg):
+        if 2000 < frequency < 2900:
+            return None
+        return fake_schedule_at(app, noc, mapping, appname, frequency, cfg)
+    monkeypatch.setattr(search, "schedule_at", fake)
+    res = search.search_minimum_frequency(None, None, None, "x", CFG)
+    assert any(n is None for (_, _, n) in res["attempts"])
+    assert res["frequency"] == 3000
+    assert res["frequency"] - res["lower"] <= CFG["scaling_tolerance"]
+
+
+def test_never_feasible_returns_none(monkeypatch):
+    monkeypatch.setattr(search, "schedule_at", limit_case(float("inf")))
+    cfg = dict(CFG, max_doublings=3)
+    assert search.search_minimum_frequency(None, None, None, "x", cfg) is None
 
 
 def test_cli_svg_receives_found_frequency(monkeypatch, tmp_path):

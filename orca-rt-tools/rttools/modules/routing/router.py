@@ -14,20 +14,51 @@ def decodeNodeID(id, width, height):
     return noc_addr
 
 
+# bytes per flit (32-bit flits)
+FLIT_BYTES = 4
+
+# bytes of the packet header that the kernel prepends to the payload
+# (noc_packet_t, ucx-os include/lib/noc.h); the DDMA sends header and
+# payload as payload flits of the router
+KERNEL_HEADER_BYTES = 12
+
+
 #!cycles
 def getRoutingTime():
-    return 7
+    """Header latency of one Hermes router without contention, in cycles.
+
+    GHDL simulation of the Hermes of the repository (8 x 3 mesh, ideal
+    source and sink at the LOCAL ports): the header takes 6 cycles in each
+    of the m + 1 routers of an m-hop path."""
+    return 6
 
 
 #!bits PAYLOAD ONLY
 def getNumFlits(datasize):
     # BUS_WIDTH = 32
-    BUS_WIDTH = 4
+    BUS_WIDTH = FLIT_BYTES
 
     if datasize % BUS_WIDTH == 0:
         return (int)((datasize / BUS_WIDTH))
     else:
         return (int)((datasize / BUS_WIDTH) + 1)
+
+
+def getPacketFlits(datasize):
+    """Payload flits p of the router for a message of `datasize` bytes:
+    ceil((12 + payload rounded up to a multiple of 4) / 4). The kernel
+    rounds the payload up to whole words (ucx_noc_create_packet) and the
+    driver converts bytes into flits by ceiling (_ddma_send)."""
+    payload = getNumFlits(int(datasize)) * FLIT_BYTES
+    return getNumFlits(KERNEL_HEADER_BYTES + payload)
+
+
+def occupancy(hops, datasize):
+    """Cycles a packet of `datasize` payload bytes holds each link of an
+    XY path with `hops` hops: the zero-load latency of the Hermes,
+    L0 = 6 (m + 1) + p + 1, with p from getPacketFlits. The GHDL
+    simulation of the router reproduces L0 for m from 1 to 9 hops."""
+    return getRoutingTime() * (hops + 1) + getPacketFlits(datasize) + 1
 
 
 def manhattan(source, target, graph):

@@ -208,8 +208,8 @@ def unwrap(app, arch, mapping):
 
         delta_m = router.manhattan(source, target, arch)
         routing_time = (delta_m + 1) * router.getRoutingTime()
-        payload = router.getNumFlits(int(p["datasize"]))
-        p["net_time"] = payload + routing_time + 1
+        payload = router.getPacketFlits(int(p["datasize"]))
+        p["net_time"] = router.occupancy(delta_m, int(p["datasize"]))
 
         debug(
             p["name"]

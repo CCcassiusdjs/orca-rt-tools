@@ -1,156 +1,93 @@
-from math import inf
-from rttools.vector.vector import mcopy, vcopy
+"""Criteria of the AGS (Sec. 6.3.4 of the thesis; ICECS 2022).
 
-def resort(tt, packets):
-  t = vcopy(tt)
-  h = []
-  
-  removed = True
-  while(removed):
+Each criterion takes the problem (tables link x packet min_start,
+occupancy and deadline, list of packets, hyperperiod) and returns the
+packet indices in allocation order: the first index is allocated first.
+Ties keep the order of the packets in the problem.
 
-    removed = False
-    min = +inf
-    idx = +inf    
-
-    for i in range(0, len(t)):
-      if(t[i] != -inf and t[i] < min):
-        min = t[i]
-        idx = i
-        t[i] = +inf
-        removed = True
-
-    if(removed):
-      h.append(idx)
-  return h
-
-# find the sum of capacity for all links
-# most bandwidth-usage link
-def mbcf(solution_space, min_start, O, deadline):
-  sumsl = [0 for x in O]
-  sumsp = [0 for x in O[0]]
-
-  # find capacity of all links
-  for l in range(0, len(O)):
-    for p in range(0, len(O[0])):
-      if(O[l][p] != None):
-        sumsl[l] += O[l][p]
-        sumsp[p] += O[l][p]
+Quantities per packet i:
+  o_i   occupancy of each link of the path (cycles), the size of the
+        packet in the unit of the period (the thesis uses "size" with
+        the period in Eq. 6.2, so both are in cycles);
+  T_i   period of the flow of i, in cycles: the "period" key of the packet
+        when present, otherwise HP / n_f, with n_f the number of packets
+        of the flow of i in the hyperperiod HP (the flow unwrapper emits
+        one packet per period, so n_f = HP / T_i). The flow of a packet is
+        its "flow" key, or the name before ":" ("f10:3" is packet 3 of
+        flow f10); a packet without either is the only packet of its
+        flow (T_i = HP).
+"""
 
 
-  # sort packets from the least consuming to the most consuming
-  # (most consuming will be consumed first)
-  list = []
-
-  removed = True
-  while removed:
-    lowest = +inf
-    idx = +inf
-
-    removed = False
-
-    for i in range(0, len(sumsp)):
-      if sumsp[i] < lowest:
-        lowest = sumsp[i]
-        idx = i
-        
-    if lowest != +inf:
-      list.append(idx)
-      sumsp[idx] = +inf
-      removed = True
-
-  return list
+def _flow(pkt):
+    if isinstance(pkt, dict):
+        if "flow" in pkt:
+            return pkt["flow"]
+        name = pkt.get("name", "")
+    else:
+        name = str(pkt)
+    return name.split(":")[0] if ":" in name else None
 
 
-'''
-Calculates a vector of slack times for a given 
-problem. 
-@param V the base problem
-@returns a vector of slack times
-'''
-def lstf(V, min_start, occupancy, deadline):
-  slack_time = [None for i in V[0]]
-  for i in range(0, len(V)):
-    for j in range(0, len(V[i])):
-      if V[i][j] != None:
-        li, ls = V[i][j]
-        st = ls - li
-        # if(slack_time[j] == None or st < slack_time[j]):
-        if(slack_time[j] == None or st > slack_time[j]):
-            slack_time[j] = st
-  #return slack_time
-  
-  # most slack time first, least slack time 
-  # will be consumed first
-  list = []
+def _occupancy(problem):
+    occ = problem["occupancy"]
+    n = len(occ[0]) if occ else 0
+    out = [0] * n
+    for j in range(n):
+        for row in occ:
+            if row[j] is not None:
+                out[j] = row[j]
+                break
+    return out
 
-  removed = True
-  while removed:
-    largest = -inf
-    idx = -inf
 
-    removed = False
+def _periods(problem):
+    pkts = problem["packets"]
+    hp = problem["hyperperiod"]
+    count = {}
+    for k in pkts:
+        f = _flow(k)
+        if f is not None:
+            count[f] = count.get(f, 0) + 1
+    out = []
+    for k in pkts:
+        if isinstance(k, dict) and "period" in k:
+            out.append(k["period"])
+            continue
+        f = _flow(k)
+        out.append(hp if f is None else hp / count[f])
+    return out
 
-    for i in range(0, len(slack_time)):
-      if slack_time[i] > largest:
-        largest = slack_time[i]
-        idx = i
-        
-    if largest != -inf:
-      list.append(idx)
-      slack_time[idx] = -inf
-      removed = True
 
-  return list
+def lstf(problem):
+    """Least Slack-Time First, Eq. 6.2: LSTF(i) = T_i - o_i, smallest
+    first (packets with fewer alternatives first)."""
+    o = _occupancy(problem)
+    t = _periods(problem)
+    return sorted(range(len(o)), key=lambda i: t[i] - o[i])
 
-'''
-Calculates a weighted vector. Higher values represent
-  packets in more critical links. 
-@param V the base problem
-@returns a vector of slack times
-'''
-def mcpf(solution_space, min_start, O, deadline):
-  # find the total load of each link
-  load = [0 for x in O]
 
-  # for each packet, sum the usage of 
-  # that packet for each link
-  for l in range(0, len(O)):
-    acc = 0
-    for p in range(0, len(O[0])):
-      if(O[l][p] != None):
-        #acc += O[l][p]      #usage
-        acc += 1
-    load[l] = acc
+def mbcf(problem):
+    """Most Bandwidth Consuming First, Eq. 6.3: MBCF(i) = o_i * HP / T_i,
+    largest first."""
+    o = _occupancy(problem)
+    t = _periods(problem)
+    hp = problem["hyperperiod"]
+    return sorted(range(len(o)), key=lambda i: -(o[i] * hp / t[i]))
 
-  # for each packet, sum their total occupancy,
-  # multiplied by the weight of each link
-  crit = [0 for x in O[0]]
-  for p in range(0, len(crit)):
-    acc = 0
-    for l in range(0, len(O)):
-      if(O[l][p] != None):
-        acc += O[l][p] * load[l]
-    crit[p] = acc
 
-  # most slack time first, least slack time 
-  # will be consumed first
-  list = []
-
-  removed = True
-  while removed:
-    largest = -inf
-    idx = -inf
-
-    removed = False
-
-    for i in range(0, len(crit)):
-      if crit[i] > largest:
-        largest = crit[i]
-        idx = i
-        
-    if largest != -inf:
-      list.append(idx)
-      crit[idx] = -inf
-      removed = True
-  
-  return list
+def mcpf(problem):
+    """Most Critical Path First (Sec. 6.3.4, no equation in the thesis):
+    the usage of link l is the time it is occupied in the hyperperiod,
+    u(l) = sum of o_k over the packets k that use l; the score of packet i
+    is the sum of u(l) over the links of its path. Largest score (path
+    through the most used links) first."""
+    occ = problem["occupancy"]
+    n = len(occ[0]) if occ else 0
+    usage = [sum(v for v in row if v is not None) for row in occ]
+    score = [0] * n
+    for l, row in enumerate(occ):
+        for j in range(n):
+            if row[j] is not None:
+                score[j] += usage[l]
+    return sorted(range(n), key=lambda i: -score[i])

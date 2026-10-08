@@ -9,11 +9,13 @@
 
 ## Result of the current code
 
+The code follows the thesis since `fix/art-fns-search`: occupancy L0 = 6(m+1) + p + 1 with the 12-byte kernel header in p, criteria of Eqs. 6.2 and 6.3 (MCPF takes the most critical packet first), AGS of Fig. 6.6 (reset, threshold across resets, truncation at the maximum release) and a bisection that keeps the feasible upper bound.
+
 | Table | Agreement with the thesis |
 |---|---|
-| 6.5 (visited) | Synthetic-D: 4 of 9 cells (PF 20 for all criteria, MCPF PF 10); PF 40 gives no schedule. DCT-Verify: 6 of 9 (LSTF and MBCF); MCPF gives 8 instead of 214, 111 and 60 |
-| 6.6 (skipped) | Synthetic-D: 4 of 9. DCT-Verify: MBCF 3 of 3; LSTF gives 314 and 158 for PF 10 and 20, the thesis prints 158 and 314; MCPF 0 of 3 |
-| 6.7 | No cell. Synthetic-D: 3906.25 Hz for every criterion and PF. DCT-Verify: 79,376 Hz (LSTF; MCPF with PF 40) and 112,164 Hz (MBCF; MCPF with PF 10 and 20). The thesis prints 793 to 1707 "MHz" |
+| 6.5 (visited) | Synthetic-D: 4 of 9 cells (6 visits in every configuration; the thesis prints 6 for MCPF PF 10 and 20 and for LSTF and MBCF PF 40). DCT-Verify: 6 of 9 (LSTF and MBCF); MCPF gives 8 instead of 214, 111 and 60 |
+| 6.6 (skipped) | Synthetic-D: 2 of 9 (LSTF and MBCF PF 40). DCT-Verify: MBCF 3 of 3; LSTF gives the MBCF values (416, 209, 105), since with one period per application Eqs. 6.2 and 6.3 give the same order; MCPF gives 314, 158 and 80, the values the thesis prints for LSTF with PF 10 and 20 swapped |
+| 6.7 | No cell. Synthetic-D: 3906.25 Hz for every criterion and PF; the absolute tolerance of 5000 Hz stops the bisection on (0, 3906.25] (with `relative_tolerance` 0.02 the search ends at 104.9 Hz). DCT-Verify: 78,125 Hz for every criterion and PF. The thesis prints 793 to 1707 "MHz" |
 
 The CAR rows of Tables 6.5 and 6.6 and the CAR frequencies of Table 6.7 come from `make car`.
 
