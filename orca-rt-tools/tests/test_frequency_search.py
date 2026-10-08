@@ -120,3 +120,55 @@ def test_fixed_frequency_without_schedule_returns_error(monkeypatch):
     monkeypatch.setattr(cli.mapparser, "loadFromFile", lambda f: None)
     monkeypatch.setattr(cli.sys, "argv", ["rttools", "a", "m", "n", "1", "1", "1", "False"])
     assert cli.main() == 1
+
+
+def test_cpu_test_runs_once_outside_the_bisection(monkeypatch):
+    """Decision D06: f_CPU comes from one CPU test before the search; the
+    bisection covers the network; the result is max(f*, f_CPU)."""
+    monkeypatch.setattr(search, "schedule_at", fake_schedule_at)
+    calls = []
+
+    def bound(app, mapping):
+        calls.append(1)
+        return {"demand": {"0": 5}, "period_s": 0.001, "f_cpu_hz": 5000.0}
+    monkeypatch.setattr(search.release, "cpu_bound", bound)
+    res = search.minimum_frequency("app", None, "map", "x", CFG)
+    assert len(calls) == 1 and res["network"]["steps"] > 1
+    assert LIMIT <= res["f_star_hz"] < 5000
+    assert res["f_cpu_hz"] == 5000.0 and res["frequency_hz"] == 5000.0
+
+    monkeypatch.setattr(search.release, "cpu_bound",
+                        lambda app, mapping: {"demand": {"0": 1}, "period_s": 0.001, "f_cpu_hz": 1000.0})
+    res = search.minimum_frequency("app", None, "map", "x", CFG)
+    assert res["frequency_hz"] == res["f_star_hz"]
+
+
+def test_cpu_test_skipped_without_common_period(monkeypatch):
+    monkeypatch.setattr(search, "schedule_at", fake_schedule_at)
+
+    def bound(app, mapping):
+        raise ValueError("the flows have different periods; give period_s")
+    monkeypatch.setattr(search.release, "cpu_bound", bound)
+    res = search.minimum_frequency("app", None, "map", "x", CFG)
+    assert res["cpu"] is None and res["f_cpu_hz"] is None
+    assert res["frequency_hz"] == res["f_star_hz"]
+
+
+def test_cli_reports_f_star_f_cpu_and_maximum(monkeypatch, tmp_path, capsys):
+    import rttools.__main__ as cli
+    monkeypatch.setattr(search, "schedule_at", fake_schedule_at)
+    monkeypatch.setattr(search.release, "cpu_bound",
+                        lambda app, mapping: {"demand": {"0": 5}, "period_s": 0.001, "f_cpu_hz": 5000.0})
+    monkeypatch.setattr(cli.appparser, "loadFromFile", lambda f: (None, "x"))
+    monkeypatch.setattr(cli.nocparser, "loadFromFile", lambda f: None)
+    monkeypatch.setattr(cli.mapparser, "loadFromFile", lambda f: [])
+    monkeypatch.setattr(cli.svg, "saveSvg", lambda *a: None)
+    monkeypatch.setattr(cli.sys, "argv", ["rttools", "a", "m", "n", "8000"])
+    monkeypatch.setattr(cli, "RTTOOLS_SCALING_TOLERANCE", 100)
+    monkeypatch.setattr(search, "cpu_check", lambda app, mapping: search.release.cpu_bound(app, mapping))
+    monkeypatch.chdir(tmp_path)
+    assert cli.main() == 0
+    out = capsys.readouterr().out
+    assert "Network frequency f* = " in out
+    assert "CPU frequency f_CPU = 5000.0Hz" in out
+    assert "Minimum frequency max(f*, f_CPU) = 5000.0Hz" in out

@@ -5,7 +5,7 @@ share these functions. The functions print the same log messages that
 the command line tool printed before the extraction.
 """
 from rttools.terminal.terminal import error, info, warn
-from rttools.modules.instances import instantiator
+from rttools.modules.instances import instantiator, release
 from rttools.modules.unwrapper import flowUnwrapper
 from rttools.modules.backend.ags import ags
 
@@ -137,3 +137,42 @@ def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
     best["steps"] = len(attempts)
     best["lower"] = lower
     return best
+
+
+def cpu_check(app, mapping):
+    """CPU test of the analysis flow (release.cpu_bound), computed once
+    from the application and the mapping, before and outside the frequency
+    search (it does not depend on the candidate frequency). Returns the
+    result of release.cpu_bound, or None when the test does not apply (no
+    application graph, or flows with different periods)."""
+    if app is None or mapping is None:
+        return None
+    try:
+        return release.cpu_bound(app, mapping)
+    except ValueError as e:
+        warn("CPU test skipped: " + str(e))
+        return None
+
+
+def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
+    """Minimum frequency of the analysis flow: the CPU test gives f_CPU
+    once (cpu_check), the bisection gives the lowest frequency f* at which
+    the AGS backend schedules every packet (search_minimum_frequency), and
+    the result is max(f*, f_CPU).
+
+    Returns {"cpu": cpu_check result or None, "network": result of
+    search_minimum_frequency or None, "f_star_hz", "f_cpu_hz",
+    "frequency_hz"}; a value is None when its part has no result."""
+    cpu = cpu_check(app, mapping)
+    f_cpu = cpu["f_cpu_hz"] if cpu is not None else None
+    if f_cpu is not None:
+        info("CPU test: f_CPU = " + str(f_cpu) + "Hz (largest CPU demand per release period)")
+    net = search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt)
+    f_star = net["frequency"] if net is not None else None
+    if f_star is None:
+        final = None
+    elif f_cpu is None:
+        final = f_star
+    else:
+        final = max(f_star, f_cpu)
+    return {"cpu": cpu, "network": net, "f_star_hz": f_star, "f_cpu_hz": f_cpu, "frequency_hz": final}

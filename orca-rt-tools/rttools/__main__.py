@@ -124,6 +124,20 @@ def load_mapping(map_arg, app, appname, noc, noc_file):
     return entries, mapfile.problems(entries or [], tasks, nodes)
 
 
+def report_frequency(freq):
+    """Prints f* (network, bisection), f_CPU (CPU test) and the minimum
+    frequency max(f*, f_CPU) of search.minimum_frequency."""
+    def hz(v):
+        return "none" if v is None else str(v) + "Hz (" + format(v / 1e6, ".1f") + " MHz)"
+    info("Network frequency f* = " + hz(freq["f_star_hz"]))
+    if freq["cpu"] is not None:
+        for node, d in sorted(freq["cpu"]["demand"].items(), key=lambda kv: str(kv[0])):
+            info("CPU demand of node " + str(node) + ": " + str(d) + " cycles per "
+                 + str(freq["cpu"]["period_s"]) + " s")
+    info("CPU frequency f_CPU = " + hz(freq["f_cpu_hz"]))
+    info("Minimum frequency max(f*, f_CPU) = " + hz(freq["frequency_hz"]))
+
+
 def main():
     welcome_msg = '''
                                                                 
@@ -195,17 +209,21 @@ def main():
         warn("No default frequency indicated, scaling for " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz...")
 
     if RTTOOLS_OPTIMIZE == True:
-        result = search.search_minimum_frequency(app, noc, mapping, appname, {
+        # CPU test once, outside the bisection; the bisection covers the
+        # network only; the result is max(f*, f_CPU)
+        freq = search.minimum_frequency(app, noc, mapping, appname, {
             "frequency": RTTOOLS_DEFAULT_FREQUENCY,
             "pruning_factor": RTTOOLS_PRUNNING_FACTOR,
             "fail_threshold": RTTOOLS_FAIL_THRESHOULD,
             "heuristic": RTTOOLS_HEURISTIC,
             "scaling_tolerance": RTTOOLS_SCALING_TOLERANCE,
         })
+        result = freq["network"]
 
         if result is not None:
             warn("Unable to optmize minimum frequency any further.")
             info("Minimum frequency found at " + str(result["frequency"]) + "Hz")
+            report_frequency(freq)
 
             debug(result["problem"]["packets"])
 
@@ -216,9 +234,15 @@ def main():
             info("Schedule visualization exported to `" + filename + "`")
         else:
             warn("Could not find a suitable frequency for the given flow set")
+            report_frequency(freq)
 
     else:
         info("Target frequency is " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz")
+        cpu = search.cpu_check(app, mapping)
+        if cpu is not None:
+            info("CPU test: f_CPU = " + str(cpu["f_cpu_hz"]) + "Hz; the target frequency "
+                 + ("meets" if RTTOOLS_DEFAULT_FREQUENCY >= cpu["f_cpu_hz"] else "does not meet")
+                 + " the CPU demand")
         result = search.schedule_at(app, noc, mapping, appname, RTTOOLS_DEFAULT_FREQUENCY, {
             "pruning_factor": RTTOOLS_PRUNNING_FACTOR,
             "fail_threshold": RTTOOLS_FAIL_THRESHOULD,
