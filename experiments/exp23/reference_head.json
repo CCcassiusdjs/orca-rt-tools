@@ -38,6 +38,22 @@
   ],
   "mean_difference_percent": 27.31868638396001
  },
+ "cpu": {
+  "demand_cycles": {
+   "ABDF": 181930,
+   "C": 96330,
+   "EHI": 173370,
+   "GJ": 217450
+  },
+  "phase_cycles": 250000,
+  "f_cpu_hz": 434900000
+ },
+ "response_bound": {
+  "cycles": 967450,
+  "ms": 1.9349,
+  "task": "J",
+  "phase": 3
+ },
  "iterations": {
   "per_release_offset": [
    {

@@ -45,6 +45,30 @@ def test_corrected_values_of_chapter_8(runs):
     assert m["monitor"]["errors"] == 0 and m["monitor"]["nodes"] == 4
 
 
+def test_cpu_check_and_response_bound(runs):
+    m, _ = runs["E"]
+    assert m["cpu"]["demand_cycles"] == {"ABDF": 181930, "C": 96330, "EHI": 173370, "GJ": 217450}
+    assert m["cpu"]["f_cpu_hz"] == 434900000 and m["cpu"]["meets_phase"] is True
+    assert m["cpu"]["phase_percent"]["GJ"] == pytest.approx(86.98)
+    rb = m["response_bound"]
+    assert (rb["cycles"], rb["task"], rb["phase"]) == (967450, "J", 3)
+    assert rb["ms"] == pytest.approx(1.9349)
+    assert rb["phases"] == {"A": 0, "B": 0, "D": 0, "F": 0, "C": 1, "G": 1, "E": 2, "H": 2, "I": 2, "J": 3}
+    # the bound covers every measured response
+    assert m["iterations"]["max_ms"] <= rb["ms"] <= m["iterations"]["deadline_ms"]
+
+
+def test_sequence_comes_from_the_bench_engine(monkeypatch):
+    """cpu_sequence calls ORT/BENCH (no closed form in the pipeline)."""
+    calls = []
+    real = exp23.cpu_estimate.sequence
+    monkeypatch.setattr(exp23.cpu_estimate, "sequence", lambda *a: calls.append(a) or real(*a))
+    seq = exp23.cpu_sequence(cfg())
+    assert len(calls) == 4
+    assert {t: (v["start"], v["finish"]) for t, v in seq.items() if v["cluster"] == "EHI"} == \
+        {"E": (11000, 52700), "I": (63700, 128070), "H": (139070, 173370)}
+
+
 def test_units_detected_and_runs_equal_in_cycles(runs):
     a, d = runs["A"][0], runs["D"][0]
     assert a["unit"]["name"] == "100 ps" and d["unit"]["name"] == "1 ns"
@@ -77,6 +101,9 @@ def test_outputs_and_macros(runs):
     values = open(os.path.join(d, "values.tex")).read()
     assert "\\newcommand{\\ExpAbdfMeasured}{143\\,900}" in values
     assert "\\newcommand{\\ExpMaxResponseMs}{1.861}" in values
+    assert "\\newcommand{\\ExpResponseBoundMs}{1.935}" in values
+    assert "\\newcommand{\\ExpResponseBoundCycles}{967\\,450}" in values
+    assert "\\newcommand{\\ExpCpuFrequencyMhz}{434.9}" in values
 
 
 def test_check_reports_differences(tmp_path, runs):

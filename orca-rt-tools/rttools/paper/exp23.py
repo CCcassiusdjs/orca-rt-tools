@@ -15,6 +15,7 @@ cycles and milliseconds:
 | tab82.tex, tab82.csv | Flow characterization (Tab. 8.2), derived from the estimates, plus the measured latency |
 | thesis.tex, thesis.csv | Values printed in the thesis next to the values of this run |
 | values.tex | LaTeX macros with the numbers, for the text of the article |
+| (metrics.json) cpu, response_bound | CPU demand per PE, f_CPU and the response bound R^ of the estimate |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
 
 `check` compares metrics.json with a reference file and exits with 1 when
@@ -29,6 +30,7 @@ import math
 import os
 import sys
 
+from rttools.bench_t import estimate as cpu_estimate
 from rttools.tui.model import export, metrics, parsers
 from rttools.tui.model.trace import Trace
 
@@ -99,25 +101,54 @@ def cpu_per_iteration(tr, cfg, clk, windows):
     return out
 
 
-def bench_t_schedule(cfg):
-    """Start and finish of each task in the sequence of rttools/bench_t:
-    the first task starts after the scheduler cost; the WCET includes the
-    cost of the next scheduling. Values in thesis scale."""
+def cpu_sequence(cfg):
+    """Start and finish of each task in the sequence of its PE, in real
+    cycles from the start of the phase: ORT/BENCH (rttools/bench_t/
+    estimate.py) on the characterized costs of each cluster (thesis
+    scale), divided by the scale. The start includes the scheduler cost;
+    each cost includes the dispatch of the task."""
     est = cfg["estimate"]
     out = {}
     for cluster, tasks in est["clusters"].items():
-        t = 0
-        for name, wcet in tasks:
-            start = t + est["scheduler_cycles"]
-            t += wcet
-            out[name] = {"cluster": cluster, "start": start, "finish": t}
+        seq = cpu_estimate.sequence([(n, w) for n, w in tasks], est["scheduler_cycles"])
+        for name, _ in tasks:
+            out[name] = {"cluster": cluster, "start": exact(seq[name]["start"] / est["scale"]),
+                         "finish": exact(seq[name]["finish"] / est["scale"])}
     return out
 
 
 def estimates(cfg):
-    """Tab. 8.3 (estimated): sum of the WCETs of the cluster / scale."""
+    """Tab. 8.3 (estimated): CPU demand c^(V_k) of each cluster, the sum of
+    the characterized costs of its tasks / scale."""
     est = cfg["estimate"]
-    return {c: exact(sum(w for _, w in tasks) / est["scale"]) for c, tasks in est["clusters"].items()}
+    return {c: exact(cpu_estimate.demand([(n, w) for n, w in tasks]) / est["scale"])
+            for c, tasks in est["clusters"].items()}
+
+
+def cpu_check(cfg, estimated):
+    """CPU test, computed once (it does not depend on the candidate
+    frequency of the link schedule): f_CPU = max_k c^(V_k) / T, and the
+    demand of each PE in percent of the phase at the clock of the run."""
+    period = exact(cfg["release_period_s"] * cfg["clock_hz"])
+    f_cpu = cpu_estimate.cpu_frequency(estimated, cfg["release_period_s"])
+    return {"demand_cycles": dict(estimated), "phase_cycles": period,
+            "phase_percent": {c: 100 * v / period for c, v in estimated.items()},
+            "f_cpu_hz": exact(f_cpu), "meets_phase": f_cpu <= cfg["clock_hz"]}
+
+
+def response_bound(cfg):
+    """R^ = phi(v_out) P + f^(v_out): phase index of each task (one phase
+    per edge between PEs, config task_graph) and the finish of the last
+    task of the iteration in its sequence; P = phase in cycles."""
+    seq = cpu_sequence(cfg)
+    pe_of = {t: v["cluster"] for t, v in seq.items()}
+    phi = cpu_estimate.phases([tuple(e) for e in cfg["task_graph"]["edges"]], pe_of)
+    period = exact(cfg["release_period_s"] * cfg["clock_hz"])
+    bound, task = cpu_estimate.response_bound(phi, {t: v["finish"] for t, v in seq.items()}, period)
+    ms = round(bound / cfg["clock_hz"] * 1e3, 9)
+    deadline_ms = cfg["response_deadline_s"] * 1e3
+    return {"cycles": bound, "ms": ms, "task": task, "phase": phi[task], "phases": phi,
+            "deadline_ms": deadline_ms, "deadline_percent": 100 * ms / deadline_ms}
 
 
 def tab83(measured, estimated, cfg):
@@ -198,11 +229,11 @@ def per_position(resp):
 
 def tab82(cfg, tr, clk):
     """Flow characterization. Minimum release = finish of the source task
-    in the bench_t sequence; deadline = start of the target task in its
-    cluster; both divided by the scale. Volume = packet size of weird_a.c
-    (the tag). The measured latency comes from the log (send -> receive)."""
-    sched = bench_t_schedule(cfg)
-    scale = cfg["estimate"]["scale"]
+    in its sequence; deadline = start of the target task in its sequence.
+    Volume = packet size
+    of weird_a.c (the tag). The measured latency comes from the log
+    (send -> receive)."""
+    sched = cpu_sequence(cfg)
     period = exact(cfg["release_period_s"] * cfg["clock_hz"])
     packets = tr.meta.get("packets") or []
     rows = []
@@ -212,8 +243,8 @@ def tab82(cfg, tr, clk):
                and p["latency"] is not None]
         rows.append({
             "flow": f["name"], "source": f["source"], "target": f["target"],
-            "min_release": exact(sched[f["source"]]["finish"] / scale),
-            "deadline": exact(sched[f["target"]]["start"] / scale),
+            "min_release": sched[f["source"]]["finish"],
+            "deadline": sched[f["target"]]["start"],
             "volume_bytes": int(f["tag"]), "period": period,
             "latency_min_cycles": exact(clk.cycles(min(lat))) if lat else None,
             "latency_max_cycles": exact(clk.cycles(max(lat))) if lat else None,
@@ -284,6 +315,10 @@ def write_values(path, m):
     put(macro_name("max", "response", "deadline", "percent"), f"{m['iterations']['max_deadline_percent']:.0f}")
     put(macro_name("release", "period", "ms"), f"{m['parameters']['release_period_ms']:g}")
     put(macro_name("hyperperiod", "ms"), f"{m['parameters']['hyperperiod_ms']:g}")
+    put(macro_name("cpu", "frequency", "mhz"), f"{m['cpu']['f_cpu_hz'] / 1e6:.1f}")
+    put(macro_name("response", "bound", "cycles"), fmt_int(m["response_bound"]["cycles"]))
+    put(macro_name("response", "bound", "ms"), f"{m['response_bound']['ms']:.3f}")
+    put(macro_name("response", "bound", "deadline", "percent"), f"{m['response_bound']['deadline_percent']:.0f}")
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")
 
@@ -362,6 +397,8 @@ def analyze(log_path, cfg, out_dir, unit=None):
             "first_hyperperiod_raw": windows[0],
         },
         "tab83": {"rows": rows83, "mean_difference_percent": mean83, "per_cluster": measured},
+        "cpu": cpu_check(cfg, est),
+        "response_bound": response_bound(cfg),
         "iterations": {"all": [{k: r[k] for k in ("iteration", "response_cycles", "response_ms", "release_offset_ms")}
                                for r in resp],
                        "per_release_offset": per_position(resp),
@@ -489,6 +526,8 @@ def main(argv=None):
                   f"{r['difference_percent']:+7.2f}%")
         print(f"  mean overestimation {m['tab83']['mean_difference_percent']:.2f}%; "
               f"max response {m['iterations']['max_ms']:.3f} ms of {m['iterations']['deadline_ms']:g} ms")
+        print(f"  f_CPU {m['cpu']['f_cpu_hz'] / 1e6:.1f} MHz; response bound {m['response_bound']['ms']:.3f} ms "
+              f"(task {m['response_bound']['task']}, phase {m['response_bound']['phase']})")
         mon = m["monitor"]
         print("  packet monitor: " + ("no CHKSUM lines" if mon is None else
                                        f"{mon['errors']} errors in {mon['send_pkts']} sent and "
