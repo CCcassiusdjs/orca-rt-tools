@@ -16,7 +16,7 @@ APPS    := ../../apps
 EXP23   := ../exp23
 GRAPH   ?= $(APPS)/sample-graph-a/sample_graph.txt
 N       ?= 4
-LOG     ?= $(EXP23)/logs/E.events.txt
+LOG     ?= $(EXP23)/logs/F.events.txt
 # join rule of J (experiments/exp23/Makefile): any3 for the stored logs A to E
 JOIN    ?= $(if $(filter $(foreach r,A B C D E,$(EXP23)/logs/$(r).events.txt),$(LOG)),any3,per_producer)
 BUILD   ?= build

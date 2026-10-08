@@ -121,14 +121,16 @@ def test_table71_summary_and_cluster_sizes(tmp_path):
 def test_figures_of_application_e(tmp_path):
     cfg = load(os.path.join(EXP, "exp23", "config.json"))
     fcfg = load(os.path.join(FIG, "config.json"))
-    m = figures.exp23_figures(os.path.join(EXP, "exp23", "logs", "E.events.txt"), cfg, fcfg, str(tmp_path))
+    # run F (tag exp23-F), join rule per_producer (default of the config)
+    m = figures.exp23_figures(os.path.join(EXP, "exp23", "logs", "F.events.txt"), cfg, fcfg, str(tmp_path))
+    assert m["join_rule"] == "per_producer"
     assert check(str(tmp_path / "metrics.json"), os.path.join(FIG, "reference_exp23.json")) == []
     assert m["gantt"]["busy_equals_tab83"]
     assert all(r["latency_matches_tab82"] for r in m["flows"])
     f1 = m["flows"][0]
     # L0 = 6 (m + 1) + p + 1 with p = 3 + ceil(1230 / 4)
     assert (f1["hops"], f1["flits"], f1["L0"]) == (1, 311, 324)
-    assert len((tmp_path / "fig-iterations-coords.tex").read_text().splitlines()) == 1 + 32 + 1
+    assert len((tmp_path / "fig-iterations-coords.tex").read_text().splitlines()) == 1 + 30 + 1
 
 
 def test_pe_coordinates_follow_the_swapped_labels():

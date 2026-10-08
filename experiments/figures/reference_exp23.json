@@ -1,5 +1,5 @@
 {
- "_doc": "Reference of make exp23 (python -m rttools.paper.figures exp23) on experiments/exp23/logs/E.events.txt.",
+ "_doc": "Reference of make exp23 (python -m rttools.paper.figures exp23) on experiments/exp23/logs/F.events.txt (run F, join rule per_producer).",
  "gantt": {
   "window_raw": [
    4000000,
@@ -8,30 +8,30 @@
   "busy_cycles_per_iteration": {
    "ABDF": 144098,
    "C": 80968.5,
-   "EHI": 119336,
-   "GJ": 183086
+   "EHI": 119339,
+   "GJ": 176457.125
   },
   "releases_raw": [
-   4000779,
-   4500775,
-   5000777,
-   5500779
+   4000775,
+   4500777,
+   5000779,
+   5500775
   ],
-  "deadline_raw": 6000779.0,
+  "deadline_raw": 6000775.0,
   "responses": [
    {
     "iteration": 3,
-    "start": 4003637,
-    "end": 5418019,
-    "cycles": 707191,
-    "ms": 1.414382
+    "start": 4003633,
+    "end": 5864165,
+    "cycles": 930266,
+    "ms": 1.860532
    },
    {
     "iteration": 4,
-    "start": 4503669,
-    "end": 5682965,
-    "cycles": 589648,
-    "ms": 1.179296
+    "start": 4503665,
+    "end": 5864165,
+    "cycles": 680250,
+    "ms": 1.3605
    }
   ],
   "busy_equals_tab83": true
@@ -40,200 +40,188 @@
   "points": [
    {
     "iteration": 1,
-    "release_ms": 3.0007750000000004,
-    "response_ms": 1.860736,
-    "response_cycles": 930368
+    "release_ms": 3.0007770000000002,
+    "response_ms": 1.86117,
+    "response_cycles": 930585
    },
    {
     "iteration": 2,
-    "release_ms": 3.5007770000000002,
-    "response_ms": 1.360704,
-    "response_cycles": 680352
+    "release_ms": 3.500779,
+    "response_ms": 1.361138,
+    "response_cycles": 680569
    },
    {
     "iteration": 3,
-    "release_ms": 4.0007790000000005,
-    "response_ms": 1.414382,
-    "response_cycles": 707191
+    "release_ms": 4.000775,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
    },
    {
     "iteration": 4,
-    "release_ms": 4.500775,
-    "response_ms": 1.179296,
-    "response_cycles": 589648
+    "release_ms": 4.500777,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
    },
    {
     "iteration": 5,
-    "release_ms": 5.000777,
-    "response_ms": 1.860738,
-    "response_cycles": 930369
+    "release_ms": 5.0007790000000005,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
    },
    {
     "iteration": 6,
-    "release_ms": 5.500779,
-    "response_ms": 1.360706,
-    "response_cycles": 680353
+    "release_ms": 5.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
    },
    {
     "iteration": 7,
-    "release_ms": 6.000775000000001,
-    "response_ms": 1.414384,
-    "response_cycles": 707192
+    "release_ms": 6.000777,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
    },
    {
     "iteration": 8,
-    "release_ms": 6.500777,
-    "response_ms": 1.179298,
-    "response_cycles": 589649
+    "release_ms": 6.5007790000000005,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
    },
    {
     "iteration": 9,
-    "release_ms": 7.0007790000000005,
-    "response_ms": 1.860734,
-    "response_cycles": 930367
+    "release_ms": 7.000775000000001,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
    },
    {
     "iteration": 10,
-    "release_ms": 7.500775,
-    "response_ms": 1.360702,
-    "response_cycles": 680351
+    "release_ms": 7.500777,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
    },
    {
     "iteration": 11,
-    "release_ms": 8.000777000000001,
-    "response_ms": 1.41438,
-    "response_cycles": 707190
+    "release_ms": 8.000779000000001,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
    },
    {
     "iteration": 12,
-    "release_ms": 8.500779,
-    "response_ms": 1.1793,
-    "response_cycles": 589650
+    "release_ms": 8.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
    },
    {
     "iteration": 13,
-    "release_ms": 9.000775,
-    "response_ms": 1.860736,
-    "response_cycles": 930368
+    "release_ms": 9.000777,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
    },
    {
     "iteration": 14,
-    "release_ms": 9.500777,
-    "response_ms": 1.360704,
-    "response_cycles": 680352
+    "release_ms": 9.500779000000001,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
    },
    {
     "iteration": 15,
-    "release_ms": 10.000779000000001,
-    "response_ms": 1.414382,
-    "response_cycles": 707191
+    "release_ms": 10.000774999999999,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
    },
    {
     "iteration": 16,
-    "release_ms": 10.500775,
-    "response_ms": 1.179296,
-    "response_cycles": 589648
+    "release_ms": 10.500777000000001,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
    },
    {
     "iteration": 17,
-    "release_ms": 11.000777000000001,
-    "response_ms": 1.860738,
-    "response_cycles": 930369
+    "release_ms": 11.000779,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
    },
    {
     "iteration": 18,
-    "release_ms": 11.500779000000001,
-    "response_ms": 1.360706,
-    "response_cycles": 680353
+    "release_ms": 11.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
    },
    {
     "iteration": 19,
-    "release_ms": 12.000775,
-    "response_ms": 1.414384,
-    "response_cycles": 707192
+    "release_ms": 12.000777000000001,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
    },
    {
     "iteration": 20,
-    "release_ms": 12.500777000000001,
-    "response_ms": 1.179298,
-    "response_cycles": 589649
+    "release_ms": 12.500779,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
    },
    {
     "iteration": 21,
-    "release_ms": 13.000779,
-    "response_ms": 1.860734,
-    "response_cycles": 930367
+    "release_ms": 13.000775,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
    },
    {
     "iteration": 22,
-    "release_ms": 13.500775,
-    "response_ms": 1.360702,
-    "response_cycles": 680351
+    "release_ms": 13.500777000000001,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
    },
    {
     "iteration": 23,
-    "release_ms": 14.000777000000001,
-    "response_ms": 1.41438,
-    "response_cycles": 707190
+    "release_ms": 14.000779000000001,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
    },
    {
     "iteration": 24,
-    "release_ms": 14.500779,
-    "response_ms": 1.1793,
-    "response_cycles": 589650
+    "release_ms": 14.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
    },
    {
     "iteration": 25,
-    "release_ms": 15.000775,
-    "response_ms": 1.860736,
-    "response_cycles": 930368
+    "release_ms": 15.000777000000001,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
    },
    {
     "iteration": 26,
-    "release_ms": 15.500777000000001,
-    "response_ms": 1.360704,
-    "response_cycles": 680352
+    "release_ms": 15.500779000000001,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
    },
    {
     "iteration": 27,
-    "release_ms": 16.000779,
-    "response_ms": 1.414382,
-    "response_cycles": 707191
+    "release_ms": 16.000775,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
    },
    {
     "iteration": 28,
-    "release_ms": 16.500775,
-    "response_ms": 1.179296,
-    "response_cycles": 589648
+    "release_ms": 16.500777000000003,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
    },
    {
     "iteration": 29,
-    "release_ms": 17.000777000000003,
-    "response_ms": 1.860738,
-    "response_cycles": 930369
+    "release_ms": 17.000779,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
    },
    {
     "iteration": 30,
-    "release_ms": 17.500779,
-    "response_ms": 1.360706,
-    "response_cycles": 680353
-   },
-   {
-    "iteration": 31,
-    "release_ms": 18.000775,
-    "response_ms": 1.414384,
-    "response_cycles": 707192
-   },
-   {
-    "iteration": 32,
-    "release_ms": 18.500777,
-    "response_ms": 1.179298,
-    "response_cycles": 589649
+    "release_ms": 17.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
    }
   ],
-  "max_ms": 1.860738,
-  "max_cycles": 930369,
-  "max_deadline_percent": 93.0369
+  "max_ms": 1.86117,
+  "max_cycles": 930585,
+  "max_deadline_percent": 93.0585
  },
  "flows": [
   {
@@ -244,18 +232,18 @@
    "hops": 1,
    "flits": 311,
    "L0": 324,
-   "latency_min": 1890,
+   "latency_min": 1891,
    "latency_max": 1984,
    "packets": 34,
    "sends": 34,
    "receives": 34,
    "latency_matches_tab82": true,
-   "latency_min_minus_L0": 1566,
+   "latency_min_minus_L0": 1567,
    "release": 28530,
    "deadline": 261000,
-   "send_min": 14729,
-   "send_max": 15257,
-   "arrival_max": 17236
+   "send_min": 14727,
+   "send_max": 15255,
+   "arrival_max": 17235
   },
   {
    "flow": "F2",
@@ -265,18 +253,18 @@
    "hops": 2,
    "flits": 1698,
    "L0": 1717,
-   "latency_min": 3293,
-   "latency_max": 3439,
+   "latency_min": 3295,
+   "latency_max": 3437,
    "packets": 34,
    "sends": 34,
    "receives": 34,
    "latency_matches_tab82": true,
-   "latency_min_minus_L0": 1576,
+   "latency_min_minus_L0": 1578,
    "release": 181930,
    "deadline": 261000,
-   "send_min": 144429,
-   "send_max": 144957,
-   "arrival_max": 148394
+   "send_min": 144427,
+   "send_max": 144955,
+   "arrival_max": 148367
   },
   {
    "flow": "F3",
@@ -295,9 +283,9 @@
    "latency_min_minus_L0": 1587,
    "release": 96330,
    "deadline": 261000,
-   "send_min": 81872,
-   "send_max": 162795,
-   "arrival_max": 164706
+   "send_min": 81874,
+   "send_max": 162794,
+   "arrival_max": 164703
   },
   {
    "flow": "F4",
@@ -308,7 +296,7 @@
    "flits": 1421,
    "L0": 1434,
    "latency_min": 2991,
-   "latency_max": 3164,
+   "latency_max": 2993,
    "packets": 32,
    "sends": 32,
    "receives": 32,
@@ -316,9 +304,9 @@
    "latency_min_minus_L0": 1557,
    "release": 128070,
    "deadline": 370880,
-   "send_min": 180845,
-   "send_max": 239514,
-   "arrival_max": 242678
+   "send_min": 180851,
+   "send_max": 239520,
+   "arrival_max": 242513
   },
   {
    "flow": "F5",
@@ -328,18 +316,19 @@
    "hops": 1,
    "flits": 2228,
    "L0": 2241,
-   "latency_min": 3798,
-   "latency_max": 3990,
+   "latency_min": 3799,
+   "latency_max": 3991,
    "packets": 32,
    "sends": 32,
    "receives": 32,
    "latency_matches_tab82": true,
-   "latency_min_minus_L0": 1557,
+   "latency_min_minus_L0": 1558,
    "release": 173370,
    "deadline": 370880,
-   "send_min": 97379,
-   "send_max": 122749,
-   "arrival_max": 126698
+   "send_min": 97385,
+   "send_max": 122755,
+   "arrival_max": 126700
   }
- ]
+ ],
+ "join_rule": "per_producer"
 }

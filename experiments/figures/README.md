@@ -4,7 +4,7 @@
 |---|---|
 | `make` | `contraction`, `exp23` and `check` (seconds) |
 | `make contraction` | Contracts `GRAPH` (default `apps/sample-graph-a/sample_graph.txt`, 10 tasks, 11 edges) to `N` = 4 clusters with the four criteria of ORT/GCM (`GraphICC.collapse`) |
-| `make exp23` | Reads the RTL log `LOG` (default `experiments/exp23/logs/E.events.txt`) with the functions of `rttools.paper.exp23` and writes the Gantt of the first complete hyperperiod, the response of each iteration and the flow table |
+| `make exp23` | Reads the RTL log `LOG` (default `experiments/exp23/logs/F.events.txt`, run F) with the functions of `rttools.paper.exp23` and writes the Gantt of the first complete hyperperiod, the response of each iteration and the flow table |
 | `make check` | Compares `build/*/metrics.json` with `reference_contraction.json` and `reference_exp23.json` |
 
 `config.json` holds the constants of the flow table: packet header (12 bytes, `noc_packet_t`), flit width (4 bytes), router constants of $L_0 = 6(m+1) + p + 1$ and the phase of the deadline (the phase after the source phase).
