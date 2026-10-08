@@ -3,11 +3,11 @@
 | Command | Effect |
 |---|---|
 | `make` | Graphs with \|V\| = 20 to 100 (`graphs/`): metrics of the input, collapse to N clusters with MIN-COMM and MAX-PROC, metrics of the output, comparison with Table 7.1 and check against `reference.json` (seconds) |
-| `make graphs` | Extracts the 17 graphs of the table (`tp-tools/apps/var-nnodes/10_<|V|>.txt`, commit 4e43483) from the git history into `build/graphs` |
-| `make full` | The 17 graphs (about 18 minutes; \|V\| = 900 alone takes 7 minutes) and check against `reference_full.json` |
+| `make graphs` | Unpacks the 17 graphs of the table (`graphs/10_<|V|>.txt` and `graphs/10_200-900.tar.xz`) into `build/graphs` and checks their SHA-256 (`graphs/SHA256SUMS`) |
+| `make full` | The 17 graphs (about 20 minutes; \|V\| = 900 alone takes 7 to 9 minutes) and check against `reference_full.json` |
 | `make n16` | \|V\| = 20 to 100 with N = 16 |
 
-`graphs/` keeps the nine smaller graphs of commit 4e43483; commit aa7b97d removed the directory from the repository.
+The 17 graphs come from `tp-tools/apps/var-nnodes/10_<|V|>.txt` of commit 4e43483 (commit aa7b97d removed the directory). The generator of that commit draws the values and the endpoints without a seed, so it cannot regenerate the files: `graphs/` keeps the nine graphs with \|V\| <= 100 as text (262 KB) and the eight graphs with \|V\| = 200 to 900 in `graphs/10_200-900.tar.xz` (8.6 MB; 22.8 MB unpacked). `python -m rttools.paper.graphs pack` writes the archive from the text files (fixed member order, owner and time).
 
 ## Result
 
@@ -24,3 +24,4 @@
 |---|---|
 | `tab71.tex`, `tab71.csv` | Table in the layout of the thesis, with the values of the run |
 | `metrics.json` | Values of each graph, thesis row and agreement per cell |
+
