@@ -116,7 +116,9 @@ def hsearch(p, space, partial, h, depth, t, tries, step):
   # warn("Depth " + str(depth) + " reported ~" + str(int(dvalue)) + 
   #   " checkings. Visited " + str(t[nnode]) + " times.")
 
-  for k in range(min, max, step):
+  # the window [min, max] is closed: max = deadline - occupancy is a valid
+  # release (a packet with zero slack has min == max)
+  for k in range(min, max + 1, step):
 
     # replace tentative starting time value for that package
     for i in range(0, len(space)):
