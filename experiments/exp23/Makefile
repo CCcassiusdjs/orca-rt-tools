@@ -27,6 +27,10 @@ BUILD   ?= build
 SIM_NS  ?= 20000000
 LOG     ?= logs/E.events.txt
 REF     ?= reference_head.json
+# join rule of J: the stored logs A to E come from weird_a.c before 379f388
+# (J joins any three packets); a new simulation of this tree, per producer
+OLD_APP_LOGS := $(foreach r,A B C D E,logs/$(r).events.txt)
+JOIN    ?= $(if $(filter $(OLD_APP_LOGS),$(LOG)),any3,per_producer)
 OUTDIR  ?= $(BUILD)/results
 RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23
 APP_E   := ../../apps/synthetic-app-e
@@ -41,7 +45,7 @@ sim:
 	./simulate.sh $(BUILD)/sim $(SIM_NS)
 
 analyze:
-	$(RUN) analyze $(LOG) --config config.json --out $(OUTDIR)
+	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR)
 
 check:
 	$(RUN) check $(OUTDIR)/metrics.json $(REF)
@@ -59,7 +63,7 @@ paper:
 # anon:drop-begin
 .PHONY: runs
 runs:
-	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --out $(BUILD)/runs/$$r || exit 1; done
+	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --join any3 --out $(BUILD)/runs/$$r || exit 1; done
 # anon:drop-end
 
 info:

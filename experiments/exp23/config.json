@@ -14,7 +14,7 @@
   "first_hyperperiod_s": 0.004,
   "response_deadline_s": 0.002,
   "source": {"pe": "0-0", "task": "A"},
-  "join": {"pe": "1-1", "task": "J", "tags": ["8900", "5670", "1230"], "packets_per_iteration": 3},
+  "join": {"_doc": "rule per_producer: J runs iteration k after the k-th packet of each tag (weird_a.c of this tree); any3: J joins any packets_per_iteration packets (weird_a.c before 379f388, stored logs A to E; the Makefiles select it for these logs).", "pe": "1-1", "task": "J", "tags": ["8900", "5670", "1230"], "packets_per_iteration": 3, "rule": "per_producer"},
   "estimate": {
     "_doc": "Characterized task costs of rttools/bench_t/main.py: tasks of each cluster in dispatch order, cost in thesis scale (10 times weird_a.c), scheduler cost included in each cost. rttools/bench_t/estimate.py runs the ORT/BENCH engine on each list.",
     "scale": 10,

@@ -22,7 +22,8 @@ def runs(tmp_path_factory):
     out = {}
     for r in "ABCDE":
         d = tmp_path_factory.mktemp(r)
-        out[r] = (exp23.analyze(os.path.join(EXP, "logs", f"{r}.events.txt"), cfg(), str(d)), str(d))
+        # the stored logs come from weird_a.c before the per-producer join of J
+        out[r] = (exp23.analyze(os.path.join(EXP, "logs", f"{r}.events.txt"), cfg(), str(d), join="any3"), str(d))
     return out
 
 
@@ -138,3 +139,49 @@ def test_latex_tables_compile(runs, tmp_path):
     r = subprocess.run(["pdflatex", "-interaction=nonstopmode", "-halt-on-error", str(doc)],
                        cwd=tmp_path, capture_output=True, text=True, timeout=120)
     assert r.returncode == 0, r.stdout[-2000:]
+
+
+class FakeTrace:
+    """Receives at the PE of J, the slices of J and the end of the log."""
+
+    def __init__(self, recvs, j_runs, t1):
+        from rttools.tui.model.trace import Mark, Slice
+        self.marks = [Mark("1-1", t, "recv", "TAG " + tag) for t, tag in recvs]
+        self.slices = [Slice("1-1", a, b, "J") for a, b in j_runs]
+        self.t1 = t1
+
+    def lane_marks(self, lane):
+        return [m for m in self.marks if m.lane == lane]
+
+    def lane_slices(self, lane):
+        return [s for s in self.slices if s.lane == lane]
+
+
+def test_join_rules_differ_when_a_producer_is_ahead():
+    """G sends the packets of iterations 1 and 2 before H and I send the
+    packet of iteration 1: any3 completes iteration 1 at the third packet
+    (the second packet of G); per_producer waits for H and I."""
+    recvs = [(10, "1230"), (20, "1230"), (30, "8900"), (40, "5670"), (50, "8900"), (60, "5670")]
+    tr = FakeTrace(recvs, [(35, 36), (45, 46), (65, 66)], 100)
+    c = cfg()
+    assert exp23.join_arrivals(tr, c, 0, "any3") == [30, 60]
+    assert exp23.join_arrivals(tr, c, 0, "per_producer") == [40, 60]
+
+
+def test_join_rule_selection():
+    c = cfg()
+    assert c["join"]["rule"] == "per_producer"
+    assert exp23.join_rule(c) == "per_producer" and exp23.join_rule(c, "any3") == "any3"
+    del c["join"]["rule"]
+    assert exp23.join_rule(c) == "per_producer"
+    with pytest.raises(ValueError):
+        exp23.join_rule(c, "x")
+
+
+@pytest.mark.parametrize("run", "ABCDE")
+def test_stored_runs_same_response_with_both_rules_and_consistent_pairs(runs, run, tmp_path):
+    m, _ = runs[run]
+    assert m["join_rule"] == "any3"
+    assert m["packet_pairs"] == {"unexpected": 0}
+    p = exp23.analyze(os.path.join(EXP, "logs", f"{run}.events.txt"), cfg(), str(tmp_path), join="per_producer")
+    assert p["iterations"]["all"] == m["iterations"]["all"]

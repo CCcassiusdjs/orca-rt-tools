@@ -211,27 +211,62 @@ def iteration_starts(tr, cfg, clk):
     return out
 
 
-def responses(tr, cfg, clk):
-    """Response time of each iteration with the criterion of the code:
-    J joins any `packets_per_iteration` packets (weird_a.c), so iteration k
-    is complete with the (k * packets_per_iteration)-th packet that reaches
-    J; it ends when J leaves the CPU after that packet arrived."""
+# join rule of J (config join.rule, option --join)
+JOIN_PER_PRODUCER = "per_producer"
+JOIN_ANY3 = "any3"
+JOIN_RULES = (JOIN_PER_PRODUCER, JOIN_ANY3)
+
+
+def join_rule(cfg, override=None):
+    """Join rule of J: `override` (option --join), else config join.rule,
+    else per_producer (the application of this tree)."""
+    rule = override or cfg["join"].get("rule", JOIN_PER_PRODUCER)
+    if rule not in JOIN_RULES:
+        raise ValueError("unknown join rule " + repr(rule) + "; options: " + ", ".join(JOIN_RULES))
+    return rule
+
+
+def join_arrivals(tr, cfg, first, rule):
+    """Instant at which J has the packets of iteration k (k = 1, 2, ...),
+    for receives at the PE of J from `first` on.
+
+    per_producer (weird_a.c after 379f388): J runs iteration k after the
+    k-th packet of each producer; each producer sends one packet per
+    iteration with its own tag (j.tags), so iteration k is complete at the
+    latest of the k-th `<- TAG` of each tag.
+    any3 (weird_a.c before 379f388, logs A to E): J consumes any
+    `packets_per_iteration` packets, so iteration k is complete with the
+    (k * packets_per_iteration)-th packet of any of the tags."""
     j = cfg["join"]
+    marks = [m for m in tr.lane_marks(j["pe"]) if m.kind == "recv" and m.time >= first]
+    if rule == JOIN_ANY3:
+        arrivals = sorted(m.time for m in marks if m.label.split()[-1] in j["tags"])
+        n = j["packets_per_iteration"]
+        return [arrivals[k * n - 1] for k in range(1, len(arrivals) // n + 1)]
+    per_tag = [sorted(m.time for m in marks if m.label.split()[-1] == tag) for tag in j["tags"]]
+    return [max(ts[k] for ts in per_tag) for k in range(min(len(ts) for ts in per_tag))]
+
+
+def responses(tr, cfg, clk, rule=None):
+    """Response time of each iteration: from the start of iteration k
+    (iteration_starts) to the exit of J from the CPU after the instant at
+    which J has the packets of iteration k (join_arrivals with the join
+    rule of join_rule)."""
+    j = cfg["join"]
+    rule = join_rule(cfg, rule)
     starts = iteration_starts(tr, cfg, clk)
     if not starts:
         return []
     first = starts[0]
-    arrivals = sorted(m.time for m in tr.lane_marks(j["pe"])
-                      if m.kind == "recv" and m.label.split()[-1] in j["tags"] and m.time >= first)
+    complete = join_arrivals(tr, cfg, first, rule)
     runs = [(s.start, s.end) for s in tr.lane_slices(j["pe"]) if s.label == j["task"]]
     hp = clk.raw(cfg["release_period_s"] * cfg["iterations_per_hyperperiod"])
     anchor = clk.raw(cfg["first_hyperperiod_s"])
     out = []
     for k, s in enumerate(starts, start=1):
-        idx = k * j["packets_per_iteration"] - 1
-        if idx >= len(arrivals):
+        if k > len(complete):
             break
-        a = arrivals[idx]
+        a = complete[k - 1]
         end = next((e for (b, e) in runs if e > a and e < tr.t1), None)
         if end is None:
             break
@@ -241,6 +276,19 @@ def responses(tr, cfg, clk):
                     "response_ms": clk.ms(end - s),
                     "release_offset_ms": round(clk.ms(offset - (offset % clk.raw(cfg["release_period_s"]))), 6)})
     return out
+
+
+def packet_pairs(tr, cfg):
+    """Pairs of `->`/`<-` lines (parsers.pair_packets pairs by tag in FIFO
+    order) whose sender and receiver PEs differ and do not form a flow of
+    the config: a receive paired with a send of another flow of the same
+    tag (tag 1230: A->C and G->J). 0 when the pairing is consistent."""
+    flows = {(f["tag"], f["src_pe"], f["dst_pe"]) for f in cfg["flows"]}
+    tags = {f["tag"] for f in cfg["flows"]}
+    bad = [p for p in tr.meta.get("packets") or []
+           if p["tag"] in tags and p["src"] is not None and p["dst"] is not None
+           and p["src"] != p["dst"] and (p["tag"], p["src"], p["dst"]) not in flows]
+    return {"unexpected": len(bad)}
 
 
 def per_position(resp):
@@ -398,7 +446,7 @@ def monitor_summary(log_path):
 
 # ----------------------------------------------------------- commands
 
-def analyze(log_path, cfg, out_dir, unit=None):
+def analyze(log_path, cfg, out_dir, unit=None, join=None):
     tr = load(log_path, cfg, unit)
     clk = Clock(tr.unit, cfg["clock_hz"])
     windows = hyperperiods(tr, cfg, clk)
@@ -407,7 +455,8 @@ def analyze(log_path, cfg, out_dir, unit=None):
     measured = cpu_per_iteration(tr, cfg, clk, windows)
     est = estimates(cfg)
     rows83, mean83 = tab83(measured, est, cfg)
-    resp = responses(tr, cfg, clk)
+    rule = join_rule(cfg, join)
+    resp = responses(tr, cfg, clk, rule)
     deadline_ms = cfg["response_deadline_s"] * 1e3
     max_ms = max(r["response_ms"] for r in resp) if resp else None
     rows82 = tab82(cfg, tr, clk)
@@ -432,6 +481,8 @@ def analyze(log_path, cfg, out_dir, unit=None):
                        "max_ms": max_ms, "deadline_ms": deadline_ms,
                        "max_deadline_percent": 100 * max_ms / deadline_ms if max_ms else None},
         "tab82": rows82,
+        "join_rule": rule,
+        "packet_pairs": packet_pairs(tr, cfg),
         "monitor": monitor_summary(log_path),
     }
     th = cfg.get("thesis", {})
@@ -535,6 +586,9 @@ def main(argv=None):
     a.add_argument("--out", required=True)
     a.add_argument("--unit", choices=["100ps", "1ns"], default=None,
                    help="raw unit when the log has no $printtimescale line")
+    a.add_argument("--join", choices=JOIN_RULES, default=None,
+                   help="join rule of J (default: config join.rule; any3 for the logs A to E of the "
+                        "application before 379f388)")
     c = sub.add_parser("check")
     c.add_argument("metrics")
     c.add_argument("reference")
@@ -546,9 +600,9 @@ def main(argv=None):
         if args.unit:
             from rttools.tui.model.timeunit import RTL_PRESETS
             unit = RTL_PRESETS[args.unit]
-        m = analyze(args.log, cfg, args.out, unit)
+        m = analyze(args.log, cfg, args.out, unit, args.join)
         print(f"{m['log']}: unit {m['unit']['name']} (detected {m['unit']['detected']}), "
-              f"{m['parameters']['hyperperiods']} hyperperiods")
+              f"{m['parameters']['hyperperiods']} hyperperiods, join rule {m['join_rule']}")
         for r in m["tab83"]["rows"]:
             print(f"  {r['cluster']:5s} measured {r['measured']:>10,} estimated {r['estimated']:>10,} "
                   f"{r['difference_percent']:+7.2f}%")

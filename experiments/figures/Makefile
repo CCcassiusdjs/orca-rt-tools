@@ -17,6 +17,8 @@ EXP23   := ../exp23
 GRAPH   ?= $(APPS)/sample-graph-a/sample_graph.txt
 N       ?= 4
 LOG     ?= $(EXP23)/logs/E.events.txt
+# join rule of J (experiments/exp23/Makefile): any3 for the stored logs A to E
+JOIN    ?= $(if $(filter $(foreach r,A B C D E,$(EXP23)/logs/$(r).events.txt),$(LOG)),any3,per_producer)
 BUILD   ?= build
 ENV      = PYTHONPATH=$(RTTOOLS) $(PYTHON)
 FIG      = $(ENV) -m rttools.paper.figures
@@ -29,7 +31,7 @@ contraction:
 	$(FIG) contraction --graph $(GRAPH) --n $(N) --out $(BUILD)/contraction
 
 exp23:
-	$(FIG) exp23 $(LOG) --config $(EXP23)/config.json --flows config.json --out $(BUILD)/exp23
+	$(FIG) exp23 $(LOG) --config $(EXP23)/config.json --flows config.json --join $(JOIN) --out $(BUILD)/exp23
 
 check:
 	$(ENV) -m rttools.paper.exp23 check $(BUILD)/contraction/contraction.json reference_contraction.json

@@ -518,11 +518,12 @@ def flows(tr, cfg, clk, fcfg):
     return lines, rows
 
 
-def exp23_figures(log, cfg, fcfg, out_dir):
+def exp23_figures(log, cfg, fcfg, out_dir, join=None):
     tr = X.load(log, cfg)
     clk = X.Clock(tr.unit, cfg["clock_hz"])
     windows = X.hyperperiods(tr, cfg, clk)
-    resp = X.responses(tr, cfg, clk)
+    rule = X.join_rule(cfg, join)
+    resp = X.responses(tr, cfg, clk, rule)
     g_lines, bars, g_info = gantt(tr, cfg, clk, windows[0], resp)
     i_lines, i_info = iterations(tr, cfg, clk, resp)
     f_lines, f_rows = flows(tr, cfg, clk, fcfg)
@@ -530,7 +531,7 @@ def exp23_figures(log, cfg, fcfg, out_dir):
     g_info["busy_equals_tab83"] = all(math.isclose(g_info["busy_cycles_per_iteration"][c], measured[c]["mean"])
                                       for c in g_info["busy_cycles_per_iteration"])
     m = {"log": os.path.basename(log), "unit": tr.unit.name, "swap_xy": bool(tr.meta["swap_xy"]),
-         "gantt": g_info, "iterations": i_info, "flows": f_rows}
+         "join_rule": rule, "gantt": g_info, "iterations": i_info, "flows": f_rows}
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
         json.dump(m, f, indent=1)
@@ -563,6 +564,8 @@ def main(argv=None):
     e.add_argument("log")
     e.add_argument("--config", required=True, help="experiments/exp23/config.json")
     e.add_argument("--flows", required=True, help="configuration of the flow table (router constants)")
+    e.add_argument("--join", choices=X.JOIN_RULES, default=None,
+                   help="join rule of J (default: config join.rule; any3 for the logs A to E)")
     e.add_argument("--out", required=True)
     a = p.parse_args(argv)
     if a.cmd == "contraction":
@@ -581,7 +584,7 @@ def main(argv=None):
             cfg = json.load(f)
         with open(a.flows) as f:
             fcfg = json.load(f)
-        m = exp23_figures(a.log, cfg, fcfg, a.out)
+        m = exp23_figures(a.log, cfg, fcfg, a.out, a.join)
         print(f"  gantt: busy per iteration {m['gantt']['busy_cycles_per_iteration']} "
               f"(equal to tab83: {m['gantt']['busy_equals_tab83']})")
         print(f"  iterations: {len(m['iterations']['points'])}, max {m['iterations']['max_ms']} ms "
