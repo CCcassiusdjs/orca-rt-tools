@@ -135,7 +135,8 @@ def exportGmlFlows(tasks, flows):
 #   Parameter,Value
 #   release_model,phase          (phase or cpa)
 #   scheduler_cycles,11000       (cycles of one dispatch, included in each wcet)
-#   sequence,<node>,<task>,...   (dispatch order on one PE; one row per PE)
+#   sequence,<node>,<task>,...   (dispatch order on one PE; one row per PE; a PE
+#                                 with the same tasks on another node takes it too)
 def readParameters(filename):
   params = {}
   mode = 0

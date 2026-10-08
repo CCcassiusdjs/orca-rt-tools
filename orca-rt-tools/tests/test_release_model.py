@@ -124,3 +124,14 @@ def test_cpu_bound_outside_the_frequency_search(tmp_path):
     assert cpu["demand"] == {"0": 181930, "1": 96330, "2": 173370, "3": 217450}
     assert cpu["period_s"] == 0.0005
     assert cpu["f_cpu_hz"] == pytest.approx(434.9e6)
+
+
+def test_sequence_follows_its_cluster_to_another_node(tmp_path):
+    """A mapping that places the clusters on other nodes (Spiral Mapping:
+    C on 0, ABDF on 1, GJ on 2, EHI on 3) keeps the sequence of each
+    cluster."""
+    app, _ = write_case(tmp_path, PHASE)
+    other = tmp_path / "other.map"
+    other.write_text("0:C\n1:A,B,D,F\n2:G,J\n3:E,H,I\n")
+    _, pk, _ = packets(app, str(other))
+    assert pk == EXPECTED

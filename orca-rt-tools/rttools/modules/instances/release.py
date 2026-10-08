@@ -22,8 +22,10 @@ deadline of the flow in the input.
 
 The application selects the model in its parameters (rttools/modules/io/
 appparser.py, section #parameters): release_model, scheduler_cycles and,
-optionally, one sequence per PE. Without a sequence, the tasks of a PE run
-in the order of the mapping file, moved only as much as the edges between
+optionally, one sequence per PE. A PE takes the sequence that holds the
+same tasks (the sequence of its own node first), so the sequence follows
+its cluster to another node. Without a sequence, the tasks of a PE run in
+the order of the mapping file, moved only as much as the edges between
 tasks of the same PE require (stable topological order).
 """
 from __future__ import annotations
@@ -68,15 +70,35 @@ def pe_sequences(tasks, edges, mapping, sequences=None):
                 order.setdefault(m["node"], []).append(t)
     out = {}
     for node, ts in order.items():
-        if sequences and node in sequences:
-            seq = list(sequences[node])
-            if sorted(seq) != sorted(ts):
-                raise ValueError(f"sequence of PE {node} ({', '.join(seq)}) differs from the mapping "
-                                 f"({', '.join(ts)})")
+        seq = matching_sequence(node, ts, sequences)
+        if seq is not None:
             out[node] = seq
             continue
         out[node] = stable_topological(ts, [(u, v) for u, v in edges if u in ts and v in ts])
     return out
+
+
+def matching_sequence(node, tasks, sequences):
+    """Sequence of the PE `node` with `tasks`: the sequence of the same
+    node when it holds the same tasks, otherwise the sequence (of any
+    node) that holds the same tasks, so a sequence follows its cluster when
+    a mapping places the cluster on another node (Spiral Mapping). None
+    when no sequence holds the tasks of the PE and no sequence shares a
+    task with it; ValueError when a sequence shares tasks with the PE but
+    differs from its tasks."""
+    if not sequences:
+        return None
+    own = sorted(tasks)
+    if node in sequences and sorted(sequences[node]) == own:
+        return list(sequences[node])
+    for seq in sequences.values():
+        if sorted(seq) == own:
+            return list(seq)
+    for key, seq in sequences.items():
+        if set(seq) & set(tasks):
+            raise ValueError(f"sequence of PE {key} ({', '.join(seq)}) differs from the tasks of PE {node} "
+                             f"in the mapping ({', '.join(tasks)})")
+    return None
 
 
 def stable_topological(tasks, edges):
