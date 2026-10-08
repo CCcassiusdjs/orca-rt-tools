@@ -207,7 +207,7 @@ void task_e()
     ucx_sleep(TASK_E_WORKLOAD);
 
     // tprintf("E->I\n");
-    ucx_noc_send(CPU_I, PORT_I, pkt1, COMM_DF_WORKLOAD);
+    ucx_noc_send(CPU_I, PORT_I, pkt1, COMM_EI_WORKLOAD);
 
     // tprintf("E->H\n");
     ucx_noc_send(CPU_H, PORT_H, pkt2, COMM_EH_WORKLOAD);
