@@ -32,3 +32,10 @@ def test_n16_differs_from_table(tmp_path):
     m = ch7.run(cfg(), os.path.join(EXP, "graphs"), str(tmp_path), sizes=[20], n=16)
     c = m["rows"][0]["calc"]
     assert (c["mc"]["E"], c["mp"]["E"]) == (220, 222)
+
+
+def test_run_records_cluster_sizes(tmp_path):
+    m = ch7.run(cfg(), os.path.join(EXP, "graphs"), str(tmp_path), sizes=[20])
+    c = m["rows"][0]["calc"]
+    assert c["mc"]["cluster_sizes"] == [1, 1, 1, 17]
+    assert c["mp"]["cluster_sizes"] == [3, 5, 6, 6]

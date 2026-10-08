@@ -74,6 +74,12 @@ def collapse(path, criterion, n):
     return g
 
 
+def cluster_sizes(g):
+    """Number of input vertices in each cluster of a collapsed graph,
+    ascending (GraphICC.collapse joins the labels with ':')."""
+    return sorted(len(str(v._data["label"]).split(":")) for v in g._nodes)
+
+
 def trunc(x, digits):
     k = 10 ** digits
     return math.floor(x * k + 1e-9) / k
@@ -111,7 +117,9 @@ def run(cfg, graphs_dir, out_dir, sizes=None, n=None):
         t0 = time.time()
         calc = measure(load_graph(path))
         for p, crit in CRITERIA:
-            calc[p] = measure(collapse(path, crit, n))
+            g = collapse(path, crit, n)
+            calc[p] = measure(g)
+            calc[p]["cluster_sizes"] = cluster_sizes(g)
         calc["seconds"] = round(time.time() - t0, 2)
         th = thesis.get(size)
         agree = compare_row(calc, th) if th and n == cfg["n"] else None
