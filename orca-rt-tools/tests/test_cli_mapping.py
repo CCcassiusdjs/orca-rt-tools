@@ -73,3 +73,5 @@ def test_app_e_minimum_frequency(work, mapping):
     assert "Network frequency f* = 345294952.3925781Hz (345.3 MHz)" in r.stdout
     assert "CPU frequency f_CPU = 434900000.0Hz (434.9 MHz)" in r.stdout
     assert "Minimum frequency max(f*, f_CPU) = 434900000.0Hz (434.9 MHz)" in r.stdout
+    # f_CPU > f*: one network evaluation at f_CPU with the phase model
+    assert "Network at f_CPU: feasible (5 packets, 0 skipped, hyperperiod 217450 cycles)" in r.stdout

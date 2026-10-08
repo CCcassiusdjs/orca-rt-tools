@@ -21,7 +21,11 @@ def test_frequency_pipeline_matches_reference(tmp_path):
         # the bisection brackets f*; the CPU test sets the result
         assert r["f_star_lower_hz"] < r["f_star_hz"] < r["f_cpu_hz"] == r["frequency_hz"]
         assert r["binding"] == "cpu"
-    assert "\\ExpFrequencyMapMinimumMhz}{434.9}" in (tmp_path / "values.tex").read_text()
+        assert r["final_check"] == {"frequency_hz": 434900000.0, "feasible": True, "hyperperiod": 217450,
+                                    "packets": 5, "skipped": 0}
+    values = (tmp_path / "values.tex").read_text()
+    assert "\\ExpFrequencyMapMinimumMhz}{434.9}" in values
+    assert "\\ExpFrequencySpiralCpuNetwork}{feasible}" in values
 
 
 def test_network_frequency_is_set_by_flow_f_to_g():

@@ -1,5 +1,5 @@
 {
- "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and max(f*, f_CPU) for the .map file and for the Spiral Mapping.",
+ "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping.",
  "f_cpu_exp23_hz": 434900000,
  "f_cpu_equals_exp23": true,
  "runs": {
@@ -35,7 +35,14 @@
    "f_star_hz": 345294952.3925781,
    "f_star_lower_hz": 345291137.6953125,
    "frequency_hz": 434900000.0,
-   "binding": "cpu"
+   "binding": "cpu",
+   "final_check": {
+    "frequency_hz": 434900000.0,
+    "feasible": true,
+    "hyperperiod": 217450,
+    "packets": 5,
+    "skipped": 0
+   }
   },
   "spiral": {
    "criterion": "MAX_PROC",
@@ -69,7 +76,14 @@
    "f_star_hz": 345294952.3925781,
    "f_star_lower_hz": 345291137.6953125,
    "frequency_hz": 434900000.0,
-   "binding": "cpu"
+   "binding": "cpu",
+   "final_check": {
+    "frequency_hz": 434900000.0,
+    "feasible": true,
+    "hyperperiod": 217450,
+    "packets": 5,
+    "skipped": 0
+   }
   }
  }
 }

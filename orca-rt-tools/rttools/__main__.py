@@ -135,7 +135,17 @@ def report_frequency(freq):
             info("CPU demand of node " + str(node) + ": " + str(d) + " cycles per "
                  + str(freq["cpu"]["period_s"]) + " s")
     info("CPU frequency f_CPU = " + hz(freq["f_cpu_hz"]))
-    info("Minimum frequency max(f*, f_CPU) = " + hz(freq["frequency_hz"]))
+    chk = freq.get("final_check")
+    if chk is not None:
+        info("Network at f_CPU: " + ("feasible" if chk["feasible"] else "not feasible") + " ("
+             + str(chk["packets"]) + " packets, " + str(chk["skipped"]) + " skipped, hyperperiod "
+             + str(chk["hyperperiod"]) + " cycles)")
+    if freq.get("final_search") is not None:
+        info("First feasible frequency above f_CPU = " + hz(freq["frequency_hz"]))
+    elif chk is not None and not chk["feasible"]:
+        info("No feasible frequency above f_CPU")
+    else:
+        info("Minimum frequency max(f*, f_CPU) = " + hz(freq["frequency_hz"]))
 
 
 def main():

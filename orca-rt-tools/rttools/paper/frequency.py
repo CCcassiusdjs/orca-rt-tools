@@ -9,13 +9,16 @@ Mapping of the command line), the pipeline runs the same steps as
 `python -m rttools <app> <map> <arch> <f0>` (rttools/__main__.py, same
 search parameters): the CPU test once (f_CPU = max_k c^(V_k) / T,
 release.cpu_bound), the bisection of the network schedule (f*) and the
-result max(f*, f_CPU) (search.minimum_frequency).
+result max(f*, f_CPU) (search.minimum_frequency). When f_CPU > f*, the
+network is evaluated once more at f_CPU (final_check: verdict, packets,
+skipped packets, hyperperiod); when it is not feasible there, the search
+continues above f_CPU and the result is the first feasible frequency.
 
 | File | Content |
 |---|---|
-| metrics.json | Per mapping: mapping entries, CPU demand per node, f_CPU, f*, the lower bound of the bisection, the attempts and max(f*, f_CPU) |
-| frequency.csv | One row per mapping with f*, f_CPU and the maximum (Hz) |
-| values.tex | LaTeX macros with the frequencies in MHz |
+| metrics.json | Per mapping: mapping entries, CPU demand per node, f_CPU, f*, the lower bound of the bisection, the attempts, the network check at f_CPU and the minimum frequency |
+| frequency.csv | One row per mapping with f*, f_CPU, the verdict of the network at f_CPU and the minimum (Hz) |
+| values.tex | LaTeX macros with the frequencies in MHz and the network check at f_CPU |
 
 With --config (experiments/exp23/config.json), metrics.json also records
 whether f_CPU equals the f_CPU of the exp-23 analysis (characterized costs
@@ -76,6 +79,9 @@ def run_one(app_file, map_arg, arch_file, f0):
         "f_star_hz": res["f_star_hz"],
         "f_star_lower_hz": net["lower"] if net else None,
         "attempts": [[f, ok, n] for f, ok, n in net["attempts"]] if net else None,
+        "final_check": res["final_check"],
+        "final_search_attempts": ([[f, ok, n] for f, ok, n in res["final_search"]["attempts"]]
+                                  if res["final_search"] else None),
         "frequency_hz": res["frequency_hz"],
         "binding": None if res["frequency_hz"] is None else
         ("cpu" if res["f_cpu_hz"] is not None and res["frequency_hz"] == res["f_cpu_hz"]
@@ -102,10 +108,13 @@ def run(app_file, maps, arch_file, f0, out_dir, config=None):
         json.dump(m, f, indent=1)
     with open(os.path.join(out_dir, "frequency.csv"), "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["map", "criterion", "f_star_hz", "f_cpu_hz", "frequency_hz", "binding"])
+        w.writerow(["map", "criterion", "f_star_hz", "f_cpu_hz", "network_at_f_cpu", "packets", "skipped",
+                    "frequency_hz", "binding"])
         for r in m["runs"].values():
-            w.writerow([r["map"], r["criterion"] or "", r["f_star_hz"], r["f_cpu_hz"], r["frequency_hz"],
-                        r["binding"]])
+            c = r["final_check"] or {}
+            verdict = "" if not c else ("feasible" if c["feasible"] else "not feasible")
+            w.writerow([r["map"], r["criterion"] or "", r["f_star_hz"], r["f_cpu_hz"], verdict,
+                        c.get("packets", ""), c.get("skipped", ""), r["frequency_hz"], r["binding"]])
     write_values(os.path.join(out_dir, "values.tex"), m)
     return m
 
@@ -119,6 +128,12 @@ def write_values(path, m):
             v = r[field]
             text = "-" if v is None else f"{v / 1e6:.1f}"
             lines.append(f"\\newcommand{{\\{macro_name('frequency', tag, name, 'mhz')}}}{{{text}}}")
+        c = r["final_check"]
+        verdict = "-" if c is None else ("feasible" if c["feasible"] else "not feasible")
+        lines.append(f"\\newcommand{{\\{macro_name('frequency', tag, 'cpu', 'network')}}}{{{verdict}}}")
+        for name in ("packets", "skipped"):
+            v = "-" if c is None or c[name] is None else str(c[name])
+            lines.append(f"\\newcommand{{\\{macro_name('frequency', tag, 'cpu', name)}}}{{{v}}}")
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")
 
@@ -140,8 +155,11 @@ def main(argv=None):
     a = p.parse_args(argv)
     m = run(a.app, a.map, a.arch, a.f0, a.out, a.config)
     for key, r in m["runs"].items():
+        c = r["final_check"]
+        net = "" if c is None else (f"; network at f_CPU {'feasible' if c['feasible'] else 'not feasible'} "
+                                    f"({c['packets']} packets, {c['skipped']} skipped)")
         print(f"  {key}: f* {mhz(r['f_star_hz'])} ({len(r['attempts'] or [])} attempts), "
-              f"f_CPU {mhz(r['f_cpu_hz'])}, max(f*, f_CPU) {mhz(r['frequency_hz'])} ({r['binding']})")
+              f"f_CPU {mhz(r['f_cpu_hz'])}{net}, minimum {mhz(r['frequency_hz'])} ({r['binding']})")
     if "f_cpu_equals_exp23" in m:
         print(f"  f_CPU equal to the exp23 analysis ({mhz(m['f_cpu_exp23_hz'])}): {m['f_cpu_equals_exp23']}")
     print("wrote " + a.out)

@@ -58,7 +58,7 @@ def _converged(lower, upper, cfg):
     return rel is not None and width <= rel * upper
 
 
-def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
+def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None, floor=0):
     """Lowest frequency at which the AGS backend schedules every packet,
     within the tolerance of _converged.
 
@@ -76,6 +76,10 @@ def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
     not found, schedule_at returns None) gives no schedule at c; the search
     records it with skipped count None and treats c as not feasible.
 
+    `floor` (Hz) is the initial lower bound: the search never tries a
+    frequency at or below it (minimum_frequency passes f_CPU when the
+    network is not feasible at f_CPU).
+
     `on_attempt(attempt, ok)` receives each attempt with a hyperperiod.
     Returns None when no attempt is feasible; otherwise the attempt at
     `upper` (keys of schedule_at) plus "attempts" (list of (frequency, ok,
@@ -83,7 +87,7 @@ def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
     "lower" (final lower bound, Hz)."""
     attempts = []
     best = None
-    lower = 0
+    lower = floor
     upper = None
 
     def attempt_at(frequency):
@@ -154,25 +158,60 @@ def cpu_check(app, mapping):
         return None
 
 
-def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
-    """Minimum frequency of the analysis flow: the CPU test gives f_CPU
-    once (cpu_check), the bisection gives the lowest frequency f* at which
-    the AGS backend schedules every packet (search_minimum_frequency), and
-    the result is max(f*, f_CPU).
+def network_check(app, noc, mapping, appname, frequency, cfg):
+    """One evaluation of the network at `frequency` (instantiation with the
+    release model of the application, unwrapping and AGS): {"frequency_hz",
+    "feasible", "hyperperiod", "packets", "skipped"}; hyperperiod, packets
+    and skipped are None when the hyperperiod is undefined."""
+    attempt = schedule_at(app, noc, mapping, appname, frequency, cfg)
+    if attempt is None:
+        return {"frequency_hz": frequency, "feasible": False, "hyperperiod": None, "packets": None,
+                "skipped": None}
+    return {"frequency_hz": frequency, "feasible": feasible(attempt), "hyperperiod": attempt["hyperperiod"],
+            "packets": len(attempt["problem"]["packets"]), "skipped": len(attempt["skipped"])}
 
-    Returns {"cpu": cpu_check result or None, "network": result of
-    search_minimum_frequency or None, "f_star_hz", "f_cpu_hz",
-    "frequency_hz"}; a value is None when its part has no result."""
+
+def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
+    """Minimum frequency of the analysis flow.
+
+    1. The CPU test gives f_CPU once (cpu_check), outside the bisection.
+    2. The bisection gives the lowest frequency f* at which the AGS backend
+       schedules every packet (search_minimum_frequency).
+    3. When f_CPU > f*, the network is evaluated once more at f_CPU
+       (network_check): the release model ties the windows of the packets
+       to the phase length T f, so feasibility at f* does not imply
+       feasibility at f_CPU. Feasible: the result is f_CPU. Not feasible:
+       the search continues upwards from f_CPU (doubling, then bisection
+       on (f_CPU, upper], never below f_CPU) and the result is the first
+       feasible frequency it finds.
+
+    Returns {"cpu", "network", "f_star_hz", "f_cpu_hz", "final_check",
+    "final_search", "frequency_hz"}: final_check is the evaluation at f_CPU
+    (None when f_CPU <= f* or unknown), final_search the result of the
+    search above f_CPU (None when not needed); a value is None when its
+    part has no result."""
     cpu = cpu_check(app, mapping)
     f_cpu = cpu["f_cpu_hz"] if cpu is not None else None
     if f_cpu is not None:
         info("CPU test: f_CPU = " + str(f_cpu) + "Hz (largest CPU demand per release period)")
     net = search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt)
     f_star = net["frequency"] if net is not None else None
+    check = None
+    above = None
     if f_star is None:
         final = None
-    elif f_cpu is None:
+    elif f_cpu is None or f_star >= f_cpu:
         final = f_star
     else:
-        final = max(f_star, f_cpu)
-    return {"cpu": cpu, "network": net, "f_star_hz": f_star, "f_cpu_hz": f_cpu, "frequency_hz": final}
+        info("Network check at f_CPU = " + str(f_cpu) + "Hz")
+        check = network_check(app, noc, mapping, appname, f_cpu, cfg)
+        if check["feasible"]:
+            final = f_cpu
+        else:
+            warn("No schedule at f_CPU; searching above f_CPU")
+            up = dict(cfg)
+            up["frequency"] = 2 * f_cpu
+            above = search_minimum_frequency(app, noc, mapping, appname, up, on_attempt, floor=f_cpu)
+            final = above["frequency"] if above is not None else None
+    return {"cpu": cpu, "network": net, "f_star_hz": f_star, "f_cpu_hz": f_cpu, "final_check": check,
+            "final_search": above, "frequency_hz": final}

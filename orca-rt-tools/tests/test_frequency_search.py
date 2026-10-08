@@ -172,3 +172,49 @@ def test_cli_reports_f_star_f_cpu_and_maximum(monkeypatch, tmp_path, capsys):
     assert "Network frequency f* = " in out
     assert "CPU frequency f_CPU = 5000.0Hz" in out
     assert "Minimum frequency max(f*, f_CPU) = 5000.0Hz" in out
+
+
+def window_schedule_at(feasible_at):
+    def fake(app, noc, mapping, appname, frequency, cfg):
+        ok = feasible_at(frequency)
+        return {"frequency": frequency, "hyperperiod": int(frequency),
+                "problem": {"hyperperiod": int(frequency), "packets": [{}, {}], "links": [], "occupancy": []},
+                "schedule": [[0]] if ok else [[None]], "skipped": set() if ok else {0}}
+    return fake
+
+
+def test_network_checked_at_f_cpu_feasible(monkeypatch):
+    """f_CPU > f*: one network evaluation at f_CPU; feasible, so the result
+    is f_CPU."""
+    monkeypatch.setattr(search, "schedule_at", window_schedule_at(lambda f: f >= LIMIT))
+    monkeypatch.setattr(search.release, "cpu_bound",
+                        lambda app, mapping: {"demand": {"0": 5}, "period_s": 0.001, "f_cpu_hz": 5000.0})
+    res = search.minimum_frequency("app", None, "map", "x", CFG)
+    assert res["final_check"] == {"frequency_hz": 5000.0, "feasible": True, "hyperperiod": 5000,
+                                  "packets": 2, "skipped": 0}
+    assert res["final_search"] is None and res["frequency_hz"] == 5000.0
+
+
+def test_network_not_feasible_at_f_cpu_searches_above(monkeypatch):
+    """Feasible from 2000 to 4500 Hz and from 6000 Hz: f* is about 2000,
+    f_CPU = 5000 is not feasible, so the search continues above f_CPU
+    (never at or below it) and stops at the first feasible frequency
+    within the tolerance."""
+    monkeypatch.setattr(search, "schedule_at", window_schedule_at(lambda f: 2000 <= f < 4500 or f >= 6000))
+    monkeypatch.setattr(search.release, "cpu_bound",
+                        lambda app, mapping: {"demand": {"0": 5}, "period_s": 0.001, "f_cpu_hz": 5000.0})
+    res = search.minimum_frequency("app", None, "map", "x", CFG)
+    assert res["f_star_hz"] < 5000
+    assert res["final_check"]["feasible"] is False and res["final_check"]["skipped"] == 1
+    above = res["final_search"]
+    assert all(f > 5000 for f, _, _ in above["attempts"])
+    assert above["lower"] >= 5000
+    assert 6000 <= res["frequency_hz"] <= 6000 + CFG["scaling_tolerance"]
+
+
+def test_no_network_check_when_f_star_sets_the_result(monkeypatch):
+    monkeypatch.setattr(search, "schedule_at", window_schedule_at(lambda f: f >= LIMIT))
+    monkeypatch.setattr(search.release, "cpu_bound",
+                        lambda app, mapping: {"demand": {"0": 1}, "period_s": 0.001, "f_cpu_hz": 1000.0})
+    res = search.minimum_frequency("app", None, "map", "x", CFG)
+    assert res["final_check"] is None and res["frequency_hz"] == res["f_star_hz"]
