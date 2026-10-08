@@ -61,32 +61,53 @@ def test_fig_8_2_from_table_8_1():
     assert placed == [2, 1, 3, 16, 4, 5, 6, 7, 8, 9, 10, 13, 15, 12, 14, 11]
 
 
-def test_car_clustered_by_gcm_and_mapped():
-    """Steps 1 and 2 on the CAR graph of Chapter 7 (apps/shi-2010/shi-2010.txt):
-    MAX_PROC wins; the clusters are those of Table 8.1. The volumes of 12
-    clusters equal Table 8.1; BFE3:FDF1, FDF2:STPH, POSI:NAVC:DIRC and
-    FBU3:VOD1:VOD2 have larger volumes than the table, with the same
-    rank, so the mesh is Fig. 8.2 (f) up to the clusters tied at 51200."""
+def car_edges(typo=False):
+    """Tasks and edges of apps/shi-2010/shi-2010.txt; typo=True restores
+    the edge FBU3->VOD2 of the file before the fix (SHI2010.csv and Shi et
+    al. give FBU8->VOD2)."""
     tasks, edges = spiral.from_orca(import_graph(os.path.join(APPS, "shi-2010", "shi-2010.txt")))
-    res = spiral.map_application(tasks, edges, 4, 4)
+    assert ("FBU8", "VOD2", 960000) in edges
+    if typo:
+        edges = [("FBU3", v, w) if (u, v) == ("FBU8", "VOD2") else (u, v, w) for u, v, w in edges]
+    return tasks, edges
+
+
+def test_car_clustered_by_gcm_and_mapped():
+    """Steps 1 and 2 on the CAR graph of Chapter 7 (apps/shi-2010/shi-2010.txt,
+    edge FBU8->VOD2 as in SHI2010.csv): MAX_PROC wins. 12 clusters equal
+    clusters of Table 8.1, 11 of them with the volume of the table
+    (POSI:NAVC:DIRC: 79 872, table 56 832). VOD2 joins FBU8, so the other
+    4 clusters differ from the table (FBU3:VOD1:VOD2, FBU8:BFE8, BFE3:FDF1,
+    FDF2:STPH)."""
+    res = spiral.map_application(*car_edges(), 4, 4)
     assert res["criterion"] == "MAX_PROC"
     by_set = {frozenset(c.split(":")): c for c in res["clusters"]}
-    table = {}
-    for num, name, vol in TABLE_8_1:
-        key = frozenset(name.replace("NAVI", "NAVC").split(":"))
-        assert key in by_set, name
-        table[num] = (by_set[key], vol)
-    differ = {table[n][0]: res["volumes"][table[n][0]] for n in table if res["volumes"][table[n][0]] != table[n][1]}
+    table = {frozenset(name.replace("NAVI", "NAVC").split(":")): vol for _, name, vol in TABLE_8_1}
+    common = {by_set[k]: (res["volumes"][by_set[k]], v) for k, v in table.items() if k in by_set}
+    assert len(common) == 12
+    assert {c: vv for c, vv in common.items() if vv[0] != vv[1]} == {"POSI:NAVC:DIRC": (79872, 56832)}
+    others = {c: res["volumes"][c] for c in res["clusters"] if c not in common}
+    assert {frozenset(c.split(":")): v for c, v in others.items()} == {
+        frozenset(["FBU3", "VOD1"]): 972800, frozenset(["FBU8", "VOD2"]): 972800,
+        frozenset(["BFE8", "FDF2"]): 1318400, frozenset(["BFE3", "FDF1", "STPH"]): 1420800}
+    # increasing volume along the spiral
+    order = spiral.spiral_order(4, 4)
+    vols = [res["volumes"][c] for c in sorted(res["clusters"], key=lambda c: order.index(res["cluster_nodes"][c]))]
+    assert vols == sorted(vols)
+
+
+def test_car_with_the_edge_fbu3_vod2_gives_the_clusters_of_table_8_1():
+    """With the edge FBU3->VOD2 (the file before the fix), MAX_PROC gives
+    the 16 clusters of Table 8.1; the volumes of 4 clusters exceed the
+    table, so the typo does not explain them."""
+    res = spiral.map_application(*car_edges(typo=True), 4, 4)
+    assert res["criterion"] == "MAX_PROC"
+    by_set = {frozenset(c.split(":")): c for c in res["clusters"]}
+    table = {frozenset(name.replace("NAVI", "NAVC").split(":")): vol for _, name, vol in TABLE_8_1}
+    assert set(table) == set(by_set)
+    differ = {by_set[k]: res["volumes"][by_set[k]] for k, v in table.items() if res["volumes"][by_set[k]] != v}
     assert differ == {"BFE3:FDF1": 1318400, "FDF2:STPH": 512000, "POSI:NAVC:DIRC": 79872,
                       "FBU3:VOD1:VOD2": 985600}
-    grid = grid_of(res["cluster_nodes"], 4, 4)
-    tied = {table[n][0] for n in range(4, 11)}
-    for row, fig_row in zip(grid, FIG_8_2_F):
-        for got, num in zip(row, fig_row):
-            if 4 <= num <= 10:
-                assert got in tied
-            else:
-                assert got == table[num][0]
 
 
 def test_app_e_spiral_mapping():

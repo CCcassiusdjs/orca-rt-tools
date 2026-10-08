@@ -64,7 +64,20 @@ def test_car_and_criterion_of_application_e(tmp_path):
         assert sum(c["load"] for c in r["clusters"]) == sum(c["load"] for c in m["car"]["input"]["clusters"])
     assert m["appe"]["chosen"] == "MAX_PROC"
     rows = (tmp_path / "tab-car-rows.tex").read_text().splitlines()[1:]
-    assert rows[1] == r"MAX-PROC & 20 & 16.2 & 205,529 & 214,330 & 6.481 & 105.0 & 2 \\"
+    assert rows[1] == r"MAX-PROC & 20 & 24.7 & 279,776 & 214,330 & 4.248 & 105.0 & 2 \\"
+    assert rows[2] == r"MIN-COMM & 21 & 3.5 & 18,229 & 987,368 & 30.214 & 443.3 & 2 \\"
+
+
+def test_car_graph_has_the_edges_of_the_source():
+    """apps/shi-2010/shi-2010.txt has the edges of SHI2010.csv (Shi et al.
+    2010), including FBU8->VOD2 (the file had FBU3->VOD2)."""
+    from rttools.gff.orca import import_graph
+    from rttools.modules.io import appparser
+    g, _ = appparser.loadFromFile(os.path.join(APPS, "shi-2010", "SHI2010.csv"))
+    txt = import_graph(os.path.join(APPS, "shi-2010", "shi-2010.txt"))
+    edges = sorted((e._from._data["label"], e._to._data["label"]) for e in txt._edges)
+    assert edges == sorted(g.edges())
+    assert ("FBU8", "VOD2") in edges and ("FBU3", "VOD2") not in edges
 
 
 def test_contraction_example(tmp_path):

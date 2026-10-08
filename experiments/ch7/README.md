@@ -18,6 +18,7 @@ The 17 graphs come from `tp-tools/apps/var-nnodes/10_<|V|>.txt` of commit 4e4348
 | N = 4 | The 204 cells of the 17 rows agree (\|E\|, M1, M2, M3 of the input and of both outputs; `make full`, 18 minutes on one core) |
 | N = 16 (value stated in the thesis, 4x4 mesh) | Row 1 gives \|E\| = 220 (MIN-COMM) and 222 (MAX-PROC); the table prints 55 and 180 |
 | Value range of the graphs | [2000; 20000] in vertices and edges; the thesis states [200; 2000] |
+| CAR graph (`make car`) | `apps/shi-2010/shi-2010.txt` has the edge FBU8->VOD2 of `SHI2010.csv` (Shi et al.); the file had FBU3->VOD2. With FBU8->VOD2, MAX-PROC puts VOD2 with FBU8: 12 clusters equal clusters of Table 8.1 and 4 differ (FBU3:VOD1, FBU8:VOD2, BFE8:FDF2, BFE3:FDF1:STPH). With FBU3->VOD2 the 16 clusters of Table 8.1 come back, so the thesis used the file with FBU3->VOD2; its volumes still differ from the table for 4 clusters (`tests/test_spiral.py`) |
 | Rounding | Input M1, M2 and M3 with 3 decimals: rows 1 to 15 truncate, rows 16 and 17 round. Output M1 and M2 truncated to integers (the note of the table says "rounded up"); output M3 rounded to 3 decimals |
 
 ## Outputs (`build/results`)
