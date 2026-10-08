@@ -27,6 +27,13 @@ def runs(tmp_path_factory):
     return out
 
 
+@pytest.fixture(scope="module")
+def run_f(tmp_path_factory):
+    d = tmp_path_factory.mktemp("F")
+    # run F (tag exp23-F): this tree, join rule per_producer of the config
+    return exp23.analyze(os.path.join(EXP, "logs", "F.events.txt"), cfg(), str(d)), str(d)
+
+
 def test_run_d_matches_reference(runs):
     m, d = runs["D"]
     assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_D.json")) == []
@@ -47,8 +54,8 @@ def test_corrected_values_of_chapter_8(runs):
     assert m["monitor"]["errors"] == 0 and m["monitor"]["nodes"] == 4
 
 
-def test_cpu_check_and_response_bound(runs):
-    m, _ = runs["E"]
+def test_cpu_check_and_response_bound(run_f):
+    m, _ = run_f
     assert m["cpu"]["demand_cycles"] == {"ABDF": 181930, "C": 96330, "EHI": 173370, "GJ": 217450}
     assert m["cpu"]["f_cpu_hz"] == 434900000 and m["cpu"]["meets_phase"] is True
     assert m["cpu"]["phase_percent"]["GJ"] == pytest.approx(86.98)
@@ -96,12 +103,6 @@ def test_run_e_matches_its_reference(runs):
     assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_E.json")) == []
 
 
-@pytest.fixture(scope="module")
-def run_f(tmp_path_factory):
-    d = tmp_path_factory.mktemp("F")
-    return exp23.analyze(os.path.join(EXP, "logs", "F.events.txt"), cfg(), str(d)), str(d)
-
-
 def test_run_f_matches_head_reference(run_f):
     """Run F (tag exp23-F): the per-producer join of J, the default rule of
     the config; the pairing of the tags stays consistent."""
@@ -141,6 +142,18 @@ def test_outputs_and_macros(runs):
     assert "\\newcommand{\\ExpResponseBoundMs}{1.935}" in values
     assert "\\newcommand{\\ExpResponseBoundCycles}{967\\,450}" in values
     assert "\\newcommand{\\ExpCpuFrequencyMhz}{434.9}" in values
+
+
+def test_outputs_and_macros_of_run_f(run_f):
+    _, d = run_f
+    for f in ("tab83.tex", "tab83.csv", "iterations.tex", "tab82.tex", "values.tex", "fig812.svg", "fig812.pdf",
+              "metrics.json"):
+        assert os.path.getsize(os.path.join(d, f)) > 0, f
+    values = open(os.path.join(d, "values.tex")).read()
+    assert "\\newcommand{\\ExpGjMeasured}{181\\,763.6}" in values
+    assert "\\newcommand{\\ExpMeanOverestimation}{27.53}" in values
+    assert "\\newcommand{\\ExpMaxResponseMs}{1.861}" in values
+    assert "GJ & 181\\,763.6 &" in open(os.path.join(d, "tab83.tex")).read()
 
 
 def test_check_reports_differences(tmp_path, runs):
