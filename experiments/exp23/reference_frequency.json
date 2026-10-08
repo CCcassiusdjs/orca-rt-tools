@@ -1,0 +1,75 @@
+{
+ "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and max(f*, f_CPU) for the .map file and for the Spiral Mapping.",
+ "f_cpu_exp23_hz": 434900000,
+ "f_cpu_equals_exp23": true,
+ "runs": {
+  "synthetic-app-e-ONTO-hermes2x2.map": {
+   "criterion": null,
+   "mapping": {
+    "0": [
+     "A",
+     "B",
+     "D",
+     "F"
+    ],
+    "1": [
+     "C"
+    ],
+    "2": [
+     "E",
+     "H",
+     "I"
+    ],
+    "3": [
+     "G",
+     "J"
+    ]
+   },
+   "cpu_demand_cycles": {
+    "0": 181930,
+    "1": 96330,
+    "2": 173370,
+    "3": 217450
+   },
+   "f_cpu_hz": 434900000.0,
+   "f_star_hz": 345294952.3925781,
+   "f_star_lower_hz": 345291137.6953125,
+   "frequency_hz": 434900000.0,
+   "binding": "cpu"
+  },
+  "spiral": {
+   "criterion": "MAX_PROC",
+   "mapping": {
+    "0": [
+     "C"
+    ],
+    "1": [
+     "A",
+     "B",
+     "D",
+     "F"
+    ],
+    "2": [
+     "G",
+     "J"
+    ],
+    "3": [
+     "E",
+     "H",
+     "I"
+    ]
+   },
+   "cpu_demand_cycles": {
+    "0": 96330,
+    "1": 181930,
+    "2": 217450,
+    "3": 173370
+   },
+   "f_cpu_hz": 434900000.0,
+   "f_star_hz": 345294952.3925781,
+   "f_star_lower_hz": 345291137.6953125,
+   "frequency_hz": 434900000.0,
+   "binding": "cpu"
+  }
+ }
+}

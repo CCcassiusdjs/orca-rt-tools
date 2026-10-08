@@ -2,16 +2,19 @@
 
 The file was a copy of apps/shi-2010/SHI2010.csv (CAR application of Shi,
 Burns and Indrusiak 2010), added in commit 4c299fc. It now holds
-application E: the graph of synthetic-app-e.txt, release period 0.5 ms,
-end-to-end deadline 2 ms (task rows) and the payloads of the exp-23
-application (pkt-sim/software/ucx-os/app/weird_a.c), except E->I, which
-weird_a.c sends with COMM_DF_WORKLOAD (3450 bytes) and the graph gives as
-9010 bytes.
+application E for the analysis flow of the paper: the graph of
+synthetic-app-e.txt, release period 0.5 ms, end-to-end deadline 2 ms
+(task rows), the payloads of the exp-23 application (pkt-sim/software/
+ucx-os/app/weird_a.c, E->I with 9010 bytes), the characterized costs
+c^(v) of rttools/bench_t/main.py (thesis scale / 10) as task capacity and
+the #parameters section of the phase model (scheduler cost and the
+dispatch order of each PE of the RTL).
 """
 import os
 import re
 
 from tests.conftest import REPO_ROOT
+from rttools.bench_t import main as bench_t
 from rttools.gff.orca import import_graph
 from rttools.modules.io import appparser
 
@@ -40,18 +43,25 @@ def test_csv_is_application_e():
 def test_csv_matches_the_graph_file():
     g, _ = appparser.loadFromFile(CSV)
     txt = import_graph(os.path.join(APP_E, "synthetic-app-e.txt"))
-    assert {n._data["label"]: int(n._data["wcet"]) for n in txt._nodes} == \
-        {n: int(d["wcet"]) for n, d in g.nodes(data=True)}
+    assert sorted(n._data["label"] for n in txt._nodes) == sorted(g.nodes)
     assert sorted((e._from._data["label"], e._to._data["label"], int(e._data["payload"])) for e in txt._edges) == \
         sorted((a, b, int(d["datasize"])) for a, b, d in g.edges(data=True))
+
+
+def test_csv_costs_are_the_characterized_costs():
+    """Task capacity = c^(v) of rttools/bench_t/main.py / 10 (cycles of
+    the RTL), scheduler cost / 10, sequence per PE in dispatch order."""
+    g, _ = appparser.loadFromFile(CSV)
+    costs = {t: c // 10 for ts in bench_t.TASK_SETS.values() for t, c in ts}
+    assert {n: int(d["wcet"]) for n, d in g.nodes(data=True)} == costs
+    assert g.graph["release_model"] == "phase"
+    assert g.graph["scheduler_cycles"] == bench_t.SCHEDULER_CYCLES // 10
+    assert sorted(g.graph["sequences"].values()) == sorted([t for t, _ in ts] for ts in bench_t.TASK_SETS.values())
 
 
 def test_csv_matches_weird_a():
     d = weird_a_defines()
     g, _ = appparser.loadFromFile(CSV)
-    for n, data in g.nodes(data=True):
-        # WCET in cycles = 10 x the sleep argument of weird_a.c
-        assert int(data["wcet"]) == 10 * d[f"TASK_{n}_WORKLOAD"], n
     for a, b, data in g.edges(data=True):
         if (a, b) == ("E", "I"):
             assert int(data["datasize"]) == 9010 == d["COMM_EI_WORKLOAD"]

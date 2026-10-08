@@ -62,3 +62,14 @@ def test_missing_map_file(work):
     r = run(work, "nothing.map", "500000000", "2000", "500", "False")
     assert r.returncode == 1
     assert "Could not locate file" in r.stdout
+
+
+@pytest.mark.parametrize("mapping", [MAP, "spiral"])
+def test_app_e_minimum_frequency(work, mapping):
+    """f* from the bisection (phase model), f_CPU from the CPU test and the
+    maximum; experiments/exp23 make frequency keeps the same numbers."""
+    r = run(work, mapping, "500000000")
+    assert r.returncode == 0, r.stderr[-2000:]
+    assert "Network frequency f* = 345294952.3925781Hz (345.3 MHz)" in r.stdout
+    assert "CPU frequency f_CPU = 434900000.0Hz (434.9 MHz)" in r.stdout
+    assert "Minimum frequency max(f*, f_CPU) = 434900000.0Hz (434.9 MHz)" in r.stdout

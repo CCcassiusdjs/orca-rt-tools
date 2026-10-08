@@ -7,6 +7,7 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 | Command | Effect | Needs |
 |---|---|---|
 | `make` | Analyzes the stored log of run E (`logs/E.events.txt`, the simulation of this tree) and checks it against `reference_head.json`; these are the numbers of the paper | Python with `orca-rt-tools/requirements.txt` |
+| `make frequency` | Minimum frequency of application E with the analysis flow (CLI input `apps/synthetic-app-e/synthetic-app-e.csv`, `arch/hermes-2x2.gml`, first frequency 500 MHz): f* of the network bisection, f_CPU of the CPU test and max(f*, f_CPU), with the `.map` file and with the Spiral Mapping; check against `reference_frequency.json` (also part of `make`) | Python |
 | `make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D` | The same for run D | Python <!-- anon:drop-line --> |
 | `make runs` | Analyzes the five stored runs into `build/runs/{A,B,C,D,E}` | Python <!-- anon:drop-line --> |
 | `make sim` | Simulates this tree (`simulate.sh build/sim`) | Questa or ModelSim, `riscv64-elf` toolchain |
@@ -51,6 +52,7 @@ or, on a server without access to the repository, from an archive of the tag: `g
 | `values.tex` | LaTeX macros (`\ExpAbdfMeasured`, `\ExpMeanOverestimation`, `\ExpMaxResponseMs`, `\ExpCpuFrequencyMhz`, `\ExpResponseBoundMs`, ...) for the text |
 | `fig812.pdf`, `fig812.svg` | Gantt of the first complete hyperperiod (Fig. 8.12) |
 | `metrics.json` | Every value above; `make check` reads it |
+| `build/frequency/metrics.json`, `frequency.csv`, `values.tex` | `make frequency`: per mapping, CPU demand per node, f_CPU, f*, the attempts of the bisection and max(f*, f_CPU); macros `\ExpFrequencyMapNetworkMhz`, `\ExpFrequencyMapCpuMhz`, `\ExpFrequencyMapMinimumMhz` and the same for `Spiral` |
 
 ## Definitions
 
@@ -62,6 +64,7 @@ or, on a server without access to the repository, from an archive of the tag: `g
 | CPU time per iteration (estimated) | CPU demand of the PE: sum of the characterized costs of the cluster in `rttools/bench_t/main.py` (thesis scale), divided by 10 |
 | Sequence per PE | Start and finish of each task: ORT/BENCH (`rttools/bench_t/estimate.py`, round robin, one job per task, quantum = largest cost) on the costs of the cluster in dispatch order, divided by 10; the start includes the scheduler cost |
 | CPU frequency (`cpu.f_cpu_hz`) | Largest CPU demand per iteration divided by the release period (0.5 ms); computed once, independent of the frequency of the link schedule |
+| Minimum frequency (`make frequency`) | `python -m rttools <app> <map> <arch> 500000000`: the CPU test once (f_CPU, the row above, from the task capacities of the CSV = characterized costs / 10), then the bisection of the network schedule with the phase model of the flows (f*), result max(f*, f_CPU). f* = 345.3 MHz is the lowest frequency whose phase holds the window of F->G (finish of F 181 930, start of G 11 000 in the next phase, occupancy 1 717 cycles); f_CPU = 434.9 MHz sets the result |
 | Response bound (`response_bound`) | phi(v) P + finish of v in its sequence, for the last task of the iteration (J): phi(v) counts the edges between PEs on the longest path to v (config `task_graph`), P = 250 000 cycles |
 | Response time | From the first dispatch of A after each release (`TRIGGER` line) to the exit of J from the CPU after the 3k-th packet that reaches J. `weird_a.c` makes J consume any three packets, so the iteration k ends with the 3k-th packet. |
 | Tab. 8.2 release and deadline | Release: finish of the source task in its sequence. Deadline: start of the target task in its sequence plus one phase (the target receives the packet in the phase after the source phase). Both count cycles from the start of the source phase |

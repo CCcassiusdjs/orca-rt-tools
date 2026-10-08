@@ -1,18 +1,18 @@
-# Application E: graph of synthetic-app-e.txt (WCET in cycles and payload in bytes as in pkt-sim/software/ucx-os/app/weird_a.c)
-# Task rows: Period = release period (s); Capacity = WCET (cycles); Deadline = end-to-end deadline (s)
-# Flow rows: Period = release period (s); Data = payload (bytes); Deadline = relative deadline (s)
+# Application E (synthetic-app-e.txt, pkt-sim/software/ucx-os/app/weird_a.c) for the analysis flow of the paper
+# Task rows: Period = release period (s); Capacity = characterized cost c^(v) in cycles (rttools/bench_t/main.py / 10: the task of weird_a.c plus its dispatch and kernel work); Deadline = end-to-end deadline (s)
+# Flow rows: Period = release period (s); Data = payload (bytes); Deadline = relative deadline (s), not used by the phase model (#parameters: release and deadline from the sequence of each PE, rttools/modules/instances/release.py)
 #tasks,,,,,
 Task,Period,Capacity,Deadline,Acronym,Description
-1,0.0005,12300,0.002,A,Task A
-2,0.0005,45600,0.002,B,Task B
-3,0.0005,78900,0.002,C,Task C
-4,0.0005,12000,0.002,D,Task D
-5,0.0005,34500,0.002,E,Task E
-6,0.0005,67800,0.002,F,Task F
-7,0.0005,90100,0.002,G,Task G
-8,0.0005,23400,0.002,H,Task H
-9,0.0005,56700,0.002,I,Task I
-10,0.0005,89000,0.002,J,Task J
+1,0.0005,28530,0.002,A,Task A
+2,0.0005,58600,0.002,B,Task B
+3,0.0005,96330,0.002,C,Task C
+4,0.0005,14000,0.002,D,Task D
+5,0.0005,52700,0.002,E,Task E
+6,0.0005,80800,0.002,F,Task F
+7,0.0005,109880,0.002,G,Task G
+8,0.0005,45300,0.002,H,Task H
+9,0.0005,75370,0.002,I,Task I
+10,0.0005,107570,0.002,J,Task J
 #flows,,,,,
 Flow,Period,Data,Deadline,Source,Target
 1,0.0005,1230,0.0005,A,C
@@ -26,3 +26,11 @@ Flow,Period,Data,Deadline,Source,Target
 9,0.0005,5670,0.0005,I,J
 10,0.0005,8900,0.0005,H,J
 11,0.0005,1230,0.0005,G,J
+#parameters,,,,,
+Parameter,Value,,,,
+release_model,phase,,,,
+scheduler_cycles,11000,,,,
+sequence,0,A,B,D,F,
+sequence,1,C,,,
+sequence,2,E,I,H,
+sequence,3,G,J,,
