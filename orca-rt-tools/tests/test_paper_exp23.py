@@ -227,3 +227,36 @@ def test_cycles_text():
     assert exp23.cycles_text(80968.50000000001) == "80,968.5"
     assert exp23.cycles_text(144098) == "144,098"
     assert exp23.cycles_text(144098.0) == "144,098"
+
+
+class SliceTrace:
+    def __init__(self, slices, t1):
+        from rttools.tui.model.trace import Slice
+        self.slices = [Slice("1-1", a, b, n) for a, b, n in slices]
+        self.t1 = t1
+
+    def lane_slices(self, lane):
+        return [s for s in self.slices if s.lane == lane]
+
+
+def test_closed_runs_keep_a_slice_closed_at_the_end_of_the_log():
+    """A `scheduled` event at the last instant of the log closes the slice
+    of J: the slice counts; the open slice that event starts leaves."""
+    tr = SliceTrace([(10, 35, "G"), (35, 100, "J"), (100, 100, "G")], 100)
+    assert exp23.closed_runs(tr, "1-1", "J") == [(35, 100)]
+
+
+def test_closed_runs_leave_the_open_slice_cut_by_the_end_of_the_log():
+    """No event closes the last slice of a lane: J may still run after the
+    end of the log, so its slice leaves."""
+    tr = SliceTrace([(10, 35, "G"), (35, 100, "J")], 100)
+    assert exp23.closed_runs(tr, "1-1", "J") == []
+
+
+def test_run_f_last_iterations_end_at_the_last_event(run_f):
+    """Run F: J leaves the CPU at 19 865 063 ns ("1-1 scheduled 2", the last
+    event of the log); iterations 31 and 32 end there."""
+    m, _ = run_f
+    it = m["iterations"]["all"]
+    assert len(it) == 32
+    assert [p["count"] for p in m["iterations"]["per_release_offset"]] == [8, 8, 8, 8]

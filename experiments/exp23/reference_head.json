@@ -58,12 +58,12 @@
   "per_release_offset": [
    {
     "release_offset_ms": 0.0,
-    "count": 7,
+    "count": 8,
     "max_ms": 1.860536
    },
    {
     "release_offset_ms": 0.5,
-    "count": 7,
+    "count": 8,
     "max_ms": 1.360504
    },
    {

@@ -217,6 +217,18 @@
     "release_ms": 17.500775,
     "response_ms": 1.360504,
     "response_cycles": 680252
+   },
+   {
+    "iteration": 31,
+    "release_ms": 18.000777000000003,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
+   },
+   {
+    "iteration": 32,
+    "release_ms": 18.500779,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
    }
   ],
   "max_ms": 1.86117,

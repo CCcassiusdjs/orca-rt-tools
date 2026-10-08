@@ -130,7 +130,7 @@ def test_figures_of_application_e(tmp_path):
     f1 = m["flows"][0]
     # L0 = 6 (m + 1) + p + 1 with p = 3 + ceil(1230 / 4)
     assert (f1["hops"], f1["flits"], f1["L0"]) == (1, 311, 324)
-    assert len((tmp_path / "fig-iterations-coords.tex").read_text().splitlines()) == 1 + 30 + 1
+    assert len((tmp_path / "fig-iterations-coords.tex").read_text().splitlines()) == 1 + 32 + 1
 
 
 def test_pe_coordinates_follow_the_swapped_labels():

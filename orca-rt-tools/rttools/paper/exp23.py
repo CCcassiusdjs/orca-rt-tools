@@ -247,6 +247,18 @@ def join_arrivals(tr, cfg, first, rule):
     return [max(ts[k] for ts in per_tag) for k in range(min(len(ts) for ts in per_tag))]
 
 
+def closed_runs(tr, lane, task):
+    """(start, end) of the slices of `task` on `lane` that a `scheduled`
+    event closes. The parser ends the last slice of each lane at the end of
+    the log (no event closes it), so only that slice leaves; a slice closed
+    by an event at the last instant of the log counts."""
+    slices = tr.lane_slices(lane)
+    if not slices:
+        return []
+    open_slice = max(slices, key=lambda s: (s.start, s.end))
+    return [(s.start, s.end) for s in slices if s.label == task and s is not open_slice]
+
+
 def responses(tr, cfg, clk, rule=None):
     """Response time of each iteration: from the start of iteration k
     (iteration_starts) to the exit of J from the CPU after the instant at
@@ -259,7 +271,7 @@ def responses(tr, cfg, clk, rule=None):
         return []
     first = starts[0]
     complete = join_arrivals(tr, cfg, first, rule)
-    runs = [(s.start, s.end) for s in tr.lane_slices(j["pe"]) if s.label == j["task"]]
+    runs = closed_runs(tr, j["pe"], j["task"])
     hp = clk.raw(cfg["release_period_s"] * cfg["iterations_per_hyperperiod"])
     anchor = clk.raw(cfg["first_hyperperiod_s"])
     out = []
@@ -267,7 +279,7 @@ def responses(tr, cfg, clk, rule=None):
         if k > len(complete):
             break
         a = complete[k - 1]
-        end = next((e for (b, e) in runs if e > a and e < tr.t1), None)
+        end = next((e for (b, e) in runs if e > a), None)
         if end is None:
             break
         offset = (s - anchor) % hp
