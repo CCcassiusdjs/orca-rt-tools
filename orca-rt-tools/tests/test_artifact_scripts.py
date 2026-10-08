@@ -178,10 +178,10 @@ def test_simulate_require_clean(tmp_path):
     assert "sim_ns=1000 monitor=1\n" in run_info and "vsim=Questa stub\n" in run_info
 
 
-def test_exp23_default_is_run_e():
+def test_exp23_default_is_run_f():
     r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3"], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
-    assert "analyze logs/E.events.txt" in r.stdout
+    assert "analyze logs/F.events.txt --config config.json --join per_producer" in r.stdout
     assert "reference_head.json" in r.stdout
     r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "LOG=logs/D.events.txt",
                         "REF=reference_D.json"], capture_output=True, text=True)

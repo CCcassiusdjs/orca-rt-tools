@@ -91,9 +91,32 @@ def test_units_detected_and_runs_equal_in_cycles(runs):
         assert json.dumps(a[key], sort_keys=True) == json.dumps(d[key], sort_keys=True)
 
 
-def test_run_e_matches_head_reference(runs):
+def test_run_e_matches_its_reference(runs):
     _, d = runs["E"]
+    assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_E.json")) == []
+
+
+@pytest.fixture(scope="module")
+def run_f(tmp_path_factory):
+    d = tmp_path_factory.mktemp("F")
+    return exp23.analyze(os.path.join(EXP, "logs", "F.events.txt"), cfg(), str(d)), str(d)
+
+
+def test_run_f_matches_head_reference(run_f):
+    """Run F (tag exp23-F): the per-producer join of J, the default rule of
+    the config; the pairing of the tags stays consistent."""
+    m, d = run_f
     assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_head.json")) == []
+    assert m["join_rule"] == "per_producer" and m["packet_pairs"] == {"unexpected": 0}
+    assert m["monitor"]["errors"] == 0 and m["monitor"]["send_pkts"] == m["monitor"]["recv_pkts"] == 166
+    # GJ: mean of 7 hyperperiods; the first one differs (start-up of PE 1-1)
+    gj = m["tab83"]["per_cluster"]["GJ"]
+    assert gj["equal_in_all_hyperperiods"] is False
+    assert gj["per_hyperperiod"][1:] == [182647.75, 182647.75, 182648.5, 182647.75, 182647.75, 182648.5]
+    assert round(gj["mean"], 1) == 181763.6
+    assert m["iterations"]["max_ms"] <= m["response_bound"]["ms"]
+    run_info = open(os.path.join(EXP, "logs", "F.RUN_INFO")).read()
+    assert "repo_state=archive\n" in run_info and "repo_tag=exp23-F\n" in run_info
 
 
 def test_run_e_close_to_run_c(runs):

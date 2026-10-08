@@ -37,7 +37,7 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 
 | Item of the paper | Source | Command |
 |---|---|---|
-| CPU time per iteration, measured and estimated, per cluster; Gantt of one hyperperiod; response time per iteration; flows with release, deadline and measured latency | `experiments/exp23/logs/E.events.txt` (stored log of the RTL simulation) | `make -C experiments/exp23`; tables, `values.tex` and `metrics.json` in `build/results` |
+| CPU time per iteration, measured and estimated, per cluster; Gantt of one hyperperiod; response time per iteration; flows with release, deadline and measured latency | `experiments/exp23/logs/F.events.txt` (stored log of the RTL simulation of tag exp23-F; `F.RUN_INFO`, `F.time.txt`) | `make -C experiments/exp23`; tables, `values.tex` and `metrics.json` in `build/results` |
 | Gantt of one hyperperiod, response per iteration and flow table (rows and coordinates of the article visuals); contraction criteria on the example graph | `experiments/exp23/logs/E.events.txt`, `apps/sample-graph-a/sample_graph.txt` | `make -C experiments figures` |
 | CAR clustering (Reference, MAX-PROC, MIN-COMM) and the criterion of application E | `apps/shi-2010/shi-2010.txt`, `apps/synthetic-app-e/synthetic-app-e.txt` | `make -C experiments/ch7 car` |
 | Minimum frequency of application E: f* (network), f_CPU (CPU test) and max(f*, f_CPU), with the mapping file and with the Spiral Mapping | `apps/synthetic-app-e/synthetic-app-e.csv` (phase model, characterized costs), `arch/hermes-2x2.gml` | `make -C experiments/exp23 frequency`; the same numbers from `python -m rttools apps/synthetic-app-e/synthetic-app-e.csv <map or spiral> arch/hermes-2x2.gml 500000000` |

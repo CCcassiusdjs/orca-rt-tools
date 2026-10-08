@@ -3,12 +3,12 @@
 #   make sim       simulate (needs Questa/ModelSim and riscv64-elf; see ENV_SETUP in simulate.sh)
 #   make analyze   tables, figure and metrics from $(LOG)
 #   make check     compare the metrics with $(REF)
-#   make all       analyze + check (default; stored log of run E against reference_head.json) + frequency
+#   make all       analyze + check (default; stored log of run F against reference_head.json) + frequency
 #   make frequency minimum frequency of application E (CLI input apps/synthetic-app-e): f*, f_CPU and
 #                  max(f*, f_CPU) with the .map file and with the Spiral Mapping; check against
 #                  reference_frequency.json
 #   make paper     sim + analyze + check (simulation of this tree against reference_head.json)
-#   make runs      analyze the five stored runs (logs/A..E) into build/runs  (anon:drop-line)
+#   make runs      analyze the six stored runs (logs/A..F) into build/runs  (anon:drop-line)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
 #
 # The run that a paper reports: make paper REQUIRE_CLEAN=1 from a clean
@@ -16,16 +16,18 @@
 # otherwise. RUN_INFO then holds repo_commit, repo_state, repo_tag and
 # src_sha256 (see simulate.sh).
 #
-# LOG and REF default to run E (logs/E.events.txt, reference_head.json): the
-# log of `make paper` on this tree, the source of the numbers of the paper.
+# LOG and REF default to run F (logs/F.events.txt, reference_head.json): the
+# log of `make paper` on this tree (tag exp23-F), the source of the numbers
+# of the paper.
 # Run D: make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D  (anon:drop-line)
+# Run E: make LOG=logs/E.events.txt REF=reference_E.json OUTDIR=build/results_E  (anon:drop-line)
 # After `make sim`, use LOG=build/sim/events.txt (make paper does it).
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
 BUILD   ?= build
 SIM_NS  ?= 20000000
-LOG     ?= logs/E.events.txt
+LOG     ?= logs/F.events.txt
 REF     ?= reference_head.json
 # join rule of J: the stored logs A to E come from weird_a.c before 379f388
 # (J joins any three packets); a new simulation of this tree, per producer
@@ -64,6 +66,7 @@ paper:
 .PHONY: runs
 runs:
 	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --join any3 --out $(BUILD)/runs/$$r || exit 1; done
+	$(RUN) analyze logs/F.events.txt --config config.json --join per_producer --out $(BUILD)/runs/F
 # anon:drop-end
 
 info:

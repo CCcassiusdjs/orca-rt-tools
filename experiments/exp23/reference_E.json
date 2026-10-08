@@ -1,0 +1,128 @@
+{
+ "_doc": "Expected results of run E (logs/E.events.txt): make paper of commit 0b02861 on the GAPH server (weird_a.c before 379f388: J joins any three packets, E->I with tag 3450), Questa 2025.3, riscv64-elf-gcc 12.2.0, 2026-10-06. Analysis with --join any3.",
+ "unit": {
+  "name": "1 ns"
+ },
+ "parameters": {
+  "release_period_ms": 0.5,
+  "hyperperiod_ms": 2.0,
+  "release_period_cycles": 250000,
+  "hyperperiods": 7
+ },
+ "tab83": {
+  "rows": [
+   {
+    "cluster": "ABDF",
+    "measured": 144098,
+    "estimated": 181930,
+    "difference": 37832
+   },
+   {
+    "cluster": "C",
+    "measured": 80968.50000000001,
+    "estimated": 96330,
+    "difference": 15361.499999999985
+   },
+   {
+    "cluster": "EHI",
+    "measured": 119336,
+    "estimated": 173370,
+    "difference": 54034
+   },
+   {
+    "cluster": "GJ",
+    "measured": 183086,
+    "estimated": 217450,
+    "difference": 34364
+   }
+  ],
+  "mean_difference_percent": 27.31868638396001
+ },
+ "cpu": {
+  "demand_cycles": {
+   "ABDF": 181930,
+   "C": 96330,
+   "EHI": 173370,
+   "GJ": 217450
+  },
+  "phase_cycles": 250000,
+  "f_cpu_hz": 434900000
+ },
+ "response_bound": {
+  "cycles": 967450,
+  "ms": 1.9349,
+  "task": "J",
+  "phase": 3
+ },
+ "iterations": {
+  "per_release_offset": [
+   {
+    "release_offset_ms": 0.0,
+    "count": 8,
+    "max_ms": 1.414384
+   },
+   {
+    "release_offset_ms": 0.5,
+    "count": 8,
+    "max_ms": 1.1793
+   },
+   {
+    "release_offset_ms": 1.0,
+    "count": 8,
+    "max_ms": 1.860738
+   },
+   {
+    "release_offset_ms": 1.5,
+    "count": 8,
+    "max_ms": 1.360706
+   }
+  ],
+  "max_ms": 1.860738
+ },
+ "tab82": [
+  {
+   "flow": "F1",
+   "min_release": 28530,
+   "deadline": 261000,
+   "volume_bytes": 1230,
+   "latency_min_cycles": 1890,
+   "latency_max_cycles": 1984
+  },
+  {
+   "flow": "F2",
+   "min_release": 181930,
+   "deadline": 261000,
+   "volume_bytes": 6780,
+   "latency_min_cycles": 3293,
+   "latency_max_cycles": 3439
+  },
+  {
+   "flow": "F3",
+   "min_release": 96330,
+   "deadline": 261000,
+   "volume_bytes": 1200,
+   "latency_min_cycles": 1909,
+   "latency_max_cycles": 2150
+  },
+  {
+   "flow": "F4",
+   "min_release": 128070,
+   "deadline": 370880,
+   "volume_bytes": 5670,
+   "latency_min_cycles": 2991,
+   "latency_max_cycles": 3164
+  },
+  {
+   "flow": "F5",
+   "min_release": 173370,
+   "deadline": 370880,
+   "volume_bytes": 8900,
+   "latency_min_cycles": 3798,
+   "latency_max_cycles": 3990
+  }
+ ],
+ "monitor": {
+  "errors": 0,
+  "nodes": 4
+ }
+}

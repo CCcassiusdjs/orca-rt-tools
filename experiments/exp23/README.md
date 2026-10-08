@@ -6,10 +6,10 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 
 | Command | Effect | Needs |
 |---|---|---|
-| `make` | Analyzes the stored log of run E (`logs/E.events.txt`, the simulation of this tree) and checks it against `reference_head.json`; these are the numbers of the paper | Python with `orca-rt-tools/requirements.txt` |
+| `make` | Analyzes the stored log of run F (`logs/F.events.txt`, the simulation of this tree) and checks it against `reference_head.json`; these are the numbers of the paper | Python with `orca-rt-tools/requirements.txt` |
 | `make frequency` | Minimum frequency of application E with the analysis flow (CLI input `apps/synthetic-app-e/synthetic-app-e.csv`, `arch/hermes-2x2.gml`, first frequency 500 MHz): f* of the network bisection, f_CPU of the CPU test, the network check at f_CPU and the minimum frequency, with the `.map` file and with the Spiral Mapping; check against `reference_frequency.json` (also part of `make`) | Python |
-| `make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D` | The same for run D | Python <!-- anon:drop-line --> |
-| `make runs` | Analyzes the five stored runs into `build/runs/{A,B,C,D,E}` (join rule `any3`) | Python <!-- anon:drop-line --> |
+| `make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D` | The same for run D (`E` and `reference_E.json` for run E) | Python <!-- anon:drop-line --> |
+| `make runs` | Analyzes the six stored runs into `build/runs/{A,B,C,D,E,F}` (join rule `any3` for A to E, `per_producer` for F) | Python <!-- anon:drop-line --> |
 | `make sim` | Simulates this tree (`simulate.sh build/sim`) | Questa or ModelSim, `riscv64-elf` toolchain |
 | `make paper` | `sim`, then analysis and check against `reference_head.json` | Questa or ModelSim, toolchain, Python |
 | `make paper REQUIRE_CLEAN=1` | The same, but `simulate.sh` stops unless the tree is a clean git checkout at a tag or a `git archive` of a commit | Same as `make paper`, git |
@@ -82,7 +82,8 @@ The files keep only the lines that the analysis reads (`grep` of the transcript,
 | B | fixed (b920605) | 4c299fc | 100 ps | Same events as A |
 | C | fixed (b920605) | fixed (b920605) | 100 ps | `noc.c` fix delays the events by 446 to 870 cycles |
 | D | fixed with `timescale 1ns/100ps (6a049b5) | 4c299fc | 1 ns | Same events as A with times divided by 10 |
-| E | this tree (`make paper`) | this tree | 1 ns | Differs from C by up to 2 cycles of CPU time per iteration and 2 to 6 cycles of packet latency; the only change to the simulated software after b920605 is the zero-size check of `ddma.c` (828835f) |
+| E | 0b02861 (`make paper`) | 0b02861 | 1 ns | Differs from C by up to 2 cycles of CPU time per iteration and 2 to 6 cycles of packet latency; the only change to the simulated software after b920605 is the zero-size check of `ddma.c` (828835f). J joins any three packets; E->I with tag 3450. `reference_E.json` |
+| F | this tree (tag exp23-F, 69d9cc5) | this tree | 1 ns | `weird_a.c` with the per-producer join of J and E->I with tag 9010. Against E: ABDF, C equal; EHI +3 cycles; GJ 181 763.6 (E 183 086); packet latencies within 2 cycles of E, except the maximum of F4 (2 993, E 3 164); responses 1.3605 to 1.8612 ms (E 1.1793 to 1.8607 ms). 0 monitor errors in 166 packets; `packet_pairs.unexpected` 0 |
 
 <!-- anon:drop-end -->
-`reference_head.json` (for `make paper`) holds the values of run E: `make paper` on the GAPH server, Questa 2025.3, riscv64-elf-gcc 12.2.0, 6 minutes of simulation.
+`reference_head.json` (for `make paper`) holds the values of run F: simulation (`simulate.sh`) of a `git archive` of tag exp23-F (`repo_state=archive`), Questa 2025.3, riscv64-elf-gcc 12.2.0. `logs/F.RUN_INFO` and `logs/F.time.txt` keep the source identification and the time of `vsim` (5 min 46 s wall clock, 343.6 s user time, 54 MB of resident memory).
