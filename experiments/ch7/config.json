@@ -1,5 +1,5 @@
 {
- "_doc": "Table 7.1. Graphs: tp-tools/apps/var-nnodes/10_<|V|>.txt of commit 4e43483 (removed in aa7b97d). graphs/ keeps |V| = 20 to 100; make graphs extracts all sizes from the git history. The thesis states N = 16 (4x4 mesh); the printed values come from N = 4.",
+ "_doc": "Table 7.1. Graphs: tp-tools/apps/var-nnodes/10_<|V|>.txt of commit 4e43483 (removed in aa7b97d). graphs/ keeps |V| = 20 to 100 as text and |V| = 200 to 900 in graphs/10_200-900.tar.xz (SHA-256 of the 17 files in graphs/SHA256SUMS); make graphs unpacks all sizes into build/graphs. The thesis states N = 16 (4x4 mesh); the printed values come from N = 4.",
  "n": 4,
  "sizes": [
   20,

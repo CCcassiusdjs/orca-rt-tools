@@ -70,6 +70,18 @@ def test_sequence_comes_from_the_bench_engine(monkeypatch):
         {"E": (11000, 52700), "I": (63700, 128070), "H": (139070, 173370)}
 
 
+def test_phase_windows_come_from_the_release_model(monkeypatch):
+    """The flow table takes release and deadline from the phase model of
+    the analysis (release.phase_flows), equal to Tab. 8.2."""
+    calls = []
+    real = exp23.release.phase_flows
+    monkeypatch.setattr(exp23.release, "phase_flows", lambda *a: calls.append(a) or real(*a))
+    w = exp23.phase_windows(cfg())
+    assert len(calls) == 1
+    assert w == {"F1": (28530, 261000), "F2": (181930, 261000), "F3": (96330, 261000),
+                 "F4": (128070, 370880), "F5": (173370, 370880)}
+
+
 def test_units_detected_and_runs_equal_in_cycles(runs):
     a, d = runs["A"][0], runs["D"][0]
     assert a["unit"]["name"] == "100 ps" and d["unit"]["name"] == "1 ns"

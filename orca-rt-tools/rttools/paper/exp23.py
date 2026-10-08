@@ -31,6 +31,7 @@ import os
 import sys
 
 from rttools.bench_t import estimate as cpu_estimate
+from rttools.modules.instances import release
 from rttools.tui.model import export, metrics, parsers
 from rttools.tui.model.trace import Trace
 
@@ -115,6 +116,31 @@ def cpu_sequence(cfg):
             out[name] = {"cluster": cluster, "start": exact(seq[name]["start"] / est["scale"]),
                          "finish": exact(seq[name]["finish"] / est["scale"])}
     return out
+
+
+def phase_windows(cfg):
+    """Release offset and absolute deadline of the first packet of each
+    flow of the config, {flow name: (f^(source), P + s^(target))}, from the
+    phase model of the analysis (rttools/modules/instances/release.py) on
+    the characterized costs / scale, the scheduler cost / scale and the
+    dispatch order of each cluster; cycles from the start of the source
+    phase."""
+    est = cfg["estimate"]
+    scale = est["scale"]
+    period = exact(cfg["release_period_s"] * cfg["clock_hz"])
+    tasks, mapping, sequences = [], [], {}
+    for cluster, ts in est["clusters"].items():
+        for name, w in ts:
+            tasks.append((name, {"wcet": exact(w / scale)}))
+        mapping.append({"node": cluster, "tasks": [n for n, _ in ts]})
+        sequences[cluster] = [n for n, _ in ts]
+    instance = {
+        "tasks": tasks,
+        "flows": [(f["source"], f["target"], {"label": f["name"], "period": period}) for f in cfg["flows"]],
+        "release": {"model": release.PHASE, "scheduler_cycles": exact(est["scheduler_cycles"] / scale),
+                    "sequences": sequences},
+    }
+    return release.phase_flows(instance, mapping)
 
 
 def estimates(cfg):

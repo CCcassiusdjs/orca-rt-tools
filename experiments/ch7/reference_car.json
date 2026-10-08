@@ -1,0 +1,239 @@
+{
+ "_doc": "Reference of make car (python -m rttools.paper.car): CAR on 16 clusters and the criterion of application E on 4 clusters.",
+ "car": {
+  "total_volume": 10687488,
+  "rows": {
+   "Reference": {
+    "V": 16,
+    "E": 38,
+    "noc_volume": 10687488,
+    "noc_volume_percent": 100.0,
+    "M1": 408093.3486736702,
+    "M2": 0.4841229182759271,
+    "M3": 1.0479545801595287,
+    "largest_load": 700002,
+    "largest_load_percent": 70.0002,
+    "loads_above_capacity": 0,
+    "contractions": 0
+   },
+   "MAX_PROC": {
+    "V": 16,
+    "E": 20,
+    "noc_volume": 1728000,
+    "noc_volume_percent": 16.168439206668584,
+    "M1": 205529.44495229874,
+    "M2": 214330.42053505697,
+    "M3": 6.481482638888889,
+    "largest_load": 1050000,
+    "largest_load_percent": 105.0,
+    "loads_above_capacity": 2,
+    "contractions": 17
+   },
+   "MIN_COMM": {
+    "V": 16,
+    "E": 21,
+    "noc_volume": 370688,
+    "noc_volume_percent": 3.468429625371275,
+    "M1": 18229.486630754625,
+    "M2": 1066878.357249192,
+    "M3": 30.214093793162984,
+    "largest_load": 4783334,
+    "largest_load_percent": 478.3334,
+    "loads_above_capacity": 1,
+    "contractions": 17
+   },
+   "MAX_COMM": {
+    "V": 16,
+    "E": 17,
+    "noc_volume": 10316800,
+    "noc_volume_percent": 96.53157037462873,
+    "M1": 424256.797601899,
+    "M2": 1079561.0270435084,
+    "M3": 1.0856081343052109,
+    "largest_load": 4666668,
+    "largest_load_percent": 466.6668,
+    "loads_above_capacity": 2,
+    "contractions": 17
+   },
+   "MIN_PROC": {
+    "V": 16,
+    "E": 16,
+    "noc_volume": 5251584,
+    "noc_volume_percent": 49.137683242311006,
+    "M1": 428448.84845684905,
+    "M2": 1446619.5825671428,
+    "M3": 2.1326902511699326,
+    "largest_load": 6300000,
+    "largest_load_percent": 630.0,
+    "loads_above_capacity": 1,
+    "contractions": 17
+   }
+  }
+ },
+ "appe": {
+  "total_volume": 52260,
+  "chosen": "MAX_PROC",
+  "rows": {
+   "MIN_COMM": {
+    "E": 4,
+    "noc_volume": 7110,
+    "M1": 965.6959925359533,
+    "M2": 55666.568737438814,
+    "M3": 71.77215189873418,
+    "largest_load": 203600,
+    "clusters": [
+     {
+      "tasks": [
+       "E",
+       "I",
+       "H",
+       "J"
+      ],
+      "load": 203600
+     },
+     {
+      "tasks": [
+       "F",
+       "G"
+      ],
+      "load": 157900
+     },
+     {
+      "tasks": [
+       "C"
+      ],
+      "load": 78900
+     },
+     {
+      "tasks": [
+       "A",
+       "B",
+       "D"
+      ],
+      "load": 69900
+     }
+    ]
+   },
+   "MAX_COMM": {
+    "E": 5,
+    "noc_volume": 38250,
+    "M1": 1276.4795337176386,
+    "M2": 60137.9819664744,
+    "M3": 13.341176470588236,
+    "largest_load": 194700,
+    "clusters": [
+     {
+      "tasks": [
+       "A",
+       "C",
+       "E",
+       "H",
+       "B"
+      ],
+      "load": 194700
+     },
+     {
+      "tasks": [
+       "G",
+       "J"
+      ],
+      "load": 179100
+     },
+     {
+      "tasks": [
+       "D",
+       "F"
+      ],
+      "load": 79800
+     },
+     {
+      "tasks": [
+       "I"
+      ],
+      "load": 56700
+     }
+    ]
+   },
+   "MIN_PROC": {
+    "E": 4,
+    "noc_volume": 17130,
+    "M1": 2403.2204955018174,
+    "M2": 181125.15527943656,
+    "M3": 29.78984238178634,
+    "largest_load": 440400,
+    "clusters": [
+     {
+      "tasks": [
+       "C",
+       "E",
+       "I",
+       "F",
+       "G",
+       "J",
+       "H"
+      ],
+      "load": 440400
+     },
+     {
+      "tasks": [
+       "B"
+      ],
+      "load": 45600
+     },
+     {
+      "tasks": [
+       "A"
+      ],
+      "load": 12300
+     },
+     {
+      "tasks": [
+       "D"
+      ],
+      "load": 12000
+     }
+    ]
+   },
+   "MAX_PROC": {
+    "E": 5,
+    "noc_volume": 23780,
+    "M1": 3071.8893209228745,
+    "M2": 36383.19495316485,
+    "M3": 21.459209419680402,
+    "largest_load": 179100,
+    "clusters": [
+     {
+      "tasks": [
+       "G",
+       "J"
+      ],
+      "load": 179100
+     },
+     {
+      "tasks": [
+       "A",
+       "B",
+       "D",
+       "F"
+      ],
+      "load": 137700
+     },
+     {
+      "tasks": [
+       "E",
+       "H",
+       "I"
+      ],
+      "load": 114600
+     },
+     {
+      "tasks": [
+       "C"
+      ],
+      "load": 78900
+     }
+    ]
+   }
+  }
+ }
+}
