@@ -10,10 +10,14 @@ from rttools.modules.instances import instantiator
 from rttools.modules.unwrapper import flowUnwrapper
 from rttools.modules.backend.ags import ags, heuristics
 from rttools.modules.backend.minizinc import minizinc
+from rttools.modules.mapping import mapfile, spiral
 
 # the frequency search uses the AGS backend only (see
 # rttools/modules/frequency/search.py)
 RTTOOLS_ENABLE_MINIZINC = False
+
+# value of <map> that selects the Spiral Mapping instead of a .map file
+MAP_SPIRAL = "spiral"
 
 
 # ==== Indrusiak params ===========
@@ -49,7 +53,8 @@ def parse_args(args):
 
     Ordem: <app> <map> <arch> [<freq>] [<pruning factor>]
     [<fail threshold>] [<optimize True|False>]. Argumentos ausentes
-    receive the global values of the module."""
+    receive the global values of the module. <map> is a .map file or
+    the word `spiral` (MAP_SPIRAL)."""
     cfg = {
         "app_file": args[0],
         "map_file": args[1],
@@ -70,6 +75,53 @@ def parse_args(args):
     if len(args) >= 7:
         cfg["optimize"] = (args[6] == "True")
     return cfg
+
+
+def mesh_size(noc):
+    """(width, height) of a mesh topology read by nocparser (node
+    attributes X and Y)."""
+    xs = [int(d["X"]) for _, d in noc.nodes(data=True)]
+    ys = [int(d["Y"]) for _, d in noc.nodes(data=True)]
+    return max(xs) + 1, max(ys) + 1
+
+
+def load_mapping(map_arg, app, appname, noc, noc_file):
+    """Mapping entries ({"node", "tasks"}) for the <map> argument: a .map
+    file (rttools.modules.io.mapparser), or the word `spiral`, which runs
+    ORT/GCM (criteria of Chapter 7, smallest deviation of the cluster WCET
+    sums) and the Spiral Mapping (thesis, Section 8.1.2) and saves the
+    result as `<app>-SPIRAL-<arch>.map` in the current directory.
+
+    Returns (entries, problems). `problems` lists a task on two nodes, a
+    task out of the mapping and a node out of the architecture; a task of
+    the file that the application does not have only gives a warning."""
+    if map_arg == MAP_SPIRAL:
+        width, height = mesh_size(noc)
+        if width * height != noc.number_of_nodes():
+            return None, ["spiral mapping needs a full mesh; `" + noc_file + "` has "
+                          + str(noc.number_of_nodes()) + " nodes in " + str(width) + "x" + str(height)]
+        tasks, edges = spiral.from_networkx(app)
+        res = spiral.map_application(tasks, edges, width, height)
+        for r in res["rows"]:
+            info("GCM " + r["criterion"] + ": deviation " + str(round(r["sigma"], 3)) + "; "
+                 + ", ".join(c + " (" + str(w) + ")" for c, w in zip(r["clusters"], r["wcet"])))
+        info("Clustering criterion: " + res["criterion"])
+        for c, node in sorted(res["cluster_nodes"].items(), key=lambda kv: kv[1]):
+            info("Spiral mapping: " + c + " (volume " + str(res["volumes"][c]) + ") -> node " + str(node))
+        entries = mapfile.from_dict(res["mapping"])
+        out = appname + "-SPIRAL-" + Path(noc_file).stem + ".map"
+        mapfile.write(out, entries)
+        info("Mapping saved to `" + out + "`")
+    else:
+        info("Loading mapping file `" + map_arg + "`")
+        entries = mapparser.loadFromFile(map_arg)
+    # app or noc is None only when a test replaces the loaders
+    tasks = list(app.nodes) if app is not None else None
+    nodes = list(noc.nodes) if noc is not None else None
+    if tasks is not None:
+        for t in mapfile.unknown_tasks(entries or [], tasks):
+            warn("Mapping: task " + t + " is not in the application (ignored)")
+    return entries, mapfile.problems(entries or [], tasks, nodes)
 
 
 def main():
@@ -103,6 +155,7 @@ def main():
     if len(args) not in [3, 4, 5, 6, 7]:
         error("Usage: ")
         error("  __main__.py <app> <map> <arch> [<freq>] [<pruning factor>] [<fail threshold>] [<optimize True|False>]")
+        error("  <map>: mapping file (.map) or `" + MAP_SPIRAL + "` (ORT/GCM clustering and Spiral Mapping)")
         return 1
 
     # cfg_file = "rttools.ini"
@@ -131,8 +184,11 @@ def main():
     info("Loading NoC file `" + noc_file + "`")
     noc = nocparser.loadFromFile(noc_file)
 
-    info("Loading mapping file `" + map_file + "`")
-    mapping = mapparser.loadFromFile(map_file)
+    mapping, bad = load_mapping(map_file, app, appname, noc, noc_file)
+    for p in bad:
+        error("Mapping: " + p)
+    if bad:
+        return 1
 
     if RTTOOLS_DEFAULT_FREQUENCY is None:
         RTTOOLS_DEFAULT_FREQUENCY = guesser.guess()
