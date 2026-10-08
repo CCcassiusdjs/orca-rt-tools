@@ -1,10 +1,60 @@
-from rttools.modules.backend.ags.heuristics import resort
+"""Adaptive Guided Search (AGS): Fig. 6.6 of the thesis (Domingues, 2024)
+and Fig. 3 of Domingues et al., ICECS 2022.
+
+Published pseudocode, as this module reads it:
+
+    R <- packets in the order of the criterion (LSTF, MBCF or MCPF)
+    Q <- empty ordered set; S <- {} (skipped); F <- PF; G <- threshold
+    T <- zeros (failures per packet)
+    while |R| != 0:
+        schedule <- {}; for q in Q: allocate(schedule, q, F)    (reset)
+        for r in R:
+            if not allocate(schedule, r, F):
+                T[r] <- T[r] + 1
+                if T[r] < G: R.push_front(r); goto reset
+                else: R.remove(r); S.push(r)
+        return schedule, S
+
+Reading adopted where the pseudocode leaves room:
+
+- allocate(schedule, r, F) places packet r alone (first fit) and never
+  moves a placed packet: it tries the releases a, a + F, a + 2F, ... of
+  the window [a, b] of r, with b = deadline - occupancy, truncated at b
+  (b is the last candidate when it is not on the grid, as in Fig. 6.5),
+  and keeps the first release whose interval [k, k + o] overlaps no
+  placed packet on any link of the path of r (closed intervals, as the
+  collision test of Sec. 6.3.1).
+- push_front moves r to the front of R (R holds each packet once).
+- The jump after a failure goes to the reset (line 10 of Fig. 6.6) and
+  keeps T. The jump to line 7 of the figure passes line 8, which zeroes
+  T; with T zeroed, a packet that never fits makes the search loop
+  forever, and the text counts the tries of each packet across resets.
+- No line of the pseudocode inserts into Q, so the partial schedule of
+  lines 11 to 13 is empty and every reset starts from an empty schedule.
+- After a packet reaches G failures, it leaves R into S and the pass
+  continues with the next packet (pseudocode, lines 20 and 21).
+- The search returns when a pass reaches the end of R.
+
+Each reset follows a failure with T[r] < G, so a run has at most
+|P| (G - 1) resets.
+
+Counters (module attribute `hsearch`, read by rttools.paper.ch6 and the
+TUI): entered = calls to allocate plus one per run for the final node
+(the depth-first search before counted its leaf node the same way);
+ignored = candidate releases rejected by the collision test; skipped =
+packets in S; resets = number of resets.
+"""
+from types import SimpleNamespace
+
 from rttools.terminal.terminal import debug, error, info, warn
-from rttools.vector.vector import mcopy
+
+# search counters of the last run
+hsearch = SimpleNamespace(entered=0, ignored=0, skipped=[], resets=0)
+
 
 '''
 Checks whether two ranges overleap.
-@param ra range a, the first range 
+@param ra range a, the first range
 @param rb range b, the second range
 @returns True if the ranger overleap, otherwise False
 
@@ -15,209 +65,113 @@ def overleap(ra, rb):
 
   return not(maxa < minb or maxb < mina)
 
-'''
-Checks whether a given partial solution has a valid
-solution within it. 
-@param V the partial solution
-@returns True if a solution is still feasible, False otherwise
-'''
-def check(V):
-  for i in range(0, len(V)):
-    for j in range(0, len(V[0]) - 1):
-      if(V[i][j] != -1):
-        rangea = V[i][j]
-        for k in range(j + 1, len(V[0])):
-          if(V[i][k] != -1):
-            rangeb = V[i][k]
-            if overleap(rangea, rangeb):
-              return False
-  return True
 
-'''
-Checks whether some packets conflits with
-other packets in the model. 
-'''
-def check_consistency(V, O, idx, show=False):
+def candidates(a, b, step):
+  """Releases a, a + step, ... up to b, with b itself as the last
+  candidate (truncation at the maximum release). Empty when b < a."""
+  if b < a:
+    return []
+  ks = list(range(a, b + 1, step))
+  if ks[-1] != b:
+    ks.append(b)
+  return ks
 
-  # acquire range for package at V[idx]
-  rangea = (0,0)
-  for i in range(0, len(V)):
-    if(V[i][idx] != None):
-      rangea = (V[i][idx], V[i][idx] + O[i][idx]) #first occurence!
-      break
 
-  # for each link in the model
-  for l in range(0, len(V)):
+def packet_view(p, j):
+  """Links, occupancy and release window [a, b] of packet j."""
+  links = [l for l in range(len(p['occupancy'])) if p['occupancy'][l][j] is not None]
+  if not links:
+    return [], 0, 0, 0   # no link: nothing to reserve
+  l0 = links[0]
+  o = p['occupancy'][l0][j]
+  a = p['min_start'][l0][j]
+  b = p['deadline'][l0][j] - o
+  return links, o, a, b
 
-    # ignore row if current packet doesnt use that link
-    if(V[l][idx] != None):
 
-      # for each packet in that link, find if it 
-      # overleaps current packet
-      for p in range(0, len(V[0])):
-        if(p != idx and V[l][p] != None): # avoid comparing to itself
-          rangeb = (V[l][p], V[l][p] + O[l][p])
-
-          if(overleap(rangea, rangeb)):
-            # if show:
-            #   warn("conflict at link '" + str(l) + "'")
-            return False
-  return True
-
-'''
-Heuristic search. 
-@param M minimum release time values 
-@param O occupancy values
-@param D deadline values 
-@param V problem instance
-@param h a heuristic vector 
-'''
-
-def hsearch(p, space, partial, h, depth, t, tries, step):
-
-  # global counter for entered nodes
-  hsearch.entered += 1
-
-  # verify whether we reach a leaf node.
-  # if node reached, then evaluate current
-  # solution. If this is a suitable solution, 
-  # return it. Otherwise keep going.
-  if len(h) == 0:
-    return partial
-
-  # Select next node based on the heuristic. 
-  # Ex. get the lesser slack time
-  nnode = h.pop()
-
-  # increment the number of time the algorithm entered this node
-  t[nnode] += 1 #tries
-
-  # print current solution node
-  # used_links = []
-  # for l in range(0, len(p['occupancy'])):
-  #   if(p['occupancy'][l][nnode] != None):
-  #     used_links.append(p['links'][l])
-
-  # acquire packet solution range
-  packet_range = (0,0) 
-  for i in range(0, len(space)):
-    if(space[i][nnode] != None):
-      packet_range = space[i][nnode]
-      break
-  
-  #debug("depth:" + str(depth) + "/" + str(len(p['packets'])) + " " + str(p['packets'][depth]))
-  #  + " tries:" + str(t[nnode]) + "/" + str(tries)  + " | " + " ".join(used_links))
-
-  # iterate through the range
-  min, max = packet_range
-  res = None
-
-  # dvalue =  (max - min) / step
-  # warn("Depth " + str(depth) + " reported ~" + str(int(dvalue)) + 
-  #   " checkings. Visited " + str(t[nnode]) + " times.")
-
-  # the window [min, max] is closed: max = deadline - occupancy is a valid
-  # release (a packet with zero slack has min == max)
-  for k in range(min, max + 1, step):
-
-    # replace tentative starting time value for that package
-    for i in range(0, len(space)):
-      if(space[i][nnode] != None):
-        partial[i][nnode] = k
-
-    # Check consistency. If branch has a possible
-    # solution, keep searching
-    check = check_consistency(partial, p['occupancy'], nnode)
-
-    if check:
-      res = hsearch(p, space, partial, h, depth + 1, t, tries, step)
-      if res != None:
-        break
-    else:
+def allocate(placed, view, step):
+  """First release of the window of the packet whose interval overlaps no
+  interval in `placed` (link -> list of (start, end)) on its links, or
+  None. Counts the rejected candidates in hsearch.ignored."""
+  links, o, a, b = view
+  for k in candidates(a, b, step):
+    rng = (k, k + o)
+    if any(overleap(rng, iv) for l in links for iv in placed[l]):
       hsearch.ignored += 1
+      continue
+    return k
+  return None
 
-  # rewrite values back to the partial solution before returning
-  # replace value for that package
-  if(res == None or res == "RESTART"):
-    for i in range(0, len(space)):
-      if(space[i][nnode] != None):
-        partial[i][nnode] = None
-
-  if(t[nnode] == tries):
-    #return "RESTART"
-    hsearch.skipped.append(nnode)
-    error("Could not schedule " + str(p['packets'][nnode]['name']) + "! Restarting.")
-
-    for l in range(0, len(p['occupancy'])):
-      if (p['occupancy'][l][nnode] != None):
-        debug(p['links'][l])
-
-    check_consistency(partial, p['occupancy'], nnode, True)
-
-    return None
-
-  h.append(nnode)
-
-  return res
-
-'''
-Self-counting!
-'''
-hsearch.entered = 0
-hsearch.ignored = 0
-hsearch.skipped = []
 
 def search3(p, heuristic, tries, step):
-  
-  # Initial solution has no packets placed yet.
-  # Rationally: select packet with the highest
-  # value for the given heuristic. Place the 
-  # selected packet and then select another one.
-  partial_solution = [[None for x in p['occupancy'][0]] for y in p['occupancy']]
+  """Runs the AGS on problem `p` (tables link x packet min_start,
+  occupancy and deadline) with the order of `heuristic`, threshold G =
+  `tries` and pruning factor PF = `step`.
 
-  # Generate ranges of solution here. At this 
-  # point, we proceed as Minizinc, using intervalar
-  # arithmetics. Sparse matrix notation takes '-1' as
-  solution_space = mcopy(p['occupancy'])
-  for i in range(0, len(solution_space)):
-    for j in range(0, len(solution_space[i])):
-      cell = solution_space[i][j]
-      if(cell != None):
-        solution_space[i][j] = (p['min_start'][i][j], p['deadline'][i][j] - p['occupancy'][i][j])
-
-  # Heuristic
-  h = heuristic(solution_space, p['min_start'], p['occupancy'], p['deadline'])
-
-  t = [0 for x in p['occupancy'][0]] # packet tries counter
-
-  res = "RESTART"
-  skip = set()
+  Returns (schedule, skipped): schedule is a link x packet table with the
+  release of each placed packet on the links of its path (None
+  elsewhere and for skipped packets); skipped is the set S of packet
+  indices that reached G failures."""
   hsearch.entered = 0
   hsearch.ignored = 0
   hsearch.skipped = []
-  while res == "RESTART":
-    
-    info("Fresh start, waiting for hsearch to finish")
-    result = hsearch(p, solution_space, partial_solution, h, 0, t, tries, step)
+  hsearch.resets = 0
 
-    for i in hsearch.skipped:
-      skip.add(i)
-    
-    if result == None:
-      #print("No solution found.")
-      return None
+  nlinks = len(p['occupancy'])
+  npackets = len(p['occupancy'][0]) if nlinks else 0
+  views = [packet_view(p, j) for j in range(npackets)]
 
-    if result != "RESTART":
-      info("Solution found!")
-      info("Ignored nodes: " + str(hsearch.ignored))
-      info("Entered nodes: " + str(hsearch.entered))
-      return (result, skip)
+  # solution space (release windows), input of the criteria
+  space = [[None if p['occupancy'][l][j] is None else
+            (p['min_start'][l][j], p['deadline'][l][j] - p['occupancy'][l][j])
+            for j in range(npackets)] for l in range(nlinks)]
 
-    for i in range(0, len(t)):
-      if t[i] >= tries:
-        t[i] += 1
+  # heuristics list the packet to allocate first at the end
+  R = list(reversed(heuristic(space, p['min_start'], p['occupancy'], p['deadline'])))
+  S = []
+  T = [0 for _ in range(npackets)]
 
-    h = resort(t, p['packets'])
+  while True:
+    # reset: empty schedule (Q is empty)
+    placed = [[] for _ in range(nlinks)]
+    release = {}
+    failed = None
+    i = 0
+    while i < len(R):
+      r = R[i]
+      hsearch.entered += 1
+      k = allocate(placed, views[r], step)
+      if k is not None:
+        release[r] = k
+        for l in views[r][0]:
+          placed[l].append((k, k + views[r][1]))
+        i += 1
+        continue
+      T[r] += 1
+      name = p['packets'][r]['name'] if isinstance(p['packets'][r], dict) else str(p['packets'][r])
+      if T[r] < tries:
+        debug("Could not schedule " + name + " (" + str(T[r]) + "/" + str(tries) + "); reset.")
+        failed = r
+        break
+      error("Could not schedule " + name + " after " + str(T[r]) + " tries; skipped.")
+      R.pop(i)
+      S.append(r)
+    if failed is None:
+      break
+    R.remove(failed)
+    R.insert(0, failed)
+    hsearch.resets += 1
 
-  # call search at node zero
-  return (res, skip)
+  hsearch.entered += 1
+  hsearch.skipped = list(S)
+
+  sched = [[None for _ in range(npackets)] for _ in range(nlinks)]
+  for r, k in release.items():
+    for l in views[r][0]:
+      sched[l][r] = k
+
+  info("AGS finished: " + str(len(release)) + " packets placed, " + str(len(S)) + " skipped, "
+       + str(hsearch.resets) + " resets")
+  info("Ignored nodes: " + str(hsearch.ignored))
+  info("Entered nodes: " + str(hsearch.entered))
+  return (sched, set(S))
