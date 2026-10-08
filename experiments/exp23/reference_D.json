@@ -67,7 +67,7 @@
   {
    "flow": "F1",
    "min_release": 28530,
-   "deadline": 11000,
+   "deadline": 261000,
    "volume_bytes": 1230,
    "latency_min_cycles": 1859,
    "latency_max_cycles": 1952
@@ -75,7 +75,7 @@
   {
    "flow": "F2",
    "min_release": 181930,
-   "deadline": 11000,
+   "deadline": 261000,
    "volume_bytes": 6780,
    "latency_min_cycles": 3262,
    "latency_max_cycles": 3406
@@ -83,7 +83,7 @@
   {
    "flow": "F3",
    "min_release": 96330,
-   "deadline": 11000,
+   "deadline": 261000,
    "volume_bytes": 1200,
    "latency_min_cycles": 1871,
    "latency_max_cycles": 2112
@@ -91,7 +91,7 @@
   {
    "flow": "F4",
    "min_release": 128070,
-   "deadline": 120880,
+   "deadline": 370880,
    "volume_bytes": 5670,
    "latency_min_cycles": 2967,
    "latency_max_cycles": 3140
@@ -99,7 +99,7 @@
   {
    "flow": "F5",
    "min_release": 173370,
-   "deadline": 120880,
+   "deadline": 370880,
    "volume_bytes": 8900,
    "latency_min_cycles": 3774,
    "latency_max_cycles": 3968

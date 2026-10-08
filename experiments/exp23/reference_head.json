@@ -38,6 +38,22 @@
   ],
   "mean_difference_percent": 27.31868638396001
  },
+ "cpu": {
+  "demand_cycles": {
+   "ABDF": 181930,
+   "C": 96330,
+   "EHI": 173370,
+   "GJ": 217450
+  },
+  "phase_cycles": 250000,
+  "f_cpu_hz": 434900000
+ },
+ "response_bound": {
+  "cycles": 967450,
+  "ms": 1.9349,
+  "task": "J",
+  "phase": 3
+ },
  "iterations": {
   "per_release_offset": [
    {
@@ -67,7 +83,7 @@
   {
    "flow": "F1",
    "min_release": 28530,
-   "deadline": 11000,
+   "deadline": 261000,
    "volume_bytes": 1230,
    "latency_min_cycles": 1890,
    "latency_max_cycles": 1984
@@ -75,7 +91,7 @@
   {
    "flow": "F2",
    "min_release": 181930,
-   "deadline": 11000,
+   "deadline": 261000,
    "volume_bytes": 6780,
    "latency_min_cycles": 3293,
    "latency_max_cycles": 3439
@@ -83,7 +99,7 @@
   {
    "flow": "F3",
    "min_release": 96330,
-   "deadline": 11000,
+   "deadline": 261000,
    "volume_bytes": 1200,
    "latency_min_cycles": 1909,
    "latency_max_cycles": 2150
@@ -91,7 +107,7 @@
   {
    "flow": "F4",
    "min_release": 128070,
-   "deadline": 120880,
+   "deadline": 370880,
    "volume_bytes": 5670,
    "latency_min_cycles": 2991,
    "latency_max_cycles": 3164
@@ -99,7 +115,7 @@
   {
    "flow": "F5",
    "min_release": 173370,
-   "deadline": 120880,
+   "deadline": 370880,
    "volume_bytes": 8900,
    "latency_min_cycles": 3798,
    "latency_max_cycles": 3990

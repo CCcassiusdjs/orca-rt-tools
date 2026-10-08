@@ -10,6 +10,7 @@ from rttools.gff.rttools import to_orca
 from rttools.gcpa.method import calculate_gcpa
 
 from rttools.modules.mapping import mapper
+from rttools.modules.instances import release
 from rttools.modules.routing import router
 from rttools.modules.io import svg, vhdl, znc
 
@@ -69,14 +70,23 @@ def get_task_wcet(task_id, tasks, app):
 
     
 
+# release window (offset, end) of the first packet of each flow, in cycles
+# from the start of its period (rttools/modules/instances/release.py)
+def releaseWindows(flows, app, mapping):
+    rel = app.get("release") or release.settings({})
+    if rel["model"] == release.PHASE:
+        return release.phase_flows(app, mapping)
+    wcet_table = task_wcet_table(app)
+    return {f["name"]: (wcet_table[f["source"]], wcet_table[f["source"]] + f["deadline"]) for f in flows}
+
+
 # generates packets for a given list of flows. packets
 # are generated for the whole hyperperiod hp
-def getPacketsFromFlows(flows, hp, tasks, app):
+def getPacketsFromFlows(flows, hp, tasks, app, mapping=None):
     packets = []
-    wcet_table = task_wcet_table(app)
+    windows = releaseWindows(flows, app, mapping)
     for f in flows:
-        task_wcet = wcet_table[f["source"]]
-        #task_wcet = external_cycle_requirements(f["source"], tasks)
+        offset, end = windows[f["name"]]
         min_start = 0
         i = 0
         while min_start < hp:
@@ -85,8 +95,8 @@ def getPacketsFromFlows(flows, hp, tasks, app):
                 "flow": f["name"],
                 "source": f["source"],
                 "target": f["target"],
-                "min_start": min_start + task_wcet,
-                "abs_deadline": min_start + task_wcet + f["deadline"],
+                "min_start": min_start + offset,
+                "abs_deadline": min_start + end,
                 "datasize": f["datasize"],
             }
             packets.append(packet)
@@ -132,7 +142,7 @@ def unwrap(app, arch, mapping):
         return None, 0, None
 
     # get packets from flows
-    packets = getPacketsFromFlows(flows, hp, app["tasks"], app)
+    packets = getPacketsFromFlows(flows, hp, app["tasks"], app, mapping)
     info(
         "Extracted " + str(len(packets)) + " packets from " + str(len(flows)) + " flows"
     )

@@ -40,9 +40,34 @@ def test_corrected_values_of_chapter_8(runs):
     assert all(v["equal_in_all_hyperperiods"] for v in m["tab83"]["per_cluster"].values())
     assert sorted(round(p["max_ms"], 3) for p in m["iterations"]["per_release_offset"]) == [1.179, 1.361, 1.414, 1.861]
     t82 = {r["flow"]: (r["min_release"], r["deadline"], r["volume_bytes"]) for r in m["tab82"]}
-    assert t82 == {"F1": (28530, 11000, 1230), "F2": (181930, 11000, 6780), "F3": (96330, 11000, 1200),
-                   "F4": (128070, 120880, 5670), "F5": (173370, 120880, 8900)}
+    # deadline = start of the target in the phase after the source phase
+    assert t82 == {"F1": (28530, 261000, 1230), "F2": (181930, 261000, 6780), "F3": (96330, 261000, 1200),
+                   "F4": (128070, 370880, 5670), "F5": (173370, 370880, 8900)}
     assert m["monitor"]["errors"] == 0 and m["monitor"]["nodes"] == 4
+
+
+def test_cpu_check_and_response_bound(runs):
+    m, _ = runs["E"]
+    assert m["cpu"]["demand_cycles"] == {"ABDF": 181930, "C": 96330, "EHI": 173370, "GJ": 217450}
+    assert m["cpu"]["f_cpu_hz"] == 434900000 and m["cpu"]["meets_phase"] is True
+    assert m["cpu"]["phase_percent"]["GJ"] == pytest.approx(86.98)
+    rb = m["response_bound"]
+    assert (rb["cycles"], rb["task"], rb["phase"]) == (967450, "J", 3)
+    assert rb["ms"] == pytest.approx(1.9349)
+    assert rb["phases"] == {"A": 0, "B": 0, "D": 0, "F": 0, "C": 1, "G": 1, "E": 2, "H": 2, "I": 2, "J": 3}
+    # the bound covers every measured response
+    assert m["iterations"]["max_ms"] <= rb["ms"] <= m["iterations"]["deadline_ms"]
+
+
+def test_sequence_comes_from_the_bench_engine(monkeypatch):
+    """cpu_sequence calls ORT/BENCH (no closed form in the pipeline)."""
+    calls = []
+    real = exp23.cpu_estimate.sequence
+    monkeypatch.setattr(exp23.cpu_estimate, "sequence", lambda *a: calls.append(a) or real(*a))
+    seq = exp23.cpu_sequence(cfg())
+    assert len(calls) == 4
+    assert {t: (v["start"], v["finish"]) for t, v in seq.items() if v["cluster"] == "EHI"} == \
+        {"E": (11000, 52700), "I": (63700, 128070), "H": (139070, 173370)}
 
 
 def test_units_detected_and_runs_equal_in_cycles(runs):
@@ -77,6 +102,9 @@ def test_outputs_and_macros(runs):
     values = open(os.path.join(d, "values.tex")).read()
     assert "\\newcommand{\\ExpAbdfMeasured}{143\\,900}" in values
     assert "\\newcommand{\\ExpMaxResponseMs}{1.861}" in values
+    assert "\\newcommand{\\ExpResponseBoundMs}{1.935}" in values
+    assert "\\newcommand{\\ExpResponseBoundCycles}{967\\,450}" in values
+    assert "\\newcommand{\\ExpCpuFrequencyMhz}{434.9}" in values
 
 
 def test_check_reports_differences(tmp_path, runs):

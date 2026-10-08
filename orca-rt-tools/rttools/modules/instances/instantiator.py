@@ -1,5 +1,6 @@
 from rttools.terminal.terminal import error, info, warn
 from rttools.modules.instances.routing import getNumFlits
+from rttools.modules.instances import release
 import networkx as nx
 import copy
 
@@ -38,7 +39,10 @@ def createInstance(app, noc, frequency):
       }
     ))
 
+  # release model of the flows and its parameters (release.py); the
+  # task wcet is the cost c^(v) of the task in cycles
   return {
     'tasks': tasks, 
-    'flows' : flows
+    'flows' : flows,
+    'release': release.settings(getattr(app, 'graph', {}) or {})
   }

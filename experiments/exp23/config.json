@@ -16,7 +16,7 @@
   "source": {"pe": "0-0", "task": "A"},
   "join": {"pe": "1-1", "task": "J", "tags": ["8900", "5670", "1230"], "packets_per_iteration": 3},
   "estimate": {
-    "_doc": "ORT/BENCH estimates of rttools/bench_t/main.py: tasks of each cluster in order, WCET in thesis scale (10 times weird_a.c), scheduler cost included in each WCET.",
+    "_doc": "Characterized task costs of rttools/bench_t/main.py: tasks of each cluster in dispatch order, cost in thesis scale (10 times weird_a.c), scheduler cost included in each cost. rttools/bench_t/estimate.py runs the ORT/BENCH engine on each list.",
     "scale": 10,
     "scheduler_cycles": 110000,
     "clusters": {
@@ -25,6 +25,10 @@
       "EHI": [["E", 527000], ["I", 753700], ["H", 453000]],
       "GJ": [["G", 1098800], ["J", 1075700]]
     }
+  },
+  "task_graph": {
+    "_doc": "Edges of application E (apps/synthetic-app-e/synthetic-app-e.txt), for the phase index of each task and the response bound.",
+    "edges": [["A", "C"], ["A", "B"], ["B", "D"], ["C", "E"], ["D", "F"], ["F", "G"], ["E", "I"], ["E", "H"], ["I", "J"], ["H", "J"], ["G", "J"]]
   },
   "flows": [
     {"name": "F1", "source": "A", "target": "C", "tag": "1230", "src_pe": "0-0", "dst_pe": "0-1"},

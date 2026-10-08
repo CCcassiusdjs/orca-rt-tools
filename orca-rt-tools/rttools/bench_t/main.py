@@ -1,52 +1,35 @@
-task_set_a = []
-task_set_a.append({ "name": "A", "wcet": 285300})
-task_set_a.append({ "name": "B", "wcet": 586000})
-task_set_a.append({ "name": "D", "wcet": 140000})
-task_set_a.append({ "name": "F", "wcet": 808000})
+"""Characterized task costs of application E and their sequence per PE.
 
-task_set_b = []
-task_set_b.append({ "name": "C", "wcet": 963300})
+    python -m rttools.bench_t.main
 
-task_set_c = []
-task_set_c.append({ "name": "E", "wcet": 527000})
-task_set_c.append({ "name": "I", "wcet": 753700})
-task_set_c.append({ "name": "H", "wcet": 453000})
+The costs c^(v) are characterized per task (thesis scale: 10 times the
+cycles of pkt-sim/software/ucx-os/app/weird_a.c) and include the
+scheduler cost (SCHEDULER_CYCLES) of the dispatch of the task. Each list
+gives the tasks of one cluster in dispatch order. The command prints the
+sequence of each PE computed by ORT/BENCH (rttools/bench_t/estimate.py)
+and the CPU demand of the PE per iteration.
+"""
+import sys
 
-task_set_d = []
-task_set_d.append({ "name": "G", "wcet": 1098800})
-task_set_d.append({ "name": "J", "wcet": 1075700})
+SCHEDULER_CYCLES = 110000
 
-task_sets = [
-   task_set_a, task_set_b, task_set_c, task_set_d
-]
-
-
+TASK_SETS = {
+    "ABDF": [("A", 285300), ("B", 586000), ("D", 140000), ("F", 808000)],
+    "C": [("C", 963300)],
+    "EHI": [("E", 527000), ("I", 753700), ("H", 453000)],
+    "GJ": [("G", 1098800), ("J", 1075700)],
+}
 
 
+def main():
+    from rttools.bench_t import estimate
+    for cluster, tasks in TASK_SETS.items():
+        seq = estimate.sequence(tasks, SCHEDULER_CYCLES)
+        for name, _ in tasks:
+            print(f"{cluster} {name} start {seq[name]['start']} finish {seq[name]['finish']}")
+        print(f"{cluster} demand {estimate.demand(tasks)}")
+    return 0
 
-schedule_time = 110000
-time_maximum = 2500000
 
-for tasks in task_sets:
-  time_current = 0
-
-  for t in tasks:
-      print(t)
-
-  while (time_current < time_maximum):
-    
-    print(time_current, "scheduling event")
-    time_current += schedule_time
-    
-    current_task = tasks[0]
-    print(time_current, "tasks execution:", current_task["name"])
-    time_current += current_task["wcet"] - schedule_time
-    
-
-    tasks.remove(current_task)
-      
-    if(len(tasks) == 0):
-        print(time_current, "finished")
-        break
-
-  
+if __name__ == "__main__":
+    sys.exit(main())
