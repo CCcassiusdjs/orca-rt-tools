@@ -24,6 +24,9 @@ def loadFromFile(app_csv):
     # current directory)
     graph = nx.parse_gml(gml.splitlines())
 
+    # optional #parameters section (release model of the flows)
+    graph.graph.update(readParameters(app_csv))
+
     # for n in graph.nodes(data=True):
     #   print(n)
 
@@ -127,6 +130,37 @@ def exportGmlFlows(tasks, flows):
     )
   return gmlFlows
 
+# Optional section after the flows (rttools/modules/instances/release.py):
+#   #parameters
+#   Parameter,Value
+#   release_model,phase          (phase or cpa)
+#   scheduler_cycles,11000       (cycles of one dispatch, included in each wcet)
+#   sequence,<node>,<task>,...   (dispatch order on one PE; one row per PE)
+def readParameters(filename):
+  params = {}
+  mode = 0
+  with open(filename) as csvfile:
+    for row in csv.reader(csvfile):
+      if mode == 0:
+        if row and row[0].strip() == "#parameters":
+          mode = 1
+      elif mode == 1:
+        mode = 2
+      elif row and row[0].strip():
+        key = row[0].strip()
+        values = [c.strip() for c in row[1:] if c.strip()]
+        if key == "sequence":
+          if len(values) < 2:
+            raise ValueError("sequence row needs a node and at least one task: " + ",".join(row))
+          params.setdefault("sequences", {})[values[0]] = values[1:]
+        elif key == "scheduler_cycles":
+          params[key] = int(values[0].replace(',', ''))
+        elif key == "release_model":
+          params[key] = values[0]
+        else:
+          raise ValueError("unknown parameter '" + key + "' in " + filename)
+  return params
+
 # Exports a graph to a png file. By design, dot generates
 # plot layout (requires graphviz)
 def csv2app(filename):
@@ -166,9 +200,12 @@ def csv2app(filename):
       # ignoring fields header line
       elif mode == 3:
         mode = 4
-      # parse line as a flow
+      # parse line as a flow, up to the optional #parameters section
       elif mode == 4:
-        flows.append(parseFlowRow(row))
+        if row and row[0].strip() == "#parameters":
+          mode = 5
+        else:
+          flows.append(parseFlowRow(row))
 
   # print(tasks)
 
