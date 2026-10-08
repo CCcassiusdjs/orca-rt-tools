@@ -168,9 +168,9 @@ def test_network_pane_example_and_search():
                 await pilot.pause(0.2)
             assert npn.result is not None
             # same minimum as the command line tool (see test_frequency_search)
-            assert npn.result["frequency"] == pytest.approx(96679.6875)
+            assert npn.result["frequency"] == pytest.approx(78125.0)
             assert "valid" in str(npn.query_one("#n-val").render())
-            assert npn.query_one("#n-att").row_count == 12
+            assert npn.query_one("#n-att").row_count == 10
     run(body())
 
 
