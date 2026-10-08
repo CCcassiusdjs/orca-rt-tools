@@ -5,7 +5,7 @@
 | Step | Effect |
 |---|---|
 | `git archive` | Tracked files of the commit only: no history, no author or committer, no uncommitted change |
-| Deletion | `tools/anonymize`, `experiments/ch6` and its code and test, the stored runs A to D of `exp23` and `reference_D.json`, LibreOffice lock files, object files of `porca`, the Maven build output of `kprofiler`, the ModelSim temporary file |
+| Deletion | `tools/anonymize` and its test, `experiments/ch6` and its code and test, the stored runs A to D of `exp23` and `reference_D.json`, LibreOffice lock files, object files of `porca`, the Maven build output of `kprofiler`, the ModelSim temporary file |
 | Overlay | Files of `overlay/` replace files of the tree (`experiments/ch7/README.md`) |
 | Markers | Lines between `anon:drop-begin` and `anon:drop-end`, and lines with `anon:drop-line`, leave the copy (in any comment syntax; in Markdown tables, the marker goes inside the last cell as an HTML comment) |
 | Comparison with the thesis | `exp23` writes no `thesis.tex`, `thesis.csv` nor `thesis_comparison`; the configuration of `ch7` names the stored values `reference_rows`; `make n16` leaves; tests that read removed files leave |

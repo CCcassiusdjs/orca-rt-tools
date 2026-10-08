@@ -42,6 +42,7 @@ import sys
 
 DELETE = [
     "tools/anonymize",                       # this tool and its rules
+    "orca-rt-tools/tests/test_artifact_anonymize.py",   # test of this tool
     "experiments/ch6",                       # Ch. 6 tables of the thesis; not in the paper
     "orca-rt-tools/rttools/paper/ch6.py",
     "orca-rt-tools/tests/test_paper_ch6.py",
