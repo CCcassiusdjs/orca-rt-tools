@@ -190,10 +190,11 @@ def tab83(measured, estimated, cfg):
     return rows, mean
 
 
-def iteration_starts(tr, cfg, clk):
-    """Start of each iteration: first dispatch of the source task at or
-    after each release (TRIGGER line); without TRIGGER lines, the first
-    dispatch after each multiple of the release period from warmup."""
+def iteration_releases(tr, cfg, clk):
+    """(release, start) of each iteration: the release is the TRIGGER line
+    (without TRIGGER lines, each multiple of the release period from
+    warmup) and the start is the first dispatch of the source task at or
+    after it."""
     src = cfg["source"]
     a_starts = [s.start for s in tr.lane_slices(src["pe"]) if s.label == src["task"]]
     releases = [m.time for m in tr.lane_marks("TRIGGER")]
@@ -206,9 +207,25 @@ def iteration_starts(tr, cfg, clk):
     out = []
     for r in releases:
         nxt = next((a for a in a_starts if a >= r), None)
-        if nxt is not None and (not out or nxt > out[-1]):
-            out.append(nxt)
+        if nxt is not None and (not out or nxt > out[-1][1]):
+            out.append((r, nxt))
     return out
+
+
+def release_to_dispatch(tr, cfg, clk):
+    """Cycles from each release to the first dispatch of the source task,
+    over every release of the log (also the releases whose iteration does
+    not complete before the end of the log): {"releases", "min_cycles",
+    "max_cycles"}."""
+    d = [exact(clk.cycles(s - r)) for r, s in iteration_releases(tr, cfg, clk)]
+    return {"releases": len(d), "min_cycles": min(d) if d else None, "max_cycles": max(d) if d else None}
+
+
+def iteration_starts(tr, cfg, clk):
+    """Start of each iteration: first dispatch of the source task at or
+    after each release (TRIGGER line); without TRIGGER lines, the first
+    dispatch after each multiple of the release period from warmup."""
+    return [s for _, s in iteration_releases(tr, cfg, clk)]
 
 
 # join rule of J (config join.rule, option --join)
@@ -266,9 +283,10 @@ def responses(tr, cfg, clk, rule=None):
     rule of join_rule)."""
     j = cfg["join"]
     rule = join_rule(cfg, rule)
-    starts = iteration_starts(tr, cfg, clk)
-    if not starts:
+    rel_starts = iteration_releases(tr, cfg, clk)
+    if not rel_starts:
         return []
+    starts = [s for _, s in rel_starts]
     first = starts[0]
     complete = join_arrivals(tr, cfg, first, rule)
     runs = closed_runs(tr, j["pe"], j["task"])
@@ -283,9 +301,13 @@ def responses(tr, cfg, clk, rule=None):
         if end is None:
             break
         offset = (s - anchor) % hp
-        out.append({"iteration": k, "start": s, "last_packet": a, "end": end,
+        r = rel_starts[k - 1][0]
+        out.append({"iteration": k, "release": r, "start": s, "last_packet": a, "end": end,
                     "response_raw": end - s, "response_cycles": exact(clk.cycles(end - s)),
                     "response_ms": clk.ms(end - s),
+                    "release_to_dispatch_cycles": exact(clk.cycles(s - r)),
+                    "response_from_release_cycles": exact(clk.cycles(end - r)),
+                    "response_from_release_ms": clk.ms(end - r),
                     "release_offset_ms": round(clk.ms(offset - (offset % clk.raw(cfg["release_period_s"]))), 6)})
     return out
 
@@ -408,6 +430,18 @@ def write_values(path, m):
     put(macro_name("mean", "overestimation"), f"{m['tab83']['mean_difference_percent']:.2f}")
     put(macro_name("max", "response", "ms"), f"{m['iterations']['max_ms']:.3f}")
     put(macro_name("max", "response", "deadline", "percent"), f"{m['iterations']['max_deadline_percent']:.0f}")
+    it = m["iterations"]
+    if it.get("max_cycles") is not None:
+        put(macro_name("max", "response", "cycles"), fmt_int(it["max_cycles"]))
+        put(macro_name("release", "to", "dispatch", "min", "cycles"), fmt_int(it["release_to_dispatch"]["min_cycles"]))
+        put(macro_name("release", "to", "dispatch", "max", "cycles"), fmt_int(it["release_to_dispatch"]["max_cycles"]))
+        allr = it["release_to_dispatch_all_releases"]
+        put(macro_name("release", "to", "dispatch", "all", "min", "cycles"), fmt_int(allr["min_cycles"]))
+        put(macro_name("release", "to", "dispatch", "all", "max", "cycles"), fmt_int(allr["max_cycles"]))
+        put(macro_name("response", "from", "release", "max", "cycles"),
+            fmt_int(it["response_from_release_max"]["cycles"]))
+        put(macro_name("response", "from", "release", "max", "ms"), f"{it['response_from_release_max']['ms']:.3f}")
+        put(macro_name("complete", "iterations"), str(it["complete"]))
     put(macro_name("release", "period", "ms"), f"{m['parameters']['release_period_ms']:g}")
     put(macro_name("hyperperiod", "ms"), f"{m['parameters']['hyperperiod_ms']:g}")
     put(macro_name("cpu", "frequency", "mhz"), f"{m['cpu']['f_cpu_hz'] / 1e6:.1f}")
@@ -495,10 +529,21 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None):
         "tab83": {"rows": rows83, "mean_difference_percent": mean83, "per_cluster": measured},
         "cpu": cpu_check(cfg, est),
         "response_bound": response_bound(cfg),
-        "iterations": {"all": [{k: r[k] for k in ("iteration", "response_cycles", "response_ms", "release_offset_ms")}
+        "iterations": {"all": [{k: r[k] for k in ("iteration", "response_cycles", "response_ms", "release_offset_ms",
+                                                  "release_to_dispatch_cycles", "response_from_release_cycles")}
                                for r in resp],
                        "per_release_offset": per_position(resp),
-                       "max_ms": max_ms, "deadline_ms": deadline_ms,
+                       "complete": len(resp),
+                       "max_ms": max_ms,
+                       "max_cycles": max(r["response_cycles"] for r in resp) if resp else None,
+                       "release_to_dispatch": {
+                           "min_cycles": min(r["release_to_dispatch_cycles"] for r in resp) if resp else None,
+                           "max_cycles": max(r["release_to_dispatch_cycles"] for r in resp) if resp else None},
+                       "release_to_dispatch_all_releases": release_to_dispatch(tr, cfg, clk),
+                       "response_from_release_max": {
+                           "cycles": max(r["response_from_release_cycles"] for r in resp) if resp else None,
+                           "ms": max(r["response_from_release_ms"] for r in resp) if resp else None},
+                       "deadline_ms": deadline_ms,
                        "max_deadline_percent": 100 * max_ms / deadline_ms if max_ms else None},
         "tab82": rows82,
         "join_rule": rule,

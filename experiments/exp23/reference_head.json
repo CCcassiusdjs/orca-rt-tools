@@ -77,7 +77,22 @@
     "max_ms": 1.361138
    }
   ],
-  "max_ms": 1.86117
+  "max_ms": 1.86117,
+  "complete": 32,
+  "max_cycles": 930585,
+  "release_to_dispatch": {
+   "min_cycles": 1396,
+   "max_cycles": 1891
+  },
+  "release_to_dispatch_all_releases": {
+   "releases": 34,
+   "min_cycles": 1396,
+   "max_cycles": 1924
+  },
+  "response_from_release_max": {
+   "cycles": 932143,
+   "ms": 1.864286
+  }
  },
  "tab82": [
   {

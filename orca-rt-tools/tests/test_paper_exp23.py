@@ -260,3 +260,18 @@ def test_run_f_last_iterations_end_at_the_last_event(run_f):
     it = m["iterations"]["all"]
     assert len(it) == 32
     assert [p["count"] for p in m["iterations"]["per_release_offset"]] == [8, 8, 8, 8]
+
+
+def test_release_to_dispatch_and_response_from_release(run_f):
+    """Run F: release (TRIGGER) to the first dispatch of A, over the complete
+    iterations and over every release; maximum response counted from the
+    release."""
+    it, _ = run_f[0]["iterations"], run_f[1]
+    assert it["complete"] == 32 and it["max_cycles"] == 930585
+    assert it["release_to_dispatch"] == {"min_cycles": 1396, "max_cycles": 1891}
+    assert it["release_to_dispatch_all_releases"] == {"releases": 34, "min_cycles": 1396, "max_cycles": 1924}
+    assert it["response_from_release_max"]["cycles"] == 932143
+    values = open(os.path.join(run_f[1], "values.tex")).read()
+    assert "\\newcommand{\\ExpResponseFromReleaseMaxCycles}{932\\,143}" in values
+    assert "\\newcommand{\\ExpReleaseToDispatchAllMaxCycles}{1\\,924}" in values
+    assert "\\newcommand{\\ExpCompleteIterations}{32}" in values
