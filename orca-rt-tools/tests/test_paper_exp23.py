@@ -185,3 +185,9 @@ def test_stored_runs_same_response_with_both_rules_and_consistent_pairs(runs, ru
     assert m["packet_pairs"] == {"unexpected": 0}
     p = exp23.analyze(os.path.join(EXP, "logs", f"{run}.events.txt"), cfg(), str(tmp_path), join="per_producer")
     assert p["iterations"]["all"] == m["iterations"]["all"]
+
+
+def test_cycles_text():
+    assert exp23.cycles_text(80968.50000000001) == "80,968.5"
+    assert exp23.cycles_text(144098) == "144,098"
+    assert exp23.cycles_text(144098.0) == "144,098"

@@ -330,6 +330,14 @@ def tab82(cfg, tr, clk):
 
 # ------------------------------------------------------------ outputs
 
+def cycles_text(v):
+    """Cycles for the terminal: thousands separator; one decimal when the
+    value is not integral (mean of half cycles)."""
+    if isinstance(v, float) and not float(v).is_integer():
+        return f"{v:,.1f}"
+    return f"{int(round(v)):,}"
+
+
 def fmt_int(v):
     if v is None:
         return "-"
@@ -604,7 +612,8 @@ def main(argv=None):
         print(f"{m['log']}: unit {m['unit']['name']} (detected {m['unit']['detected']}), "
               f"{m['parameters']['hyperperiods']} hyperperiods, join rule {m['join_rule']}")
         for r in m["tab83"]["rows"]:
-            print(f"  {r['cluster']:5s} measured {r['measured']:>10,} estimated {r['estimated']:>10,} "
+            print(f"  {r['cluster']:5s} measured {cycles_text(r['measured']):>10} "
+                  f"estimated {cycles_text(r['estimated']):>10} "
                   f"{r['difference_percent']:+7.2f}%")
         print(f"  mean overestimation {m['tab83']['mean_difference_percent']:.2f}%; "
               f"max response {m['iterations']['max_ms']:.3f} ms of {m['iterations']['deadline_ms']:g} ms")
