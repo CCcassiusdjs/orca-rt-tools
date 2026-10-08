@@ -40,8 +40,9 @@ def test_corrected_values_of_chapter_8(runs):
     assert all(v["equal_in_all_hyperperiods"] for v in m["tab83"]["per_cluster"].values())
     assert sorted(round(p["max_ms"], 3) for p in m["iterations"]["per_release_offset"]) == [1.179, 1.361, 1.414, 1.861]
     t82 = {r["flow"]: (r["min_release"], r["deadline"], r["volume_bytes"]) for r in m["tab82"]}
-    assert t82 == {"F1": (28530, 11000, 1230), "F2": (181930, 11000, 6780), "F3": (96330, 11000, 1200),
-                   "F4": (128070, 120880, 5670), "F5": (173370, 120880, 8900)}
+    # deadline = start of the target in the phase after the source phase
+    assert t82 == {"F1": (28530, 261000, 1230), "F2": (181930, 261000, 6780), "F3": (96330, 261000, 1200),
+                   "F4": (128070, 370880, 5670), "F5": (173370, 370880, 8900)}
     assert m["monitor"]["errors"] == 0 and m["monitor"]["nodes"] == 4
 
 

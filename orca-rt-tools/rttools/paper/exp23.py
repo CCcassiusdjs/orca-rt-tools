@@ -12,7 +12,7 @@ cycles and milliseconds:
 | metrics.json | Every number below, for `check` and for other scripts |
 | tab83.tex, tab83.csv | CPU time per iteration of each cluster, measured and estimated (Tab. 8.3) |
 | iterations.tex, iterations.csv | Response time of each iteration and the maximum against the deadline |
-| tab82.tex, tab82.csv | Flow characterization (Tab. 8.2), derived from the estimates, plus the measured latency |
+| tab82.tex, tab82.csv | Flow characterization (Tab. 8.2): release and deadline of the phase model, plus the measured latency |
 | thesis.tex, thesis.csv | Values printed in the thesis next to the values of this run |
 | values.tex | LaTeX macros with the numbers, for the text of the article |
 | (metrics.json) cpu, response_bound | CPU demand per PE, f_CPU and the response bound R^ of the estimate |
@@ -228,9 +228,10 @@ def per_position(resp):
 
 
 def tab82(cfg, tr, clk):
-    """Flow characterization. Minimum release = finish of the source task
-    in its sequence; deadline = start of the target task in its sequence.
-    Volume = packet size
+    """Flow characterization (phase model, cycles from the start of the
+    phase in which the source sends). Minimum release = finish of the
+    source task in its sequence; deadline = start of the target task in
+    the next phase (phase + start in its sequence). Volume = packet size
     of weird_a.c (the tag). The measured latency comes from the log
     (send -> receive)."""
     sched = cpu_sequence(cfg)
@@ -244,7 +245,7 @@ def tab82(cfg, tr, clk):
         rows.append({
             "flow": f["name"], "source": f["source"], "target": f["target"],
             "min_release": sched[f["source"]]["finish"],
-            "deadline": sched[f["target"]]["start"],
+            "deadline": period + sched[f["target"]]["start"],
             "volume_bytes": int(f["tag"]), "period": period,
             "latency_min_cycles": exact(clk.cycles(min(lat))) if lat else None,
             "latency_max_cycles": exact(clk.cycles(max(lat))) if lat else None,
@@ -453,8 +454,9 @@ def analyze(log_path, cfg, out_dir, unit=None):
                  ("Min. release", "min_release"), ("Deadline", "deadline"), ("Volume (B)", "volume_bytes"),
                  ("Latency min", "latency_min_cycles"), ("Latency max", "latency_max_cycles")],
                 rows82, "lllrrrrr",
-                "Flows (cycles; release and deadline add phase $\\times$ pv, "
-                f"pv = {fmt_int(m['parameters']['release_period_cycles'])} cycles).",
+                "Flows (cycles from the start of the phase in which the source sends; "
+                "the deadline falls in the next phase, phase = "
+                f"{fmt_int(m['parameters']['release_period_cycles'])} cycles).",
                 "tab:exp23-flows")
     write_table(os.path.join(out_dir, "thesis"),
                 [("Item", "item"), ("Thesis", "thesis"), ("This run", "this_run")],

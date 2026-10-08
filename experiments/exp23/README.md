@@ -37,7 +37,7 @@ On the GAPH server: `make paper ENV_SETUP="source /soft64/source_gaph; module lo
 | CPU frequency (`cpu.f_cpu_hz`) | Largest CPU demand per iteration divided by the release period (0.5 ms); computed once, independent of the frequency of the link schedule |
 | Response bound (`response_bound`) | phi(v) P + finish of v in its sequence, for the last task of the iteration (J): phi(v) counts the edges between PEs on the longest path to v (config `task_graph`), P = 250 000 cycles |
 | Response time | From the first dispatch of A after each release (`TRIGGER` line) to the exit of J from the CPU after the 3k-th packet that reaches J. `weird_a.c` makes J consume any three packets, so the iteration k ends with the 3k-th packet. |
-| Tab. 8.2 release and deadline | Finish of the source task and start of the target task in the sequence of their clusters |
+| Tab. 8.2 release and deadline | Release: finish of the source task in its sequence. Deadline: start of the target task in its sequence plus one phase (the target receives the packet in the phase after the source phase). Both count cycles from the start of the source phase |
 | Packet monitor | `rtl/pe_checker.sv` compares the flits each DDMA sends and writes with the memory; `errors` adds every mismatch |
 
 ## Stored logs (`logs/`)
