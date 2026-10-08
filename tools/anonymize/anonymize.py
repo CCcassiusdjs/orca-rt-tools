@@ -86,6 +86,8 @@ CODE_EDITS = [
      'hint="Without `timescale, the PE prints $time in units of 100 ps."', 0, False),
     # the stored runs A to D are not in the copy
     ("orca-rt-tools/tests/test_paper_exp23.py", r'for r in "ABCDE":', 'for r in "E":', 0, False),
+    ("orca-rt-tools/tests/test_paper_exp23.py", r'@pytest\.mark\.parametrize\("run", "ABCDE"\)',
+     '@pytest.mark.parametrize("run", "E")', 0, False),
 ]
 
 # (file, edit): edit(data) changes the parsed JSON in place
@@ -107,7 +109,7 @@ JSON_EDITS = [
 ]
 
 # test functions of TEST_FILES (orca-rt-tools/tests) that contain one of TEST_TOKENS are removed
-TEST_FILES = ["test_paper_exp23.py", "test_paper_ch7.py", "test_tui_model.py"]
+TEST_FILES = ["test_paper_exp23.py", "test_paper_ch7.py", "test_tui_model.py", "test_ags.py"]
 TEST_TOKENS = ["reference_D.json", "thesis", 'runs["A"]', 'runs["B"]', 'runs["C"]', 'runs["D"]',
                "paper import ch6", "paper.ch6", "logs/D.events",
                'exp23_log("A")', 'exp23_log("B")', 'exp23_log("C")', 'exp23_log("D")']
