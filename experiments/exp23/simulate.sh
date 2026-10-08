@@ -11,13 +11,31 @@
 #
 # Environment:
 #   ENV_SETUP   shell commands run before the builds and vsim, e.g.
-#               "source /soft64/source_gaph; module load riscv64-elf/12.2.0 questa/2025.3"
+#               "module load riscv64-elf/12.2.0 questa/2025.3"
 #   MONITOR     1 (default) binds the packet monitor; 0 runs without it
 #               (then the log has no $printtimescale lines; pass --unit to
 #               the analysis)
+#   REQUIRE_CLEAN
+#               1 stops before the build unless the source is a clean git
+#               checkout at a tag or a `git archive` of a commit (see
+#               RUN_INFO below); use it for the run that a paper reports
 #
 # Outputs in <out_dir>: sim.log (transcript), events.txt (lines used by
 # the analysis), build_sw.log, build_boot.log, time.log, RUN_INFO.
+#
+# RUN_INFO identifies the source of the run:
+#   repo_commit  commit hash: from git when the repository root is a git
+#                work tree; from VERSION when the tree comes from
+#                `git archive` (export-subst); "unknown" otherwise
+#   repo_state   clean (git, no change to tracked files and no untracked
+#                file), dirty (git, with changes; `git status --porcelain`
+#                goes to RUN_INFO.status), archive (git archive, clean by
+#                construction) or nogit (copy without git metadata)
+#   repo_tag     tag at the commit (git describe --tags --exact-match), or none
+#   src_sha256   SHA-256 of the sorted `sha256sum` lines of the simulated
+#                sources (pkt-sim, rtl/, simulate.sh), relative to the
+#                repository root; identifies the input also in a copy
+#                without git
 set -euo pipefail
 
 OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns>]}
@@ -37,6 +55,18 @@ done
 
 mkdir -p "$OUT"
 OUT=$(cd "$OUT" && pwd)
+
+# source identification (before the build, so a failed build keeps it)
+rm -f "$OUT/RUN_INFO.status"
+"$HERE/source_info.sh" "$REPO" "$OUT/RUN_INFO" "$OUT/RUN_INFO.status"
+if [ "${REQUIRE_CLEAN:-0}" = 1 ]; then
+	state=$(sed -n 's/^repo_state=//p' "$OUT/RUN_INFO")
+	tag=$(sed -n 's/^repo_tag=//p' "$OUT/RUN_INFO")
+	if [ "$state" != archive ] && { [ "$state" != clean ] || [ "$tag" = none ]; }; then
+		echo "REQUIRE_CLEAN=1: source is $state, tag $tag (need a clean checkout at a tag or a git archive)" >&2
+		exit 3
+	fi
+fi
 rm -rf "$OUT/pkt-sim"
 cp -a "$REPO/pkt-sim" "$OUT/pkt-sim"
 mkdir -p "$OUT/pkt-sim/logs"
@@ -70,12 +100,11 @@ EOD
 fi
 
 {
-	echo "repo_commit=$(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo unknown)$(git -C "$REPO" diff --quiet 2>/dev/null || echo -dirty)"
 	echo "sim_ns=$SIM_NS monitor=$MONITOR"
 	echo "vsim=$(vsim -version 2>/dev/null | head -1)"
 	echo "gcc=$(riscv64-elf-gcc --version | head -1)"
 	echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-} > "$OUT/RUN_INFO"
+} >> "$OUT/RUN_INFO"
 
 if command -v /usr/bin/time > /dev/null; then
 	/usr/bin/time -v vsim -batch -do run.do > "$OUT/sim.log" 2> "$OUT/time.log"
@@ -88,4 +117,4 @@ if grep -qE "\*\* (Error|Fatal)" "$OUT/sim.log"; then
 	grep -E "\*\* (Error|Fatal)" "$OUT/sim.log" | head -5 >&2
 	exit 1
 fi
-echo "events: $(grep -c . "$OUT/events.txt") lines; $(cat "$OUT/RUN_INFO" | head -1)"
+echo "events: $(grep -c . "$OUT/events.txt") lines; $(head -2 "$OUT/RUN_INFO" | tr '\n' ' ')"

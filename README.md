@@ -1,5 +1,7 @@
 # ORCA RT-Tools
 
+`ARTIFACT.md` lists the commands that reproduce the numbers of the paper (`experiments/`).
+
 Welcome to the ORCA RT-Tools repository. In this repository you will find the following assets:
 
 - Minizinc constraint models for optimizing real-time traffic in networks-on-chip
@@ -75,6 +77,7 @@ cd orca-rt-tools && python -m pytest -q
 
 The RTL tests skip when Verilator or GHDL is missing. `pkt-sim/software/ucx-os/tests/host/run.sh` and `pkt-sim/tests/rtl/run.sh` run the C and RTL tests without pytest.
 
+<!-- anon:drop-begin -->
 ## Command-line options added by the fixes
 
 | Tool | Option |
@@ -87,3 +90,4 @@ The RTL tests skip when Verilator or GHDL is missing. `pkt-sim/software/ucx-os/t
 ## Time unit of the RTL logs
 
 `pkt-sim/manycore_modelsim/manycore_pe.sv` declares `` `timescale 1ns/100ps ``, so the simulation logs (`scheduled`, `TAG`, `TRIGGER`) report time in ns. Commit 4c299fc ran without this directive; in that configuration the simulator assigns 100 ps to the PE, and the logs of that commit report time in units of 100 ps (`log2gannt --units-per-ms 10000000`). Logs produced before the fix of `addr_x()`/`addr_y()` print X and Y swapped (`log2gannt --swap-xy` reads logs of the fixed RTL with the default map).
+<!-- anon:drop-end -->
