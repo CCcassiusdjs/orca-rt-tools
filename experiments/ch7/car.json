@@ -1,0 +1,16 @@
+{
+ "_doc": "make car: CAR on 16 clusters (reference mapping of Shi et al. and the contraction criteria) and the criterion of application E on 4 clusters. Paths relative to apps/. load_capacity_cycles: cycles of a 1 MHz processor over the 1 s hyperperiod of CAR (the WCETs of shi-2010.txt assume 1 MHz).",
+ "car": {
+  "graph": "shi-2010/shi-2010.txt",
+  "reference_map": "shi-2010/shi2010-ONTO-hermes4x4.map",
+  "n": 16,
+  "load_capacity_cycles": 1000000,
+  "criteria": ["MAX_PROC", "MIN_COMM", "MAX_COMM", "MIN_PROC"],
+  "table": ["Reference", "MAX_PROC", "MIN_COMM"]
+ },
+ "appe": {
+  "graph": "synthetic-app-e/synthetic-app-e.txt",
+  "n": 4,
+  "criteria": ["MIN_COMM", "MAX_COMM", "MIN_PROC", "MAX_PROC"]
+ }
+}

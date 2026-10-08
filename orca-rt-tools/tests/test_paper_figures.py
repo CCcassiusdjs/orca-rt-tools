@@ -6,7 +6,8 @@ import json
 import os
 
 from tests.conftest import REPO_ROOT
-from rttools.paper import graphs
+from rttools.paper import car, graphs
+from rttools.paper.exp23 import check
 
 EXP = os.path.join(REPO_ROOT, "experiments")
 APPS = os.path.join(REPO_ROOT, "apps")
@@ -50,3 +51,17 @@ def test_pack_is_deterministic_and_extract_inverts_it(tmp_path):
     assert graphs.extract(str(a), str(out)) == ["10_20.txt", "10_30.txt"]
     for v in (20, 30):
         assert graphs.sha256(out / f"10_{v}.txt") == graphs.sha256(os.path.join(src, f"10_{v}.txt"))
+
+
+def test_car_and_criterion_of_application_e(tmp_path):
+    cfg = load(os.path.join(CH7, "car.json"))
+    m = car.write(str(tmp_path), car.run_car(cfg["car"], APPS), car.run_appe(cfg["appe"], APPS), cfg)
+    assert check(str(tmp_path / "metrics.json"), os.path.join(CH7, "reference_car.json")) == []
+    ref = m["car"]["rows"]["Reference"]
+    assert (ref["E"], ref["intra_volume"], ref["noc_volume"]) == (38, 0, m["car"]["total_volume"])
+    # the sum of the WCETs does not change under contraction
+    for r in m["car"]["rows"].values():
+        assert sum(c["load"] for c in r["clusters"]) == sum(c["load"] for c in m["car"]["input"]["clusters"])
+    assert m["appe"]["chosen"] == "MAX_PROC"
+    rows = (tmp_path / "tab-car-rows.tex").read_text().splitlines()[1:]
+    assert rows[1] == r"MAX-PROC & 20 & 16.2 & 205,529 & 214,330 & 6.481 & 105.0 & 2 \\"
