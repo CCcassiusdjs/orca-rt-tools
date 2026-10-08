@@ -121,13 +121,8 @@ def search3(p, heuristic, tries, step):
   npackets = len(p['occupancy'][0]) if nlinks else 0
   views = [packet_view(p, j) for j in range(npackets)]
 
-  # solution space (release windows), input of the criteria
-  space = [[None if p['occupancy'][l][j] is None else
-            (p['min_start'][l][j], p['deadline'][l][j] - p['occupancy'][l][j])
-            for j in range(npackets)] for l in range(nlinks)]
-
-  # heuristics list the packet to allocate first at the end
-  R = list(reversed(heuristic(space, p['min_start'], p['occupancy'], p['deadline'])))
+  # order of the criterion (rttools/modules/backend/ags/heuristics.py)
+  R = list(heuristic(p))
   S = []
   T = [0 for _ in range(npackets)]
 
