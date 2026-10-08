@@ -1,0 +1,345 @@
+{
+ "_doc": "Reference of make exp23 (python -m rttools.paper.figures exp23) on experiments/exp23/logs/E.events.txt.",
+ "gantt": {
+  "window_raw": [
+   4000000,
+   6000000
+  ],
+  "busy_cycles_per_iteration": {
+   "ABDF": 144098,
+   "C": 80968.5,
+   "EHI": 119336,
+   "GJ": 183086
+  },
+  "releases_raw": [
+   4000779,
+   4500775,
+   5000777,
+   5500779
+  ],
+  "deadline_raw": 6000779.0,
+  "responses": [
+   {
+    "iteration": 3,
+    "start": 4003637,
+    "end": 5418019,
+    "cycles": 707191,
+    "ms": 1.414382
+   },
+   {
+    "iteration": 4,
+    "start": 4503669,
+    "end": 5682965,
+    "cycles": 589648,
+    "ms": 1.179296
+   }
+  ],
+  "busy_equals_tab83": true
+ },
+ "iterations": {
+  "points": [
+   {
+    "iteration": 1,
+    "release_ms": 3.0007750000000004,
+    "response_ms": 1.860736,
+    "response_cycles": 930368
+   },
+   {
+    "iteration": 2,
+    "release_ms": 3.5007770000000002,
+    "response_ms": 1.360704,
+    "response_cycles": 680352
+   },
+   {
+    "iteration": 3,
+    "release_ms": 4.0007790000000005,
+    "response_ms": 1.414382,
+    "response_cycles": 707191
+   },
+   {
+    "iteration": 4,
+    "release_ms": 4.500775,
+    "response_ms": 1.179296,
+    "response_cycles": 589648
+   },
+   {
+    "iteration": 5,
+    "release_ms": 5.000777,
+    "response_ms": 1.860738,
+    "response_cycles": 930369
+   },
+   {
+    "iteration": 6,
+    "release_ms": 5.500779,
+    "response_ms": 1.360706,
+    "response_cycles": 680353
+   },
+   {
+    "iteration": 7,
+    "release_ms": 6.000775000000001,
+    "response_ms": 1.414384,
+    "response_cycles": 707192
+   },
+   {
+    "iteration": 8,
+    "release_ms": 6.500777,
+    "response_ms": 1.179298,
+    "response_cycles": 589649
+   },
+   {
+    "iteration": 9,
+    "release_ms": 7.0007790000000005,
+    "response_ms": 1.860734,
+    "response_cycles": 930367
+   },
+   {
+    "iteration": 10,
+    "release_ms": 7.500775,
+    "response_ms": 1.360702,
+    "response_cycles": 680351
+   },
+   {
+    "iteration": 11,
+    "release_ms": 8.000777000000001,
+    "response_ms": 1.41438,
+    "response_cycles": 707190
+   },
+   {
+    "iteration": 12,
+    "release_ms": 8.500779,
+    "response_ms": 1.1793,
+    "response_cycles": 589650
+   },
+   {
+    "iteration": 13,
+    "release_ms": 9.000775,
+    "response_ms": 1.860736,
+    "response_cycles": 930368
+   },
+   {
+    "iteration": 14,
+    "release_ms": 9.500777,
+    "response_ms": 1.360704,
+    "response_cycles": 680352
+   },
+   {
+    "iteration": 15,
+    "release_ms": 10.000779000000001,
+    "response_ms": 1.414382,
+    "response_cycles": 707191
+   },
+   {
+    "iteration": 16,
+    "release_ms": 10.500775,
+    "response_ms": 1.179296,
+    "response_cycles": 589648
+   },
+   {
+    "iteration": 17,
+    "release_ms": 11.000777000000001,
+    "response_ms": 1.860738,
+    "response_cycles": 930369
+   },
+   {
+    "iteration": 18,
+    "release_ms": 11.500779000000001,
+    "response_ms": 1.360706,
+    "response_cycles": 680353
+   },
+   {
+    "iteration": 19,
+    "release_ms": 12.000775,
+    "response_ms": 1.414384,
+    "response_cycles": 707192
+   },
+   {
+    "iteration": 20,
+    "release_ms": 12.500777000000001,
+    "response_ms": 1.179298,
+    "response_cycles": 589649
+   },
+   {
+    "iteration": 21,
+    "release_ms": 13.000779,
+    "response_ms": 1.860734,
+    "response_cycles": 930367
+   },
+   {
+    "iteration": 22,
+    "release_ms": 13.500775,
+    "response_ms": 1.360702,
+    "response_cycles": 680351
+   },
+   {
+    "iteration": 23,
+    "release_ms": 14.000777000000001,
+    "response_ms": 1.41438,
+    "response_cycles": 707190
+   },
+   {
+    "iteration": 24,
+    "release_ms": 14.500779,
+    "response_ms": 1.1793,
+    "response_cycles": 589650
+   },
+   {
+    "iteration": 25,
+    "release_ms": 15.000775,
+    "response_ms": 1.860736,
+    "response_cycles": 930368
+   },
+   {
+    "iteration": 26,
+    "release_ms": 15.500777000000001,
+    "response_ms": 1.360704,
+    "response_cycles": 680352
+   },
+   {
+    "iteration": 27,
+    "release_ms": 16.000779,
+    "response_ms": 1.414382,
+    "response_cycles": 707191
+   },
+   {
+    "iteration": 28,
+    "release_ms": 16.500775,
+    "response_ms": 1.179296,
+    "response_cycles": 589648
+   },
+   {
+    "iteration": 29,
+    "release_ms": 17.000777000000003,
+    "response_ms": 1.860738,
+    "response_cycles": 930369
+   },
+   {
+    "iteration": 30,
+    "release_ms": 17.500779,
+    "response_ms": 1.360706,
+    "response_cycles": 680353
+   },
+   {
+    "iteration": 31,
+    "release_ms": 18.000775,
+    "response_ms": 1.414384,
+    "response_cycles": 707192
+   },
+   {
+    "iteration": 32,
+    "release_ms": 18.500777,
+    "response_ms": 1.179298,
+    "response_cycles": 589649
+   }
+  ],
+  "max_ms": 1.860738,
+  "max_cycles": 930369,
+  "max_deadline_percent": 93.0369
+ },
+ "flows": [
+  {
+   "flow": "F1",
+   "source": "A",
+   "target": "C",
+   "payload": 1230,
+   "hops": 1,
+   "flits": 311,
+   "L0": 324,
+   "latency_min": 1890,
+   "latency_max": 1984,
+   "packets": 34,
+   "sends": 34,
+   "receives": 34,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1566,
+   "release": 28530,
+   "deadline": 261000,
+   "send_min": 14729,
+   "send_max": 15257,
+   "arrival_max": 17236
+  },
+  {
+   "flow": "F2",
+   "source": "F",
+   "target": "G",
+   "payload": 6780,
+   "hops": 2,
+   "flits": 1698,
+   "L0": 1717,
+   "latency_min": 3293,
+   "latency_max": 3439,
+   "packets": 34,
+   "sends": 34,
+   "receives": 34,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1576,
+   "release": 181930,
+   "deadline": 261000,
+   "send_min": 144429,
+   "send_max": 144957,
+   "arrival_max": 148394
+  },
+  {
+   "flow": "F3",
+   "source": "C",
+   "target": "E",
+   "payload": 1200,
+   "hops": 2,
+   "flits": 303,
+   "L0": 322,
+   "latency_min": 1909,
+   "latency_max": 2150,
+   "packets": 34,
+   "sends": 34,
+   "receives": 34,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1587,
+   "release": 96330,
+   "deadline": 261000,
+   "send_min": 81872,
+   "send_max": 162795,
+   "arrival_max": 164706
+  },
+  {
+   "flow": "F4",
+   "source": "I",
+   "target": "J",
+   "payload": 5670,
+   "hops": 1,
+   "flits": 1421,
+   "L0": 1434,
+   "latency_min": 2991,
+   "latency_max": 3164,
+   "packets": 32,
+   "sends": 32,
+   "receives": 32,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1557,
+   "release": 128070,
+   "deadline": 370880,
+   "send_min": 180845,
+   "send_max": 239514,
+   "arrival_max": 242678
+  },
+  {
+   "flow": "F5",
+   "source": "H",
+   "target": "J",
+   "payload": 8900,
+   "hops": 1,
+   "flits": 2228,
+   "L0": 2241,
+   "latency_min": 3798,
+   "latency_max": 3990,
+   "packets": 32,
+   "sends": 32,
+   "receives": 32,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1557,
+   "release": 173370,
+   "deadline": 370880,
+   "send_min": 97379,
+   "send_max": 122749,
+   "arrival_max": 126698
+  }
+ ]
+}

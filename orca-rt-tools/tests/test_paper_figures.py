@@ -6,7 +6,7 @@ import json
 import os
 
 from tests.conftest import REPO_ROOT
-from rttools.paper import car, graphs
+from rttools.paper import car, ch7, figures, graphs
 from rttools.paper.exp23 import check
 
 EXP = os.path.join(REPO_ROOT, "experiments")
@@ -65,3 +65,59 @@ def test_car_and_criterion_of_application_e(tmp_path):
     assert m["appe"]["chosen"] == "MAX_PROC"
     rows = (tmp_path / "tab-car-rows.tex").read_text().splitlines()[1:]
     assert rows[1] == r"MAX-PROC & 20 & 16.2 & 205,529 & 214,330 & 6.481 & 105.0 & 2 \\"
+
+
+def test_contraction_example(tmp_path):
+    m = figures.contraction(os.path.join(APPS, "sample-graph-a", "sample_graph.txt"), 4, str(tmp_path))
+    assert check(str(tmp_path / "contraction.json"), os.path.join(FIG, "reference_contraction.json")) == []
+    for c in m["criteria"].values():
+        assert len(c["steps"]) == 10 - 4
+        # payload between clusters = payload of the edges left in the collapsed graph
+        assert c["w_noc"] == c["out_payload"]
+    # MIN-COMM contracts the edges in decreasing payload order (Kruskal)
+    mc = m["criteria"]["MIN_COMM"]["steps"]
+    assert list(mc) == ["E-I", "H-J", "B-D", "F-G", "I-J", "A-B"]
+    body = (tmp_path / "fig-contraction-body.tex").read_text()
+    assert body.count("\\begin{scope}[xshift=") == 2
+
+
+def test_table71_summary_and_cluster_sizes(tmp_path):
+    cfg = load(os.path.join(CH7, "config.json"))
+    ch7.run(cfg, os.path.join(CH7, "graphs"), str(tmp_path / "run"), sizes=[20, 30, 100])
+    m = figures.table71(str(tmp_path / "run" / "metrics.json"), os.path.join(CH7, "graphs"), str(tmp_path / "s"))
+    rows = {d["V"]: d for d in m["rows"]}
+    # cluster sizes of the stored graphs
+    assert rows[20]["mc"]["cluster_sizes"] == [1, 1, 1, 17]
+    assert rows[20]["mp"]["cluster_sizes"] == [3, 5, 6, 6]
+    assert rows[100]["mc"]["cluster_sizes"] == [1, 1, 4, 94]
+    for d in m["rows"]:
+        for p in ("mc", "mp"):
+            assert sum(d[p]["cluster_sizes"]) == d["V"]
+            # NoC payload share = M3_in / M3_out
+            assert abs(d[p]["noc_percent"] - 100 * d["M3"] / d[p]["M3"]) < 1e-9
+    assert rows[20]["mc"]["kept_percent"] == 100 * 55 / 228
+    # rho: ordered pairs of distinct vertices, 1 - 17 * 16 / (20 * 19)
+    assert abs(rows[20]["mc"]["rho_percent"] - 100 * (1 - 272 / 380)) < 1e-9
+    s = m["summary"]
+    assert s["cluster_sizes"]["min_comm_three_single_tasks"] == 2
+    assert s["mc"]["kept_percent"]["max"] == rows[20]["mc"]["kept_percent"]
+    lines = (tmp_path / "s" / "tab-table71-rows.tex").read_text().splitlines()
+    assert len(lines) == 1 + 6 and lines[1].count("&") == 7
+
+
+def test_figures_of_application_e(tmp_path):
+    cfg = load(os.path.join(EXP, "exp23", "config.json"))
+    fcfg = load(os.path.join(FIG, "config.json"))
+    m = figures.exp23_figures(os.path.join(EXP, "exp23", "logs", "E.events.txt"), cfg, fcfg, str(tmp_path))
+    assert check(str(tmp_path / "metrics.json"), os.path.join(FIG, "reference_exp23.json")) == []
+    assert m["gantt"]["busy_equals_tab83"]
+    assert all(r["latency_matches_tab82"] for r in m["flows"])
+    f1 = m["flows"][0]
+    # L0 = 6 (m + 1) + p + 1 with p = 3 + ceil(1230 / 4)
+    assert (f1["hops"], f1["flits"], f1["L0"]) == (1, 311, 324)
+    assert len((tmp_path / "fig-iterations-coords.tex").read_text().splitlines()) == 1 + 32 + 1
+
+
+def test_pe_coordinates_follow_the_swapped_labels():
+    assert figures.pe_xy("0-1") == (1, 0)
+    assert figures.pe_xy("1-0") == (0, 1)
