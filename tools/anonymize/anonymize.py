@@ -51,6 +51,8 @@ DELETE = [
     "experiments/exp23/logs/C.events.txt",
     "experiments/exp23/logs/D.events.txt",
     "experiments/exp23/reference_D.json",
+    "experiments/exp23/logs/E.events.txt",   # run E: application before the per-producer join of J
+    "experiments/exp23/reference_E.json",
     "**/.~lock.*#",                          # LibreOffice lock files (user and host names)
     "**/*.o",                                # object files of porca (paths and names in debug data)
     "orca-rt-tools/rttools/porca/old-ccp-migration/apps/kprofiler/target",   # Maven build output
@@ -85,9 +87,7 @@ CODE_EDITS = [
      r'hint="The thesis \(Ch\. 8\) read logs of \w+ as 1 ns; the PE prints \$time in units of 100 ps\."',
      'hint="Without `timescale, the PE prints $time in units of 100 ps."', 0, False),
     # the stored runs A to D are not in the copy
-    ("orca-rt-tools/tests/test_paper_exp23.py", r'for r in "ABCDE":', 'for r in "E":', 0, False),
-    ("orca-rt-tools/tests/test_paper_exp23.py", r'@pytest\.mark\.parametrize\("run", "ABCDE"\)',
-     '@pytest.mark.parametrize("run", "E")', 0, False),
+    ("orca-rt-tools/tests/test_paper_exp23.py", r'for r in "ABCDE":', 'for r in "":', 0, False),
 ]
 
 # (file, edit): edit(data) changes the parsed JSON in place
@@ -97,7 +97,7 @@ JSON_EDITS = [
         d.__setitem__("_doc", "Application E on the 2x2 manycore (pkt-sim/software/ucx-os/app/weird_a.c). "
                               "Times in seconds or cycles of the 500 MHz clock."))),
     ("experiments/exp23/reference_head.json", lambda d: d.__setitem__(
-        "_doc", "Expected results of make paper: run E (logs/E.events.txt), Questa 2025.3, riscv64-elf-gcc 12.2.0.")),
+        "_doc", "Expected results of make paper: run F (logs/F.events.txt), Questa 2025.3, riscv64-elf-gcc 12.2.0.")),
     ("experiments/ch7/config.json", lambda d: (
         d.__setitem__("reference_rows", d.pop("thesis_rows")) if "thesis_rows" in d else None,
         d.__setitem__("_doc", "Random graphs 10_<|V|>.txt (values in [2000; 20000]) collapsed to N = 4 clusters; "
@@ -110,7 +110,8 @@ JSON_EDITS = [
 
 # test functions of TEST_FILES (orca-rt-tools/tests) that contain one of TEST_TOKENS are removed
 TEST_FILES = ["test_paper_exp23.py", "test_paper_ch7.py", "test_tui_model.py", "test_ags.py"]
-TEST_TOKENS = ["reference_D.json", "thesis", 'runs["A"]', 'runs["B"]', 'runs["C"]', 'runs["D"]',
+TEST_TOKENS = ["reference_D.json", "reference_E.json", "thesis", 'runs["A"]', 'runs["B"]', 'runs["C"]',
+               'runs["D"]', 'runs["E"]', "runs[run]", "logs/E.events", '"E.events.txt"',
                "paper import ch6", "paper.ch6", "logs/D.events",
                'exp23_log("A")', 'exp23_log("B")', 'exp23_log("C")', 'exp23_log("D")']
 
@@ -153,8 +154,11 @@ ALLOWED = [
 HASH_EXT = {".md", ".json", ".py", ".sh", ".yml", ".yaml", ".txt", ".tex", ".cfg", ".ini", ".csv", ".svh",
             ".sv", ".vhd", ".c", ".h", ".do"}
 HASH_NAMES = {"Makefile", "VERSION", "README"}
+# source identification of a stored run (experiments/exp23/logs/<run>.RUN_INFO)
+HASH_EXT.add(".RUN_INFO")
 
-REMOVED_OUTPUTS = ["experiments/exp23/logs/[ABCD].events.txt", "experiments/exp23/reference_D.json",
+REMOVED_OUTPUTS = ["experiments/exp23/logs/[ABCDE].events.txt", "experiments/exp23/reference_D.json",
+                   "experiments/exp23/reference_E.json",
                    "experiments/ch6", "**/thesis.tex", "**/thesis.csv"]
 
 

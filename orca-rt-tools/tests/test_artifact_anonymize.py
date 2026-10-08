@@ -41,8 +41,8 @@ def test_export_content(export):
     out, _ = export
     e = out / "experiments"
     assert not (e / "ch6").exists()
-    assert sorted(os.listdir(e / "exp23" / "logs")) == ["E.events.txt"]
-    assert not (e / "exp23" / "reference_D.json").exists()
+    assert sorted(os.listdir(e / "exp23" / "logs")) == ["F.RUN_INFO", "F.events.txt", "F.time.txt"]
+    assert not (e / "exp23" / "reference_D.json").exists() and not (e / "exp23" / "reference_E.json").exists()
     assert "thesis" not in json.loads((e / "exp23" / "config.json").read_text())
     assert "reference_rows" in json.loads((e / "ch7" / "config.json").read_text())
     exp23 = (out / "orca-rt-tools" / "rttools" / "paper" / "exp23.py").read_text()
