@@ -5,13 +5,13 @@
    "app": "synthetic_d",
    "criterion": "LSTF",
    "pf": 10,
-   "run": 30
+   "run": 6
   },
   {
    "app": "synthetic_d",
    "criterion": "MBCF",
    "pf": 10,
-   "run": 30
+   "run": 6
   },
   {
    "app": "synthetic_d",
@@ -23,13 +23,13 @@
    "app": "synthetic_d",
    "criterion": "LSTF",
    "pf": 20,
-   "run": 16
+   "run": 6
   },
   {
    "app": "synthetic_d",
    "criterion": "MBCF",
    "pf": 20,
-   "run": 16
+   "run": 6
   },
   {
    "app": "synthetic_d",
@@ -41,19 +41,19 @@
    "app": "synthetic_d",
    "criterion": "LSTF",
    "pf": 40,
-   "run": 4
+   "run": 6
   },
   {
    "app": "synthetic_d",
    "criterion": "MBCF",
    "pf": 40,
-   "run": 4
+   "run": 6
   },
   {
    "app": "synthetic_d",
    "criterion": "MCPF",
    "pf": 40,
-   "run": 4
+   "run": 6
   },
   {
    "app": "dct_verify",
@@ -115,61 +115,61 @@
    "app": "synthetic_d",
    "criterion": "LSTF",
    "pf": 10,
-   "run": 80
+   "run": 8
   },
   {
    "app": "synthetic_d",
    "criterion": "MBCF",
    "pf": 10,
-   "run": 80
+   "run": 8
   },
   {
    "app": "synthetic_d",
    "criterion": "MCPF",
    "pf": 10,
+   "run": 8
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "LSTF",
+   "pf": 20,
+   "run": 4
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MBCF",
+   "pf": 20,
+   "run": 4
+  },
+  {
+   "app": "synthetic_d",
+   "criterion": "MCPF",
+   "pf": 20,
    "run": 4
   },
   {
    "app": "synthetic_d",
    "criterion": "LSTF",
-   "pf": 20,
-   "run": 12
-  },
-  {
-   "app": "synthetic_d",
-   "criterion": "MBCF",
-   "pf": 20,
-   "run": 12
-  },
-  {
-   "app": "synthetic_d",
-   "criterion": "MCPF",
-   "pf": 20,
+   "pf": 40,
    "run": 2
   },
   {
    "app": "synthetic_d",
-   "criterion": "LSTF",
-   "pf": 40,
-   "run": 1
-  },
-  {
-   "app": "synthetic_d",
    "criterion": "MBCF",
    "pf": 40,
-   "run": 1
+   "run": 2
   },
   {
    "app": "synthetic_d",
    "criterion": "MCPF",
    "pf": 40,
-   "run": 1
+   "run": 2
   },
   {
    "app": "dct_verify",
    "criterion": "LSTF",
    "pf": 10,
-   "run": 314
+   "run": 416
   },
   {
    "app": "dct_verify",
@@ -181,13 +181,13 @@
    "app": "dct_verify",
    "criterion": "MCPF",
    "pf": 10,
-   "run": 428
+   "run": 314
   },
   {
    "app": "dct_verify",
    "criterion": "LSTF",
    "pf": 20,
-   "run": 158
+   "run": 209
   },
   {
    "app": "dct_verify",
@@ -199,13 +199,13 @@
    "app": "dct_verify",
    "criterion": "MCPF",
    "pf": 20,
-   "run": 217
+   "run": 158
   },
   {
    "app": "dct_verify",
    "criterion": "LSTF",
    "pf": 40,
-   "run": 80
+   "run": 105
   },
   {
    "app": "dct_verify",
@@ -217,7 +217,7 @@
    "app": "dct_verify",
    "criterion": "MCPF",
    "pf": 40,
-   "run": 110
+   "run": 80
   }
  ],
  "tab67": [
@@ -279,61 +279,61 @@
    "app": "dct_verify",
    "criterion": "LSTF",
    "pf": 10,
-   "run_hz": 79376.220703125
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "MBCF",
    "pf": 10,
-   "run_hz": 112163.54370117188
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "MCPF",
    "pf": 10,
-   "run_hz": 112163.54370117188
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "LSTF",
    "pf": 20,
-   "run_hz": 79376.220703125
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "MBCF",
    "pf": 20,
-   "run_hz": 112163.54370117188
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "MCPF",
    "pf": 20,
-   "run_hz": 112163.54370117188
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "LSTF",
    "pf": 40,
-   "run_hz": 79376.220703125
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "MBCF",
    "pf": 40,
-   "run_hz": 112163.54370117188
+   "run_hz": 78125.0
   },
   {
    "app": "dct_verify",
    "criterion": "MCPF",
    "pf": 40,
-   "run_hz": 79376.220703125
+   "run_hz": 78125.0
   }
  ],
  "summary": {
   "tab65_agree": 10,
   "tab65_cells": 18,
-  "tab66_agree": 8,
+  "tab66_agree": 5,
   "tab66_cells": 18
  }
 }
