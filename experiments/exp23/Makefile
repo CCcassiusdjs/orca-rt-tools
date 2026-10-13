@@ -4,9 +4,12 @@
 #   make analyze   tables, figure and metrics from $(LOG)
 #   make check     compare the metrics with $(REF)
 #   make all       analyze + check (default; stored log of run F against reference_head.json) + frequency
+#                  + frequency-header-wait
 #   make frequency minimum frequency of application E (CLI input apps/synthetic-app-e): f*, f_CPU and
-#                  max(f*, f_CPU) with the .map file and with the Spiral Mapping; check against
-#                  reference_frequency.json
+#                  max(f*, f_CPU) with the .map file and with the Spiral Mapping, link occupancy
+#                  o_i = L0; check against reference_frequency.json
+#   make frequency-header-wait  the same with o_i = L0 + 20 (m + 1) (header wait bound of the Hermes,
+#                  make -C ../zll contention); check against reference_frequency_header_wait.json
 #   make paper     sim + analyze + check (simulation of this tree against reference_head.json)
 #   make runs      analyze the six stored runs (logs/A..F) into build/runs  (anon:drop-line)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
@@ -39,9 +42,9 @@ APP_E   := ../../apps/synthetic-app-e
 ARCH    := ../../arch/hermes-2x2.gml
 F0      ?= 500000000
 
-.PHONY: all sim analyze check frequency paper info clean
+.PHONY: all sim analyze check frequency frequency-header-wait paper info clean
 
-all: analyze check frequency
+all: analyze check frequency frequency-header-wait
 
 sim:
 	./simulate.sh $(BUILD)/sim $(SIM_NS)
@@ -55,8 +58,14 @@ check:
 frequency:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
 		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --map spiral --f0 $(F0) \
-		--config config.json --out $(BUILD)/frequency
+		--config config.json --header-wait off --out $(BUILD)/frequency
 	$(RUN) check $(BUILD)/frequency/metrics.json reference_frequency.json
+
+frequency-header-wait:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
+		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --map spiral --f0 $(F0) \
+		--config config.json --header-wait bound --out $(BUILD)/frequency_header_wait
+	$(RUN) check $(BUILD)/frequency_header_wait/metrics.json reference_frequency_header_wait.json
 
 paper:
 	$(MAKE) sim

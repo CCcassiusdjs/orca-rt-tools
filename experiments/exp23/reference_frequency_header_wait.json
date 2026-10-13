@@ -1,0 +1,91 @@
+{
+ "_doc": "Minimum frequency of application E with the header wait bound (make frequency-header-wait): the inputs and search parameters of reference_frequency.json, link occupancy o_i = L0 + 20 (m + 1) (rttools/modules/routing/router.py, HEADER_WAIT_CYCLES; wait measured by make -C ../zll contention).",
+ "header_wait_cycles": 20,
+ "occupancy": "L0 + 20 (m + 1)",
+ "f_cpu_exp23_hz": 434900000,
+ "f_cpu_equals_exp23": true,
+ "runs": {
+  "synthetic-app-e-ONTO-hermes2x2.map": {
+   "criterion": null,
+   "mapping": {
+    "0": [
+     "A",
+     "B",
+     "D",
+     "F"
+    ],
+    "1": [
+     "C"
+    ],
+    "2": [
+     "E",
+     "H",
+     "I"
+    ],
+    "3": [
+     "G",
+     "J"
+    ]
+   },
+   "cpu_demand_cycles": {
+    "0": 181930,
+    "1": 96330,
+    "2": 173370,
+    "3": 217450
+   },
+   "f_cpu_hz": 434900000.0,
+   "f_star_hz": 345417022.7050781,
+   "f_star_lower_hz": 345413208.0078125,
+   "frequency_hz": 434900000.0,
+   "binding": "cpu",
+   "final_check": {
+    "frequency_hz": 434900000.0,
+    "feasible": true,
+    "hyperperiod": 217450,
+    "packets": 5,
+    "skipped": 0
+   }
+  },
+  "spiral": {
+   "criterion": "MAX_PROC",
+   "mapping": {
+    "0": [
+     "C"
+    ],
+    "1": [
+     "A",
+     "B",
+     "D",
+     "F"
+    ],
+    "2": [
+     "G",
+     "J"
+    ],
+    "3": [
+     "E",
+     "H",
+     "I"
+    ]
+   },
+   "cpu_demand_cycles": {
+    "0": 96330,
+    "1": 181930,
+    "2": 217450,
+    "3": 173370
+   },
+   "f_cpu_hz": 434900000.0,
+   "f_star_hz": 345417022.7050781,
+   "f_star_lower_hz": 345413208.0078125,
+   "frequency_hz": 434900000.0,
+   "binding": "cpu",
+   "final_check": {
+    "frequency_hz": 434900000.0,
+    "feasible": true,
+    "hyperperiod": 217450,
+    "packets": 5,
+    "skipped": 0
+   }
+  }
+ }
+}

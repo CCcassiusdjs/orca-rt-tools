@@ -1,5 +1,7 @@
 {
  "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping.",
+ "header_wait_cycles": 0,
+ "occupancy": "L0",
  "f_cpu_exp23_hz": 434900000,
  "f_cpu_equals_exp23": true,
  "runs": {
