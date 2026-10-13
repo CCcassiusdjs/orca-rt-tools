@@ -5,6 +5,9 @@
  * J (node 3) runs iteration k after the k-th packet of each of G, H and I
  * (it ran after any three packets).
  *
+ * Each task writes the iteration markers ITER_BEGIN/ITER_END (device/cacc.h)
+ * once per iteration, also for the two iterations of one run.
+ *
  * The task runs until it blocks on an empty queue; then ucx_task_yield()
  * delivers the next batch of packets or leaves the task with longjmp. */
 #include <ucx.h>
@@ -55,6 +58,18 @@ static void setup(uint32_t x, uint32_t y, int tasks)
 	host_on_block = NULL;
 	host_delivered = 0;
 	host_sleeps = 0;
+	host_iter_nmarks = 0;
+}
+
+/* the markers written so far are `n` words of `expected` */
+static int marks_are(const uint32_t *expected, int n)
+{
+	if (host_iter_nmarks != n)
+		return 0;
+	for (int i = 0; i < n; i++)
+		if (host_iter_marks[i] != expected[i])
+			return 0;
+	return 1;
 }
 
 /* packet from another node: irq2 (size) and irq3 (complete packet) */
@@ -123,6 +138,40 @@ static void test_e_sends_ei_workload(void)
 	p = ucx_noc_receive();
 	CHECK(p && p->tag == COMM_EH_WORKLOAD);
 	CHECK(p && p->payload_size >= COMM_EH_WORKLOAD);
+}
+
+/* two packets of C wait in the queue: one run of E serves iterations 1
+ * and 2 and marks the begin and the end of each */
+static int e2_block(void)
+{
+	if (e_batches++ > 0)
+		return 0;
+	deliver(CPU_C, PORT_C, PORT_E, COMM_CE_WORKLOAD);
+	deliver(CPU_C, PORT_C, PORT_E, COMM_CE_WORKLOAD);
+	return 1;
+}
+
+static void test_e_marks_each_iteration_of_a_run(void)
+{
+	setup(0, 1, 4);
+	host_current_task = H_ID;
+	CHECK(ucx_noc_comm_create(PORT_H) == UCX_NOC_OK);
+	host_current_task = I_ID;
+	CHECK(ucx_noc_comm_create(PORT_I) == UCX_NOC_OK);
+
+	host_current_task = E_ID;
+	e_batches = 0;
+	host_on_block = e2_block;
+	if (!setjmp(host_leave))
+		task_e();
+
+	CHECK(host_sleeps == 2);
+	CHECK(e_batches == 2);                      /* one block after the two iterations */
+	const uint32_t m[] = {ITER_MARK('E', 1), ITER_MARK_END | ITER_MARK('E', 1),
+	                      ITER_MARK('E', 2), ITER_MARK_END | ITER_MARK('E', 2)};
+	CHECK(marks_are(m, 4));
+	CHECK(ITER_MARK('E', 2) == 0x45000002u);
+	CHECK((ITER_MARK_END | ITER_MARK('J', 0x1234567)) == 0xCA234567u);  /* k keeps 24 bits */
 }
 
 /* ------------------------------------------------------------ join of J */
@@ -213,6 +262,20 @@ static void test_j_producer_ahead(void)
 	CHECK(c[2] == 9);      /* | I3 G3 */
 }
 
+/* J marks iterations 1 and 2 of the same run separately, then 3 */
+static void test_j_marks_each_iteration(void)
+{
+	int c[16];
+	int n = run_j("HHHGGII|IG", c);
+	CHECK(n == 3);
+	uint32_t m[6];
+	for (int k = 1; k <= 3; k++) {
+		m[2 * k - 2] = ITER_MARK('J', k);
+		m[2 * k - 1] = ITER_MARK_END | ITER_MARK('J', k);
+	}
+	CHECK(marks_are(m, 6));
+}
+
 /* arrivals in the order of the producers: one iteration per three packets */
 static void test_j_in_order(void)
 {
@@ -245,6 +308,8 @@ static void test_j_unknown_port(void)
 int main(void)
 {
 	RUN_FORK(test_e_sends_ei_workload);
+	RUN_FORK(test_e_marks_each_iteration_of_a_run);
+	RUN_FORK(test_j_marks_each_iteration);
 	RUN_FORK(test_j_joins_same_iteration);
 	RUN_FORK(test_j_producer_ahead);
 	RUN_FORK(test_j_in_order);
