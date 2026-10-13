@@ -1,0 +1,851 @@
+{
+ "name": "car_v",
+ "generator": "rttools.ucxgen",
+ "inputs": {
+  "csv": {
+   "file": "car-v.csv",
+   "sha256": "57979d1f5960165d3c59bf11986ad181641b213433037e8a742afd56f276f167"
+  },
+  "map": {
+   "file": "car-v.map",
+   "sha256": "9fbf86c91619af9824f716ed918dacdccc2f4a6a53d1b294bcc4ea05eca0bdb2"
+  }
+ },
+ "mesh": [
+  4,
+  4
+ ],
+ "cycles_per_count": 10,
+ "reserve_cycles": 11000,
+ "payload_divisor": 1,
+ "tag_mod": 1024,
+ "release": {
+  "period_ns": 500000,
+  "delay_ns": 3000000,
+  "pes": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   8,
+   11
+  ],
+  "pe_labels": [
+   "1-0",
+   "2-0",
+   "3-0",
+   "0-1",
+   "1-1",
+   "3-1",
+   "0-2",
+   "3-2"
+  ],
+  "mask": 2494
+ },
+ "pe_tasks": {
+  "0-0": [
+   "IDLE",
+   "NAVC"
+  ],
+  "1-0": [
+   "IDLE",
+   "FBU4",
+   "BFE4"
+  ],
+  "2-0": [
+   "IDLE",
+   "FBU1",
+   "BFE1"
+  ],
+  "3-0": [
+   "IDLE",
+   "FBU2",
+   "BFE2"
+  ],
+  "0-1": [
+   "IDLE",
+   "FBU3",
+   "VOD1"
+  ],
+  "1-1": [
+   "IDLE",
+   "FBU8",
+   "VOD2"
+  ],
+  "2-1": [
+   "IDLE",
+   "BFE3"
+  ],
+  "3-1": [
+   "IDLE",
+   "FBU5",
+   "BFE5"
+  ],
+  "0-2": [
+   "IDLE",
+   "FBU7"
+  ],
+  "1-2": [
+   "IDLE",
+   "BFE8"
+  ],
+  "2-2": [
+   "IDLE",
+   "BFE7"
+  ],
+  "3-2": [
+   "IDLE",
+   "FBU6",
+   "BFE6"
+  ],
+  "0-3": [
+   "IDLE",
+   "STPH"
+  ],
+  "1-3": [
+   "IDLE",
+   "FDF2"
+  ],
+  "2-3": [
+   "IDLE",
+   "FDF1"
+  ],
+  "3-3": [
+   "IDLE",
+   "OBMG"
+  ]
+ },
+ "tasks": [
+  {
+   "name": "FBU1",
+   "ident": "FBU1",
+   "port": 1,
+   "pe": 2,
+   "pe_label": "2-0",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [],
+   "outputs": [
+    5
+   ],
+   "source": true
+  },
+  {
+   "name": "FBU2",
+   "ident": "FBU2",
+   "port": 2,
+   "pe": 3,
+   "pe_label": "3-0",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [],
+   "outputs": [
+    6
+   ],
+   "source": true
+  },
+  {
+   "name": "FBU3",
+   "ident": "FBU3",
+   "port": 3,
+   "pe": 4,
+   "pe_label": "0-1",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [],
+   "outputs": [
+    1,
+    7
+   ],
+   "source": true
+  },
+  {
+   "name": "FBU4",
+   "ident": "FBU4",
+   "port": 4,
+   "pe": 1,
+   "pe_label": "1-0",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 85664,
+   "workload": 7466,
+   "inputs": [],
+   "outputs": [
+    8
+   ],
+   "source": true
+  },
+  {
+   "name": "FBU5",
+   "ident": "FBU5",
+   "port": 5,
+   "pe": 7,
+   "pe_label": "3-1",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [],
+   "outputs": [
+    9
+   ],
+   "source": true
+  },
+  {
+   "name": "FBU6",
+   "ident": "FBU6",
+   "port": 6,
+   "pe": 11,
+   "pe_label": "3-2",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [],
+   "outputs": [
+    10
+   ],
+   "source": true
+  },
+  {
+   "name": "FBU7",
+   "ident": "FBU7",
+   "port": 7,
+   "pe": 8,
+   "pe_label": "0-2",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [],
+   "outputs": [
+    11
+   ],
+   "source": true
+  },
+  {
+   "name": "FBU8",
+   "ident": "FBU8",
+   "port": 8,
+   "pe": 5,
+   "pe_label": "1-1",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [],
+   "outputs": [
+    2,
+    12
+   ],
+   "source": true
+  },
+  {
+   "name": "NAVC",
+   "ident": "NAVC",
+   "port": 9,
+   "pe": 0,
+   "pe_label": "0-0",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    3,
+    4
+   ],
+   "outputs": [],
+   "source": false
+  },
+  {
+   "name": "BFE1",
+   "ident": "BFE1",
+   "port": 10,
+   "pe": 2,
+   "pe_label": "2-0",
+   "order": 1,
+   "kernel_id": 2,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    5
+   ],
+   "outputs": [
+    13
+   ],
+   "source": false
+  },
+  {
+   "name": "BFE2",
+   "ident": "BFE2",
+   "port": 11,
+   "pe": 3,
+   "pe_label": "3-0",
+   "order": 1,
+   "kernel_id": 2,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    6
+   ],
+   "outputs": [
+    14
+   ],
+   "source": false
+  },
+  {
+   "name": "BFE3",
+   "ident": "BFE3",
+   "port": 12,
+   "pe": 6,
+   "pe_label": "2-1",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    7
+   ],
+   "outputs": [
+    15
+   ],
+   "source": false
+  },
+  {
+   "name": "BFE4",
+   "ident": "BFE4",
+   "port": 13,
+   "pe": 1,
+   "pe_label": "1-0",
+   "order": 1,
+   "kernel_id": 2,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    8
+   ],
+   "outputs": [
+    16
+   ],
+   "source": false
+  },
+  {
+   "name": "BFE5",
+   "ident": "BFE5",
+   "port": 14,
+   "pe": 7,
+   "pe_label": "3-1",
+   "order": 1,
+   "kernel_id": 2,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    9
+   ],
+   "outputs": [
+    17
+   ],
+   "source": false
+  },
+  {
+   "name": "BFE6",
+   "ident": "BFE6",
+   "port": 15,
+   "pe": 11,
+   "pe_label": "3-2",
+   "order": 1,
+   "kernel_id": 2,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    10
+   ],
+   "outputs": [
+    18
+   ],
+   "source": false
+  },
+  {
+   "name": "BFE7",
+   "ident": "BFE7",
+   "port": 16,
+   "pe": 10,
+   "pe_label": "2-2",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    11
+   ],
+   "outputs": [
+    19
+   ],
+   "source": false
+  },
+  {
+   "name": "BFE8",
+   "ident": "BFE8",
+   "port": 17,
+   "pe": 9,
+   "pe_label": "1-2",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    12
+   ],
+   "outputs": [
+    20
+   ],
+   "source": false
+  },
+  {
+   "name": "FDF1",
+   "ident": "FDF1",
+   "port": 18,
+   "pe": 14,
+   "pe_label": "2-3",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    13,
+    14,
+    15,
+    16
+   ],
+   "outputs": [
+    21
+   ],
+   "source": false
+  },
+  {
+   "name": "FDF2",
+   "ident": "FDF2",
+   "port": 19,
+   "pe": 13,
+   "pe_label": "1-3",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    17,
+    18,
+    19,
+    20
+   ],
+   "outputs": [
+    22
+   ],
+   "source": false
+  },
+  {
+   "name": "STPH",
+   "ident": "STPH",
+   "port": 20,
+   "pe": 12,
+   "pe_label": "0-3",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    21,
+    22
+   ],
+   "outputs": [
+    23
+   ],
+   "source": false
+  },
+  {
+   "name": "VOD1",
+   "ident": "VOD1",
+   "port": 21,
+   "pe": 4,
+   "pe_label": "0-1",
+   "order": 1,
+   "kernel_id": 2,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    1
+   ],
+   "outputs": [
+    3
+   ],
+   "source": false
+  },
+  {
+   "name": "VOD2",
+   "ident": "VOD2",
+   "port": 22,
+   "pe": 5,
+   "pe_label": "1-1",
+   "order": 1,
+   "kernel_id": 2,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    2
+   ],
+   "outputs": [
+    4
+   ],
+   "source": false
+  },
+  {
+   "name": "OBMG",
+   "ident": "OBMG",
+   "port": 23,
+   "pe": 15,
+   "pe_label": "3-3",
+   "order": 0,
+   "kernel_id": 1,
+   "wcet": 123000,
+   "workload": 11200,
+   "inputs": [
+    23
+   ],
+   "outputs": [],
+   "source": false
+  }
+ ],
+ "flows": [
+  {
+   "id": 1,
+   "csv_id": "1",
+   "source": "FBU3",
+   "target": "VOD1",
+   "src_pe": 4,
+   "dst_pe": 4,
+   "src_label": "0-1",
+   "dst_label": "0-1",
+   "local": true,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 1024
+  },
+  {
+   "id": 2,
+   "csv_id": "2",
+   "source": "FBU8",
+   "target": "VOD2",
+   "src_pe": 5,
+   "dst_pe": 5,
+   "src_label": "1-1",
+   "dst_label": "1-1",
+   "local": true,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 2048
+  },
+  {
+   "id": 3,
+   "csv_id": "3",
+   "source": "VOD1",
+   "target": "NAVC",
+   "src_pe": 4,
+   "dst_pe": 0,
+   "src_label": "0-1",
+   "dst_label": "0-0",
+   "local": false,
+   "csv_bytes": 128,
+   "bytes": 128,
+   "tag_base": 3072
+  },
+  {
+   "id": 4,
+   "csv_id": "4",
+   "source": "VOD2",
+   "target": "NAVC",
+   "src_pe": 5,
+   "dst_pe": 0,
+   "src_label": "1-1",
+   "dst_label": "0-0",
+   "local": false,
+   "csv_bytes": 128,
+   "bytes": 128,
+   "tag_base": 4096
+  },
+  {
+   "id": 5,
+   "csv_id": "5",
+   "source": "FBU1",
+   "target": "BFE1",
+   "src_pe": 2,
+   "dst_pe": 2,
+   "src_label": "2-0",
+   "dst_label": "2-0",
+   "local": true,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 5120
+  },
+  {
+   "id": 6,
+   "csv_id": "6",
+   "source": "FBU2",
+   "target": "BFE2",
+   "src_pe": 3,
+   "dst_pe": 3,
+   "src_label": "3-0",
+   "dst_label": "3-0",
+   "local": true,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 6144
+  },
+  {
+   "id": 7,
+   "csv_id": "7",
+   "source": "FBU3",
+   "target": "BFE3",
+   "src_pe": 4,
+   "dst_pe": 6,
+   "src_label": "0-1",
+   "dst_label": "2-1",
+   "local": false,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 7168
+  },
+  {
+   "id": 8,
+   "csv_id": "8",
+   "source": "FBU4",
+   "target": "BFE4",
+   "src_pe": 1,
+   "dst_pe": 1,
+   "src_label": "1-0",
+   "dst_label": "1-0",
+   "local": true,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 8192
+  },
+  {
+   "id": 9,
+   "csv_id": "9",
+   "source": "FBU5",
+   "target": "BFE5",
+   "src_pe": 7,
+   "dst_pe": 7,
+   "src_label": "3-1",
+   "dst_label": "3-1",
+   "local": true,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 9216
+  },
+  {
+   "id": 10,
+   "csv_id": "10",
+   "source": "FBU6",
+   "target": "BFE6",
+   "src_pe": 11,
+   "dst_pe": 11,
+   "src_label": "3-2",
+   "dst_label": "3-2",
+   "local": true,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 10240
+  },
+  {
+   "id": 11,
+   "csv_id": "11",
+   "source": "FBU7",
+   "target": "BFE7",
+   "src_pe": 8,
+   "dst_pe": 10,
+   "src_label": "0-2",
+   "dst_label": "2-2",
+   "local": false,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 11264
+  },
+  {
+   "id": 12,
+   "csv_id": "12",
+   "source": "FBU8",
+   "target": "BFE8",
+   "src_pe": 5,
+   "dst_pe": 9,
+   "src_label": "1-1",
+   "dst_label": "1-2",
+   "local": false,
+   "csv_bytes": 9600,
+   "bytes": 9600,
+   "tag_base": 12288
+  },
+  {
+   "id": 13,
+   "csv_id": "13",
+   "source": "BFE1",
+   "target": "FDF1",
+   "src_pe": 2,
+   "dst_pe": 14,
+   "src_label": "2-0",
+   "dst_label": "2-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 13312
+  },
+  {
+   "id": 14,
+   "csv_id": "14",
+   "source": "BFE2",
+   "target": "FDF1",
+   "src_pe": 3,
+   "dst_pe": 14,
+   "src_label": "3-0",
+   "dst_label": "2-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 14336
+  },
+  {
+   "id": 15,
+   "csv_id": "15",
+   "source": "BFE3",
+   "target": "FDF1",
+   "src_pe": 6,
+   "dst_pe": 14,
+   "src_label": "2-1",
+   "dst_label": "2-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 15360
+  },
+  {
+   "id": 16,
+   "csv_id": "16",
+   "source": "BFE4",
+   "target": "FDF1",
+   "src_pe": 1,
+   "dst_pe": 14,
+   "src_label": "1-0",
+   "dst_label": "2-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 16384
+  },
+  {
+   "id": 17,
+   "csv_id": "17",
+   "source": "BFE5",
+   "target": "FDF2",
+   "src_pe": 7,
+   "dst_pe": 13,
+   "src_label": "3-1",
+   "dst_label": "1-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 17408
+  },
+  {
+   "id": 18,
+   "csv_id": "18",
+   "source": "BFE6",
+   "target": "FDF2",
+   "src_pe": 11,
+   "dst_pe": 13,
+   "src_label": "3-2",
+   "dst_label": "1-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 18432
+  },
+  {
+   "id": 19,
+   "csv_id": "19",
+   "source": "BFE7",
+   "target": "FDF2",
+   "src_pe": 10,
+   "dst_pe": 13,
+   "src_label": "2-2",
+   "dst_label": "1-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 19456
+  },
+  {
+   "id": 20,
+   "csv_id": "20",
+   "source": "BFE8",
+   "target": "FDF2",
+   "src_pe": 9,
+   "dst_pe": 13,
+   "src_label": "1-2",
+   "dst_label": "1-3",
+   "local": false,
+   "csv_bytes": 512,
+   "bytes": 512,
+   "tag_base": 20480
+  },
+  {
+   "id": 21,
+   "csv_id": "21",
+   "source": "FDF1",
+   "target": "STPH",
+   "src_pe": 14,
+   "dst_pe": 12,
+   "src_label": "2-3",
+   "dst_label": "0-3",
+   "local": false,
+   "csv_bytes": 2048,
+   "bytes": 2048,
+   "tag_base": 21504
+  },
+  {
+   "id": 22,
+   "csv_id": "22",
+   "source": "FDF2",
+   "target": "STPH",
+   "src_pe": 13,
+   "dst_pe": 12,
+   "src_label": "1-3",
+   "dst_label": "0-3",
+   "local": false,
+   "csv_bytes": 2048,
+   "bytes": 2048,
+   "tag_base": 22528
+  },
+  {
+   "id": 23,
+   "csv_id": "23",
+   "source": "STPH",
+   "target": "OBMG",
+   "src_pe": 12,
+   "dst_pe": 15,
+   "src_label": "0-3",
+   "dst_label": "3-3",
+   "local": false,
+   "csv_bytes": 1024,
+   "bytes": 1024,
+   "tag_base": 23552
+  }
+ ],
+ "warnings": []
+}
