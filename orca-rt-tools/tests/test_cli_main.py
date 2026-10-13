@@ -67,3 +67,21 @@ def test_fixed_frequency_zero_hyperperiod_exits_cleanly(tmp_path):
                    "hermes-2x2.gml", "1", "1", "500", "False", cwd=str(tmp_path))
     assert "Traceback" not in r.stderr, r.stderr[-2000:]
     assert r.returncode == 1
+
+
+@pytest.mark.parametrize("value,text", [(None, "o_i = L0 ("), ("bound", "o_i = L0 + 20 (m + 1)"),
+                                        ("3", "o_i = L0 + 3 (m + 1)")])
+def test_link_occupancy_follows_header_wait(inputs, monkeypatch, value, text):
+    d, files = inputs
+    if value is not None:
+        monkeypatch.setenv("RTTOOLS_HEADER_WAIT", value)
+    r = run_module("rttools", *files, "1000000", cwd=str(d))
+    assert text in r.stdout + r.stderr
+
+
+def test_bad_header_wait_returns_nonzero(inputs, monkeypatch):
+    d, files = inputs
+    monkeypatch.setenv("RTTOOLS_HEADER_WAIT", "-4")
+    r = run_module("rttools", *files, "1000000", cwd=str(d))
+    assert r.returncode != 0
+    assert "RTTOOLS_HEADER_WAIT" in r.stdout + r.stderr

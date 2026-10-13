@@ -2,8 +2,22 @@ import os
 import sys
 import subprocess
 
+import pytest
+
 PKG_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO_ROOT = os.path.dirname(PKG_ROOT)
+
+
+@pytest.fixture(autouse=True)
+def _default_header_wait(monkeypatch):
+    """Every test starts with the default link occupancy o_i = L0: no
+    RTTOOLS_HEADER_WAIT in the environment (also for child processes) and
+    no selection by router.set_header_wait."""
+    from rttools.modules.routing import router
+    monkeypatch.delenv(router.HEADER_WAIT_ENV, raising=False)
+    router.set_header_wait(None)
+    yield
+    router.set_header_wait(None)
 
 
 def run_module(module, *args, cwd=None, block=(), timeout=120):

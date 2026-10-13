@@ -11,6 +11,7 @@ from rttools.modules.unwrapper import flowUnwrapper
 from rttools.modules.backend.ags import ags, heuristics
 from rttools.modules.backend.minizinc import minizinc
 from rttools.modules.mapping import mapfile, spiral
+from rttools.modules.routing import router
 
 # the frequency search uses the AGS backend only (see
 # rttools/modules/frequency/search.py)
@@ -207,6 +208,15 @@ def main():
 
     info("Loading NoC file `" + noc_file + "`")
     noc = nocparser.loadFromFile(noc_file)
+
+    # link occupancy o_i = L0 + w_h (m + 1); w_h from RTTOOLS_HEADER_WAIT (default 0)
+    try:
+        w_h = router.header_wait()
+    except ValueError as e:
+        error(str(e) + " (" + router.HEADER_WAIT_ENV + ")")
+        return 1
+    info("Link occupancy o_i = " + ("L0 + " + str(w_h) + " (m + 1)" if w_h else "L0")
+         + " (" + router.HEADER_WAIT_ENV + "; header wait bound " + str(router.HEADER_WAIT_CYCLES) + " cycles)")
 
     mapping, bad = load_mapping(map_file, app, appname, noc, noc_file)
     for p in bad:

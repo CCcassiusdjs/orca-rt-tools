@@ -66,3 +66,79 @@ def test_unwrapper_uses_occupancy():
     for pkt in packets:
         r = by_flow[pkt["flow"]]
         assert pkt["net_time"] == router.occupancy(r["hops"], pkt["datasize"]) == r["net_time"]
+
+
+# header wait at the SwitchControl (make -C experiments/zll contention)
+CONTENTION_REF = os.path.join(REPO_ROOT, "experiments", "zll", "reference_contention.json")
+
+
+def l0(m, payload):
+    return router.getRoutingTime() * (m + 1) + router.getPacketFlits(payload) + 1
+
+
+def test_header_wait_constants_come_from_ghdl_reference():
+    import json
+    with open(CONTENTION_REF) as f:
+        ref = json.load(f)
+    assert router.HEADER_SERVICE_CYCLES == ref["service_cycles_per_header"] == 5
+    assert router.MAX_COMPETING_HEADERS == ref["competing_headers_max"] == 4
+    assert router.HEADER_WAIT_CYCLES == ref["largest_wait_cycles"] == 20
+    assert ref["flits_with_error"] == 0 and ref["lost_or_timeout"] == 0
+    # one service time per competing header, 0 for a header alone
+    for n, w in ref["largest_wait_by_headers"].items():
+        assert w == router.HEADER_SERVICE_CYCLES * (int(n) - 1)
+
+
+def test_default_occupancy_is_zero_load_latency():
+    assert router.header_wait() == router.HEADER_WAIT_DEFAULT == 0
+    for m, payload, p, lat in FLOWS_E:
+        assert router.occupancy(m, payload) == lat == l0(m, payload)
+
+
+@pytest.mark.parametrize("m,payload,p,lat", FLOWS_E)
+def test_occupancy_with_header_wait_bound(m, payload, p, lat):
+    assert router.occupancy(m, payload, "bound") == lat + 20 * (m + 1)
+    assert router.occupancy(m, payload, 20) == lat + 20 * (m + 1)
+    assert router.occupancy(m, payload, "off") == lat
+    assert router.occupancy(m, payload, 0) == lat
+
+
+def test_header_wait_from_environment(monkeypatch):
+    for value, w in (("bound", 20), ("BOUND", 20), ("7", 7), ("0", 0), ("off", 0), ("", 0)):
+        monkeypatch.setenv(router.HEADER_WAIT_ENV, value)
+        assert router.header_wait() == w
+        assert router.occupancy(2, 6780) == 1717 + w * 3
+    monkeypatch.delenv(router.HEADER_WAIT_ENV)
+    assert router.occupancy(2, 6780) == 1717
+
+
+def test_set_header_wait_overrides_environment(monkeypatch):
+    monkeypatch.setenv(router.HEADER_WAIT_ENV, "7")
+    assert router.set_header_wait("bound") is None
+    assert router.header_wait() == 20
+    assert router.set_header_wait(None) == 20
+    assert router.header_wait() == 7
+
+
+@pytest.mark.parametrize("value", ["-1", -5, "twenty", "1.5", True])
+def test_header_wait_rejects_bad_values(value, monkeypatch):
+    with pytest.raises(ValueError):
+        router.parse_header_wait(value)
+    if isinstance(value, str):
+        monkeypatch.setenv(router.HEADER_WAIT_ENV, value)
+        with pytest.raises(ValueError):
+            router.occupancy(1, 1230)
+
+
+def test_unwrapper_uses_header_wait():
+    from rttools.tui.model import network
+    d = os.path.join(REPO_ROOT, "apps", "str2rts-dct-verify")
+    files = (os.path.join(d, "DCT-Verify.csv"), os.path.join(d, "STR2RST-DCT-verify-ONTO-hermes3x2.map"),
+             os.path.join(REPO_ROOT, "arch", "hermes-2x3.gml"))
+    _, _, base = network.flows_at(network.load_case(*files), 2000000)
+    router.set_header_wait("bound")
+    rows, _, packets = network.flows_at(network.load_case(*files), 2000000)
+    hops = {r["flow"]: r["hops"] for r in rows}
+    assert [p["name"] for p in packets] == [p["name"] for p in base]
+    for p, b in zip(packets, base):
+        assert p["net_time"] == b["net_time"] + 20 * (hops[p["flow"]] + 1)
