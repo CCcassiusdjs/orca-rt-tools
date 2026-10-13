@@ -41,7 +41,8 @@ def test_export_content(export):
     out, _ = export
     e = out / "experiments"
     assert not (e / "ch6").exists()
-    assert sorted(os.listdir(e / "exp23" / "logs")) == ["F.RUN_INFO", "F.events.txt", "F.time.txt"]
+    assert sorted(os.listdir(e / "exp23" / "logs")) == ["F.RUN_INFO", "F.events.txt", "F.image.lst",
+                                                         "F.noinstr.lst", "F.software.txt", "F.time.txt"]
     assert not (e / "exp23" / "reference_D.json").exists() and not (e / "exp23" / "reference_E.json").exists()
     assert "thesis" not in json.loads((e / "exp23" / "config.json").read_text())
     assert "reference_rows" in json.loads((e / "ch7" / "config.json").read_text())
