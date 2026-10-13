@@ -182,10 +182,26 @@ def test_exp23_default_is_run_f():
     r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3"], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     assert "analyze logs/F.events.txt --config config.json --join per_producer" in r.stdout
+    assert "--listing logs/F.image.lst --listing-without logs/F.noinstr.lst" in r.stdout
     assert "reference_head.json" in r.stdout
     r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "LOG=logs/D.events.txt",
                         "REF=reference_D.json"], capture_output=True, text=True)
     assert "analyze logs/D.events.txt" in r.stdout and "reference_D.json" in r.stdout
+    assert "--listing" not in r.stdout
+
+
+def test_exp23_paper_and_instrumentation_use_the_build_listings():
+    """make paper: listing of the simulated image and of the build without
+    the writes; make instrumentation: listings of make software."""
+    r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "paper"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "UCX_CFLAGS=-DUCX_NO_INSTRUMENTATION ./build_sw.sh build/sw/without" in r.stdout
+    assert ("--listing build/sim/pkt-sim/software/ucx-os/build/target/image.lst "
+            "--listing-without build/sw/without/pkt-sim/software/ucx-os/build/target/image.lst") in r.stdout
+    r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "instrumentation"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "./build_sw.sh build/sw/with" in r.stdout
+    assert "--listing build/sw/with/pkt-sim/software/ucx-os/build/target/image.lst" in r.stdout
 
 
 @needs_git

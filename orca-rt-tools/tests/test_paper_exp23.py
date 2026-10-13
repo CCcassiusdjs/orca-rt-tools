@@ -30,8 +30,11 @@ def runs(tmp_path_factory):
 @pytest.fixture(scope="module")
 def run_f(tmp_path_factory):
     d = tmp_path_factory.mktemp("F")
-    # run F (tag exp23-F): this tree, join rule per_producer of the config
-    return exp23.analyze(os.path.join(EXP, "logs", "F.events.txt"), cfg(), str(d)), str(d)
+    # run F (tag exp23-F): this tree, join rule per_producer of the config;
+    # listings of its image for the bound of the instrumentation writes
+    return exp23.analyze(os.path.join(EXP, "logs", "F.events.txt"), cfg(), str(d),
+                         listing=os.path.join(EXP, "logs", "F.image.lst"),
+                         listing_without=os.path.join(EXP, "logs", "F.noinstr.lst")), str(d)
 
 
 def test_run_d_matches_reference(runs):
