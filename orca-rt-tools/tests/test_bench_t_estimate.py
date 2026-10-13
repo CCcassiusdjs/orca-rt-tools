@@ -77,6 +77,55 @@ def test_phases_and_response_bound_of_application_e():
     assert estimate.response_bound(phi, fin, 250000) == (967450, "J")
 
 
+# creation order of each PE in app_main of pkt-sim/software/ucx-os/app/weird_a.c:405-422
+CREATION = {"ABDF": ["F", "D", "B", "A"], "C": ["C"], "EHI": ["H", "I", "E"], "GJ": ["J", "G"]}
+
+
+def test_dispatch_order_of_application_e():
+    """Round robin in creation order from the idle task: A, B, D, F wait
+    for their predecessor of the same phase; E runs first and H, I follow
+    in queue order from E (idle skipped); J (phase 3) and G (phase 1) are
+    both ready at the tick and J comes first in the queue."""
+    phi = estimate.phases(app_e_edges(), PE_OF)
+    got = {c: estimate.dispatch_order(ts, app_e_edges(), phi) for c, ts in CREATION.items()}
+    assert got == {"ABDF": ["A", "B", "D", "F"], "C": ["C"], "EHI": ["E", "H", "I"], "GJ": ["J", "G"]}
+
+
+def test_dispatch_order_scans_from_the_task_that_finished():
+    edges = [("E", "H"), ("E", "I")]
+    phi = {"E": 0, "H": 0, "I": 0}
+    assert estimate.dispatch_order(["I", "E", "H"], edges, phi) == ["E", "H", "I"]
+    assert estimate.dispatch_order(["E", "I", "H"], edges, phi) == ["E", "I", "H"]
+    assert estimate.dispatch_order(["H", "I", "E"], edges, phi) == ["E", "H", "I"]
+
+
+def test_dispatch_order_waits_only_for_predecessors_of_the_same_phase():
+    # G -> J on the same PE: same phase, J waits for G; J in a later phase, J is ready at the tick
+    assert estimate.dispatch_order(["J", "G"], [("G", "J")], {"G": 1, "J": 1}) == ["G", "J"]
+    assert estimate.dispatch_order(["J", "G"], [("G", "J")], {"G": 1, "J": 3}) == ["J", "G"]
+    # edges with a task of another PE do not block
+    assert estimate.dispatch_order(["J", "G"], [("I", "J")], {"G": 1, "J": 1, "I": 0}) == ["J", "G"]
+
+
+def test_dispatch_order_rejects_bad_input():
+    with pytest.raises(ValueError):
+        estimate.dispatch_order(["a", "a"], [], {"a": 0})
+    with pytest.raises(ValueError):
+        estimate.dispatch_order(["a", "b"], [("a", "b"), ("b", "a")], {"a": 0, "b": 0})
+
+
+def test_phases_follow_the_sequence_inside_a_pe():
+    """A target that runs before its source on the same PE serves the
+    iteration of the source in the next phase."""
+    pe = {"G": 3, "J": 3}
+    assert estimate.phases([("G", "J")], pe) == {"G": 0, "J": 0}
+    assert estimate.phases([("G", "J")], pe, {"G": 0, "J": 1}) == {"G": 0, "J": 0}
+    assert estimate.phases([("G", "J")], pe, {"J": 0, "G": 1}) == {"G": 0, "J": 1}
+    # application E: the kernel order J, G does not move J (phi(J) = 3 comes from I and H)
+    order = {"A": 0, "B": 1, "D": 2, "F": 3, "C": 0, "E": 0, "H": 1, "I": 2, "J": 0, "G": 1}
+    assert estimate.phases(app_e_edges(), PE_OF, order) == estimate.phases(app_e_edges(), PE_OF)
+
+
 def test_phases_reject_cycles():
     with pytest.raises(ValueError):
         estimate.phases([("a", "b"), ("b", "a")], {"a": 0, "b": 1})
