@@ -20,9 +20,14 @@ PAYLOAD = [("A", "C", 1230), ("A", "B", 4560), ("B", "D", 7890), ("C", "E", 1200
            ("G", "J", 1230)]
 MAP = "0:A,B,D,F\n1:C\n2:E,H,I\n3:G,J\n"
 ARCH = os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml")
-# Tab. 8.2 / tab-flows: (release, deadline) from the start of the source phase
-EXPECTED = {("A", "C"): (28530, 261000), ("F", "G"): (181930, 261000), ("C", "E"): (96330, 261000),
-            ("I", "J"): (128070, 370880), ("H", "J"): (173370, 370880)}
+# Tab. 8.2 / tab-flows: (release, deadline) from the start of the source phase, with the
+# dispatch order of the kernel rule on the creation order of weird_a.c (A B D F, C, E H I, J G)
+EXPECTED = {("A", "C"): (28530, 261000), ("F", "G"): (181930, 250000 + 107570 + 11000),
+            ("C", "E"): (96330, 261000), ("I", "J"): (52700 + 45300 + 75370, 261000),
+            ("H", "J"): (52700 + 45300, 261000)}
+# the same flows with the order E, I, H and G, J of the earlier sequence rows
+EXPECTED_EIH_GJ = {("A", "C"): (28530, 261000), ("F", "G"): (181930, 261000), ("C", "E"): (96330, 261000),
+                   ("I", "J"): (128070, 370880), ("H", "J"): (173370, 370880)}
 
 
 def write_case(tmp_path, params):
@@ -47,15 +52,24 @@ def packets(app_file, map_file, frequency=500000000):
     return case, {(p["source"], p["target"]): (p["min_start"], p["abs_deadline"]) for p in pk}, hp
 
 
-PHASE = ["release_model,phase", "scheduler_cycles,11000", "sequence,2,E,I,H"]
+# creation order of app_main (pkt-sim/software/ucx-os/app/weird_a.c:405-422)
+CREATION = ["creation,0,F,D,B,A", "creation,1,C", "creation,2,H,I,E", "creation,3,J,G"]
+PHASE = ["release_model,phase", "scheduler_cycles,11000"] + CREATION
 
 
 def test_parameters_section(tmp_path):
     app, _ = write_case(tmp_path, PHASE)
     g, _ = appparser.loadFromFile(app)
     assert g.graph["release_model"] == "phase" and g.graph["scheduler_cycles"] == 11000
-    assert g.graph["sequences"] == {"2": ["E", "I", "H"]}
+    assert g.graph["creation"] == {"0": ["F", "D", "B", "A"], "1": ["C"], "2": ["H", "I", "E"], "3": ["J", "G"]}
+    assert "sequences" not in g.graph
     assert g.number_of_edges() == len(PAYLOAD)
+
+
+def test_two_rows_for_one_node_are_an_error(tmp_path):
+    app, _ = write_case(tmp_path, PHASE + ["creation,2,E,H,I"])
+    with pytest.raises(ValueError):
+        appparser.loadFromFile(app)
 
 
 def test_phase_model_reproduces_tab_flows(tmp_path):
@@ -70,24 +84,46 @@ def test_phase_model_frequency_scales_the_phase_only(tmp_path):
     _, pk, hp = packets(*write_case(tmp_path, PHASE), frequency=400000000)
     assert hp == 200000
     assert pk[("A", "C")] == (28530, 200000 + 11000)
-    assert pk[("I", "J")] == (128070, 200000 + 120880)
+    assert pk[("I", "J")] == (173370, 200000 + 11000)
 
 
-def test_sequence_defaults_to_mapping_order(tmp_path):
-    """Without a sequence row, PE 2 runs E, H, I (mapping order)."""
+def test_dispatch_order_follows_the_kernel_rule(tmp_path):
+    """The creation rows give the order of the kernel: E, H, I on PE 2
+    (round robin from E) and J, G on PE 3 (both ready at the tick, J first
+    in the queue)."""
+    case = network.load_case(*write_case(tmp_path, PHASE), ARCH)
+    inst = instantiator.createInstance(case["app"], case["noc"], 500000000)
+    edges = [(s, t) for s, t, _ in inst["flows"]]
+    seqs = release.pe_sequences([t for t, _ in inst["tasks"]], edges, case["mapping"],
+                                creation=inst["release"]["creation"])
+    assert {str(k): v for k, v in seqs.items()} == {"0": ["A", "B", "D", "F"], "1": ["C"], "2": ["E", "H", "I"],
+                                                    "3": ["J", "G"]}
+
+
+def test_mapping_order_is_the_creation_order_without_rows(tmp_path):
+    """Without a creation row, the mapping order (2:E,H,I and 3:G,J) is the
+    creation order: E, H, I on PE 2 and G, J on PE 3."""
     _, pk, _ = packets(*write_case(tmp_path, PHASE[:2]))
     assert pk[("H", "J")] == (52700 + 45300, 370880)
     assert pk[("I", "J")] == (52700 + 45300 + 75370, 370880)
 
 
-def test_stable_topological_order():
-    assert release.stable_topological(["J", "G"], [("G", "J")]) == ["G", "J"]
-    assert release.stable_topological(["E", "H", "I"], [("E", "H"), ("E", "I")]) == ["E", "H", "I"]
-    assert release.stable_topological(["a", "b"], [("a", "b"), ("b", "a")]) == ["a", "b"]
+def test_sequence_rows_win_over_the_creation_rows(tmp_path):
+    """A sequence row is the dispatch order of its PE (a kernel with
+    another rule); with E, I, H and G, J the windows are the earlier ones."""
+    _, pk, _ = packets(*write_case(tmp_path, PHASE + ["sequence,2,E,I,H", "sequence,3,G,J"]))
+    assert pk == EXPECTED_EIH_GJ
 
 
 def test_sequence_must_match_the_mapping(tmp_path):
     case = network.load_case(*write_case(tmp_path, PHASE[:2] + ["sequence,2,E,I"]), ARCH)
+    inst = instantiator.createInstance(case["app"], case["noc"], 500000000)
+    with pytest.raises(ValueError):
+        release.phase_flows(inst, case["mapping"])
+
+
+def test_creation_must_match_the_mapping(tmp_path):
+    case = network.load_case(*write_case(tmp_path, PHASE[:2] + ["creation,2,H,E"]), ARCH)
     inst = instantiator.createInstance(case["app"], case["noc"], 500000000)
     with pytest.raises(ValueError):
         release.phase_flows(inst, case["mapping"])
@@ -126,10 +162,10 @@ def test_cpu_bound_outside_the_frequency_search(tmp_path):
     assert cpu["f_cpu_hz"] == pytest.approx(434.9e6)
 
 
-def test_sequence_follows_its_cluster_to_another_node(tmp_path):
+def test_creation_order_follows_its_cluster_to_another_node(tmp_path):
     """A mapping that places the clusters on other nodes (Spiral Mapping:
-    C on 0, ABDF on 1, GJ on 2, EHI on 3) keeps the sequence of each
-    cluster."""
+    C on 0, ABDF on 1, GJ on 2, EHI on 3) keeps the creation order of
+    each cluster."""
     app, _ = write_case(tmp_path, PHASE)
     other = tmp_path / "other.map"
     other.write_text("0:C\n1:A,B,D,F\n2:G,J\n3:E,H,I\n")
