@@ -46,6 +46,8 @@ def test_export_content(export):
         f"{r}.{x}" for r in "GH" for x in ("RUN_INFO", "events.txt", "image.lst", "noinstr.lst", "time.txt")]
     assert (e / "exp23" / "reference_G.json").exists() and (e / "exp23" / "reference_H.json").exists()
     assert not (e / "exp23" / "reference_D.json").exists() and not (e / "exp23" / "reference_E.json").exists()
+    assert sorted(os.listdir(e / "car-v-rtl" / "logs")) == ["CV.RUN_INFO", "CV.events.txt", "CV.time.txt"]
+    assert (e / "car-v-rtl" / "reference_CV.json").exists()
     assert "thesis" not in json.loads((e / "exp23" / "config.json").read_text())
     assert "reference_rows" in json.loads((e / "ch7" / "config.json").read_text())
     exp23 = (out / "orca-rt-tools" / "rttools" / "paper" / "exp23.py").read_text()
