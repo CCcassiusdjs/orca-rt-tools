@@ -40,7 +40,7 @@ FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \
 	print(exp23.flow_clock(m['chosen']['search']['frequency_hz'], m['scale']['period_s'])['f_clk_hz'])"
 # _heap_size of the image of car_v built with riscv64-unknown-elf-gcc 13.2
 # (make build reads the value of the toolchain in use)
-HEAP    ?= 50756
+HEAP    ?= 50676
 IN_FLIGHT ?= 2
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 

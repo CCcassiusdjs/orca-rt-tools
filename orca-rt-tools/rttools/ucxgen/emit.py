@@ -30,6 +30,14 @@ HEADER = """\
  * same PE goes to the local queue of the target task (lib/noc.c). On each
  * PE, app_main creates the tasks in the creation order of the model; the
  * kernel dispatches them in the order of the model (dispatch_order).
+ *
+ * Iteration markers (include/device/cacc.h, as weird_a.c): each task
+ * writes ITER_BEGIN(letter, k) when it has the input of iteration k (a
+ * source task after the release) and ITER_END(letter, k) after its last
+ * send of iteration k (after the work, for a task without output edge);
+ * the PE prints `<t> <x-y> ITER begin|end <letter> <k>` (manycore_pe.sv).
+ * The letter of each task is in the manifest (iter_letter); a run that
+ * serves iterations k and k + 1 writes the markers of both.
  */
 """
 
@@ -53,6 +61,7 @@ struct out_s {{
 
 struct task_s {{
   char name[5];
+  char letter;                    /* letter of the iteration markers */
   uint16_t port;
   int32_t workload;               /* counts of ucx_sleep */
   uint8_t n_in, n_out;
@@ -152,6 +161,7 @@ static void run_task(const struct task_s *t)
         while (received[i] <= done)
           receive_one(t, received);
     }}
+    ITER_BEGIN(t->letter, done + 1);
 
     /* simulate processing */
     ucx_sleep(t->workload);
@@ -159,6 +169,7 @@ static void run_task(const struct task_s *t)
 
     for (int o = 0; o < t->n_out; o++)
       ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+    ITER_END(t->letter, done);
   }} while (--it);
 
   for (int o = 0; o < t->n_out; o++)
@@ -210,8 +221,10 @@ def task_row(t, flows, tasks_by_name, max_in, max_out):
     in_txt = "{" + ", ".join(str(p) for p in ins or [0]) + "}"
     out_txt = "{" + ", ".join(outs or ["{0, 0, 0, 0}"]) + "}"
     kname = t["name"][:4]
-    return (f"  /* {t['name']}: PE {t['pe']} ({t['pe_label']}), position {t['order']}, c(v) = {t['wcet']} */\n"
-            f"  {{{c_string(kname)}, {t['port']}, {t['workload']}, {len(ins)}, {len(t['outputs'])}, "
+    return (f"  /* {t['name']}: PE {t['pe']} ({t['pe_label']}), position {t['order']}, c(v) = {t['wcet']}, "
+            f"marker {t['iter_letter']} */\n"
+            f"  {{{c_string(kname)}, '{t['iter_letter']}', {t['port']}, {t['workload']}, {len(ins)}, "
+            f"{len(t['outputs'])}, "
             f"{in_txt}, {out_txt}}},")
 
 

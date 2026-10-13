@@ -29,6 +29,10 @@ MAX_PAYLOAD = 0xFFFF - 3
 MAX_TASKS_PER_PE = 15
 MAX_NAME = 4               # char name[5] of struct tcb_s (include/kernel/kernel.h)
 DEFAULT_DELAY_NS = 3_000_000
+# letters of the iteration markers (include/device/cacc.h ITER_BEGIN and
+# ITER_END: bits 30:24 of the word, one ASCII letter per task; the parser
+# of the RTL log, rttools/tui/model/parsers.py RE_ITER, reads [A-Za-z])
+ITER_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 # release generator of manycore_pe.sv (wake_up_alarm, wake_up_delay)
 RTL_PERIOD_NS = 500_000
 RTL_DELAY_NS = 3_000_000
@@ -136,6 +140,8 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
     labels = [t["label"] for t in tasks]
     if len(set(labels)) != len(labels):
         raise GenError("repeated task label in " + csv_path)
+    if len(labels) > len(ITER_LETTERS):
+        raise GenError(f"{len(labels)} tasks: the iteration markers have {len(ITER_LETTERS)} letters")
     known = set(labels)
     for f in flows:
         for end in ("source", "target"):
@@ -198,7 +204,8 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
         outs = [f["id"] for f in out_flows if f["source"] == v]
         out_tasks.append({"name": v, "ident": c_ident(v, used), "port": port, "pe": node,
                           "pe_label": label(node), "order": order[node].index(v),
-                          "kernel_id": order[node].index(v) + 1, "wcet": wcet, "workload": workload,
+                          "kernel_id": order[node].index(v) + 1, "iter_letter": ITER_LETTERS[port - 1],
+                          "wcet": wcet, "workload": workload,
                           "inputs": ins, "outputs": outs, "source": not ins})
     sources = sorted({t["pe"] for t in out_tasks if t["source"]})
     if not sources:
