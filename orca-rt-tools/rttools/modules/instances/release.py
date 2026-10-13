@@ -22,11 +22,18 @@ deadline of the flow in the input.
 
 The application selects the model in its parameters (rttools/modules/io/
 appparser.py, section #parameters): release_model, scheduler_cycles and,
-optionally, one sequence per PE. A PE takes the sequence that holds the
-same tasks (the sequence of its own node first), so the sequence follows
-its cluster to another node. Without a sequence, the tasks of a PE run in
-the order of the mapping file, moved only as much as the edges between
-tasks of the same PE require (stable topological order).
+optionally, the creation order of the tasks of each PE (`creation` rows:
+the order of ucx_task_add in app_main). The dispatch order of each PE
+follows the rule of the UCX/OS kernel (rttools/bench_t/estimate.py,
+dispatch_order): round robin over the creation order from the idle task;
+a task waits for its predecessors of the same phase on the PE. Without a
+creation row, the order of the mapping file is the creation order. A PE
+takes the row that holds the same tasks (the row of its own node first),
+so the row follows its cluster to another node. A `sequence` row gives
+the dispatch order of a PE directly (a kernel with another rule) and
+wins over the creation row; the phase index then follows that order
+(estimate.phases: a target that runs before its source on the same PE
+gets one more phase).
 """
 from __future__ import annotations
 
@@ -46,19 +53,19 @@ def settings(app_graph_attrs):
     if model not in MODELS:
         raise ValueError("unknown release model " + repr(model) + "; options: " + ", ".join(MODELS))
     sequences = app_graph_attrs.get("sequences")
+    creation = app_graph_attrs.get("creation")
     return {
         "model": model,
         "scheduler_cycles": int(app_graph_attrs.get("scheduler_cycles", 0)),
         "sequences": {str(k): list(v) for k, v in sequences.items()} if sequences else None,
+        "creation": {str(k): list(v) for k, v in creation.items()} if creation else None,
     }
 
 
-def pe_sequences(tasks, edges, mapping, sequences=None):
-    """Dispatch order of the tasks of each PE: {node: [task, ...]}.
-
-    `tasks`: task ids of the instance; `edges`: (u, v) pairs; `mapping`:
-    entries {"node", "tasks"} of the mapping file (mapper.getMap gives the
-    PE of a task); `sequences`: explicit order per node, which wins."""
+def pe_members(tasks, mapping):
+    """Tasks of each PE in the order of the mapping file: {node: [task, ...]}.
+    `tasks`: task ids of the instance; `mapping`: entries {"node", "tasks"}
+    (mapper.getMap gives the PE of a task)."""
     node_of = {t: mapper.getMap(t, mapping) for t in tasks}
     missing = sorted(str(t) for t, n in node_of.items() if n is None)
     if missing:
@@ -68,24 +75,48 @@ def pe_sequences(tasks, edges, mapping, sequences=None):
         for t in m["tasks"]:
             if t in node_of and node_of[t] == m["node"] and t not in order.get(m["node"], []):
                 order.setdefault(m["node"], []).append(t)
+    return order
+
+
+def pe_sequences(tasks, edges, mapping, sequences=None, creation=None):
+    """Dispatch order of the tasks of each PE: {node: [task, ...]}.
+
+    `tasks`: task ids of the instance; `edges`: (u, v) pairs of the task
+    graph (all of them: the phase index decides which predecessor a task
+    waits for); `mapping`: entries {"node", "tasks"} of the mapping file;
+    `sequences`: explicit dispatch order per node, which wins; `creation`:
+    creation order per node, from which estimate.dispatch_order gives the
+    dispatch order (default: the order of the mapping file)."""
+    edges = list(edges)
+    members = pe_members(tasks, mapping)
+    node_of = {t: n for n, ts in members.items() for t in ts}
+    phi = None
     out = {}
-    for node, ts in order.items():
+    for node, ts in members.items():
         seq = matching_sequence(node, ts, sequences)
         if seq is not None:
             out[node] = seq
             continue
-        out[node] = stable_topological(ts, [(u, v) for u, v in edges if u in ts and v in ts])
+        made = matching_sequence(node, ts, creation, "creation order")
+        if phi is None:
+            phi = estimate.phases(edges, node_of)
+        out[node] = estimate.dispatch_order(made if made is not None else ts, edges, phi)
     return out
 
 
-def matching_sequence(node, tasks, sequences):
-    """Sequence of the PE `node` with `tasks`: the sequence of the same
-    node when it holds the same tasks, otherwise the sequence (of any
-    node) that holds the same tasks, so a sequence follows its cluster when
-    a mapping places the cluster on another node (Spiral Mapping). None
-    when no sequence holds the tasks of the PE and no sequence shares a
-    task with it; ValueError when a sequence shares tasks with the PE but
-    differs from its tasks."""
+def sequence_positions(seqs):
+    """task -> position in the sequence of its PE (input of estimate.phases)."""
+    return {t: i for ts in seqs.values() for i, t in enumerate(ts)}
+
+
+def matching_sequence(node, tasks, sequences, what="sequence"):
+    """Row (sequence or creation order) of the PE `node` with `tasks`: the
+    row of the same node when it holds the same tasks, otherwise the row
+    (of any node) that holds the same tasks, so a row follows its cluster
+    when a mapping places the cluster on another node (Spiral Mapping).
+    None when no row holds the tasks of the PE and no row shares a task
+    with it; ValueError when a row shares tasks with the PE but differs
+    from its tasks."""
     if not sequences:
         return None
     own = sorted(tasks)
@@ -96,31 +127,9 @@ def matching_sequence(node, tasks, sequences):
             return list(seq)
     for key, seq in sequences.items():
         if set(seq) & set(tasks):
-            raise ValueError(f"sequence of PE {key} ({', '.join(seq)}) differs from the tasks of PE {node} "
+            raise ValueError(f"{what} of PE {key} ({', '.join(seq)}) differs from the tasks of PE {node} "
                              f"in the mapping ({', '.join(tasks)})")
     return None
-
-
-def stable_topological(tasks, edges):
-    """Topological order of `tasks` that keeps the given order where the
-    edges allow; with a cycle, the remaining tasks keep the given order."""
-    indeg = {t: 0 for t in tasks}
-    succ = {t: [] for t in tasks}
-    for u, v in edges:
-        succ[u].append(v)
-        indeg[v] += 1
-    out = []
-    left = list(tasks)
-    while left:
-        ready = [t for t in left if indeg[t] == 0]
-        if not ready:
-            return out + left
-        t = ready[0]
-        out.append(t)
-        left.remove(t)
-        for v in succ[t]:
-            indeg[v] -= 1
-    return out
 
 
 def task_windows(instance, mapping):
@@ -129,7 +138,7 @@ def task_windows(instance, mapping):
     rel = instance.get("release") or settings({})
     cost = {t: d["wcet"] for t, d in instance["tasks"]}
     edges = [(s, t) for s, t, _ in instance["flows"]]
-    seqs = pe_sequences(list(cost), edges, mapping, rel["sequences"])
+    seqs = pe_sequences(list(cost), edges, mapping, rel["sequences"], rel.get("creation"))
     out = {}
     for node, ts in seqs.items():
         seq = estimate.sequence([(t, cost[t]) for t in ts], rel["scheduler_cycles"])
@@ -160,8 +169,8 @@ def cpu_bound(app, mapping, period_s=None):
         if len(periods) != 1:
             raise ValueError("the flows have different periods; give period_s")
         period_s = periods.pop()
-    rel = settings(getattr(app, "graph", {}) or {})
     cost = {t: d["wcet"] for t, d in app.nodes(data=True)}
-    seqs = pe_sequences(list(cost), list(app.edges()), mapping, rel["sequences"])
-    demand = {node: estimate.demand([(t, cost[t]) for t in ts]) for node, ts in seqs.items()}
+    # the demand does not depend on the order of the tasks
+    members = pe_members(list(cost), mapping)
+    demand = {node: estimate.demand([(t, cost[t]) for t in ts]) for node, ts in members.items()}
     return {"demand": demand, "period_s": period_s, "f_cpu_hz": estimate.cpu_frequency(demand, period_s)}

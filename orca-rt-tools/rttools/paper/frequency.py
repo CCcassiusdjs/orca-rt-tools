@@ -16,7 +16,7 @@ continues above f_CPU and the result is the first feasible frequency.
 
 | File | Content |
 |---|---|
-| metrics.json | Per mapping: mapping entries, CPU demand per node, f_CPU, f*, the lower bound of the bisection, the attempts, the network check at f_CPU and the minimum frequency |
+| metrics.json | Per mapping: mapping entries, dispatch order per node (phase model), CPU demand per node, f_CPU, f*, the lower bound of the bisection, the attempts, the network check at f_CPU and the minimum frequency |
 | frequency.csv | One row per mapping with f*, f_CPU, the verdict of the network at f_CPU and the minimum (Hz) |
 | values.tex | LaTeX macros with the frequencies in MHz and the network check at f_CPU |
 
@@ -34,6 +34,7 @@ import sys
 
 from rttools import __main__ as cli
 from rttools.modules.frequency import search
+from rttools.modules.instances import release
 from rttools.modules.io import appparser, mapparser, nocparser
 from rttools.modules.mapping import mapfile, spiral
 from rttools.tui.model import network
@@ -69,10 +70,15 @@ def run_one(app_file, map_arg, arch_file, f0):
         res = search.minimum_frequency(app, noc, entries, appname, search_config(f0))
     net = res["network"]
     cpu = res["cpu"]
+    rel = release.settings(app.graph)
+    seqs = None
+    if rel["model"] == release.PHASE:
+        seqs = release.pe_sequences(list(app.nodes), list(app.edges()), entries, rel["sequences"], rel["creation"])
     return {
         "map": map_arg if map_arg == cli.MAP_SPIRAL else os.path.basename(map_arg),
         "criterion": criterion,
         "mapping": {str(e["node"]): list(e["tasks"]) for e in entries},
+        "sequences": None if seqs is None else {str(k): v for k, v in seqs.items()},
         "cpu_demand_cycles": {str(k): v for k, v in cpu["demand"].items()} if cpu else None,
         "period_s": cpu["period_s"] if cpu else None,
         "f_cpu_hz": res["f_cpu_hz"],
@@ -98,8 +104,7 @@ def run(app_file, maps, arch_file, f0, out_dir, config=None):
         m["runs"][r["map"]] = r
     if config is not None:
         from rttools.paper import exp23
-        with open(config) as f:
-            cfg = json.load(f)
+        cfg = exp23.load_config(config)
         f_exp = exp23.cpu_check(cfg, exp23.estimates(cfg))["f_cpu_hz"]
         m["f_cpu_exp23_hz"] = f_exp
         m["f_cpu_equals_exp23"] = all(r["f_cpu_hz"] == f_exp for r in m["runs"].values())

@@ -28,12 +28,17 @@ def test_frequency_pipeline_matches_reference(tmp_path):
     assert "\\ExpFrequencySpiralCpuNetwork}{feasible}" in values
 
 
-def test_network_frequency_is_set_by_flow_f_to_g():
-    """f* = (f^(F) - s^(G) + o(F->G)) / T: the phase must hold the window of
-    F->G (release 181 930, start of G 11 000 in the next phase, occupancy
-    1 717 cycles for 6 780 bytes over 2 hops)."""
+def test_network_frequency_is_set_by_flow_i_to_j():
+    """f* = (f^(I) - s^(J) + o(I->J)) / T: with the kernel order (E, H, I
+    and J, G), the phase must hold the window of I->J (release 173 370,
+    start of J 11 000 in the next phase, occupancy 1 434 cycles for
+    5 670 bytes over 1 hop). F->G no longer sets it: G starts after J
+    (s^(G) = 118 570), so F->G needs (181 930 - 118 570 + 1 717) / T."""
     with open(os.path.join(EXP, "reference_frequency.json")) as f:
         ref = json.load(f)
-    need = (181930 - 11000 + 1717) / 0.0005
+    need = (173370 - 11000 + 1434) / 0.0005
     for r in ref["runs"].values():
         assert r["f_star_lower_hz"] < need <= r["f_star_hz"]
+        assert (181930 - 118570 + 1717) / 0.0005 < need
+        assert r["sequences"]["2" if r["criterion"] is None else "3"] == ["E", "H", "I"]
+        assert r["sequences"]["3" if r["criterion"] is None else "2"] == ["J", "G"]

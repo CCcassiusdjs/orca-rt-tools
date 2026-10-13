@@ -70,7 +70,8 @@ def test_app_e_minimum_frequency(work, mapping):
     maximum; experiments/exp23 make frequency keeps the same numbers."""
     r = run(work, mapping, "500000000")
     assert r.returncode == 0, r.stderr[-2000:]
-    assert "Network frequency f* = 345294952.3925781Hz (345.3 MHz)" in r.stdout
+    # dispatch order of the kernel rule (E, H, I and J, G): I->J sets f*
+    assert "Network frequency f* = 327610015.8691406Hz (327.6 MHz)" in r.stdout
     assert "CPU frequency f_CPU = 434900000.0Hz (434.9 MHz)" in r.stdout
     assert "Minimum frequency max(f*, f_CPU) = 434900000.0Hz (434.9 MHz)" in r.stdout
     # f_CPU > f*: one network evaluation at f_CPU with the phase model

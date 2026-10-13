@@ -580,8 +580,7 @@ def main(argv=None):
         if "cluster_sizes" in m["summary"]:
             print("  cluster sizes: " + json.dumps(m["summary"]["cluster_sizes"]))
     else:
-        with open(a.config) as f:
-            cfg = json.load(f)
+        cfg = X.load_config(a.config)
         with open(a.flows) as f:
             fcfg = json.load(f)
         m = exp23_figures(a.log, cfg, fcfg, a.out, a.join)
