@@ -14,6 +14,7 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 | `make paper` | `sim`, then analysis and check against `reference_head.json` | Questa or ModelSim, toolchain, Python |
 | `make paper REQUIRE_CLEAN=1` | The same, but `simulate.sh` stops unless the tree is a clean git checkout at a tag or a `git archive` of a commit | Same as `make paper`, git |
 | `make info` | Prints the source identification that `make sim` writes to `RUN_INFO` | git (optional) |
+| `./simulate.sh <out> [<sim_ns> [<app> [<mesh>]]]` | Simulation of another application of `pkt-sim/software/ucx-os` on a WxH mesh, for example `./simulate.sh build/carv 11500000 car_v 4x4` (`experiments/car-v-rtl`); `app/<app>.sim` gives the mesh and the release generator (`RELEASE_MASK`, `RELEASE_PERIOD_NS`, `RELEASE_DELAY_NS`, also as environment variables), which reach `manycore_top` as `vsim -g` options; the defaults (`weird_a`, 2x2) give the vsim command of run F | Questa or ModelSim, toolchain |
 
 `ENV_SETUP` holds the shell commands that put the simulator and the toolchain on the `PATH`, for example `make paper ENV_SETUP="module load riscv64-elf/12.2.0 questa/2025.3"`.
 <!-- anon:drop-begin -->
@@ -31,6 +32,7 @@ On the GAPH server: `make paper ENV_SETUP="source /soft64/source_gaph; module lo
 | `repo_tag` | Tag at the commit, or `none` |
 | `src_sha256` | SHA-256 over the `sha256sum` lines of the simulated sources (`pkt-sim`, `rtl/`, `simulate.sh`), sorted by path; equal in a clean checkout, in a `git archive` of the same commit and in a copy without git |
 | `sim_ns`, `monitor`, `vsim`, `gcc`, `date` | Simulation length, packet monitor, simulator and compiler versions, UTC date |
+| `app`, `mesh`, `generics` | Application, mesh and the `vsim -g` options of the run (empty for the setup of run F) |
 
 A copy of a work tree without its git metadata (for example a copy of a `git worktree`, whose `.git` file points to a directory that does not exist on the simulation server) gives `repo_commit=unknown` and `repo_state=nogit`. The run that a paper reports comes from a tagged clean checkout:
 
