@@ -29,9 +29,9 @@
   "map": "car-v-ONTO-hermes4x4.map"
  },
  "platform": {
-  "_doc": "clock and tick of the ORCA2 platform (pkt-sim/software/ucx-os/arch/riscv/hf-riscv-e/arch.mak: F_CLK = 500 MHz, F_TICK = 2000; tick of 250,016 cycles, setup of the paper); f0_hz: first frequency of the search, as experiments/exp23 (make frequency); max_utilization: limit of f_CPU / clock for the choice of the cost factor, the utilization of application E (f_CPU 434.9 MHz / 500 MHz, experiments/exp23/reference_frequency.json).",
+  "_doc": "clock and tick of the ORCA2 platform (pkt-sim/software/ucx-os/arch/riscv/hf-riscv-e/arch.mak: F_CLK = 500 MHz, F_TICK = 2000; tick of F_CLK / F_TICK = 250,000 cycles, hal.c TIMER1CTC = F_CPU / F_TIMER / 16 - 1, setup of the paper); f0_hz: first frequency of the search, as experiments/exp23 (make frequency); max_utilization: limit of f_CPU / clock for the choice of the cost factor, the utilization of application E (f_CPU 434.9 MHz / 500 MHz, experiments/exp23/reference_frequency.json).",
   "clock_hz": 500000000,
-  "tick_cycles": 250016,
+  "tick_cycles": 250000,
   "f0_hz": 500000000,
   "max_utilization": 0.8698
  },

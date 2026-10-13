@@ -1,5 +1,8 @@
 {
  "_doc": "Reference of make (experiments/car-v, python -m rttools.paper.carv run): generated application, candidates of the cost factor and of the payload divisor, and the analysis flow of the chosen pair (cost factor 6, payload divisor 16) on arch/hermes-4x4.gml at 500 MHz.",
+ "_header_wait": "Integration of PR 109 with PR 106: link occupancy o_i = L0 + 20 (m + 1), the default of rttools/modules/routing/router.py. Each flow between PEs holds 20 (m + 1) cycles more (net_time_cycles +40 for 1 hop to +100 for 4 hops; slack_cycles the same less); f* of the chosen candidate (k = 6, q = 16) 358638763.43 -> 359001159.67 Hz; f_CPU 380.0 MHz, the minimum frequency, R_bound and the memory do not change.",
+ "header_wait_cycles": 20,
+ "occupancy": "L0 + 20 (m + 1)",
  "app": {
   "csv": "car-v.csv",
   "map": "car-v-ONTO-hermes4x4.map",
@@ -57,7 +60,7 @@
    "criterion": "MAX_PROC",
    "f_cpu_hz": 380000000.0,
    "utilization_at_clock": 0.76,
-   "f_star_hz": 359153747.55859375,
+   "f_star_hz": 359512329.1015625,
    "frequency_hz": 380000000.0,
    "binding": "cpu",
    "network_at_clock_feasible": true,
@@ -78,7 +81,7 @@
    "criterion": "MAX_PROC",
    "f_cpu_hz": 380000000.0,
    "utilization_at_clock": 0.76,
-   "f_star_hz": 358638763.4277344,
+   "f_star_hz": 359001159.66796875,
    "frequency_hz": 380000000.0,
    "binding": "cpu",
    "network_at_clock_feasible": true,
@@ -99,7 +102,7 @@
    "criterion": "MAX_PROC",
    "f_cpu_hz": 492000000.0,
    "utilization_at_clock": 0.984,
-   "f_star_hz": 471153259.27734375,
+   "f_star_hz": 471511840.8203125,
    "frequency_hz": 492000000.0,
    "binding": "cpu",
    "network_at_clock_feasible": true,
@@ -120,7 +123,7 @@
    "criterion": "MAX_PROC",
    "f_cpu_hz": 492000000.0,
    "utilization_at_clock": 0.984,
-   "f_star_hz": 470638275.1464844,
+   "f_star_hz": 471000671.38671875,
    "frequency_hz": 492000000.0,
    "binding": "cpu",
    "network_at_clock_feasible": true,
@@ -276,8 +279,8 @@
    "utilization_at_clock": 0.76
   },
   "search": {
-   "f_star_hz": 358638763.4277344,
-   "f_star_lower_hz": 358634948.73046875,
+   "f_star_hz": 359001159.66796875,
+   "f_star_lower_hz": 358997344.9707031,
    "attempts": 18,
    "final_check": {
     "frequency_hz": 380000000.0,
@@ -351,8 +354,8 @@
     "end_cycles": 261000,
     "window_cycles": 71000,
     "hops": 3,
-    "net_time_cycles": 48,
-    "slack_cycles": 70952
+    "net_time_cycles": 88,
+    "slack_cycles": 70912
    },
    {
     "flow": "f4",
@@ -366,8 +369,8 @@
     "end_cycles": 261000,
     "window_cycles": 71000,
     "hops": 4,
-    "net_time_cycles": 54,
-    "slack_cycles": 70946
+    "net_time_cycles": 114,
+    "slack_cycles": 70886
    },
    {
     "flow": "f5",
@@ -411,8 +414,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 4,
-    "net_time_cycles": 2422,
-    "slack_cycles": 163578
+    "net_time_cycles": 2482,
+    "slack_cycles": 163518
    },
    {
     "flow": "f8",
@@ -471,8 +474,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 4,
-    "net_time_cycles": 2422,
-    "slack_cycles": 163578
+    "net_time_cycles": 2482,
+    "slack_cycles": 163518
    },
    {
     "flow": "f12",
@@ -486,8 +489,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 3,
-    "net_time_cycles": 2416,
-    "slack_cycles": 163584
+    "net_time_cycles": 2456,
+    "slack_cycles": 163544
    },
    {
     "flow": "f13",
@@ -501,8 +504,8 @@
     "end_cycles": 261000,
     "window_cycles": 71000,
     "hops": 5,
-    "net_time_cycles": 156,
-    "slack_cycles": 70844
+    "net_time_cycles": 236,
+    "slack_cycles": 70764
    },
    {
     "flow": "f14",
@@ -516,8 +519,8 @@
     "end_cycles": 261000,
     "window_cycles": 71000,
     "hops": 6,
-    "net_time_cycles": 162,
-    "slack_cycles": 70838
+    "net_time_cycles": 262,
+    "slack_cycles": 70738
    },
    {
     "flow": "f15",
@@ -531,8 +534,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 4,
-    "net_time_cycles": 150,
-    "slack_cycles": 165850
+    "net_time_cycles": 210,
+    "slack_cycles": 165790
    },
    {
     "flow": "f16",
@@ -546,8 +549,8 @@
     "end_cycles": 261000,
     "window_cycles": 99002,
     "hops": 6,
-    "net_time_cycles": 162,
-    "slack_cycles": 98840
+    "net_time_cycles": 262,
+    "slack_cycles": 98740
    },
    {
     "flow": "f17",
@@ -561,8 +564,8 @@
     "end_cycles": 261000,
     "window_cycles": 71000,
     "hops": 6,
-    "net_time_cycles": 162,
-    "slack_cycles": 70838
+    "net_time_cycles": 262,
+    "slack_cycles": 70738
    },
    {
     "flow": "f18",
@@ -576,8 +579,8 @@
     "end_cycles": 261000,
     "window_cycles": 71000,
     "hops": 5,
-    "net_time_cycles": 156,
-    "slack_cycles": 70844
+    "net_time_cycles": 236,
+    "slack_cycles": 70764
    },
    {
     "flow": "f19",
@@ -591,8 +594,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 4,
-    "net_time_cycles": 150,
-    "slack_cycles": 165850
+    "net_time_cycles": 210,
+    "slack_cycles": 165790
    },
    {
     "flow": "f20",
@@ -606,8 +609,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 3,
-    "net_time_cycles": 144,
-    "slack_cycles": 165856
+    "net_time_cycles": 184,
+    "slack_cycles": 165816
    },
    {
     "flow": "f21",
@@ -621,8 +624,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 4,
-    "net_time_cycles": 534,
-    "slack_cycles": 165466
+    "net_time_cycles": 594,
+    "slack_cycles": 165406
    },
    {
     "flow": "f22",
@@ -636,8 +639,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 3,
-    "net_time_cycles": 528,
-    "slack_cycles": 165472
+    "net_time_cycles": 568,
+    "slack_cycles": 165432
    },
    {
     "flow": "f23",
@@ -651,8 +654,8 @@
     "end_cycles": 261000,
     "window_cycles": 166000,
     "hops": 5,
-    "net_time_cycles": 284,
-    "slack_cycles": 165716
+    "net_time_cycles": 364,
+    "slack_cycles": 165636
    }
   ],
   "packets_per_period": 16,

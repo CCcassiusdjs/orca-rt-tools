@@ -77,6 +77,7 @@ from rttools.modules.frequency import search
 from rttools.modules.instances import instantiator, release
 from rttools.modules.io import appparser, nocparser
 from rttools.modules.mapping import mapfile, spiral
+from rttools.modules.routing import router
 from rttools.modules.unwrapper import flowUnwrapper
 from rttools.paper.exp23 import macro_name
 from rttools.paper.frequency import search_config
@@ -432,7 +433,10 @@ def run(cfg, apps, arch, out_dir):
     with open(os.path.join(out_dir, "car-v.map"), "w") as f:
         f.write(map_text)
     repo = os.path.join(apps, cfg["app"]["dir"])
+    w_h = router.header_wait()
     m = {
+        # link occupancy of the flow (rttools/modules/routing/router.py)
+        "header_wait_cycles": w_h, "occupancy": "L0 + %d (m + 1)" % w_h if w_h else "L0",
         "app": {"csv": cfg["app"]["csv"], "map": cfg["app"]["map"],
                 "csv_matches_repo": _same(os.path.join(repo, cfg["app"]["csv"]), text),
                 "map_matches_repo": _same(os.path.join(repo, cfg["app"]["map"]), map_text)},
