@@ -21,7 +21,13 @@ module manycore_top #(parameter
   BOOT_MSIZE = 1024,     // 2k bytes
   NOC_DIM_X = 2,
   NOC_DIM_Y = 2,
-  INTERLEAVING_GRAIN = 10   // switch input after 10 cycles
+  INTERLEAVING_GRAIN = 10,  // switch input after 10 cycles
+  // Release generator (manycore_pe.sv). Bit k of RELEASE_MASK enables the
+  // generator of the PE with node index k = y * NOC_DIM_X + x, the index
+  // of the software (device/ddma.c, _ddma_node_addr) and of the .map files.
+  // The default (PE 0) is the setup of application E (weird_a.c); a run
+  // sets it with vsim -g (experiments/exp23/simulate.sh).
+  parameter logic [63:0] RELEASE_MASK = 64'd1
 )();
 
   // router ports enumeration cannot be imported from Hermes definitions
@@ -64,7 +70,7 @@ module manycore_top #(parameter
 
         manycore_pe #(MEMORY_BUS_WIDTH, FLIT_WIDTH, RAM_MSIZE, BOOT_MSIZE,
           ADDRESS, INTERLEAVING_GRAIN, NOC_DIM_X, NOC_DIM_Y,
-          CLOCK_HALF_PERIOD_FS, RELEASE_CYCLES, WARMUP_CYCLES
+          CLOCK_HALF_PERIOD_FS, RELEASE_CYCLES, WARMUP_CYCLES, RELEASE_MASK
         ) pe_mod(
           .clock(clock), .reset(reset),
           .pe_if(pe_if.PE)

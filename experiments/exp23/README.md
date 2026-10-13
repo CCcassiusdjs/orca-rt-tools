@@ -21,6 +21,7 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 | `make instrumentation` | `software`, then analysis of `$(LOG)` with the listings of these builds and check against `$(REF)`: the bound of the instrumentation writes from the image that this tree compiles. With riscv64-elf-gcc 12.2.0, the listings equal `logs/F.image.lst` and `logs/F.noinstr.lst` | `riscv64-elf` toolchain, Python |
 | `make paper REQUIRE_CLEAN=1` | The same, but `simulate.sh` stops unless the tree is a clean git checkout at a tag or a `git archive` of a commit | Same as `make paper`, git |
 | `make info` | Prints the source identification that `make sim` writes to `RUN_INFO` | git (optional) |
+| `./simulate.sh <out> [<sim_ns> [<app> [<mesh>]]]` | Simulation of another application of `pkt-sim/software/ucx-os` on a WxH mesh, for example `./simulate.sh build/carv 11500000 car_v 4x4` (`experiments/car-v-rtl`); `app/<app>.sim` gives the mesh and the PEs of the release generator (`RELEASE_MASK`, also as an environment variable), which reach `manycore_top` as `vsim -g` options; the defaults (`weird_a`, 2x2) give the vsim command of run F | Questa or ModelSim, toolchain |
 
 `ENV_SETUP` holds the shell commands that put the simulator and the toolchain on the `PATH`, for example `make paper ENV_SETUP="module load riscv64-elf/12.2.0 questa/2025.3"`.
 <!-- anon:drop-begin -->
@@ -45,6 +46,7 @@ The UCX-OS tick lasts 16 x (TIMER1CTC + 1) cycles (TIMER1 of `peripherals_minima
 | `f_clk_hz`, `f_tick_hz` | `F_CLK` and `F_TICK` = 1 / T of the software build (`arch.mak`; tick of `F_CLK / F_TICK` cycles) |
 | `clock_half_period_fs`, `clock_hz_exact` | Half period of the clock of `manycore_top.sv`, floor(1e15 / (2 F_CLK)) fs, and its frequency 1e15 / (2 half) Hz (at or above `F_CLK`) |
 | `release_cycles`, `warmup_cycles` | Release period T F_CLK and first release (3 ms) F_CLK of the release generator (`manycore_pe.sv`), in cycles |
+| `app`, `mesh`, `generics` | Application, mesh and the `vsim -g` options of the run (empty for the setup of run F) |
 
 A copy of a work tree without its git metadata (for example a copy of a `git worktree`, whose `.git` file points to a directory that does not exist on the simulation server) gives `repo_commit=unknown` and `repo_state=nogit`. The run that a paper reports comes from a tagged clean checkout:
 

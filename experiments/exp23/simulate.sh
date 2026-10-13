@@ -2,11 +2,20 @@
 # Simulates the experiment of Ch. 8 (application E, weird_a.c) with
 # ModelSim/Questa and writes the transcript and the extracted events.
 #
-#   simulate.sh <out_dir> [<sim_ns>]
+#   simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]
 #
 # <sim_ns>: time of manycore_top in ns (default 20000000 = 20 ms). The
 # clock runs at or above F_CLK, so <sim_ns> covers at least <sim_ns> of
 # platform time (cycles / F_CLK).
+# <app>:    application of pkt-sim/software/ucx-os (Makefile target and
+#           app/<app>.c; default weird_a, application E of run F). An
+#           application of rttools.ucxgen has app/<app>.sim with MESH and
+#           RELEASE_MASK, which this script passes to manycore_top
+#           (vsim -g).
+# <mesh>:   WxH of manycore_top (NOC_DIM_X x NOC_DIM_Y); default MESH of
+#           app/<app>.sim, otherwise 2x2.
+# With the defaults (weird_a, 2x2, no app/weird_a.sim) the vsim command is
+# the one of run F (tag exp23-F): no -g option.
 # The script copies pkt-sim to <out_dir>/pkt-sim, builds the software there
 # (build_sw.sh: riscv64-elf toolchain, ARCH=riscv/hf-riscv-e), adds the packet monitor
 # (rtl/pe_checker.sv, rtl/chk_binds.sv) and runs vsim in batch mode.
@@ -34,6 +43,10 @@
 #               config.json release_period_s)
 #   WARMUP_NS   instant of the first release in ns of platform time
 #               (default 3000000, config.json warmup_s)
+#   RELEASE_MASK
+#               overrides the value of app/<app>.sim (release generator of
+#               manycore_pe.sv: bit k of the mask, decimal, = PE with node
+#               index k = y * W + x)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -62,8 +75,10 @@
 #   release_cycles, warmup_cycles
 set -euo pipefail
 
-OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns>]}
+OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]}
 SIM_NS=${2:-20000000}
+APP=${3:-weird_a}
+MESH_ARG=${4:-}
 MONITOR=${MONITOR:-1}
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
@@ -89,6 +104,33 @@ F_EXACT=$(awk -v h="$HALF_FS" 'BEGIN { printf "%.3f", 1e15 / (2 * h) }')
 GENERICS="-gCLOCK_HALF_PERIOD_FS=$HALF_FS -gRELEASE_CYCLES=$RELEASE_CYCLES -gWARMUP_CYCLES=$WARMUP_CYCLES"
 echo "clock: F_CLK $F_CLK Hz, half period $HALF_FS fs ($F_EXACT Hz), release every $RELEASE_CYCLES cycles, first at cycle $WARMUP_CYCLES, F_TICK $F_TICK Hz"
 
+# setup of the application (key=value lines of app/<app>.sim; read, not run)
+UCX_APP="$REPO/pkt-sim/software/ucx-os/app"
+if ! [[ "$APP" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+	echo "invalid application name: $APP" >&2; exit 2
+fi
+setup() { # setup <key>: value of <key> in app/<app>.sim, or empty
+	if [ -f "$UCX_APP/$APP.sim" ]; then
+		sed -n "s/^$1=\([0-9x]*\)\$/\1/p" "$UCX_APP/$APP.sim" | tail -1
+	fi
+}
+MESH=${MESH_ARG:-$(setup MESH)}
+MESH=${MESH:-2x2}
+if ! [[ "$MESH" =~ ^([1-9][0-9]*)x([1-9][0-9]*)$ ]]; then
+	echo "invalid mesh: $MESH (WxH)" >&2; exit 2
+fi
+DIM_X=${BASH_REMATCH[1]}
+DIM_Y=${BASH_REMATCH[2]}
+R_MASK=${RELEASE_MASK:-$(setup RELEASE_MASK)}
+if [ -n "$R_MASK" ] && ! [[ "$R_MASK" =~ ^[1-9][0-9]*$ ]]; then
+	echo "invalid RELEASE_MASK: $R_MASK (positive decimal integer)" >&2; exit 2
+fi
+# -g options only for values that differ from the defaults of manycore_top.sv
+APP_GENERICS=""
+[ "$DIM_X" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_X=$DIM_X"
+[ "$DIM_Y" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_Y=$DIM_Y"
+[ -n "$R_MASK" ] && [ "$R_MASK" != 1 ] && APP_GENERICS="$APP_GENERICS -gRELEASE_MASK=$R_MASK"
+
 if [ -n "${ENV_SETUP:-}" ]; then
 	set +u
 	eval "$ENV_SETUP" > /dev/null 2>&1
@@ -112,10 +154,10 @@ if [ "${REQUIRE_CLEAN:-0}" = 1 ]; then
 		exit 3
 	fi
 fi
-# copy of pkt-sim and build of the software (build_sw.sh) at the clock of
-# the run (F_CLK, F_TICK), always with the instrumentation writes
-# (UCX_CFLAGS empty)
-F_CLK="$F_CLK" F_TICK="$F_TICK" UCX_CFLAGS= "$HERE/build_sw.sh" "$OUT"
+# copy of pkt-sim and build of the software (build_sw.sh: application
+# $APP) at the clock of the run (F_CLK, F_TICK), always with the
+# instrumentation writes (UCX_CFLAGS empty)
+APP="$APP" F_CLK="$F_CLK" F_TICK="$F_TICK" UCX_CFLAGS= "$HERE/build_sw.sh" "$OUT"
 
 SIM="$OUT/pkt-sim/manycore_modelsim"
 cd "$SIM"
@@ -125,7 +167,7 @@ if [ "$MONITOR" = 1 ]; then
 	cat >> run.do <<EOD
 vlog -mixedsvvh -sv -work work $HERE/rtl/pe_checker.sv
 vlog -mixedsvvh -sv -work work $HERE/rtl/chk_binds.sv
-vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS $GENERICS
+vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS $GENERICS$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run -all
@@ -133,7 +175,7 @@ quit -f
 EOD
 else
 	cat >> run.do <<EOD
-vsim -c work.manycore_top $GENERICS
+vsim -c work.manycore_top $GENERICS$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run ${SIM_NS}ns
@@ -143,6 +185,7 @@ fi
 
 {
 	echo "sim_ns=$SIM_NS monitor=$MONITOR"
+	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${APP_GENERICS# }"
 	echo "vsim=$(vsim -version 2>/dev/null | head -1)"
 	echo "gcc=$(riscv64-elf-gcc --version | head -1)"
 	echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"

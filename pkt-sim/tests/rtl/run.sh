@@ -63,7 +63,7 @@ PE_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddm
 	$HW/peripherals/interface_peripherals.sv $HW/tcd/interface_tcd.sv $HW/interface_pe.sv \
 	$T/pe_stubs.sv $MC/manycore_pe.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release tb_cpu_cycles}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release tb_cpu_cycles tb_release_mask}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
 	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
@@ -84,6 +84,9 @@ for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb
 		for h in 1000000 1148897; do
 			(mkdir -p "$OUT/rel_$h" && cd "$OUT/rel_$h" && OUT="$OUT/rel_$h" vl tb_release $PE_SRC "$T/tb_release.sv" -GHALF_FS=$h)
 		done ;;
+	tb_release_mask)
+		mkdir -p "$OUT/mask_run/sim" "$OUT/mask_run/logs"
+		(cd "$OUT/mask_run/sim" && vl tb_release_mask $PE_SRC "$MC/manycore_top.sv" "$T/tb_release_mask.sv") ;;
 	tb_hermes_local)
 		ghdl_hermes A -gSRC=4 -gDST=4 -gP=4 -gM=0 -gNAME=A
 		ghdl_hermes B -gSRC=0 -gDST=8 -gP=4 -gM=4 -gNAME=B ;;

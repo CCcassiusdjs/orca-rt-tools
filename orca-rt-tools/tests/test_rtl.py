@@ -18,6 +18,7 @@ TESTS = {
     "tb_manycore_pe": "verilator",   # fixes 25 to 27
     "tb_release": "verilator",       # release generator in cycles, clock half period in fs
     "tb_cpu_cycles": "ghdl",         # cycles per instruction (bound of the instrumentation writes)
+    "tb_release_mask": "verilator",  # release generator on the PEs of RELEASE_MASK (4x4 and 2x2)
 }
 
 
