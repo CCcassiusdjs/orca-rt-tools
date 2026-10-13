@@ -56,7 +56,23 @@ def test_tick_equals_release_period():
     assert v["timer1ctc"] == 15624
     assert v["prescaler_cycles"] == 16
     assert v["tick_cycles"] == 250000
-    assert v["release_period_ns"] * v["f_clk_hz"] // 10 ** 9 == 250000
+    assert v["release_cycles"] == 250000
+    assert v["clock_half_period_fs"] == 1000000
+
+
+def test_tick_at_the_clock_of_the_flow():
+    """make paper-flow: F_CLK = 434.912 MHz (first multiple of 32 kHz at or
+    above 434.9 MHz); TIMER1CTC = 13590, tick = release period = 217456
+    cycles (13591 steps of 16), half period 1149657 fs."""
+    rc, out = run("code", "--f-clk", "434912000")
+    v = out["code"]
+    assert rc == 0 and out["pass"]
+    assert v["timer1ctc"] == 13590 and v["tick_cycles"] == v["release_cycles"] == 217456
+    assert v["clock_half_period_fs"] == 1149657
+    # a clock off the 32 kHz grid gives a release period that is not a whole
+    # number of TIMER1 steps (simulate.sh refuses it)
+    rc, out = run("code", "--f-clk", "434900000")
+    assert rc == 1 and not out["pass"]
 
 
 def test_previous_hal_expression_gives_250016(tmp_path):
@@ -70,11 +86,11 @@ def test_previous_hal_expression_gives_250016(tmp_path):
 
 
 def test_tick_follows_another_release_period(tmp_path):
-    """T = 1 ms (F_TICK = 1000, wake_up_alarm = 1000000 ns): tick of
+    """T = 1 ms (F_TICK = 1000, RELEASE_CYCLES = 500000): tick of
     T x F_CLK = 500000 cycles, TIMER1CTC = 31249."""
     paths = copy_sources(tmp_path)
-    edit(tmp_path / paths["arch_mak"], r"^F_TICK = 2000$", "F_TICK = 1000")
-    edit(tmp_path / paths["pe_sv"], r"wake_up_alarm = 500_000;", "wake_up_alarm = 1_000_000;")
+    edit(tmp_path / paths["arch_mak"], r"^F_TICK \?= 2000$", "F_TICK ?= 1000")
+    edit(tmp_path / paths["pe_sv"], r"RELEASE_CYCLES = 250_000", "RELEASE_CYCLES = 500_000")
     cfg = tmp_path / paths["config"]
     edit(cfg, r'"release_period_s": 0\.0005', '"release_period_s": 0.001')
     rc, out = run("code", repo=str(tmp_path))
@@ -84,9 +100,9 @@ def test_tick_follows_another_release_period(tmp_path):
 
 
 def test_tick_differs_from_release_period(tmp_path):
-    """F_TICK = 2000 against wake_up_alarm = 1 ms: the check fails."""
+    """F_TICK = 2000 against RELEASE_CYCLES = 500000 (1 ms): the check fails."""
     paths = copy_sources(tmp_path)
-    edit(tmp_path / paths["pe_sv"], r"wake_up_alarm = 500_000;", "wake_up_alarm = 1_000_000;")
+    edit(tmp_path / paths["pe_sv"], r"RELEASE_CYCLES = 250_000", "RELEASE_CYCLES = 500_000")
     rc, out = run("code", repo=str(tmp_path))
     assert rc == 1 and not out["pass"]
 
@@ -133,7 +149,7 @@ def test_rtl_timer1_period(variant, tmp_path):
     _, out = run("code")
     v = out["code"]
     ctc = v["timer1ctc"] if variant == "code" else v["timer1ctc"] + 1
-    expect = v["release_period_ns"] * v["f_clk_hz"] // 10 ** 9
+    expect = v["release_cycles"]
     if variant == "previous":
         expect += v["prescaler_cycles"]
     r = subprocess.run(["sh", RUN_SH, "tb_timer1"],

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Tick period of the UCX-OS (hf-riscv-e) against the release period of A.
 
-    tick_period.py code [--repo ROOT] [--json]
+    tick_period.py code [--repo ROOT] [--f-clk HZ] [--json]
     tick_period.py log EVENTS [--repo ROOT] [--json]
 
 `code` reads the sources that set the two periods and checks that the
@@ -9,21 +9,25 @@ tick lasts exactly the release period T, in cycles (T * F_CLK):
 
 | Source | Value |
 |---|---|
-| arch/riscv/hf-riscv-e/arch.mak | F_CLK, F_TICK |
+| arch/riscv/hf-riscv-e/arch.mak | F_CLK, F_TICK (defaults of the build) |
 | arch/riscv/hf-riscv-e/hal.c, hal.h | TIMER1PRE (prescaler code), TIMER1CTC expression |
 | hw/peripherals/peripherals_minimal.vhd | prescaler bit per code; counter from 0 to TIMER1CTC inclusive |
-| manycore_modelsim/manycore_pe.sv | wake_up_alarm (release period, ns), wake_up_delay (first release, ns) |
-| manycore_modelsim/manycore_top.sv | CLOCK_BORDER_PERIOD (clock period, ns) |
+| manycore_modelsim/manycore_pe.sv | RELEASE_CYCLES (release period), WARMUP_CYCLES (first release), defaults |
+| manycore_modelsim/manycore_top.sv | CLOCK_HALF_PERIOD_FS (half period of the clock, fs), default |
 | experiments/exp23/config.json | clock_hz, release_period_s |
 
 tick (cycles) = prescaler * (TIMER1CTC + 1), with TIMER1CTC evaluated as
-C integer arithmetic on F_CPU = F_CLK and F_TIMER = F_TICK.
+C integer arithmetic on F_CPU = F_CLK and F_TIMER = F_TICK. --f-clk HZ
+checks the build and the testbench parameters that simulate.sh derives for
+F_CLK = HZ (F_TICK = 1 / T, RELEASE_CYCLES = T HZ, half period
+floor(1e15 / (2 HZ)) fs), for example the clock of make paper-flow.
 
 `log` reads a simulation log (events.txt of simulate.sh) and reports,
 per release of A: release_to_dispatch (TRIGGER line, the acknowledgement
 of IRQ 4, to the first dispatch of A; the metric of metrics.json),
-request_to_dispatch (release request of the testbench, "next release will
-be at" minus wake_up_alarm, to the same dispatch) and the spacing of the
+request_to_dispatch (release request of the testbench, the start of cycle
+WARMUP_CYCLES + k RELEASE_CYCLES: the cycle of "next release will be at"
+minus RELEASE_CYCLES, to the same dispatch) and the spacing of the
 dispatches of A. The log passes when every spacing equals the tick of the
 code and request_to_dispatch takes one value; release_to_dispatch then
 varies only by the acknowledgement latency of IRQ 4.
@@ -99,11 +103,18 @@ def c_int_eval(expr, names):
     return ev(ast.parse(expr, mode="eval"))
 
 
-def code_values(repo):
-    """Values of the sources (see the module docstring)."""
+def code_values(repo, f_clk_run=None):
+    """Values of the sources (see the module docstring); f_clk_run: the
+    clock of a run of simulate.sh (F_CLK, F_TICK = 1 / T and the testbench
+    parameters derived from it) in place of the defaults."""
     mak = strip_comments(read(repo, "arch_mak"), "#")
-    f_clk = last_int(r"^\s*F_CLK\s*=\s*(\d+)\s*$", mak, "F_CLK in arch.mak")
-    f_tick = last_int(r"^\s*F_TICK\s*=\s*(\d+)\s*$", mak, "F_TICK in arch.mak")
+    f_clk = last_int(r"^\s*F_CLK\s*\??=\s*(\d+)\s*$", mak, "F_CLK in arch.mak")
+    f_tick = last_int(r"^\s*F_TICK\s*\??=\s*(\d+)\s*$", mak, "F_TICK in arch.mak")
+    with open(os.path.join(repo, PATHS["config"])) as f:
+        cfg = json.load(f)
+    if f_clk_run is not None:
+        f_clk = int(f_clk_run)
+        f_tick = round(1 / cfg["release_period_s"])
 
     hal = strip_comments(read(repo, "hal_c"), "//")
     hal = re.sub(r"/\*.*?\*/", "", hal, flags=re.S)
@@ -145,25 +156,28 @@ def code_values(repo):
     pe = strip_comments(read(repo, "pe_sv"), "//")
     if not re.search(r"`timescale\s+1ns/", read(repo, "pe_sv")):
         raise SourceError("manycore_pe.sv: time unit is not 1 ns")
-    alarm_ns = last_int(r"integer\s+wake_up_alarm\s*=\s*([\d_]+)\s*;", pe, "wake_up_alarm")
-    delay_ns = last_int(r"integer\s+wake_up_delay\s*=\s*([\d_]+)\s*;", pe, "wake_up_delay")
+    release_cycles = last_int(r"longint\s+RELEASE_CYCLES\s*=\s*([\d_]+)", pe, "RELEASE_CYCLES")
+    warmup_cycles = last_int(r"longint\s+WARMUP_CYCLES\s*=\s*([\d_]+)", pe, "WARMUP_CYCLES")
 
     top_raw = read(repo, "top_sv")
     top = strip_comments(top_raw, "//")
     if not re.search(r"`timescale\s+1ns/", top_raw):
         raise SourceError("manycore_top.sv: time unit is not 1 ns")
-    clk_period_ns = last_int(r"CLOCK_BORDER_PERIOD\s*=\s*(\d+)", top, "CLOCK_BORDER_PERIOD")
+    half_fs = last_int(r"longint\s+CLOCK_HALF_PERIOD_FS\s*=\s*([\d_]+)", top, "CLOCK_HALF_PERIOD_FS")
 
-    with open(os.path.join(repo, PATHS["config"])) as f:
-        cfg = json.load(f)
+    if f_clk_run is not None:
+        # parameters of simulate.sh for this clock (vsim -g)
+        release_cycles = round(cfg["release_period_s"] * f_clk)
+        warmup_cycles = round(cfg["warmup_s"] * f_clk)
+        half_fs = 10 ** 15 // (2 * f_clk)
 
     return {
-        "f_clk_hz": f_clk, "f_tick_hz": f_tick,
+        "f_clk_hz": f_clk, "f_tick_hz": f_tick, "run_clock": f_clk_run is not None,
         "timer1pre": pre_name, "timer1pre_code": pre_code, "prescaler_cycles": prescaler,
         "timer1ctc_expr": ctc_expr, "timer1ctc": ctc, "steps_per_tick": steps,
         "tick_cycles": prescaler * steps,
-        "release_period_ns": alarm_ns, "first_release_ns": delay_ns,
-        "clock_period_ns": clk_period_ns,
+        "release_cycles": release_cycles, "first_release_cycles": warmup_cycles,
+        "clock_half_period_fs": half_fs, "clock_hz": 10 ** 15 / (2 * half_fs),
         "config_clock_hz": cfg["clock_hz"], "config_release_period_s": cfg["release_period_s"],
     }
 
@@ -171,14 +185,16 @@ def code_values(repo):
 def code_checks(v):
     """(name, value, expected, ok) rows."""
     f = v["f_clk_hz"]
-    release_cycles = v["release_period_ns"] * f / 1e9
+    release_cycles = v["release_cycles"]
     t_cycles = v["config_release_period_s"] * f
     rows = [
+        ("F_CLK of the run (Hz)", f, f, True) if v["run_clock"] else
         ("F_CLK = config clock_hz (Hz)", f, v["config_clock_hz"], f == v["config_clock_hz"]),
-        ("F_CLK = 1 / CLOCK_BORDER_PERIOD (Hz)", f, 1e9 / v["clock_period_ns"],
-         abs(f - 1e9 / v["clock_period_ns"]) < 1e-6),
+        # the clock runs at or above F_CLK, within one fs of the half period
+        ("clock 1e15 / (2 CLOCK_HALF_PERIOD_FS) >= F_CLK (Hz)", round(v["clock_hz"], 3), f,
+         v["clock_hz"] >= f and 10 ** 15 / (2 * (v["clock_half_period_fs"] + 1)) < f),
         ("TIMER1CTC fits 16 bits", v["timer1ctc"], "0..65535", 0 <= v["timer1ctc"] <= 0xFFFF),
-        ("wake_up_alarm = config T (cycles)", release_cycles, t_cycles, abs(release_cycles - t_cycles) < 1e-6),
+        ("RELEASE_CYCLES = config T (cycles)", release_cycles, t_cycles, abs(release_cycles - t_cycles) < 1e-6),
         ("F_TICK = 1 / T (Hz)", v["f_tick_hz"], 1 / v["config_release_period_s"],
          abs(v["f_tick_hz"] * v["config_release_period_s"] - 1) < 1e-9),
         ("tick = T x F_CLK (cycles)", v["tick_cycles"], t_cycles, abs(v["tick_cycles"] - t_cycles) < 1e-6),
@@ -193,31 +209,39 @@ def load_rttools(repo):
 
 
 def log_values(repo, log_path, v):
+    """Per release of the log; the clock of the run comes from the RUN_INFO
+    next to the log (exp23.load_run; else config clock_hz)."""
     exp23 = load_rttools(repo)
-    with open(os.path.join(repo, PATHS["config"])) as f:
-        cfg = json.load(f)
-    tr = exp23.load(log_path, cfg)
-    clk = exp23.Clock(tr.unit, cfg["clock_hz"])
+    cfg = exp23.load_config(os.path.join(repo, PATHS["config"]))
+    tr, cfg, clk, clock = exp23.load_run(log_path, cfg)
     pairs = exp23.iteration_releases(tr, cfg, clk)
-    ns_raw = 1e-9 / tr.unit.seconds
-    requests = []
+    half_fs = clock["half_period_fs"] or round(1e15 / (2 * cfg["clock_hz"]))
+    period_ns = 2 * half_fs / 1e6
+    release_cycles = exp23.exact(cfg["release_period_s"] * cfg["clock_hz"])
+    requests = []   # cycle of each release request (start of the cycle)
     with open(log_path, errors="replace") as fh:
         for line in fh:
             m = re.search(r"TRIGGER: next release will be at (\d+) ns", line)
             if m:
-                requests.append((int(m.group(1)) - v["release_period_ns"]) * ns_raw)
-    def cyc(raw):
-        # cycles to 1/1000 (the request falls between clock edges: half cycles)
-        return exp23.exact(round(clk.cycles(raw), 3))
+                # manycore_pe.sv prints the start of the cycle truncated to ns;
+                # the period exceeds 1 ns, so one cycle starts in [t, t + 1)
+                c_next = -(-int(m.group(1)) * 10 ** 6 // (2 * half_fs))
+                requests.append(c_next - release_cycles)
+
+    def cyc(x):
+        # cycles to 1/1000 (the request is the start of a cycle and the
+        # events are rising edges: half cycles)
+        return exp23.exact(round(x, 3))
 
     rows = []
     for r, s in pairs:
-        req = max((q for q in requests if q <= r), default=None)
+        rc, sc = clk.cycles(r), clk.cycles(s)
+        req = max((q for q in requests if q <= rc), default=None)
         rows.append({
-            "release_to_dispatch_cycles": cyc(s - r),
-            "request_to_dispatch_cycles": None if req is None else cyc(s - req),
-            "ack_latency_cycles": None if req is None else cyc(r - req),
-            "dispatch": s,
+            "release_to_dispatch_cycles": cyc(sc - rc),
+            "request_to_dispatch_cycles": None if req is None else cyc(sc - req),
+            "ack_latency_cycles": None if req is None else cyc(rc - req),
+            "dispatch": sc,
         })
     spacing = [cyc(b["dispatch"] - a["dispatch"]) for a, b in zip(rows, rows[1:])]
     rtd = [x["release_to_dispatch_cycles"] for x in rows]
@@ -262,13 +286,15 @@ def main(argv=None):
     p.add_argument("--repo", default=DEFAULT_REPO, help="repository root (default: two levels above this script)")
     sub = p.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("code")
+    c.add_argument("--f-clk", type=int, default=None,
+                   help="clock of a run (Hz): the parameters that simulate.sh derives from F_CLK")
     c.add_argument("--json", action="store_true")
     lg = sub.add_parser("log")
     lg.add_argument("events")
     lg.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
     try:
-        v = code_values(a.repo)
+        v = code_values(a.repo, getattr(a, "f_clk", None))
     except (SourceError, OSError, KeyError) as e:
         print("source error: " + str(e), file=sys.stderr)
         return 2
@@ -288,7 +314,7 @@ def main(argv=None):
     print(f"F_CLK {v['f_clk_hz']} Hz, F_TICK {v['f_tick_hz']} Hz, TIMER1PRE {v['timer1pre']} "
           f"(1 step per {v['prescaler_cycles']} cycles), TIMER1CTC = {v['timer1ctc_expr']} = {v['timer1ctc']}")
     print(f"tick = {v['prescaler_cycles']} x ({v['timer1ctc']} + 1) = {v['tick_cycles']} cycles; "
-          f"release period {v['release_period_ns']} ns = {v['release_period_ns'] * v['f_clk_hz'] / 1e9:g} cycles")
+          f"release period {v['release_cycles']} cycles; clock half period {v['clock_half_period_fs']} fs")
     if a.cmd == "log":
         lv = out["log"]
         def rng(x):

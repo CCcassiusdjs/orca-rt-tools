@@ -44,8 +44,8 @@
   "meets_phase": true
  },
  "response_bound": {
-  "cycles": 869818,
-  "ms": 1.999986204,
+  "cycles": 759938,
+  "ms": 1.747337392,
   "task": "J",
   "phase": 3,
   "deadline_ms": 2.0
@@ -57,5 +57,6 @@
  "monitor": {
   "errors": 0,
   "nodes": 4
- }
+ },
+ "_dispatch_order": "Integration of PR 104 with PR 105: response_bound follows the dispatch order of the kernel rule (J before G on PE 3): f^(J) = c^(J) = 107570 cycles, R_bound = 3 x 217456 + 107570 = 759938 cycles (1.747337 ms) (before PR 105: 869818 cycles, f^(J) = 217450)."
 }

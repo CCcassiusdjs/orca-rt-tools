@@ -6,7 +6,8 @@
 #   make all       analyze + check (default; stored log of run F against reference_head.json) + frequency
 #                  + tick
 #   make tick      tick of the UCX-OS (arch.mak, hal.c, peripherals_minimal.vhd) against the release
-#                  period of A (manycore_pe.sv, config.json): tick = T x F_CLK cycles (tick_period.py code)
+#                  period of A (manycore_pe.sv, config.json): tick = T x F_CLK cycles (tick_period.py code;
+#                  make paper-flow also checks it at the clock of the flow, --f-clk)
 #   make tick-log  release_to_dispatch, request_to_dispatch and spacing of the dispatches of A in $(LOG);
 #                  passes when the spacing equals the tick and request_to_dispatch is constant
 #   make frequency minimum frequency of application E (CLI input apps/synthetic-app-e): f*, f_CPU and
@@ -95,6 +96,7 @@ flow-clock: frequency
 	$(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --out $(CLOCK)
 
 paper-flow: flow-clock
+	$(PYTHON) tick_period.py code --f-clk $$($(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --field f_clk_hz)
 	$(MAKE) sim F_CLK=$$($(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --field f_clk_hz) \
 		SIMDIR=$(BUILD)/sim-flow
 	$(MAKE) analyze check LOG=$(BUILD)/sim-flow/events.txt OUTDIR=$(BUILD)/results-flow REF=reference_flow.json
