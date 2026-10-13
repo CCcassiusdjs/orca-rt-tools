@@ -18,8 +18,9 @@ LOG_F = os.path.join(EXP, "logs", "F.events.txt")
 
 
 def cfg():
-    with open(os.path.join(EXP, "config.json")) as f:
-        return json.load(f)
+    # load_config: the application CSV of the config as an absolute path
+    # (creation rows of the dispatch order)
+    return exp23.load_config(os.path.join(EXP, "config.json"))
 
 
 def tx_line(t, src, dst, tag, size, head, last, block=0, gap=0):
@@ -170,7 +171,9 @@ def synthetic_f_log(path):
 def test_analyze_log_f_with_flit_lines(tmp_path):
     log = tmp_path / "F_flit.events.txt"
     expected = synthetic_f_log(str(log))
-    m = exp23.analyze(str(log), cfg(), str(tmp_path / "out"))
+    # listings of run F: reference_head.json holds the instrumentation bound
+    m = exp23.analyze(str(log), cfg(), str(tmp_path / "out"), listing=os.path.join(EXP, "logs", "F.image.lst"),
+                      listing_without=os.path.join(EXP, "logs", "F.noinstr.lst"))
     net = m["network"]
     assert net["packets"] == 166 and net["identity_errors"] == 0 and net["outside_flows"] == 0
     rows = {r["flow"]: r for r in net["flows"]}
