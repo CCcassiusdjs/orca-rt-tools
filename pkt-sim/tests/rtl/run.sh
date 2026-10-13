@@ -32,10 +32,20 @@ ghdl_hermes() { # ghdl_hermes <nome> <generics...>
 		| grep -E "PASS|FAIL|wrong" | sed 's/.*(report note): //' || true
 }
 
+ghdl_timer1() { # ghdl_timer1 <CTC> <expected tick in cycles>
+	W="$OUT/ghdl_timer1"
+	mkdir -p "$W"
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$HW/peripherals/peripherals_minimal.vhd"
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_timer1.vhd"
+	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_timer1
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_timer1 -gCTC="$1" -gEXPECT="$2" 2>&1) \
+		| grep -E "TICK|PASS|FAIL" | sed 's/.*(report note): //' || true
+}
+
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
 	$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/ddma/ddma.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
 	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
@@ -59,6 +69,10 @@ for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe}; 
 	tb_hermes_local)
 		ghdl_hermes A -gSRC=4 -gDST=4 -gP=4 -gM=0 -gNAME=A
 		ghdl_hermes B -gSRC=0 -gDST=8 -gP=4 -gM=4 -gNAME=B ;;
+	tb_timer1)
+		# TB_TIMER1_CTC, TB_TIMER1_EXPECT: TIMER1CTC and the expected tick
+		# (default: hal.c at 500 MHz and F_TICK = 2000, 250000 cycles)
+		ghdl_timer1 "${TB_TIMER1_CTC:-15624}" "${TB_TIMER1_EXPECT:-250000}" ;;
 	*) echo "unknown test: $t"; exit 2 ;;
 	esac
 done
