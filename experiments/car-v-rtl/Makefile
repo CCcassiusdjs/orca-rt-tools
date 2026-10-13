@@ -7,8 +7,11 @@
 #                each PE (rttools.ucxgen.memory) against HEAP (default target)
 #   make build   build $(NAME) in build/pkt-sim (riscv64-elf toolchain); heap demand
 #                against _heap_size of the image
-#   make sim     RTL simulation (Questa and riscv64-elf; ENV_SETUP as in exp23):
-#                ../exp23/simulate.sh build/sim $(SIM_NS) $(NAME) $(MESH)
+#   make sim     RTL simulation (Questa and riscv64-elf; ENV_SETUP as in exp23) at F_CLK:
+#                F_CLK=$(F_CLK) ../exp23/simulate.sh build/sim $(SIM_NS) $(NAME) $(MESH)
+#   make flow-clock  F_CLK of a run at the minimum frequency of the CAR-V flow (make -C ../car-v run,
+#                chosen candidate): the first multiple of 32 kHz at or above it (exp23.flow_clock)
+#   make sim-flow  sim at that F_CLK in build/sim-flow
 #
 # CSV and MAP: the files of the CAR-V analysis flow (apps/car-v, rttools.paper.carv)
 # when they exist, otherwise input/car-v.csv and input/car-v.map, provisional
@@ -29,13 +32,19 @@ MESH    ?= 4x4
 GENFLAGS ?=
 BUILD   ?= build
 SIM_NS  ?= 11500000
+# clock of the simulation (Hz); default 500 MHz, the clock of run F
+F_CLK   ?= 500000000
+CARV_METRICS ?= ../car-v/build/metrics.json
+FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \
+	m = json.load(open('$(CARV_METRICS)')); \
+	print(exp23.flow_clock(m['chosen']['search']['frequency_hz'], m['scale']['period_s'])['f_clk_hz'])"
 # _heap_size of the image of car_v built with riscv64-unknown-elf-gcc 13.2
 # (make build reads the value of the toolchain in use)
 HEAP    ?= 50756
 IN_FLIGHT ?= 2
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 
-.PHONY: all app check build sim clean
+.PHONY: all app check build sim flow-clock sim-flow clean
 
 all: check
 
@@ -55,7 +64,15 @@ build:
 		--in-flight $(IN_FLIGHT) --json $(BUILD)/memory.json
 
 sim:
-	../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) $(MESH)
+	F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) $(MESH)
+
+flow-clock:
+	$(MAKE) -C ../car-v run PYTHON=$(PYTHON)
+	PYTHONPATH=$(RTTOOLS) $(FLOW_F_CLK)
+
+sim-flow:
+	$(MAKE) -C ../car-v run PYTHON=$(PYTHON)
+	F_CLK=$$(PYTHONPATH=$(RTTOOLS) $(FLOW_F_CLK)) ../exp23/simulate.sh $(BUILD)/sim-flow $(SIM_NS) $(NAME) $(MESH)
 
 clean:
 	rm -rf $(BUILD)

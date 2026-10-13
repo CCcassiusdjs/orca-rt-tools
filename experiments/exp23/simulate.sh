@@ -101,7 +101,13 @@ RELEASE_CYCLES=$(( F_CLK * RELEASE_NS / 1000000000 ))
 WARMUP_CYCLES=$(( F_CLK * WARMUP_NS / 1000000000 ))
 HALF_FS=$(( 500000000000000 / F_CLK ))
 F_EXACT=$(awk -v h="$HALF_FS" 'BEGIN { printf "%.3f", 1e15 / (2 * h) }')
-GENERICS="-gCLOCK_HALF_PERIOD_FS=$HALF_FS -gRELEASE_CYCLES=$RELEASE_CYCLES -gWARMUP_CYCLES=$WARMUP_CYCLES"
+# -g options only for values that differ from the defaults of
+# manycore_top.sv (the clock of run F): at 500 MHz the vsim command is the
+# one of run F
+GENERICS=""
+[ "$HALF_FS" != 1000000 ] && GENERICS="$GENERICS -gCLOCK_HALF_PERIOD_FS=$HALF_FS"
+[ "$RELEASE_CYCLES" != 250000 ] && GENERICS="$GENERICS -gRELEASE_CYCLES=$RELEASE_CYCLES"
+[ "$WARMUP_CYCLES" != 1500000 ] && GENERICS="$GENERICS -gWARMUP_CYCLES=$WARMUP_CYCLES"
 echo "clock: F_CLK $F_CLK Hz, half period $HALF_FS fs ($F_EXACT Hz), release every $RELEASE_CYCLES cycles, first at cycle $WARMUP_CYCLES, F_TICK $F_TICK Hz"
 
 # setup of the application (key=value lines of app/<app>.sim; read, not run)
@@ -167,7 +173,7 @@ if [ "$MONITOR" = 1 ]; then
 	cat >> run.do <<EOD
 vlog -mixedsvvh -sv -work work $HERE/rtl/pe_checker.sv
 vlog -mixedsvvh -sv -work work $HERE/rtl/chk_binds.sv
-vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS $GENERICS$APP_GENERICS
+vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$GENERICS$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run -all
@@ -175,7 +181,7 @@ quit -f
 EOD
 else
 	cat >> run.do <<EOD
-vsim -c work.manycore_top $GENERICS$APP_GENERICS
+vsim -c work.manycore_top$GENERICS$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run ${SIM_NS}ns
@@ -185,7 +191,8 @@ fi
 
 {
 	echo "sim_ns=$SIM_NS monitor=$MONITOR"
-	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${APP_GENERICS# }"
+	ALL_GENERICS="$GENERICS$APP_GENERICS"
+	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${ALL_GENERICS# }"
 	echo "vsim=$(vsim -version 2>/dev/null | head -1)"
 	echo "gcc=$(riscv64-elf-gcc --version | head -1)"
 	echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"

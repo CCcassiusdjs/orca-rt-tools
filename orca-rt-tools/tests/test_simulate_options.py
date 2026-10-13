@@ -15,7 +15,7 @@ def stub_repo(tmp_path):
     repo = tmp_path / "repo"
     e = repo / "experiments" / "exp23"
     (e / "rtl").mkdir(parents=True)
-    for f in ("source_info.sh", "simulate.sh", "VERSION"):
+    for f in ("source_info.sh", "simulate.sh", "build_sw.sh", "VERSION"):
         shutil.copy2(os.path.join(REPO_ROOT, "experiments", "exp23", f), e / f)
     mc = repo / "pkt-sim" / "manycore_modelsim"
     mc.mkdir(parents=True)
@@ -70,3 +70,25 @@ def test_simulate_carv_4x4(tmp_path):
     r = subprocess.run(["bash", sh, str(tmp_path / "o3"), "1000", "car_v", "4by4"],
                        capture_output=True, text=True, env=env)
     assert r.returncode == 2 and "invalid mesh" in r.stderr
+
+
+def test_simulate_clock_generics(tmp_path):
+    """At a clock other than 500 MHz (make paper-flow: 434.912 MHz) the clock
+    of the run goes to vsim -g and to the build; at 500 MHz the command has
+    no clock option (test_simulate_default_is_run_f)."""
+    repo, env, log = stub_repo(tmp_path)
+    sh = str(repo / "experiments" / "exp23" / "simulate.sh")
+    r = subprocess.run(["bash", sh, str(tmp_path / "o"), "1000"], capture_output=True, text=True,
+                       env={**env, "F_CLK": "434912000"})
+    assert r.returncode == 0, r.stdout + r.stderr
+    g = "-gCLOCK_HALF_PERIOD_FS=1149657 -gRELEASE_CYCLES=217456 -gWARMUP_CYCLES=1304736"
+    assert f"vsim -c work.manycore_top work.chk_binds +RUN_NS=1000 {g}\n" in run_do(tmp_path / "o")
+    assert "-s weird_a F_CLK=434912000 F_TICK=2000" in log.read_text()
+    info = (tmp_path / "o" / "RUN_INFO").read_text()
+    assert f"app=weird_a mesh=2x2 generics={g}\n" in info and "f_clk_hz=434912000\n" in info
+    # CAR-V at the clock of its flow (380 MHz): clock and mesh options together
+    r = subprocess.run(["bash", sh, str(tmp_path / "o2"), "1000", "car_v", "4x4"], capture_output=True, text=True,
+                       env={**env, "F_CLK": "380000000"})
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert ("+RUN_NS=1000 -gCLOCK_HALF_PERIOD_FS=1315789 -gRELEASE_CYCLES=190000 -gWARMUP_CYCLES=1140000 "
+            "-gNOC_DIM_X=4 -gNOC_DIM_Y=4 -gRELEASE_MASK=2494\n") in run_do(tmp_path / "o2")

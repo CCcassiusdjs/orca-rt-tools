@@ -16,7 +16,7 @@ file of the flow (node index y * width + x of arch/hermes-*.gml).
 | One ucx_noc_send per edge, tag = payload | One ucx_noc_send per edge; tag = flow * tag_mod + (k mod tag_mod), flow = index of the edge in the CSV (from 1), k = iteration (from 1); tag_mod = 1 gives one tag per flow |
 | Edge inside a PE: ucx_noc_send to the same CPU | The same: lib/noc.c puts the packet in the local queue of the target task |
 | Join of J: k-th packet of each producer | The same rule for every task with more than one input edge (source port of the packet) |
-| ucx_task_add per PE in app_main | Creation order of each PE = dispatch order of the model (sequence rows of the CSV, otherwise the order of the .map line kept by the local edges; rttools/modules/instances/release.py, pe_sequences) |
+| ucx_task_add per PE in app_main | Creation order of each PE as the model reads it (rttools/modules/instances/release.py, pe_sequences): sequence row of the CSV, otherwise creation row, otherwise the order of the .map line; the kernel dispatches it by the rule of rttools/bench_t/estimate.py (dispatch_order) |
 
 Outputs in <dir>: <name>.c (application), <name>.json (manifest: tasks,
 flows, PE of each task, ports, tags, release mask; the input of the

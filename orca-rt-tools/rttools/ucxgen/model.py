@@ -149,8 +149,12 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
     mapfile.check(entries, labels, nodes=range(width * height))
     node_of = {t: int(e["node"]) for e in entries for t in e["tasks"] if t in known}
 
-    # dispatch order of each PE, as the analysis computes it
-    edges = [(f["source"], f["target"]) for f in flows]
+    # creation order of each PE (the order of ucx_task_add), as the
+    # analysis reads it (rttools/modules/instances/release.py,
+    # pe_sequences): a sequence row (explicit dispatch order) wins; else the
+    # creation row of the PE; else the order of the .map line. The kernel
+    # dispatches the creation order by the rule of
+    # rttools/bench_t/estimate.py (dispatch_order), the order of the model.
     order = {}
     for e in entries:
         ts = [t for t in e["tasks"] if t in known]
@@ -158,7 +162,9 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
             continue
         seq = release.matching_sequence(e["node"], ts, params.get("sequences"))
         if seq is None:
-            seq = release.stable_topological(ts, [(u, v) for u, v in edges if u in ts and v in ts])
+            seq = release.matching_sequence(e["node"], ts, params.get("creation"), "creation order")
+        if seq is None:
+            seq = list(ts)
         order[int(e["node"])] = seq
         if len(seq) > MAX_TASKS_PER_PE:
             raise GenError(f"PE {e['node']}: {len(seq)} tasks (at most {MAX_TASKS_PER_PE}, MAX_TASKS of noc.h)")
@@ -216,6 +222,11 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
                     "pe_labels": [label(n) for n in sources],
                     "mask": sum(1 << n for n in sources)},
         "pe_tasks": {label(n): ["IDLE"] + order[n] for n in sorted(order)},
+        # dispatch order of each PE in one phase (the model of the analysis)
+        "pe_dispatch": {label(int(n)): seq for n, seq in sorted(
+            release.pe_sequences(list(known), [(f["source"], f["target"]) for f in flows], entries,
+                                 params.get("sequences"), params.get("creation")).items(),
+            key=lambda kv: int(kv[0]))},
         "tasks": out_tasks,
         "flows": out_flows,
         "warnings": [f"tasks {', '.join(ns)} share the kernel name {ns[0][:MAX_NAME]!r} on one PE"

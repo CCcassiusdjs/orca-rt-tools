@@ -28,7 +28,8 @@ HEADER = """\
  * packet per output edge with tag = flow * TAG_MOD + (k mod TAG_MOD)
  * (flow = index of the edge in the CSV, from 1). A packet to a task of the
  * same PE goes to the local queue of the target task (lib/noc.c). On each
- * PE, app_main creates the tasks in the dispatch order of the model.
+ * PE, app_main creates the tasks in the creation order of the model; the
+ * kernel dispatches them in the order of the model (dispatch_order).
  */
 """
 

@@ -1,5 +1,5 @@
 """UCX-OS application generator (rttools.ucxgen): model of application E
-against weird_a.c, order without sequence rows, input errors and the
+against weird_a.c, order without sequence and creation rows, input errors and the
 heap size of an image map."""
 import os
 
@@ -31,9 +31,12 @@ def test_app_e_matches_weird_a():
     assert [n for n, x in t.items() if x["source"]] == ["A"]
     assert m["release"] == {"period_ns": 500000, "delay_ns": 3000000, "pes": [0],
                             "pe_labels": ["0-0"], "mask": 1}
-    # creation order = sequence rows of the CSV (dispatch order of the model)
-    assert m["pe_tasks"] == {"0-0": ["IDLE", "A", "B", "D", "F"], "1-0": ["IDLE", "C"],
-                             "0-1": ["IDLE", "E", "I", "H"], "1-1": ["IDLE", "G", "J"]}
+    # creation order = creation rows of the CSV (ucx_task_add in app_main of
+    # weird_a.c); the kernel dispatches it in the order of the model
+    assert m["pe_tasks"] == {"0-0": ["IDLE", "F", "D", "B", "A"], "1-0": ["IDLE", "C"],
+                             "0-1": ["IDLE", "H", "I", "E"], "1-1": ["IDLE", "J", "G"]}
+    assert m["pe_dispatch"] == {"0-0": ["A", "B", "D", "F"], "1-0": ["C"],
+                                "0-1": ["E", "H", "I"], "1-1": ["J", "G"]}
     # J joins three edges, in CSV order; ports unique and nonzero
     assert [m["flows"][i - 1]["source"] for i in t["J"]["inputs"]] == ["I", "H", "G"]
     ports = [x["port"] for x in m["tasks"]]
@@ -44,7 +47,8 @@ def test_app_e_matches_weird_a():
 
 
 def test_order_without_sequence_rows(tmp_path):
-    """Without sequence rows the order is the .map line, kept by local edges."""
+    """Without sequence and creation rows the creation order is the .map
+    line; the kernel rule dispatches S, Y, X (edges S->Y->X)."""
     csv = tmp_path / "a.csv"
     csv.write_text("#tasks,,,,,\nTask,Period,Capacity,Deadline,Acronym,Description\n"
                    "1,0,30000,0,S,S\n2,0,30000,0,X,X\n3,0,30000,0,Y,Y\n"
@@ -54,7 +58,8 @@ def test_order_without_sequence_rows(tmp_path):
     mp = tmp_path / "a.map"
     mp.write_text("0:X,S,Y\n")
     m = model.build(str(csv), str(mp), "a", mesh="1x1")
-    assert m["pe_tasks"] == {"0-0": ["IDLE", "S", "Y", "X"]}
+    assert m["pe_tasks"] == {"0-0": ["IDLE", "X", "S", "Y"]}
+    assert m["pe_dispatch"] == {"0-0": ["S", "Y", "X"]}
     assert m["release"]["period_ns"] == 1000000
     assert any("manycore_pe.sv fires every 500000 ns" in w for w in m["warnings"])
     assert all(f["local"] for f in m["flows"])

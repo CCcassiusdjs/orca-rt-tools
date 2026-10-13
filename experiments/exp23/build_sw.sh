@@ -1,7 +1,8 @@
 #!/bin/bash
-# Builds the software of the experiment of Ch. 8 (application E, weird_a.c)
-# the way simulate.sh does: copies pkt-sim to <out_dir>/pkt-sim and builds
-# ucx-os (ARCH=riscv/hf-riscv-e) and the boot code there.
+# Builds the software of the experiment of Ch. 8 (application E, weird_a.c,
+# or the application APP) the way simulate.sh does: copies pkt-sim to
+# <out_dir>/pkt-sim and builds ucx-os (ARCH=riscv/hf-riscv-e) and the boot
+# code there.
 #
 #   build_sw.sh <out_dir>
 #
@@ -13,6 +14,8 @@
 #               writes to the instrumentation registers (device/cacc.h);
 #               `make software` builds both variants for the bound of the
 #               instrumentation cost (rttools/paper/instrumentation.py)
+#   APP         application of pkt-sim/software/ucx-os (Makefile target and
+#               app/<APP>.c; default weird_a, application E of run F)
 #   F_CLK, F_TICK
 #               clock and tick of the software in Hz (make F_CLK= F_TICK=;
 #               unset: the defaults of arch.mak, 500000000 and 2000, the
@@ -26,6 +29,8 @@
 set -euo pipefail
 
 OUT=${1:?usage: build_sw.sh <out_dir>}
+APP=${APP:-weird_a}
+[[ "$APP" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || { echo "invalid application name: $APP" >&2; exit 2; }
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
 
@@ -58,6 +63,7 @@ for v in F_CLK F_TICK; do
 	fi
 done
 ( cd "$OUT/pkt-sim/software/ucx-os" && make -s ARCH=riscv/hf-riscv-e "$@" incl \
-	&& make -s "$@" ${CLK[@]+"${CLK[@]}"} weird_a ) > "$OUT/build_sw.log" 2>&1
+	&& make -s "$@" "$APP" ${CLK[@]+"${CLK[@]}"} ) > "$OUT/build_sw.log" 2>&1 \
+	|| { tail -20 "$OUT/build_sw.log" >&2; echo "build of $APP failed" >&2; exit 4; }
 ( cd "$OUT/pkt-sim/software/hfrisc-software" && make -s boot_sim ) > "$OUT/build_boot.log" 2>&1
 riscv64-elf-gcc --version | head -1 > "$OUT/gcc.txt"

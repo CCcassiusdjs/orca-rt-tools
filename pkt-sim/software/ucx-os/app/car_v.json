@@ -4,10 +4,10 @@
  "inputs": {
   "csv": {
    "file": "car-v.csv",
-   "sha256": "57979d1f5960165d3c59bf11986ad181641b213433037e8a742afd56f276f167"
+   "sha256": "f2d3d1d0d6d01b1139f2ce6902adad589e36502243cf5202cd6b7d383c23caa0"
   },
   "map": {
-   "file": "car-v.map",
+   "file": "car-v-ONTO-hermes4x4.map",
    "sha256": "9fbf86c91619af9824f716ed918dacdccc2f4a6a53d1b294bcc4ea05eca0bdb2"
   }
  },
@@ -117,6 +117,63 @@
    "OBMG"
   ]
  },
+ "pe_dispatch": {
+  "0-0": [
+   "NAVC"
+  ],
+  "1-0": [
+   "FBU4",
+   "BFE4"
+  ],
+  "2-0": [
+   "FBU1",
+   "BFE1"
+  ],
+  "3-0": [
+   "FBU2",
+   "BFE2"
+  ],
+  "0-1": [
+   "FBU3",
+   "VOD1"
+  ],
+  "1-1": [
+   "FBU8",
+   "VOD2"
+  ],
+  "2-1": [
+   "BFE3"
+  ],
+  "3-1": [
+   "FBU5",
+   "BFE5"
+  ],
+  "0-2": [
+   "FBU7"
+  ],
+  "1-2": [
+   "BFE8"
+  ],
+  "2-2": [
+   "BFE7"
+  ],
+  "3-2": [
+   "FBU6",
+   "BFE6"
+  ],
+  "0-3": [
+   "STPH"
+  ],
+  "1-3": [
+   "FDF2"
+  ],
+  "2-3": [
+   "FDF1"
+  ],
+  "3-3": [
+   "OBMG"
+  ]
+ },
  "tasks": [
   {
    "name": "FBU1",
@@ -126,8 +183,8 @@
    "pe_label": "2-0",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [],
    "outputs": [
     5
@@ -142,8 +199,8 @@
    "pe_label": "3-0",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [],
    "outputs": [
     6
@@ -158,8 +215,8 @@
    "pe_label": "0-1",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [],
    "outputs": [
     1,
@@ -175,8 +232,8 @@
    "pe_label": "1-0",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 85664,
-   "workload": 7466,
+   "wcet": 66998,
+   "workload": 5600,
    "inputs": [],
    "outputs": [
     8
@@ -191,8 +248,8 @@
    "pe_label": "3-1",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [],
    "outputs": [
     9
@@ -207,8 +264,8 @@
    "pe_label": "3-2",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [],
    "outputs": [
     10
@@ -223,8 +280,8 @@
    "pe_label": "0-2",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [],
    "outputs": [
     11
@@ -239,8 +296,8 @@
    "pe_label": "1-1",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [],
    "outputs": [
     2,
@@ -256,8 +313,8 @@
    "pe_label": "0-0",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     3,
     4
@@ -273,8 +330,8 @@
    "pe_label": "2-0",
    "order": 1,
    "kernel_id": 2,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     5
    ],
@@ -291,8 +348,8 @@
    "pe_label": "3-0",
    "order": 1,
    "kernel_id": 2,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     6
    ],
@@ -309,8 +366,8 @@
    "pe_label": "2-1",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     7
    ],
@@ -327,8 +384,8 @@
    "pe_label": "1-0",
    "order": 1,
    "kernel_id": 2,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     8
    ],
@@ -345,8 +402,8 @@
    "pe_label": "3-1",
    "order": 1,
    "kernel_id": 2,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     9
    ],
@@ -363,8 +420,8 @@
    "pe_label": "3-2",
    "order": 1,
    "kernel_id": 2,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     10
    ],
@@ -381,8 +438,8 @@
    "pe_label": "2-2",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     11
    ],
@@ -399,8 +456,8 @@
    "pe_label": "1-2",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     12
    ],
@@ -417,8 +474,8 @@
    "pe_label": "2-3",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     13,
     14,
@@ -438,8 +495,8 @@
    "pe_label": "1-3",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     17,
     18,
@@ -459,8 +516,8 @@
    "pe_label": "0-3",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     21,
     22
@@ -478,8 +535,8 @@
    "pe_label": "0-1",
    "order": 1,
    "kernel_id": 2,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     1
    ],
@@ -496,8 +553,8 @@
    "pe_label": "1-1",
    "order": 1,
    "kernel_id": 2,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     2
    ],
@@ -514,8 +571,8 @@
    "pe_label": "3-3",
    "order": 0,
    "kernel_id": 1,
-   "wcet": 123000,
-   "workload": 11200,
+   "wcet": 95000,
+   "workload": 8400,
    "inputs": [
     23
    ],
