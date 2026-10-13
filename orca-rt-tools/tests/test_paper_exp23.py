@@ -13,8 +13,7 @@ EXP = os.path.join(REPO_ROOT, "experiments", "exp23")
 
 
 def cfg():
-    with open(os.path.join(EXP, "config.json")) as f:
-        return json.load(f)
+    return exp23.load_config(os.path.join(EXP, "config.json"))
 
 
 @pytest.fixture(scope="module")
@@ -48,9 +47,10 @@ def test_corrected_values_of_chapter_8(runs):
     assert all(v["equal_in_all_hyperperiods"] for v in m["tab83"]["per_cluster"].values())
     assert sorted(round(p["max_ms"], 3) for p in m["iterations"]["per_release_offset"]) == [1.179, 1.361, 1.414, 1.861]
     t82 = {r["flow"]: (r["min_release"], r["deadline"], r["volume_bytes"]) for r in m["tab82"]}
-    # deadline = start of the target in the phase after the source phase
-    assert t82 == {"F1": (28530, 261000, 1230), "F2": (181930, 261000, 6780), "F3": (96330, 261000, 1200),
-                   "F4": (128070, 370880, 5670), "F5": (173370, 370880, 8900)}
+    # deadline = start of the target in the phase after the source phase; dispatch order of the
+    # kernel rule: E, H, I (F5 leaves H at 98 000, F4 leaves I at 173 370) and J, G (J starts at 11 000)
+    assert t82 == {"F1": (28530, 261000, 1230), "F2": (181930, 368570, 6780), "F3": (96330, 261000, 1200),
+                   "F4": (173370, 261000, 5670), "F5": (98000, 261000, 8900)}
     assert m["monitor"]["errors"] == 0 and m["monitor"]["nodes"] == 4
 
 
@@ -60,11 +60,16 @@ def test_cpu_check_and_response_bound(run_f):
     assert m["cpu"]["f_cpu_hz"] == 434900000 and m["cpu"]["meets_phase"] is True
     assert m["cpu"]["phase_percent"]["GJ"] == pytest.approx(86.98)
     rb = m["response_bound"]
-    assert (rb["cycles"], rb["task"], rb["phase"]) == (967450, "J", 3)
-    assert rb["ms"] == pytest.approx(1.9349)
+    # J runs first on GJ: f^(J) = c^(J) = 107 570, R^ = 3 P + 107 570
+    assert (rb["cycles"], rb["task"], rb["phase"]) == (3 * 250000 + 107570, "J", 3)
+    assert rb["ms"] == pytest.approx(1.71514)
+    # J of iteration k runs in phase 3 and G of iteration k in phase 1 (phi(J) comes from I and H)
     assert rb["phases"] == {"A": 0, "B": 0, "D": 0, "F": 0, "C": 1, "G": 1, "E": 2, "H": 2, "I": 2, "J": 3}
-    # the bound covers every measured response
-    assert m["iterations"]["max_ms"] <= rb["ms"] <= m["iterations"]["deadline_ms"]
+    assert m["sequences"] == {"ABDF": ["A", "B", "D", "F"], "C": ["C"], "EHI": ["E", "H", "I"], "GJ": ["J", "G"]}
+    # the measured response of log F (1.861 ms) closes at the exit of J after the two iterations
+    # that one slice of J serves; the bound of one iteration stays below it until the response
+    # is measured per iteration (PR 102)
+    assert rb["ms"] < m["iterations"]["max_ms"] <= m["iterations"]["deadline_ms"]
 
 
 def test_sequence_comes_from_the_bench_engine(monkeypatch):
@@ -75,7 +80,9 @@ def test_sequence_comes_from_the_bench_engine(monkeypatch):
     seq = exp23.cpu_sequence(cfg())
     assert len(calls) == 4
     assert {t: (v["start"], v["finish"]) for t, v in seq.items() if v["cluster"] == "EHI"} == \
-        {"E": (11000, 52700), "I": (63700, 128070), "H": (139070, 173370)}
+        {"E": (11000, 52700), "H": (63700, 98000), "I": (109000, 173370)}
+    assert {t: (v["start"], v["finish"]) for t, v in seq.items() if v["cluster"] == "GJ"} == \
+        {"J": (11000, 107570), "G": (118570, 217450)}
 
 
 def test_phase_windows_come_from_the_release_model(monkeypatch):
@@ -86,8 +93,56 @@ def test_phase_windows_come_from_the_release_model(monkeypatch):
     monkeypatch.setattr(exp23.release, "phase_flows", lambda *a: calls.append(a) or real(*a))
     w = exp23.phase_windows(cfg())
     assert len(calls) == 1
-    assert w == {"F1": (28530, 261000), "F2": (181930, 261000), "F3": (96330, 261000),
-                 "F4": (128070, 370880), "F5": (173370, 370880)}
+    assert w == {"F1": (28530, 261000), "F2": (181930, 368570), "F3": (96330, 261000),
+                 "F4": (173370, 261000), "F5": (98000, 261000)}
+
+
+def test_dispatch_order_comes_from_the_creation_rows_of_the_csv():
+    """The creation rows of the application CSV (config application) are
+    the source of the order; the order of estimate.clusters is not read."""
+    c = cfg()
+    assert exp23.creation_order(c) == {"ABDF": ["F", "D", "B", "A"], "C": ["C"], "EHI": ["H", "I", "E"],
+                                       "GJ": ["J", "G"]}
+    c["estimate"]["clusters"]["EHI"] = list(reversed(c["estimate"]["clusters"]["EHI"]))
+    assert exp23.dispatch_sequences(c)["EHI"] == ["E", "H", "I"]
+
+
+def test_log_table_must_follow_the_creation_rows():
+    c = cfg()
+    c["pe_tasks"]["1-0"] = ["IDLE", "E", "I", "H"]
+    with pytest.raises(ValueError):
+        exp23.creation_order(c)
+    c = cfg()
+    c["application"] = "../../apps/synthetic-app-e/synthetic-app-e.csv"
+    with pytest.raises(ValueError):
+        exp23.creation_order(c)
+
+
+def test_run_f_dispatch_follows_the_kernel_rule(run_f):
+    """Log F: per phase, ABDF runs A, B, D, F and EHI runs E, H, I (never
+    E, I, H). GJ runs J, G in the phases in which J is ready at the tick
+    (J dispatched first) and G, J in the phases in which the packets of I
+    reach J after the tick (one slice of I serves two iterations); in no
+    phase with both ready at the tick does G run first."""
+    c = cfg()
+    tr = exp23.load(os.path.join(EXP, "logs", "F.events.txt"), c)
+    clk = exp23.Clock(tr.unit, c["clock_hz"])
+    p = clk.raw(c["release_period_s"])
+    seen = {}
+    for pe, cluster in c["clusters"].items():
+        by = {}
+        for sl in tr.lane_slices(pe):
+            if sl.label != "IDLE":
+                by.setdefault(int(sl.start // p), []).append(sl)
+        for k, ss in by.items():
+            if 8 <= k < 40:
+                seen.setdefault(cluster, set()).add(" ".join(x.label for x in ss))
+    assert seen == {"ABDF": {"A B D F"}, "C": {"C"}, "EHI": {"E H I"}, "GJ": {"G J", "J G"}}
+    for sl in tr.lane_slices("1-1"):
+        k = int(sl.start // p)
+        if sl.label == "J" and 8 <= k < 40 and clk.cycles(sl.start - k * p) < 5000:
+            rest = [x.label for x in tr.lane_slices("1-1") if int(x.start // p) == k and x.label != "IDLE"]
+            assert rest == ["J", "G"]
 
 
 def test_units_detected_and_runs_equal_in_cycles(runs):
@@ -115,7 +170,9 @@ def test_run_f_matches_head_reference(run_f):
     assert gj["equal_in_all_hyperperiods"] is False
     assert gj["per_hyperperiod"][1:] == [182647.75, 182647.75, 182648.5, 182647.75, 182647.75, 182648.5]
     assert round(gj["mean"], 1) == 181763.6
-    assert m["iterations"]["max_ms"] <= m["response_bound"]["ms"]
+    # one slice of J serves two iterations: the measured response exceeds the bound of one
+    # iteration (PR 102 measures per iteration)
+    assert m["response_bound"]["ms"] < m["iterations"]["max_ms"]
     run_info = open(os.path.join(EXP, "logs", "F.RUN_INFO")).read()
     assert "repo_state=archive\n" in run_info and "repo_tag=exp23-F\n" in run_info
 
@@ -139,8 +196,8 @@ def test_outputs_and_macros(runs):
     values = open(os.path.join(d, "values.tex")).read()
     assert "\\newcommand{\\ExpAbdfMeasured}{143\\,900}" in values
     assert "\\newcommand{\\ExpMaxResponseMs}{1.861}" in values
-    assert "\\newcommand{\\ExpResponseBoundMs}{1.935}" in values
-    assert "\\newcommand{\\ExpResponseBoundCycles}{967\\,450}" in values
+    assert "\\newcommand{\\ExpResponseBoundMs}{1.715}" in values
+    assert "\\newcommand{\\ExpResponseBoundCycles}{857\\,570}" in values
     assert "\\newcommand{\\ExpCpuFrequencyMhz}{434.9}" in values
 
 

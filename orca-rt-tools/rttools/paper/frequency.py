@@ -104,8 +104,7 @@ def run(app_file, maps, arch_file, f0, out_dir, config=None):
         m["runs"][r["map"]] = r
     if config is not None:
         from rttools.paper import exp23
-        with open(config) as f:
-            cfg = json.load(f)
+        cfg = exp23.load_config(config)
         f_exp = exp23.cpu_check(cfg, exp23.estimates(cfg))["f_cpu_hz"]
         m["f_cpu_exp23_hz"] = f_exp
         m["f_cpu_equals_exp23"] = all(r["f_cpu_hz"] == f_exp for r in m["runs"].values())

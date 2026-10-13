@@ -16,6 +16,7 @@ cycles and milliseconds:
 | thesis.tex, thesis.csv | Values printed in the thesis next to the values of this run |
 | values.tex | LaTeX macros with the numbers, for the text of the article |
 | (metrics.json) cpu, response_bound | CPU demand per PE, f_CPU and the response bound R^ of the estimate |
+| (metrics.json) sequences | Dispatch order of each cluster: kernel rule on the creation order of the application CSV (config `application`) |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
 
 `check` compares metrics.json with a reference file and exits with 1 when
@@ -32,11 +33,66 @@ import sys
 
 from rttools.bench_t import estimate as cpu_estimate
 from rttools.modules.instances import release
+from rttools.modules.io import appparser
 from rttools.tui.model import export, metrics, parsers
 from rttools.tui.model.trace import Trace
 
 
 # ------------------------------------------------------------ loading
+
+def load_config(path):
+    """config.json of the experiment, with `application` (the CSV of the
+    application, relative to the directory of the config) as an absolute
+    path."""
+    with open(path) as f:
+        cfg = json.load(f)
+    if cfg.get("application"):
+        cfg["application"] = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(path)),
+                                                           cfg["application"]))
+    return cfg
+
+
+def creation_order(cfg):
+    """{cluster: [task, ...]}: creation order of the tasks of each cluster,
+    from the creation rows of the application CSV (config `application`,
+    #parameters; a row belongs to the cluster with the same tasks). The
+    CSV is the source of the order: the log table pe_tasks (id 0 = IDLE,
+    then the creation order) must follow it, otherwise the task ids of the
+    log decode to other tasks; ValueError when it does not."""
+    app = cfg.get("application")
+    if not app:
+        raise ValueError("config has no application (CSV with the creation rows)")
+    if not os.path.isabs(app):
+        raise ValueError("application path is relative (" + app + "); load the config with load_config")
+    rows = appparser.readParameters(app).get("creation") or {}
+    out = {}
+    for cluster, tasks in cfg["estimate"]["clusters"].items():
+        names = [n for n, _ in tasks]
+        row = release.matching_sequence(cluster, names, rows, "creation order")
+        if row is None:
+            raise ValueError(f"no creation row of {os.path.basename(app)} holds the tasks of cluster {cluster}")
+        out[cluster] = row
+    for pe, cluster in cfg["clusters"].items():
+        if cfg["pe_tasks"][pe] != ["IDLE"] + out[cluster]:
+            raise ValueError(f"pe_tasks of PE {pe} ({', '.join(cfg['pe_tasks'][pe])}) differs from IDLE and the "
+                             f"creation order of cluster {cluster} ({', '.join(out[cluster])})")
+    return out
+
+
+def task_pe(cfg):
+    """task -> cluster of the PE that runs it."""
+    return {n: c for c, ts in cfg["estimate"]["clusters"].items() for n, _ in ts}
+
+
+def dispatch_sequences(cfg):
+    """{cluster: [task, ...]}: dispatch order of each cluster in one phase,
+    the kernel rule (rttools/bench_t/estimate.py, dispatch_order) on the
+    creation order (creation_order) with the phase index of the task graph
+    of the config."""
+    edges = [tuple(e) for e in cfg["task_graph"]["edges"]]
+    phi = cpu_estimate.phases(edges, task_pe(cfg))
+    return {c: cpu_estimate.dispatch_order(ts, edges, phi) for c, ts in creation_order(cfg).items()}
+
 
 def load(log_path, cfg, unit=None):
     names = cfg["pe_tasks"]
@@ -106,12 +162,16 @@ def cpu_sequence(cfg):
     """Start and finish of each task in the sequence of its PE, in real
     cycles from the start of the phase: ORT/BENCH (rttools/bench_t/
     estimate.py) on the characterized costs of each cluster (thesis
-    scale), divided by the scale. The start includes the scheduler cost;
-    each cost includes the dispatch of the task."""
+    scale) in the dispatch order of dispatch_sequences, divided by the
+    scale. The start includes the scheduler cost; each cost includes the
+    dispatch of the task."""
     est = cfg["estimate"]
+    order = dispatch_sequences(cfg)
     out = {}
     for cluster, tasks in est["clusters"].items():
-        seq = cpu_estimate.sequence([(n, w) for n, w in tasks], est["scheduler_cycles"])
+        cost = dict((n, w) for n, w in tasks)
+        tasks = [(n, cost[n]) for n in order[cluster]]
+        seq = cpu_estimate.sequence(tasks, est["scheduler_cycles"])
         for name, _ in tasks:
             out[name] = {"cluster": cluster, "start": exact(seq[name]["start"] / est["scale"]),
                          "finish": exact(seq[name]["finish"] / est["scale"])}
@@ -122,25 +182,29 @@ def phase_windows(cfg):
     """Release offset and absolute deadline of the first packet of each
     flow of the config, {flow name: (f^(source), P + s^(target))}, from the
     phase model of the analysis (rttools/modules/instances/release.py) on
-    the characterized costs / scale, the scheduler cost / scale and the
-    dispatch order of each cluster; cycles from the start of the source
-    phase."""
+    the characterized costs / scale, the scheduler cost / scale, the edges
+    of the task graph and the creation order of each cluster (the model
+    derives the dispatch order by the kernel rule, as for the CSV); cycles
+    from the start of the source phase."""
     est = cfg["estimate"]
     scale = est["scale"]
     period = exact(cfg["release_period_s"] * cfg["clock_hz"])
-    tasks, mapping, sequences = [], [], {}
+    tasks, mapping = [], []
     for cluster, ts in est["clusters"].items():
         for name, w in ts:
             tasks.append((name, {"wcet": exact(w / scale)}))
         mapping.append({"node": cluster, "tasks": [n for n, _ in ts]})
-        sequences[cluster] = [n for n, _ in ts]
+    names = {(f["source"], f["target"]): f["name"] for f in cfg["flows"]}
+    flows = [(u, v, {"label": names.get((u, v), f"{u}->{v}"), "period": period})
+             for u, v in (tuple(e) for e in cfg["task_graph"]["edges"])]
     instance = {
         "tasks": tasks,
-        "flows": [(f["source"], f["target"], {"label": f["name"], "period": period}) for f in cfg["flows"]],
+        "flows": flows,
         "release": {"model": release.PHASE, "scheduler_cycles": exact(est["scheduler_cycles"] / scale),
-                    "sequences": sequences},
+                    "sequences": None, "creation": creation_order(cfg)},
     }
-    return release.phase_flows(instance, mapping)
+    win = release.phase_flows(instance, mapping)
+    return {f["name"]: win[f["name"]] for f in cfg["flows"]}
 
 
 def estimates(cfg):
@@ -164,11 +228,16 @@ def cpu_check(cfg, estimated):
 
 def response_bound(cfg):
     """R^ = phi(v_out) P + f^(v_out): phase index of each task (one phase
-    per edge between PEs, config task_graph) and the finish of the last
-    task of the iteration in its sequence; P = phase in cycles."""
+    per edge between PEs, config task_graph; on the same PE, one phase
+    when the target runs before the source in the dispatch order) and the
+    finish of the last task of the iteration in its sequence; P = phase in
+    cycles. With the dispatch order J, G of GJ, J of iteration k runs first
+    in phase 3 and G of iteration k ran in phase 1 (phi(J) = 3 comes from
+    I and H), so f^(J) = c^(J)."""
     seq = cpu_sequence(cfg)
     pe_of = {t: v["cluster"] for t, v in seq.items()}
-    phi = cpu_estimate.phases([tuple(e) for e in cfg["task_graph"]["edges"]], pe_of)
+    order = release.sequence_positions(dispatch_sequences(cfg))
+    phi = cpu_estimate.phases([tuple(e) for e in cfg["task_graph"]["edges"]], pe_of, order)
     period = exact(cfg["release_period_s"] * cfg["clock_hz"])
     bound, task = cpu_estimate.response_bound(phi, {t: v["finish"] for t, v in seq.items()}, period)
     ms = round(bound / cfg["clock_hz"] * 1e3, 9)
@@ -528,6 +597,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None):
         },
         "tab83": {"rows": rows83, "mean_difference_percent": mean83, "per_cluster": measured},
         "cpu": cpu_check(cfg, est),
+        "sequences": dispatch_sequences(cfg),
         "response_bound": response_bound(cfg),
         "iterations": {"all": [{k: r[k] for k in ("iteration", "response_cycles", "response_ms", "release_offset_ms",
                                                   "release_to_dispatch_cycles", "response_from_release_cycles")}
@@ -659,8 +729,7 @@ def main(argv=None):
     c.add_argument("reference")
     args = p.parse_args(argv)
     if args.cmd == "analyze":
-        with open(args.config) as f:
-            cfg = json.load(f)
+        cfg = load_config(args.config)
         unit = None
         if args.unit:
             from rttools.tui.model.timeunit import RTL_PRESETS

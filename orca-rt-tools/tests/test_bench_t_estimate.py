@@ -50,7 +50,7 @@ def test_application_e_values():
     for tasks in SETS.values():
         fin.update({n: v["finish"] for n, v in estimate.sequence(tasks, SIGMA).items()})
     assert fin == {"A": 28530, "B": 87130, "D": 101130, "F": 181930, "C": 96330,
-                   "E": 52700, "I": 128070, "H": 173370, "G": 109880, "J": 217450}
+                   "E": 52700, "H": 98000, "I": 173370, "J": 107570, "G": 217450}
     demands = {c: estimate.demand(ts) for c, ts in SETS.items()}
     assert demands == {"ABDF": 181930, "C": 96330, "EHI": 173370, "GJ": 217450}
     assert estimate.cpu_frequency(demands, 0.0005) == pytest.approx(434.9e6)
@@ -74,11 +74,18 @@ def test_phases_and_response_bound_of_application_e():
     fin = {}
     for tasks in SETS.values():
         fin.update({n: v["finish"] for n, v in estimate.sequence(tasks, SIGMA).items()})
-    assert estimate.response_bound(phi, fin, 250000) == (967450, "J")
+    assert estimate.response_bound(phi, fin, 250000) == (857570, "J")
 
 
-# creation order of each PE in app_main of pkt-sim/software/ucx-os/app/weird_a.c:405-422
-CREATION = {"ABDF": ["F", "D", "B", "A"], "C": ["C"], "EHI": ["H", "I", "E"], "GJ": ["J", "G"]}
+def creation_rows():
+    """{cluster: creation order} from the creation rows of the CSV of
+    application E (the order of app_main of weird_a.c:405-422)."""
+    from rttools.modules.io import appparser
+    rows = appparser.readParameters(os.path.join(REPO_ROOT, "apps", "synthetic-app-e", "synthetic-app-e.csv"))
+    return {"".join(sorted(ts)): ts for ts in rows["creation"].values()}
+
+
+CREATION = creation_rows()
 
 
 def test_dispatch_order_of_application_e():
@@ -131,6 +138,14 @@ def test_phases_reject_cycles():
         estimate.phases([("a", "b"), ("b", "a")], {"a": 0, "b": 1})
 
 
+def test_task_sets_follow_the_kernel_order():
+    """The lists of bench_t (and of the exp23 config) are in the order that
+    the kernel rule gives on the creation rows of the CSV."""
+    phi = estimate.phases(app_e_edges(), PE_OF)
+    for cluster, ts in bench_t.TASK_SETS.items():
+        assert [n for n, _ in ts] == estimate.dispatch_order(CREATION[cluster], app_e_edges(), phi), cluster
+
+
 def test_config_of_exp23_holds_the_bench_t_costs():
     with open(os.path.join(REPO_ROOT, "experiments", "exp23", "config.json")) as f:
         est = json.load(f)["estimate"]
@@ -141,4 +156,5 @@ def test_config_of_exp23_holds_the_bench_t_costs():
 def test_main_prints_sequence(capsys):
     assert bench_t.main() == 0
     out = capsys.readouterr().out.splitlines()
-    assert "GJ J start 1208800 finish 2174500" in out and "GJ demand 2174500" in out
+    assert "GJ J start 110000 finish 1075700" in out and "GJ G start 1185700 finish 2174500" in out
+    assert "GJ demand 2174500" in out

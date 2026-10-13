@@ -7,7 +7,7 @@ import os
 
 from tests.conftest import REPO_ROOT
 from rttools.paper import car, ch7, figures, graphs
-from rttools.paper.exp23 import check
+from rttools.paper.exp23 import check, load_config
 
 EXP = os.path.join(REPO_ROOT, "experiments")
 APPS = os.path.join(REPO_ROOT, "apps")
@@ -119,7 +119,7 @@ def test_table71_summary_and_cluster_sizes(tmp_path):
 
 
 def test_figures_of_application_e(tmp_path):
-    cfg = load(os.path.join(EXP, "exp23", "config.json"))
+    cfg = load_config(os.path.join(EXP, "exp23", "config.json"))
     fcfg = load(os.path.join(FIG, "config.json"))
     # run F (tag exp23-F), join rule per_producer (default of the config)
     m = figures.exp23_figures(os.path.join(EXP, "exp23", "logs", "F.events.txt"), cfg, fcfg, str(tmp_path))
@@ -130,6 +130,10 @@ def test_figures_of_application_e(tmp_path):
     f1 = m["flows"][0]
     # L0 = 6 (m + 1) + p + 1 with p = 3 + ceil(1230 / 4)
     assert (f1["hops"], f1["flits"], f1["L0"]) == (1, 311, 324)
+    # windows of the kernel order (E, H, I and J, G); the measured arrivals fall before the deadlines
+    w = {r["flow"]: (r["release"], r["deadline"], r["arrival_max"]) for r in m["flows"]}
+    assert w["F4"] == (173370, 261000, 242513) and w["F5"] == (98000, 261000, 126700)
+    assert w["F2"][1] == 368570
     assert len((tmp_path / "fig-iterations-coords.tex").read_text().splitlines()) == 1 + 32 + 1
 
 
