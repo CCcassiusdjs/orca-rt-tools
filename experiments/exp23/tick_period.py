@@ -291,12 +291,15 @@ def main(argv=None):
           f"release period {v['release_period_ns']} ns = {v['release_period_ns'] * v['f_clk_hz'] / 1e9:g} cycles")
     if a.cmd == "log":
         lv = out["log"]
-        r, q, k, s = (lv["release_to_dispatch_cycles"], lv["request_to_dispatch_cycles"],
-                      lv["ack_latency_cycles"], lv["dispatch_spacing_cycles"])
-        print(f"{lv['releases']} releases; release_to_dispatch {r['min']}..{r['max']} cycles "
-              f"(growth {lv['release_to_dispatch_growth_per_release_cycles']:+.2f} per release); "
-              f"request_to_dispatch {q['min']}..{q['max']}; IRQ 4 ack latency {k['min']}..{k['max']}; "
-              f"dispatch spacing {s['min']}..{s['max']}")
+        def rng(x):
+            # a log with fewer than two releases has no spacing or growth
+            return "none" if x is None else f"{x['min']}..{x['max']}"
+        g = lv["release_to_dispatch_growth_per_release_cycles"]
+        print(f"{lv['releases']} releases; release_to_dispatch {rng(lv['release_to_dispatch_cycles'])} cycles "
+              f"(growth {'none' if g is None else format(g, '+.2f')} per release); "
+              f"request_to_dispatch {rng(lv['request_to_dispatch_cycles'])}; "
+              f"IRQ 4 ack latency {rng(lv['ack_latency_cycles'])}; "
+              f"dispatch spacing {rng(lv['dispatch_spacing_cycles'])}")
     print_rows(rows)
     print("PASS" if ok else "FAIL")
     return 0 if ok else 1

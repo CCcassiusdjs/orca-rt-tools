@@ -107,6 +107,23 @@ def test_log_of_run_f_drifts_16_cycles_per_release():
     assert lv["ack_latency_cycles"] == {"min": 387.5, "max": 389.5}
 
 
+def test_log_with_one_release_fails_without_error(tmp_path):
+    """A log cut after the first release of A (no spacing, no growth):
+    exit status 1 and the summary line, in text and in JSON."""
+    lines = open(LOG_F).read().splitlines()
+    first = next(i for i, l in enumerate(lines) if "TRIGGER: workflow iteration" in l)
+    second = next(i for i, l in enumerate(lines) if i > first and "TRIGGER: workflow iteration" in l)
+    log = tmp_path / "one.events.txt"
+    log.write_text("\n".join(lines[:second]) + "\n")
+    rc, out = run("log", str(log))
+    assert rc == 1 and not out["pass"]
+    assert out["log"]["releases"] == 1 and out["log"]["dispatch_spacing_cycles"] is None
+    r = subprocess.run([sys.executable, "-I", SCRIPT, "log", str(log)], capture_output=True, text=True,
+                       timeout=300)
+    assert r.returncode == 1, r.stderr
+    assert "1 releases;" in r.stdout and "dispatch spacing none" in r.stdout and "FAIL" in r.stdout
+
+
 @pytest.mark.skipif(shutil.which("ghdl") is None, reason="ghdl ausente")
 @pytest.mark.parametrize("variant", ["code", "previous"])
 def test_rtl_timer1_period(variant, tmp_path):
