@@ -21,6 +21,7 @@ cycles and milliseconds:
 | (metrics.json) instrumentation | With --listing and --listing-without (objdump listings of the image with and without the instrumentation writes, experiments/exp23/build_sw.sh): upper bound of the instrumentation cycles in the measured CPU time per cluster (rttools/paper/instrumentation.py) |
 | (metrics.json) per_iteration; packets_per_iteration.csv | Send and arrival of each packet against the phase of its own iteration; with ITER lines, also the response of each iteration to the end of J for it (iterations_markers.csv) and the iterations that a task runs in the run of the previous one |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
+| network.tex, network.csv, network_packets.csv | Network latency per flow and per packet from the FLIT lines of the packet monitor (only when the log has them) |
 
 `check` compares metrics.json with a reference file and exits with 1 when
 a value differs (integers exactly; floats within 1e-6 relative).
@@ -999,6 +1000,155 @@ def monitor_summary(log_path):
     return tot
 
 
+# ---------------------------------------------------- flit times (monitor)
+
+FLIT_INT_KEYS = ("t", "tag", "size", "head", "last", "block", "stall", "gap")
+
+
+def parse_flit_lines(lines):
+    """FLIT lines of the packet monitor (rtl/pe_checker.sv), optionally
+    prefixed by `#`:
+
+        FLIT TX t=<ns> src=<x-y> dst=<x-y> tag=<n> size=<p> head=<c> last=<c> block=<n> gap=<n>
+        FLIT RX t=<ns> src=<x-y> dst=<x-y> tag=<n> size=<p> head=<c> last=<c> stall=<n> gap=<n>
+
+    Returns (tx, rx): lists of dicts with the fields of each line (labels
+    as printed, cycles as int)."""
+    tx, rx = [], []
+    for raw in lines:
+        if "FLIT" not in raw:
+            continue
+        s = parsers._strip(raw)
+        parts = s.split()
+        if len(parts) < 3 or parts[0] != "FLIT" or parts[1] not in ("TX", "RX"):
+            continue
+        d = {"side": parts[1]}
+        for kv in parts[2:]:
+            k, _, v = kv.partition("=")
+            d[k] = int(v) if k in FLIT_INT_KEYS else v
+        (tx if parts[1] == "TX" else rx).append(d)
+    return tx, rx
+
+
+def _hops(a, b):
+    (ax, ay), (bx, by) = (tuple(int(v) for v in n.split("-")) for n in (a, b))
+    return abs(ax - bx) + abs(ay - by)
+
+
+def _span(values):
+    return (min(values), max(values)) if values else (None, None)
+
+
+def network_latency(tx, rx, cfg, swap_xy=False, software=None):
+    """Network latency of each packet from the FLIT lines, against the
+    zero-load latency of the Hermes (experiments/zll).
+
+    A TX line (source) and an RX line (destination) form a packet when they
+    have the same source, destination and size flit; the k-th TX of a key
+    pairs with its k-th RX (XY routing and wormhole switching keep the order
+    of the packets of one source and destination). Per packet, in cycles:
+
+    | Quantity | Definition |
+    |---|---|
+    | latency | RX.last - TX.head (header accepted at the LOCAL port of the source router to the last flit taken from the LOCAL port of the destination router) |
+    | L0 | 6 (m + 1) + p + 1 (rttools.modules.routing.router.occupancy), m = XY hops, p = size flit |
+    | header | RX.head - TX.head (header on the LOCAL output of the destination); 6 (m + 1) without contention |
+    | stall, gap | RX window: edges with the flit on data_o and no credit of the DDMA, edges without a flit |
+
+    Counting the edges of the RX window gives latency = header + p + 1 +
+    stall + gap, so latency - L0 = (header - 6 (m + 1)) + stall + gap;
+    `identity_errors` counts the packets where the printed numbers break
+    it. A flow of the config takes the packets with its source PE,
+    destination PE and p = getPacketFlits(tag); `tag_mismatch` counts its
+    packets whose decoded tag differs from the tag of the flow.
+
+    `software`: {flow name: [software latency in cycles, in send order]}
+    (`->`/`<-` TAG marks of noc.c); when the counts agree, `driver` gives
+    software minus network latency per packet.
+
+    Labels: swap_xy (of the trace) swaps X and Y of the monitor labels, as
+    for the `scheduled` and TAG lines. Returns None without FLIT lines."""
+    if not tx and not rx:
+        return None
+    from rttools.modules.routing import router as hermes
+    sw = parsers.swap_node if swap_xy else (lambda n: n)
+    queues = {}
+    for t in sorted(tx, key=lambda d: d["head"]):
+        queues.setdefault((sw(t["src"]), sw(t["dst"]), t["size"]), []).append(t)
+    packets, unpaired_rx = [], 0
+    for r in sorted(rx, key=lambda d: d["last"]):
+        q = queues.get((sw(r["src"]), sw(r["dst"]), r["size"]))
+        if not q:
+            unpaired_rx += 1
+            continue
+        t = q.pop(0)
+        src, dst, p = sw(t["src"]), sw(t["dst"]), t["size"]
+        m = _hops(src, dst)
+        hop = hermes.getRoutingTime() * (m + 1)
+        lat = r["last"] - t["head"]
+        head = r["head"] - t["head"]
+        packets.append({
+            "src": src, "dst": dst, "tag_tx": t.get("tag"), "tag_rx": r.get("tag"), "size": p, "hops": m,
+            "tx_t": t.get("t"), "rx_t": r.get("t"), "tx_head": t["head"], "tx_last": t["last"],
+            "rx_head": r["head"], "rx_last": r["last"],
+            "latency": lat, "L0": hop + p + 1, "latency_minus_L0": lat - (hop + p + 1),
+            "header": head, "header_model": hop, "header_minus_model": head - hop,
+            "stall": r.get("stall"), "gap": r.get("gap"), "tx_block": t.get("block"), "tx_gap": t.get("gap"),
+            "identity_ok": (r["last"] - r["head"] == p + 1 + r.get("stall", 0) + r.get("gap", 0)
+                            and t["last"] - t["head"] == p + 1 + t.get("block", 0) + t.get("gap", 0)),
+            "flow": None,
+        })
+    unpaired_tx = sum(len(q) for q in queues.values())
+    flows = []
+    for f in cfg["flows"]:
+        p = hermes.getPacketFlits(int(f["tag"]))
+        pk = [x for x in packets if (x["src"], x["dst"], x["size"]) == (f["src_pe"], f["dst_pe"], p)]
+        for x in pk:
+            x["flow"] = f["name"]
+        m = _hops(f["src_pe"], f["dst_pe"])
+        hop = hermes.getRoutingTime() * (m + 1)
+        row = {"flow": f["name"], "source": f["source"], "target": f["target"], "tag": f["tag"],
+               "hops": m, "flits": p, "L0": hop + p + 1, "header_model": hop, "packets": len(pk),
+               "tag_mismatch": sum(1 for x in pk if str(x["tag_tx"]) != f["tag"] or str(x["tag_rx"]) != f["tag"]),
+               "at_L0": sum(1 for x in pk if x["latency_minus_L0"] == 0),
+               "header_at_model": sum(1 for x in pk if x["header_minus_model"] == 0)}
+        for k in ("latency", "latency_minus_L0", "header_minus_model", "stall", "gap", "tx_block", "tx_gap"):
+            row[k + "_min"], row[k + "_max"] = _span([x[k] for x in pk if x[k] is not None])
+        drv = None
+        if software is not None and f["name"] in software and len(software[f["name"]]) == len(pk) and pk:
+            net = [x["latency"] for x in sorted(pk, key=lambda x: x["tx_head"])]
+            drv = [exact(s - n) for s, n in zip(software[f["name"]], net)]
+        row["driver_min"], row["driver_max"] = _span(drv or [])
+        flows.append(row)
+    return {
+        "model": "L0 = 6 (m + 1) + p + 1; header 6 (m + 1)",
+        "tx": len(tx), "rx": len(rx), "packets": len(packets),
+        "unpaired_tx": unpaired_tx, "unpaired_rx": unpaired_rx,
+        "outside_flows": sum(1 for x in packets if x["flow"] is None),
+        "identity_errors": sum(1 for x in packets if not x["identity_ok"]),
+        "flows": flows,
+        "per_packet": packets,
+    }
+
+
+def software_latencies(tr, cfg, clk):
+    """Software latency (`->` to `<-` TAG marks, noc.c) of each packet of
+    each flow in cycles, in send order (the pairing of figures.flows)."""
+    out = {}
+    for f in cfg["flows"]:
+        tag = "TAG " + f["tag"]
+        sends = sorted(mk.time for mk in tr.lane_marks(f["src_pe"]) if mk.kind == "send" and mk.label == tag)
+        recvs = sorted(mk.time for mk in tr.lane_marks(f["dst_pe"]) if mk.kind == "recv" and mk.label == tag)
+        out[f["name"]] = [clk.cycles(b - a) for a, b in zip(sends, recvs)]
+    return out
+
+
+def flit_times(log_path, tr, cfg, clk):
+    with open(log_path, errors="replace") as f:
+        tx, rx = parse_flit_lines(f)
+    return network_latency(tx, rx, cfg, bool(tr.meta.get("swap_xy")), software_latencies(tr, cfg, clk))
+
+
 # ----------------------------------------------------------- commands
 
 def mhz_text(hz):
@@ -1023,6 +1173,8 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
     deadline_ms = cfg["response_deadline_s"] * 1e3
     max_ms = max(r["response_ms"] for r in resp) if resp else None
     rows82 = tab82(cfg, tr, clk)
+    net = flit_times(log_path, tr, cfg, clk)
+    per_packet = net.pop("per_packet") if net else []
     m = {
         "log": os.path.basename(log_path),
         "unit": {"name": tr.unit.name, "seconds": tr.unit.seconds, "detected": tr.meta["timescale_detected"],
@@ -1061,6 +1213,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
         "packet_pairs": packet_pairs(tr, cfg),
         "monitor": monitor_summary(log_path),
         "per_iteration": per_iteration(tr, cfg, clk),
+        "network": net,
     }
     if listing or listing_without:
         if not (listing and listing_without):
@@ -1121,6 +1274,23 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
                 [("Item", "item"), ("Thesis", "thesis"), ("This run", "this_run")],
                 thesis_rows, "lrr", "Values of the thesis and of this run.", "tab:exp23-thesis")
     write_per_iteration(out_dir, m["per_iteration"])
+    if net:
+        cols = list(per_packet[0].keys()) if per_packet else []
+        with open(os.path.join(out_dir, "network_packets.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(cols)
+            for x in per_packet:
+                w.writerow([x[c] for c in cols])
+        write_table(os.path.join(out_dir, "network"),
+                    [("Flow", "flow"), ("m", "hops"), ("p", "flits"), ("$L_0$", "L0"),
+                     ("Packets", "packets"), ("Latency min", "latency_min"), ("Latency max", "latency_max"),
+                     ("Header $-$ 6(m+1) max", "header_minus_model_max"),
+                     ("Stall min", "stall_min"), ("Stall max", "stall_max"), ("Gap max", "gap_max")],
+                    net["flows"], "lrrrrrrrrrr",
+                    "Network latency per packet (packet monitor): header accepted at the LOCAL port of the "
+                    "source router to the last flit taken at the LOCAL port of the destination router, "
+                    "cycles; latency $-$ $L_0$ = (header $-$ 6(m+1)) + stall + gap.",
+                    "tab:exp23-network")
     write_values(os.path.join(out_dir, "values.tex"), m)
     write_figure(tr, cfg, out_dir, windows[0])
     return m
@@ -1230,6 +1400,18 @@ def main(argv=None):
             for c, v in ins["clusters"].items():
                 print(f"  {c:5s} instrumentation at most {cycles_text(round(v['max_cycles'], 1)):>6} cycles "
                       f"per iteration = {v['max_percent']:.2f}% of the measured CPU time")
+        net = m["network"]
+        if net is None:
+            print("  flit times: no FLIT lines")
+        else:
+            print(f"  flit times: {net['packets']} packets ({net['unpaired_tx']} TX and {net['unpaired_rx']} RX "
+                  f"unpaired, {net['outside_flows']} outside the flows, {net['identity_errors']} identity errors)")
+            for r in net["flows"]:
+                print(f"  {r['flow']} m {r['hops']} p {r['flits']} L0 {r['L0']}: {r['packets']} packets, "
+                      f"latency {r['latency_min']}-{r['latency_max']} ({r['at_L0']} at L0), "
+                      f"header-6(m+1) {r['header_minus_model_min']}-{r['header_minus_model_max']}, "
+                      f"stall {r['stall_min']}-{r['stall_max']}, gap {r['gap_min']}-{r['gap_max']}, "
+                      f"driver {r['driver_min']}-{r['driver_max']}, tag mismatch {r['tag_mismatch']}")
         print("wrote " + args.out)
         return 0
     if args.cmd == "clock":
