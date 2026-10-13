@@ -580,15 +580,20 @@ def test_simulate_sh_clock(tmp_path, f_clk, rc, text):
 def test_run_f_packets_against_their_own_iteration(run_f):
     """Run F has no ITER lines: the iteration of a packet is its position in
     the flow (FIFO). Send and arrival in cycles from r_k + phi(source) T;
-    the numbers of r9/threats/scripts/per_iteration2.py (E, I, H; G, J)."""
+    the numbers of r9/threats/scripts/per_iteration2.py. The slack uses the
+    windows of the dispatch order of the kernel (E, H, I; J, G; PR 105):
+    against the windows of E, I, H; G, J, F2 gains 107 570 cycles (deadline
+    261 000 -> 368 570), F4 and F5 lose 109 880 (deadline 370 880 ->
+    261 000): F2 113 022 -> 220 592, F4 186 947 -> 77 067, F5 269 413 ->
+    159 533."""
     m, d = run_f
     pi = m["per_iteration"]
     assert pi["source"] == "fifo" and pi["markers"] == 0
     assert pi["responses"] is None and pi["tasks"] is None
     fl = {f["flow"]: f for f in pi["flows"]}
     assert {k: (f["packets"], f["sent_after_release"], f["min_slack_cycles"]) for k, f in fl.items()} == {
-        "F1": (34, 0, 244154), "F2": (34, 0, 113022), "F3": (34, 0, 176855),
-        "F4": (32, 16, 186947), "F5": (32, 0, 269413)}
+        "F1": (34, 0, 244154), "F2": (34, 0, 220592), "F3": (34, 0, 176855),
+        "F4": (32, 16, 77067), "F5": (32, 0, 159533)}
     f3 = fl["F3"]["by_parity"]
     assert f3["odd"]["send"] == {"min": 81485, "max": 81996} and f3["odd"]["sent_after_release"] == 0
     assert f3["even"]["send"] == {"min": -88106, "max": -87595}
@@ -768,7 +773,8 @@ def test_run_f_with_injected_markers(tmp_path):
     ends = inject_markers(log, c, synth)
     assert len(ends) == 32
     d = tmp_path / "out"
-    m = exp23.analyze(synth, c, str(d))
+    m = exp23.analyze(synth, c, str(d), listing=os.path.join(EXP, "logs", "F.image.lst"),
+                      listing_without=os.path.join(EXP, "logs", "F.noinstr.lst"))
     assert exp23.check(str(d / "metrics.json"), os.path.join(EXP, "reference_head.json")) == []
     pi = m["per_iteration"]
     assert pi["source"] == "markers" and pi["markers"] > 0
