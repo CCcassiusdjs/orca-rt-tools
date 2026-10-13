@@ -17,6 +17,7 @@ TESTS = {
     "tb_tcd": "verilator",           # fix 24
     "tb_manycore_pe": "verilator",   # fixes 25 to 27
     "tb_release": "verilator",       # release generator in cycles, clock half period in fs
+    "tb_cpu_cycles": "ghdl",         # cycles per instruction (bound of the instrumentation writes)
 }
 
 

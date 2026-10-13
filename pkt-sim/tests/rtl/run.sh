@@ -42,6 +42,18 @@ ghdl_timer1() { # ghdl_timer1 <CTC> <expected tick in cycles>
 		| grep -E "TICK|PASS|FAIL" | sed 's/.*(report note): //' || true
 }
 
+ghdl_cpu() { # cycles per instruction of the HF-RISC core (tb_cpu_cycles.vhd)
+	W="$OUT/ghdl_cpu"
+	mkdir -p "$W"
+	for f in bshifter alu reg_bank control int_control datapath cpu; do
+		ghdl -a --workdir="$W" -fsynopsys -fexplicit "$HW/cpu/core_rv32e/$f.vhd" 2>/dev/null
+	done
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_cpu_cycles.vhd"
+	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_cpu_cycles
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_cycles -gHEX="$T/cpu_cycles.hex" \
+		--stop-time=1ms 2>&1) | grep -E "^(CPI|PASS|FAIL)" || true
+}
+
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
 	$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/ddma/ddma.sv"
 
@@ -51,7 +63,7 @@ PE_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddm
 	$HW/peripherals/interface_peripherals.sv $HW/tcd/interface_tcd.sv $HW/interface_pe.sv \
 	$T/pe_stubs.sv $MC/manycore_pe.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release tb_cpu_cycles}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
 	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
@@ -79,6 +91,7 @@ for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb
 		# TB_TIMER1_CTC, TB_TIMER1_EXPECT: TIMER1CTC and the expected tick
 		# (default: hal.c at 500 MHz and F_TICK = 2000, 250000 cycles)
 		ghdl_timer1 "${TB_TIMER1_CTC:-15624}" "${TB_TIMER1_EXPECT:-250000}" ;;
+	tb_cpu_cycles) ghdl_cpu ;;
 	*) echo "unknown test: $t"; exit 2 ;;
 	esac
 done

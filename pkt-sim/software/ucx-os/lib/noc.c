@@ -117,7 +117,9 @@ void irq3_handler(void){
     }
     else
     {
+#ifndef UCX_NO_INSTRUMENTATION
       set_counter_4(pkt->tag);
+#endif
       enable_receiver(k);
     }
   }
@@ -341,7 +343,9 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
   pkt->target_port = target_port;
   pkt->tag = tag;
 
+#ifndef UCX_NO_INSTRUMENTATION
   set_counter_3(pkt->tag);
+#endif
 
   //check whether the packet destination lies in the same pcore
   if(target_cpu != ucx_noc_cpu_id()) {
@@ -378,7 +382,9 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
     // wake the receiver only when the packet entered its queue
     int32_t res = ucx_queue_enqueue(pktdrv_tqueue[target_task], pkt);
     if (res == 0) {
+#ifndef UCX_NO_INSTRUMENTATION
       set_counter_4(pkt->tag);
+#endif
       enable_receiver(target_task);
     }
     return res;

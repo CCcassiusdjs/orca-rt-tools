@@ -13,7 +13,14 @@
 #   make frequency minimum frequency of application E (CLI input apps/synthetic-app-e): f*, f_CPU and
 #                  max(f*, f_CPU) with the .map file and with the Spiral Mapping; check against
 #                  reference_frequency.json
-#   make paper     sim + analyze + check (simulation of this tree against reference_head.json)
+#   make paper     sim + software-without + analyze + check (simulation of this tree against
+#                  reference_head.json), both builds at F_CLK
+#   make software  build of simulate.sh (build_sw.sh) into $(SW)/with and the same build with
+#                  -DUCX_NO_INSTRUMENTATION into $(SW)/without (needs riscv64-elf; ENV_SETUP)
+#   make instrumentation
+#                  software + analyze + check with the listings of these builds: the bound of
+#                  the instrumentation writes from the image of this tree (rttools/paper/
+#                  instrumentation.py); check against $(REF)
 #   make flow-clock  clock of a run at the minimum frequency of the flow (after `make frequency`):
 #                  F_CLK = first multiple of 32 kHz at or above it (T F_CLK in steps of 16
 #                  cycles of TIMER1), half period floor(1e15 / (2 F_CLK)) fs; writes
@@ -40,6 +47,13 @@
 # default 500 MHz, the clock of run F. `make sim F_CLK=435200000` runs at
 # 435.2 MHz. The analysis reads the clock from the RUN_INFO next to the log
 # (else config.json clock_hz).
+#
+# LISTING and LISTING_WITHOUT: objdump listings (image.lst of build_sw.sh) of
+# the image with and without the instrumentation writes, for the bound of
+# their cycles in the measured CPU time (metrics.json `instrumentation`,
+# values.tex). Run F keeps them in logs/F.image.lst and logs/F.noinstr.lst
+# (logs/F.software.txt); make paper and make instrumentation build them.
+# Other logs: no listing, no bound.
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
@@ -59,11 +73,21 @@ ARCH    := ../../arch/hermes-2x2.gml
 F0      ?= 500000000
 # clock of the simulation (Hz) and its output directory
 F_CLK   ?= 500000000
+# tick of the software (Hz): 1 / T, the default of simulate.sh (RELEASE_NS = 500000)
+F_TICK  ?= 2000
 SIMDIR  ?= $(BUILD)/sim
 PAPER_REF ?= reference_head.json
 CLOCK   := $(BUILD)/frequency/clock.json
 
-.PHONY: all sim analyze check frequency tick tick-log paper flow-clock paper-flow info clean
+SW      ?= $(BUILD)/sw
+UCX_IMG := pkt-sim/software/ucx-os/build/target
+F_LOG   := logs/F.events.txt
+LISTING ?= $(if $(filter $(F_LOG),$(LOG)),logs/F.image.lst)
+LISTING_WITHOUT ?= $(if $(filter $(F_LOG),$(LOG)),logs/F.noinstr.lst)
+INSTR_ARGS = $(if $(LISTING),--listing $(LISTING) --listing-without $(LISTING_WITHOUT))
+
+.PHONY: all sim analyze check frequency tick tick-log paper flow-clock paper-flow software software-without
+.PHONY: instrumentation info clean
 
 all: analyze check frequency tick
 
@@ -71,7 +95,7 @@ sim:
 	F_CLK=$(F_CLK) ./simulate.sh $(SIMDIR) $(SIM_NS)
 
 analyze:
-	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR)
+	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR) $(INSTR_ARGS)
 
 check:
 	$(RUN) check $(OUTDIR)/metrics.json $(REF)
@@ -89,23 +113,36 @@ tick-log:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) tick_period.py log $(LOG)
 
 paper:
-	$(MAKE) sim
-	$(MAKE) analyze check LOG=$(SIMDIR)/events.txt REF=$(PAPER_REF)
+	$(MAKE) sim software-without
+	$(MAKE) analyze check LOG=$(SIMDIR)/events.txt REF=$(PAPER_REF) \
+		LISTING=$(SIMDIR)/$(UCX_IMG)/image.lst LISTING_WITHOUT=$(SW)/without/$(UCX_IMG)/image.lst
 
 flow-clock: frequency
 	$(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --out $(CLOCK)
 
 paper-flow: flow-clock
 	$(PYTHON) tick_period.py code --f-clk $$($(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --field f_clk_hz)
-	$(MAKE) sim F_CLK=$$($(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --field f_clk_hz) \
-		SIMDIR=$(BUILD)/sim-flow
-	$(MAKE) analyze check LOG=$(BUILD)/sim-flow/events.txt OUTDIR=$(BUILD)/results-flow REF=reference_flow.json
+	$(MAKE) sim software-without F_CLK=$$($(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --field f_clk_hz) \
+		SIMDIR=$(BUILD)/sim-flow SW=$(BUILD)/sw-flow
+	$(MAKE) analyze check LOG=$(BUILD)/sim-flow/events.txt OUTDIR=$(BUILD)/results-flow REF=reference_flow.json \
+		LISTING=$(BUILD)/sim-flow/$(UCX_IMG)/image.lst LISTING_WITHOUT=$(BUILD)/sw-flow/without/$(UCX_IMG)/image.lst
+
+software: software-without
+	F_CLK=$(F_CLK) F_TICK=$(F_TICK) ./build_sw.sh $(SW)/with
+
+software-without:
+	F_CLK=$(F_CLK) F_TICK=$(F_TICK) UCX_CFLAGS=-DUCX_NO_INSTRUMENTATION ./build_sw.sh $(SW)/without
+
+instrumentation: software
+	$(MAKE) analyze check LISTING=$(SW)/with/$(UCX_IMG)/image.lst \
+		LISTING_WITHOUT=$(SW)/without/$(UCX_IMG)/image.lst
 
 # anon:drop-begin
 .PHONY: runs
 runs:
 	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --join any3 --out $(BUILD)/runs/$$r || exit 1; done
-	$(RUN) analyze logs/F.events.txt --config config.json --join per_producer --out $(BUILD)/runs/F
+	$(RUN) analyze logs/F.events.txt --config config.json --join per_producer --out $(BUILD)/runs/F \
+		--listing logs/F.image.lst --listing-without logs/F.noinstr.lst
 # anon:drop-end
 
 info:

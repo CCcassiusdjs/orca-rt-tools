@@ -14,9 +14,11 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 | `make runs` | Analyzes the six stored runs into `build/runs/{A,B,C,D,E,F}` (join rule `any3` for A to E, `per_producer` for F) | Python <!-- anon:drop-line --> |
 | `make sim` | Simulates this tree (`simulate.sh build/sim`) at `F_CLK` (default 500000000 Hz, the clock of run F) | Questa or ModelSim, `riscv64-elf` toolchain |
 | `make sim F_CLK=435200000 SIMDIR=build/sim-435` | The same at 435.2 MHz: software with `F_CLK`, clock half period 1 148 897 fs (435 200 022.282 Hz), release every 217 600 cycles | Same as `make sim` |
-| `make paper` | `sim`, then analysis and check against `reference_head.json` (`PAPER_REF`) | Questa or ModelSim, toolchain, Python |
+| `make paper` | `sim` and the build without the instrumentation writes (`software-without`, same `F_CLK`), then analysis and check against `reference_head.json` (`PAPER_REF`), with the bound of the instrumentation writes from the simulated image | Questa or ModelSim, toolchain, Python |
 | `make flow-clock` | `frequency`, then the clock of a run at the minimum frequency of the flow (`build/frequency/clock.json`): 434.9 MHz gives `F_CLK` = 434 912 000 Hz, half period 1 149 657 fs (434 912 326.024 Hz) | Python |
-| `make paper-flow` | `flow-clock`, `sim` at that `F_CLK` in `build/sim-flow`, analysis in `build/results-flow` and check against `reference_flow.json` (model at that clock, packet monitor and pairing) | Same as `make paper` |
+| `make paper-flow` | `flow-clock`, `tick_period.py code --f-clk` at that `F_CLK`, `sim` and `software-without` at that `F_CLK` in `build/sim-flow` and `build/sw-flow`, analysis (with the bound of the instrumentation writes) in `build/results-flow` and check against `reference_flow.json` (model at that clock, packet monitor and pairing) | Same as `make paper` |
+| `make software` | `build_sw.sh build/sw/with` (the build of `simulate.sh`) and `UCX_CFLAGS=-DUCX_NO_INSTRUMENTATION build_sw.sh build/sw/without` | `riscv64-elf` toolchain |
+| `make instrumentation` | `software`, then analysis of `$(LOG)` with the listings of these builds and check against `$(REF)`: the bound of the instrumentation writes from the image that this tree compiles. With riscv64-elf-gcc 12.2.0, the listings equal `logs/F.image.lst` and `logs/F.noinstr.lst` | `riscv64-elf` toolchain, Python |
 | `make paper REQUIRE_CLEAN=1` | The same, but `simulate.sh` stops unless the tree is a clean git checkout at a tag or a `git archive` of a commit | Same as `make paper`, git |
 | `make info` | Prints the source identification that `make sim` writes to `RUN_INFO` | git (optional) |
 
@@ -38,7 +40,7 @@ The UCX-OS tick lasts 16 x (TIMER1CTC + 1) cycles (TIMER1 of `peripherals_minima
 | `repo_commit` | Commit hash from git when the repository root is a git work tree; from `VERSION` when the tree comes from `git archive` (the `export-subst` attribute writes the hash there); `unknown` for a copy without git metadata |
 | `repo_state` | `clean` (git, no change to tracked files and no untracked file), `dirty` (git with changes; the list goes to `RUN_INFO.status`), `archive` (`git archive`, clean by construction) or `nogit` |
 | `repo_tag` | Tag at the commit, or `none` |
-| `src_sha256` | SHA-256 over the `sha256sum` lines of the simulated sources (`pkt-sim`, `rtl/`, `simulate.sh`), sorted by path; equal in a clean checkout, in a `git archive` of the same commit and in a copy without git |
+| `src_sha256` | SHA-256 over the `sha256sum` lines of the simulated sources (`pkt-sim`, `rtl/`, `simulate.sh`, `build_sw.sh`), sorted by path; equal in a clean checkout, in a `git archive` of the same commit and in a copy without git |
 | `sim_ns`, `monitor`, `vsim`, `gcc`, `date` | Simulation length, packet monitor, simulator and compiler versions, UTC date |
 | `f_clk_hz`, `f_tick_hz` | `F_CLK` and `F_TICK` = 1 / T of the software build (`arch.mak`; tick of `F_CLK / F_TICK` cycles) |
 | `clock_half_period_fs`, `clock_hz_exact` | Half period of the clock of `manycore_top.sv`, floor(1e15 / (2 F_CLK)) fs, and its frequency 1e15 / (2 half) Hz (at or above `F_CLK`) |
@@ -61,10 +63,24 @@ or, on a server without access to the repository, from an archive of the tag: `g
 | `iterations.tex`, `iterations.csv` | Response time per release in the hyperperiod and the maximum against the deadline |
 | `tab82.tex`, `tab82.csv` | Flow characterization (Tab. 8.2) and the packet latency measured in the log |
 | `thesis.tex`, `thesis.csv` | Values printed in the thesis next to the values of the run |
-| `values.tex` | LaTeX macros (`\ExpAbdfMeasured`, `\ExpMeanOverestimation`, `\ExpMaxResponseMs`, `\ExpCpuFrequencyMhz`, `\ExpResponseBoundMs`, ...) for the text |
+| `values.tex` | LaTeX macros (`\ExpAbdfMeasured`, `\ExpMeanOverestimation`, `\ExpMaxResponseMs`, `\ExpCpuFrequencyMhz`, `\ExpResponseBoundMs`, `\ExpAbdfInstrumentationPercent`, `\ExpInstrumentationMaxPercent`, ...) for the text |
 | `fig812.pdf`, `fig812.svg` | Gantt of the first complete hyperperiod (Fig. 8.12) |
 | `metrics.json` | Every value above; `make check` reads it |
 | `build/frequency/metrics.json`, `frequency.csv`, `values.tex` | `make frequency`: per mapping, CPU demand per node, f_CPU, f*, the attempts of the bisection, the network check at f_CPU (`final_check`: verdict, packets, skipped packets, hyperperiod) and the minimum frequency; macros `\ExpFrequencyMapNetworkMhz`, `\ExpFrequencyMapCpuMhz`, `\ExpFrequencyMapMinimumMhz`, `\ExpFrequencyMapCpuNetwork`, `\ExpFrequencyMapCpuPackets`, `\ExpFrequencyMapCpuSkipped` and the same for `Spiral` |
+
+## Bound of the instrumentation writes (`metrics.json` `instrumentation`)
+
+The kernel writes the instrumentation registers of `manycore_pe.sv` inside the measured times: `krnl_schedule` (`kernel/sched.c`) increments a 64-bit counter and calls `set_cacc`, `set_counter_1` and `set_counter_2` in each dispatch; `ucx_noc_send` and the receive interrupt (`lib/noc.c`) call `set_counter_3` and `set_counter_4` in each packet event. The RTL prints `scheduled`, `->` and `<-` at the writes of counters 2, 3 and 4. `rttools/paper/instrumentation.py` bounds their cycles from two listings of the image (`objdump --disassemble -Mno-aliases`, the `image.lst` of `build_sw.sh`): the build of `simulate.sh` and the same build with `-DUCX_NO_INSTRUMENTATION`.
+
+| Step | Rule |
+|---|---|
+| Instructions of the writes | Per function that calls a write: instructions of the build with the writes outside the equal blocks of the alignment (difflib) of the mnemonic sequences of both builds, plus the instructions of each called write function (4: `lui`, `lw`, `sw`, `jalr`) |
+| Checks | The unmatched instructions lie outside the loops of the function (strongly connected components of its control-flow graph); the write functions are straight-line code; every other function has the same mnemonic sequence in both builds |
+| Cycles per instruction | `config.json` `instrumentation.cycles`, from `pkt-sim/tests/rtl/tb_cpu_cycles.vhd` (GHDL, HF-RISC core of `hw/cpu/core_rv32e` on the bus of `manycore_pe.sv`): ALU and `lui` 1, load and store 3 (also on the instrumentation registers: `stall_in = 0`, registers written at the clock edge of the address and read through `dly_address`, no wait state), jump 3, branch 3 taken and 1 not taken (the bound takes 3) |
+| Charge to the events | A function whose write of a logged register lies on every path from the entry to a return (`krnl_schedule`: counter 2; `ucx_noc_send`: counter 3) charges its whole cost to each event of that register; otherwise (`irq3_handler`) each unmatched instruction must lie in a basic block with a logged write, and the block cost goes to that event |
+| Bound per cluster | Per hyperperiod window: (dispatches x dispatch cost + sends x send cost + receives x receive cost) / iterations of the window, and its percent of the measured CPU time per iteration of the window; the maximum over the windows |
+
+Run F (`logs/F.image.lst`, `logs/F.noinstr.lst`, `logs/F.software.txt`): riscv64-elf-gcc 12.2.0 and binutils 2.39 (Arch Linux packages); the image with the writes equals, byte for byte, the build of a `git archive` of tag exp23-F with the same packages.
 
 ## Definitions
 
@@ -102,4 +118,4 @@ The files keep only the lines that the analysis reads (`grep` of the transcript,
 | F | this tree (tag exp23-F, 69d9cc5) | this tree | 1 ns | `weird_a.c` with the per-producer join of J and E->I with tag 9010. Against E: ABDF, C equal; EHI +3 cycles; GJ 181 763.6 (E 183 086); packet latencies within 2 cycles of E, except the maximum of F4 (2 993, E 3 164); responses 1.3605 to 1.8612 ms (E 1.1793 to 1.8607 ms). 0 monitor errors in 166 packets; `packet_pairs.unexpected` 0 |
 
 <!-- anon:drop-end -->
-`reference_head.json` (for `make paper`) holds the values of run F: simulation (`simulate.sh`) of a `git archive` of tag exp23-F (`repo_state=archive`), Questa 2025.3, riscv64-elf-gcc 12.2.0. `logs/F.RUN_INFO` and `logs/F.time.txt` keep the source identification and the time of `vsim` (5 min 46 s wall clock, 343.6 s user time, 54 MB of resident memory). In run F, the packet monitor recorded 166 sent and 166 received packets and 0 errors (`monitor` in `build/results/metrics.json`).
+`reference_head.json` (for `make paper`) holds the values of run F: simulation (`simulate.sh`) of a `git archive` of tag exp23-F (`repo_state=archive`), Questa 2025.3, riscv64-elf-gcc 12.2.0. `logs/F.RUN_INFO` and `logs/F.time.txt` keep the source identification and the time of `vsim` (5 min 46 s wall clock, 343.6 s user time, 54 MB of resident memory). In run F, the packet monitor recorded 166 sent and 166 received packets and 0 errors (`monitor` in `build/results/metrics.json`). `logs/F.image.lst` and `logs/F.noinstr.lst` keep the listings of the image of run F with and without the instrumentation writes (`logs/F.software.txt`: compiler, packages and SHA-256 of the images); in run F, the writes take at most 0.58 % of the measured CPU time per iteration (ABDF; C 0.28 %, EHI 0.44 %, GJ 0.21 %).

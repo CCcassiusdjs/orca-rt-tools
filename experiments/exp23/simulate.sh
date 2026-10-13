@@ -8,7 +8,7 @@
 # clock runs at or above F_CLK, so <sim_ns> covers at least <sim_ns> of
 # platform time (cycles / F_CLK).
 # The script copies pkt-sim to <out_dir>/pkt-sim, builds the software there
-# (riscv64-elf toolchain, ARCH=riscv/hf-riscv-e), adds the packet monitor
+# (build_sw.sh: riscv64-elf toolchain, ARCH=riscv/hf-riscv-e), adds the packet monitor
 # (rtl/pe_checker.sv, rtl/chk_binds.sv) and runs vsim in batch mode.
 #
 # Environment:
@@ -40,7 +40,9 @@
 #               RUN_INFO below); use it for the run that a paper reports
 #
 # Outputs in <out_dir>: sim.log (transcript), events.txt (lines used by
-# the analysis), build_sw.log, build_boot.log, time.log, RUN_INFO.
+# the analysis), build_sw.log, build_boot.log, gcc.txt, time.log, RUN_INFO;
+# the image of ucx-os and its listing in
+# pkt-sim/software/ucx-os/build/target/image.{elf,lst}.
 #
 # RUN_INFO identifies the source of the run:
 #   repo_commit  commit hash: from git when the repository root is a git
@@ -52,7 +54,7 @@
 #                construction) or nogit (copy without git metadata)
 #   repo_tag     tag at the commit (git describe --tags --exact-match), or none
 #   src_sha256   SHA-256 of the sorted `sha256sum` lines of the simulated
-#                sources (pkt-sim, rtl/, simulate.sh), relative to the
+#                sources (pkt-sim, rtl/, simulate.sh, build_sw.sh), relative to the
 #                repository root; identifies the input also in a copy
 #                without git
 # and the clock of the run (read by rttools.paper.exp23):
@@ -110,14 +112,10 @@ if [ "${REQUIRE_CLEAN:-0}" = 1 ]; then
 		exit 3
 	fi
 fi
-rm -rf "$OUT/pkt-sim"
-cp -a "$REPO/pkt-sim" "$OUT/pkt-sim"
-mkdir -p "$OUT/pkt-sim/logs"
-
-( cd "$OUT/pkt-sim/software/ucx-os" && make -s ARCH=riscv/hf-riscv-e incl \
-	&& make -s weird_a F_CLK="$F_CLK" F_TICK="$F_TICK" ) \
-	> "$OUT/build_sw.log" 2>&1
-( cd "$OUT/pkt-sim/software/hfrisc-software" && make -s boot_sim ) > "$OUT/build_boot.log" 2>&1
+# copy of pkt-sim and build of the software (build_sw.sh) at the clock of
+# the run (F_CLK, F_TICK), always with the instrumentation writes
+# (UCX_CFLAGS empty)
+F_CLK="$F_CLK" F_TICK="$F_TICK" UCX_CFLAGS= "$HERE/build_sw.sh" "$OUT"
 
 SIM="$OUT/pkt-sim/manycore_modelsim"
 cd "$SIM"

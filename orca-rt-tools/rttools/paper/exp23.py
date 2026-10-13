@@ -1,6 +1,7 @@
 """Reproduction of the results of Ch. 8 (exp-23) from a simulation log.
 
     python -m rttools.paper.exp23 analyze <log> --config <config.json> --out <dir>
+        [--listing <image.lst> --listing-without <image.lst>]
     python -m rttools.paper.exp23 check <dir>/metrics.json <reference.json>
 
 `analyze` reads the ModelSim/Questa transcript (or the extracted events),
@@ -17,6 +18,7 @@ cycles and milliseconds:
 | values.tex | LaTeX macros with the numbers, for the text of the article |
 | (metrics.json) cpu, response_bound | CPU demand per PE, f_CPU and the response bound R^ of the estimate |
 | (metrics.json) sequences | Dispatch order of each cluster: kernel rule on the creation order of the application CSV (config `application`) |
+| (metrics.json) instrumentation | With --listing and --listing-without (objdump listings of the image with and without the instrumentation writes, experiments/exp23/build_sw.sh): upper bound of the instrumentation cycles in the measured CPU time per cluster (rttools/paper/instrumentation.py) |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
 
 `check` compares metrics.json with a reference file and exits with 1 when
@@ -48,6 +50,7 @@ import os
 import sys
 
 from rttools.bench_t import estimate as cpu_estimate
+from rttools.paper import instrumentation
 from rttools.modules.instances import release
 from rttools.modules.io import appparser
 from rttools.tui.model import export, metrics, parsers
@@ -716,6 +719,16 @@ def write_values(path, m):
     put(macro_name("response", "bound", "cycles"), fmt_int(m["response_bound"]["cycles"]))
     put(macro_name("response", "bound", "ms"), f"{m['response_bound']['ms']:.3f}")
     put(macro_name("response", "bound", "deadline", "percent"), f"{m['response_bound']['deadline_percent']:.0f}")
+    ins = m.get("instrumentation")
+    if ins:
+        for kind, e in ins["events"].items():
+            put(macro_name("instrumentation", kind, "instructions"), str(e["instructions"]))
+            put(macro_name("instrumentation", kind, "cycles"), str(e["cycles"]))
+        for cluster, c in ins["clusters"].items():
+            put(macro_name(cluster, "instrumentation", "cycles"), fmt_int(round(c["max_cycles"], 1)))
+            put(macro_name(cluster, "instrumentation", "percent"), f"{c['max_percent']:.2f}")
+        put(macro_name("instrumentation", "max", "percent"), f"{ins['max_percent']:.2f}")
+        put(macro_name("instrumentation", "max", "cluster"), ins["max_cluster"])
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")
 
@@ -773,9 +786,11 @@ def mhz_text(hz):
     return f"{hz / 1e6:.6f}".rstrip("0").rstrip(".")
 
 
-def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto"):
+def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None):
     """Every output of the module for one log; run_info: RUN_INFO path,
-    "auto" (next to the log) or None (config clock_hz)."""
+    "auto" (next to the log) or None (config clock_hz); listing and
+    listing_without: objdump listings of the image with and without the
+    instrumentation writes (bound of their cycles; None: no bound)."""
     tr, cfg, clk, clock = load_run(log_path, cfg, unit, run_info)
     windows = hyperperiods(tr, cfg, clk)
     if not windows:
@@ -826,6 +841,10 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto"):
         "packet_pairs": packet_pairs(tr, cfg),
         "monitor": monitor_summary(log_path),
     }
+    if listing or listing_without:
+        if not (listing and listing_without):
+            raise ValueError("the instrumentation bound needs --listing and --listing-without")
+        m["instrumentation"] = instrumentation.analyze(tr, cfg, windows, measured, listing, listing_without)
     th = cfg.get("thesis", {})
     thesis_rows = []
     for c in cfg["estimate"]["clusters"]:
@@ -940,6 +959,10 @@ def main(argv=None):
     k.add_argument("--map", default=None, help="mapping of the frequency run (default: the first .map file)")
     k.add_argument("--field", default=None, help="print only this field (for example f_clk_hz)")
     k.add_argument("--out", default=None, help="write the clock as JSON")
+    a.add_argument("--listing", default=None,
+                   help="objdump listing of the simulated image (build_sw.sh, image.lst)")
+    a.add_argument("--listing-without", default=None,
+                   help="objdump listing of the image built with -DUCX_NO_INSTRUMENTATION")
     c = sub.add_parser("check")
     c.add_argument("metrics")
     c.add_argument("reference")
@@ -951,7 +974,7 @@ def main(argv=None):
             from rttools.tui.model.timeunit import RTL_PRESETS
             unit = RTL_PRESETS[args.unit]
         run_info = None if args.run_info == "none" else args.run_info
-        m = analyze(args.log, cfg, args.out, unit, args.join, run_info)
+        m = analyze(args.log, cfg, args.out, unit, args.join, run_info, args.listing, args.listing_without)
         ck = m["clock"]
         print(f"{m['log']}: unit {m['unit']['name']} (detected {m['unit']['detected']}), "
               f"{m['parameters']['hyperperiods']} hyperperiods, join rule {m['join_rule']}")
@@ -971,6 +994,13 @@ def main(argv=None):
         print("  packet monitor: " + ("no CHKSUM lines" if mon is None else
                                        f"{mon['errors']} errors in {mon['send_pkts']} sent and "
                                        f"{mon['recv_pkts']} received packets ({mon['nodes']} PEs)"))
+        ins = m.get("instrumentation")
+        if ins:
+            ev = ", ".join(f"{k} {e['instructions']} instructions {e['cycles']} cycles" for k, e in ins["events"].items())
+            print(f"  instrumentation per event: {ev}")
+            for c, v in ins["clusters"].items():
+                print(f"  {c:5s} instrumentation at most {cycles_text(round(v['max_cycles'], 1)):>6} cycles "
+                      f"per iteration = {v['max_percent']:.2f}% of the measured CPU time")
         print("wrote " + args.out)
         return 0
     if args.cmd == "clock":

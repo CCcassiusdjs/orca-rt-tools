@@ -28,6 +28,12 @@
       "GJ": [["J", 1075700], ["G", 1098800]]
     }
   },
+  "instrumentation": {
+    "_doc": "Bound of the instrumentation writes in the measured CPU time (rttools/paper/instrumentation.py). callees: functions of device/cacc.c that write the registers of manycore_pe.sv. events: kind of logged event -> function that writes its register (set_counter_2 prints `scheduled`, set_counter_3 `->`, set_counter_4 `<-`), in charge order. cycles: cycles per instruction class of the HF-RISC core on the bus of manycore_pe.sv (no stall, no wait state), measured by pkt-sim/tests/rtl/tb_cpu_cycles.vhd.",
+    "callees": ["set_cacc", "set_counter_1", "set_counter_2", "set_counter_3", "set_counter_4"],
+    "events": {"dispatch": "set_counter_2", "send": "set_counter_3", "receive": "set_counter_4"},
+    "cycles": {"alu": 1, "load": 3, "store": 3, "jump": 3, "branch_taken": 3, "branch_not_taken": 1}
+  },
   "task_graph": {
     "_doc": "Edges of application E (apps/synthetic-app-e/synthetic-app-e.txt), for the phase index of each task and the response bound.",
     "edges": [["A", "C"], ["A", "B"], ["B", "D"], ["C", "E"], ["D", "F"], ["F", "G"], ["E", "I"], ["E", "H"], ["I", "J"], ["H", "J"], ["G", "J"]]
