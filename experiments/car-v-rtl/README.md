@@ -4,7 +4,7 @@ CAR-V is the vision subgraph of CAR (23 tasks, 23 flows, one release period) at 
 
 | Target | Action | Requirements |
 |---|---|---|
-| `make check` (default) | `pkt-sim/software/ucx-os/app/car_v.{c,json,sim}` match a new generation from `CSV` and `MAP`; heap demand of each PE against `HEAP`; `analyze` and `check-run` of the stored run CV | Python |
+| `make check` (default) | `pkt-sim/software/ucx-os/app/car_v.{c,json,sim}` match a new generation from `CSV` and `MAP`; heap demand of each PE against `HEAP`; `analyze` and `check-run` of the stored runs CV and CV2 | Python |
 | `make analyze [LOG=<events.txt>] [OUTDIR=<dir>]` | Analysis of a run against the phase model (`python -m rttools.paper.rtlapp`; default `LOG=logs/CV.events.txt`, `OUTDIR=build/results_CV`; the `RUN_INFO` next to the log gives the clock) | Python |
 | `make check-run [REF=<reference>]` | `metrics.json` of `OUTDIR` against `REF` (default `reference_CV.json`) | Python |
 | `make app CSV=<csv> MAP=<map>` | Writes the three files | Python |
@@ -38,10 +38,10 @@ The Makefile and the tests take `apps/car-v/car-v.csv` and `apps/car-v/car-v-ONT
 | `TRIGGER-PE <x>-<y>: release acknowledged at <t> ns` | The same release on another PE of the mask |
 | `<t> <x>-<y> scheduled <id>` | Dispatch; `id` = position in `pe_tasks` of the manifest |
 | `<t> <x>-<y> -> TAG <tag>`, `<- TAG <tag>` | Send and receive of a packet; flow = tag div 1024, iteration = tag mod 1024 (from 1) |
-| `<t> <x>-<y> ITER begin\|end <letter> <k>` | Begin and end of iteration k of the task with that letter (`car_v.c` with iteration markers; run CV has none) |
+| `<t> <x>-<y> ITER begin\|end <letter> <k>` | Begin and end of iteration k of the task with that letter (`car_v.c` with iteration markers: run CV2 has 758; run CV has none) |
 | `FLIT TX\|RX ...` | Flit times of the packet monitor (`rtl/pe_checker.sv`): header and last flit at the LOCAL ports of the source and destination routers, stall and gap, decoded tag |
 
-## Stored run CV
+## Stored runs CV and CV2
 
 | File | Content |
 |---|---|
@@ -49,6 +49,10 @@ The Makefile and the tests take `apps/car-v/car-v.csv` and `apps/car-v/car-v-ONT
 | `logs/CV.RUN_INFO` | Source (`git archive` of r10-rc1, commit 9686dff), simulator, compiler, clock (half period 1,315,789 fs, 190,000 cycles per release) |
 | `logs/CV.time.txt` | `time -v` of `vsim` (14 min 25 s, 73 MB) |
 | `reference_CV.json` | Values of `make analyze` on the stored log; `make check-run` compares them |
+| `logs/CV2.events.txt` | The same setup with `car_v.c` of tag r10-rc2 (the `car_v.c` of this tree, iteration markers): 758 ITER lines (379 begin, 379 end; 14 `ITER end W` of OBMG), 16 CHKSUM lines with 0 errors |
+| `logs/CV2.RUN_INFO` | Source (`git archive` of r10-rc2, commit 38b6310), simulator, compiler, clock |
+| `logs/CV2.time.txt` | `time -v` of `vsim` (14 min 30 s, 73 MB) |
+| `reference_CV2.json` | Values of `make analyze LOG=logs/CV2.events.txt OUTDIR=build/results_CV2`; `make check` compares CV and CV2 |
 
 ## Analysis (`rttools.paper.rtlapp`)
 
