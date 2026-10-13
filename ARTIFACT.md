@@ -28,7 +28,7 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | Command | Output | Time |
 |---|---|---|
 | `make -C experiments PYTHON=<python>` | `experiments/*/build`; each Python pipeline prints `match`; `zll` writes `experiments/zll/build/{8x3,2x2}/zll.csv` and prints `192 of 192` and `64 of 64` points that satisfy L0 = 6(m+1) + p + 1 | about 40 s |
-| `make -C experiments/ch7 car` | `experiments/ch7/build/car`: CAR on 16 clusters and the criterion of application E | seconds |
+| `make -C experiments/ch7 car` | `experiments/ch7/build/car`: CAR on 16 clusters, the criterion of application E and the Spiral Mapping of CAR with the body of its figure | seconds |
 | `make -C experiments/ch7 graphs full stats` | `experiments/ch7/build/{full,stats}`: all graphs and the summary of Table 7.1 | about 20 min |
 | `make -C experiments/exp23 paper ENV_SETUP="..."` | `experiments/exp23/build/sim` (transcript, events, `RUN_INFO`), then the analysis of the new log against `reference_head.json` | about 6 min of simulation |
 | `cd orca-rt-tools && python -m pytest -q` | Python, C host and RTL tests (the RTL tests skip without Verilator or GHDL) | about 1 min |
@@ -46,7 +46,7 @@ Each time below comes from one run of the command.
 |---|---|---|
 | `make -C experiments` (`ch7`, `exp23`, `figures`, `zll` and their checks) | 37.6 s (`zll` alone 27.3 s) | Container |
 | `make -C experiments/ch7` (\|V\| = 20 to 100) | 2.3 s | Container |
-| `make -C experiments/ch7 car` | 0.5 s | Container |
+| `make -C experiments/ch7 car` | 1.2 s (with the Spiral Mapping and 10,000 random placements) | Container |
 | `make -C experiments/ch7 graphs full` (17 graphs) | 21 min 32 s wall clock, 17 min 1 s user time (\|V\| = 900 alone 560 s) | Container |
 | `make -C experiments/exp23` (with `frequency`) | 2.3 s | Container |
 | `make -C experiments/exp23 frequency` | 0.6 s | Container |
@@ -69,6 +69,7 @@ TODO(re-measure on the workstation): the container times come from a shared cont
 | CPU time per iteration, measured and estimated, per cluster; Gantt of one hyperperiod; response time per iteration; flows with release, deadline and measured latency | `experiments/exp23/logs/F.events.txt` (stored log of the RTL simulation of tag exp23-F; `F.RUN_INFO`, `F.time.txt`) | `make -C experiments/exp23`; tables, `values.tex` and `metrics.json` in `build/results` |
 | Gantt of one hyperperiod, response per iteration and flow table (rows and coordinates of the article visuals); contraction criteria on the example graph | `experiments/exp23/logs/F.events.txt`, `apps/sample-graph-a/sample_graph.txt` | `make -C experiments figures` |
 | CAR clustering (Reference, MAX-PROC, MIN-COMM) and the criterion of application E | `apps/shi-2010/shi-2010.txt`, `apps/synthetic-app-e/synthetic-app-e.txt` | `make -C experiments/ch7 car` |
+| Spiral Mapping of CAR (Figure 4): cluster, tasks and volume per position, mean XY distance, payload x hops of the Spiral, the reversed spiral and 10,000 random placements, volume share of the inner nodes | `apps/shi-2010/shi-2010.txt` | `make -C experiments/ch7 car`; `spiral.csv`, `values.tex`, `fig-spiral-body.tex` in `build/car` |
 | Minimum frequency of application E: f* (network), f_CPU (CPU test) and max(f*, f_CPU), with the mapping file and with the Spiral Mapping | `apps/synthetic-app-e/synthetic-app-e.csv` (phase model, characterized costs), `arch/hermes-2x2.gml` | `make -C experiments/exp23 frequency`; the same numbers from `python -m rttools apps/synthetic-app-e/synthetic-app-e.csv <map or spiral> arch/hermes-2x2.gml 500000000` |
 | Zero-load latency L0 = 6(m+1) + p + 1 | Hermes RTL in `pkt-sim/hw/router/hermes` | `make -C experiments zll` |
 | Contraction criteria on the random graphs (\|V\| = 20 to 900) | `experiments/ch7/graphs` | `make -C experiments/ch7` (\|V\| up to 100); `make -C experiments/ch7 graphs full` (all graphs) |
