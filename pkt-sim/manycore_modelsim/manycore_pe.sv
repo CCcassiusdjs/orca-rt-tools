@@ -1,7 +1,8 @@
 // Explicit time unit: $time counts ns. Without this directive (commit
 // 4c299fc), the simulator assigned the 100 ps unit to this module, and the
-// logs (scheduled, TAG, TRIGGER) came out in tenths of ns.
-`timescale 1ns/100ps
+// logs (scheduled, TAG, TRIGGER) came out in tenths of ns. Precision 1 fs,
+// as manycore_top.sv (clock half period in fs).
+`timescale 1ns/1fs
 
 import orca_pkg::*;
 
@@ -13,7 +14,12 @@ module manycore_pe #(parameter
   ADDRESS,
   INTERLEAVING_GRAIN,
   NOC_DIM_X,
-  NOC_DIM_Y
+  NOC_DIM_Y,
+  // clock and release of the source task (manycore_top.sv); the
+  // defaults are the values of run F (500 MHz, T = 0.5 ms, 3 ms warm-up)
+  longint CLOCK_HALF_PERIOD_FS = 1_000_000,
+  longint RELEASE_CYCLES = 250_000,
+  longint WARMUP_CYCLES = 1_500_000
 )(
   input logic clock,
   input logic reset,
@@ -149,12 +155,24 @@ module manycore_pe #(parameter
     INC_EPOCH = 2'b11
   } wake_up_state_s;
 
-  // workflow controller, mimics external comm system
+  // workflow controller, mimics external comm system. The release of A
+  // is due at cycle WARMUP_CYCLES + k RELEASE_CYCLES (k = 0, 1, ...) and
+  // the controller sees it at the rising edge of that cycle. The count of
+  // cycles keeps the release period at T F_CLK cycles at any clock; the
+  // tick of the kernel also counts cycles (F_CPU / F_TIMER, hal.c). At
+  // 500 MHz it fires at the same edges as the former test
+  // $time >= 3_000_000 + k 500_000 ns (rising edge n at 2 n + 1 ns).
   logic   wake_up_irq;
-  integer wake_up_counter_next;
-  integer wake_up_alarm = 500_000;    // ns: release of A every 0.5 ms (same effective value as exp-23)
-  integer wake_up_delay = 3_000_000;  // ns: 3 ms warm-up (same effective value as exp-23)
+  longint wake_up_cycle = 0;        // rising edges of clock before the current one
+  longint wake_up_counter_next;     // cycle of the next release
   wake_up_state_s wake_up_state;
+
+  // start of cycle c in ns (truncated), for the TRIGGER line
+  function automatic longint cycle_ns(input longint c);
+    return (c * 2 * CLOCK_HALF_PERIOD_FS) / 1_000_000;
+  endfunction
+
+  always @(posedge clock) wake_up_cycle <= wake_up_cycle + 1;
   
   logic wakeup_ack_flip; // written by memory
   logic wakeup_ack_flip_sh; // written by process
@@ -169,7 +187,7 @@ module manycore_pe #(parameter
       case (wake_up_state)
         COUNTING: begin
           wake_up_counter_next <= wake_up_counter_next;
-          wake_up_state <= ($time >= wake_up_counter_next) ? IRQ_SEND : COUNTING;
+          wake_up_state <= (wake_up_cycle >= wake_up_counter_next) ? IRQ_SEND : COUNTING;
           wake_up_irq <= 0;
         end
 
@@ -178,7 +196,7 @@ module manycore_pe #(parameter
           if (wakeup_ack_flip != wakeup_ack_flip_sh) begin
             wake_up_state <= INC_EPOCH;
             $display("TRIGGER: workflow iteration at %0d ns.", $time);
-            $display("TRIGGER: next release will be at %0d ns",  wake_up_counter_next + wake_up_alarm);
+            $display("TRIGGER: next release will be at %0d ns",  cycle_ns(wake_up_counter_next + RELEASE_CYCLES));
           end else begin
             wake_up_state <= IRQ_SEND;
           end
@@ -186,7 +204,7 @@ module manycore_pe #(parameter
         end
 
         INC_EPOCH: begin
-          wake_up_counter_next <= wake_up_counter_next + wake_up_alarm;
+          wake_up_counter_next <= wake_up_counter_next + RELEASE_CYCLES;
           wake_up_state <= COUNTING;
           wake_up_irq <= 0;
         end
@@ -197,7 +215,7 @@ module manycore_pe #(parameter
       
     end else begin
       wake_up_state <= COUNTING;
-      wake_up_counter_next <= wake_up_delay;
+      wake_up_counter_next <= WARMUP_CYCLES;
       wake_up_irq <= 0;
     end
   end 

@@ -1,4 +1,5 @@
-`timescale 1ns/100ps
+// precision 1 fs, as manycore_top.sv and manycore_pe.sv
+`timescale 1ns/1fs
 // Binds the monitor to each PE, prints the time units of manycore_top and
 // manycore_pe ($printtimescale) and ends the simulation at +RUN_NS=<ns>
 // (time of manycore_top).
