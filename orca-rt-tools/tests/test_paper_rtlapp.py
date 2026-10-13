@@ -1,5 +1,6 @@
 """Analysis of an RTL run of a generated application (rttools.paper.rtlapp):
-stored run CV of CAR-V against reference_CV.json and the phase model,
+stored runs CV (no markers) and CV2 (ITER markers) of CAR-V against their
+references and the phase model,
 iterations from the tags, the response with ITER markers, the XY route
 and the iteration markers of the generator."""
 import json
@@ -21,6 +22,7 @@ MAP = os.path.join(APP, "car-v-ONTO-hermes4x4.map")
 MANIFEST = os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os", "app", "car_v.json")
 ARCH = os.path.join(REPO_ROOT, "arch", "hermes-4x4.gml")
 CV_LOG = os.path.join(LOGS, "CV.events.txt")
+CV2_LOG = os.path.join(LOGS, "CV2.events.txt")
 
 
 @pytest.fixture(scope="module")
@@ -101,6 +103,37 @@ def test_cpu_windows_of_phi_plus_one_releases(cv):
         assert x["mean"] < x["estimated"], pe
         a = m["cpu_attributed"][pe]
         assert abs(a["measured"] - x["mean"]) / x["mean"] < 0.002, pe
+
+
+@pytest.fixture(scope="module")
+def cv2(tmp_path_factory):
+    out = tmp_path_factory.mktemp("cv2")
+    return rtlapp.analyze(CV2_LOG, MANIFEST, CSV, MAP, str(out), arch=ARCH), out
+
+
+def test_cv2_matches_reference(cv2):
+    _, out = cv2
+    assert exp23.check(str(out / "metrics.json"), os.path.join(EXP, "reference_CV2.json")) == []
+
+
+def test_cv2_markers_give_every_response(cv2):
+    """Run CV2 (car_v.c with ITER markers): the end of every iteration of
+    every task comes from its markers; the 14 responses are exact and below
+    R_bound and the deadline."""
+    m, _ = cv2
+    assert m["clock"]["clock_hz"] == 380_000_000
+    assert set(m["iteration_source"].values()) == {"markers"} and m["markers"] == 758
+    assert m["tags"] == {"unknown_tags": 0, "lane_errors": 0, "repeated": 0, "fifo_mismatch": 0}
+    r = m["responses"]
+    rb, dl = m["model"]["response_bound"]["cycles"], m["model"]["deadline"]["cycles"]
+    assert r["complete"] == r["exact"] == 14 and r["upper_bound_only"] == 0
+    assert r["above_bound"] == 0 and r["above_deadline"] == 0
+    assert r["max_cycles"] == 845_952 and rb - r["max_cycles"] == 9_048
+    # the run of OBMG still serves k - 1 and k for even k; the marker splits it
+    assert m["tasks"]["OBMG"]["same_run_as_previous"] == [2, 4, 6, 8, 10, 12, 14]
+    odd = [x["response_cycles"] for x in r["rows"] if x["iteration"] % 2]
+    assert max(odd) < rb < dl
+    assert m["packets"]["late"] == 0 and m["monitor"]["errors"] == 0
 
 
 def test_unwrap_iterations():

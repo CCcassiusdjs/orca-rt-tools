@@ -5,7 +5,7 @@
 #   make app     write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} from $(CSV) and $(MAP)
 #   make check   the stored $(NAME).{c,json,sim} match a new generation; heap demand of
 #                each PE (rttools.ucxgen.memory) against HEAP; analyze + check-run of the
-#                stored run CV (default target)
+#                stored runs CV and CV2 (default target)
 #   make analyze analysis of $(LOG) against the phase model (rttools.paper.rtlapp): CPU per PE,
 #                response per iteration, packets against [r, d], network latency; into $(OUTDIR)
 #   make check-run  compare $(OUTDIR)/metrics.json with $(REF)
@@ -26,8 +26,11 @@
 # iterations - 1) x 0.5 ms + R_bound 2.25 ms + one tick (0.5 ms) of release
 # offset = 11.25 ms, rounded up to 11.5 ms (PR-110-car-v-rtl.md).
 # LOG and REF default to run CV (logs/CV.*, reference_CV.json): car_v of tag
-# r10-rc1 (without iteration markers) at F_CLK = 380 MHz, 11.5 ms. After
-# `make sim`, use LOG=$(BUILD)/sim/events.txt (RUN_INFO next to it).
+# r10-rc1 (without iteration markers) at F_CLK = 380 MHz, 11.5 ms. Run CV2
+# (logs/CV2.*, reference_CV2.json): car_v of tag r10-rc2 (with iteration
+# markers, the car_v.c of this tree), same clock and duration:
+#   make analyze check-run LOG=logs/CV2.events.txt REF=reference_CV2.json OUTDIR=build/results_CV2
+# After `make sim`, use LOG=$(BUILD)/sim/events.txt (RUN_INFO next to it).
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
@@ -67,6 +70,7 @@ check:
 	$(GEN) check $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR) $(GENFLAGS)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
 	$(MAKE) analyze check-run
+	$(MAKE) analyze check-run LOG=logs/CV2.events.txt REF=reference_CV2.json OUTDIR=$(BUILD)/results_CV2
 
 analyze:
 	$(ANALYZE) analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json --csv $(CSV) --map $(MAP) --arch $(ARCH) \
