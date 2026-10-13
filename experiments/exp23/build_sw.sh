@@ -13,6 +13,10 @@
 #               writes to the instrumentation registers (device/cacc.h);
 #               `make software` builds both variants for the bound of the
 #               instrumentation cost (rttools/paper/instrumentation.py)
+#   F_CLK, F_TICK
+#               clock and tick of the software in Hz (make F_CLK= F_TICK=;
+#               unset: the defaults of arch.mak, 500000000 and 2000, the
+#               build of run F); simulate.sh passes the clock of the run
 #
 # Outputs in <out_dir>: pkt-sim/ (sources and build), build_sw.log,
 # build_boot.log, gcc.txt (first line of riscv64-elf-gcc --version). The
@@ -45,7 +49,15 @@ if [ -n "${UCX_CFLAGS:-}" ]; then
 else
 	set --
 fi
-( cd "$OUT/pkt-sim/software/ucx-os" && make -s ARCH=riscv/hf-riscv-e "$@" incl && make -s "$@" weird_a ) \
-	> "$OUT/build_sw.log" 2>&1
+# clock of the software, for the build of the application only
+CLK=()
+for v in F_CLK F_TICK; do
+	if [ -n "${!v:-}" ]; then
+		[[ "${!v}" =~ ^[1-9][0-9]*$ ]] || { echo "$v must be a positive integer: ${!v}" >&2; exit 2; }
+		CLK+=("$v=${!v}")
+	fi
+done
+( cd "$OUT/pkt-sim/software/ucx-os" && make -s ARCH=riscv/hf-riscv-e "$@" incl \
+	&& make -s "$@" ${CLK[@]+"${CLK[@]}"} weird_a ) > "$OUT/build_sw.log" 2>&1
 ( cd "$OUT/pkt-sim/software/hfrisc-software" && make -s boot_sim ) > "$OUT/build_boot.log" 2>&1
 riscv64-elf-gcc --version | head -1 > "$OUT/gcc.txt"

@@ -411,7 +411,11 @@ def test_run_f_with_run_info_at_500_mhz_matches_head_reference(tmp_path):
     d.mkdir()
     shutil.copy(os.path.join(EXP, "logs", "F.events.txt"), d / "events.txt")
     write_run_info(d / "RUN_INFO", 500_000_000, 250_000)
-    m = exp23.analyze(str(d / "events.txt"), cfg(), str(tmp_path / "out"))
+    # with the listings of run F: reference_head.json has the bound of the
+    # instrumentation writes
+    m = exp23.analyze(str(d / "events.txt"), cfg(), str(tmp_path / "out"),
+                      listing=os.path.join(EXP, "logs", "F.image.lst"),
+                      listing_without=os.path.join(EXP, "logs", "F.noinstr.lst"))
     assert m["clock"]["source"] == "RUN_INFO" and m["clock"]["edges_snapped"] is False
     assert exp23.check(str(tmp_path / "out" / "metrics.json"), os.path.join(EXP, "reference_head.json")) == []
 

@@ -21,8 +21,9 @@ RTL = os.path.join(REPO_ROOT, "pkt-sim", "tests", "rtl")
 
 
 def cfg():
-    with open(os.path.join(EXP, "config.json")) as f:
-        return json.load(f)
+    # load_config: the application CSV of the config as an absolute path
+    # (creation rows of the dispatch order)
+    return exp23.load_config(os.path.join(EXP, "config.json"))
 
 
 @pytest.fixture(scope="module")
