@@ -48,9 +48,9 @@ Each time below comes from one run of the command.
 | `make -C experiments/ch7` (\|V\| = 20 to 100) | 2.3 s | Container |
 | `make -C experiments/ch7 car` | 0.5 s | Container |
 | `make -C experiments/ch7 graphs full` (17 graphs) | 21 min 32 s wall clock, 17 min 1 s user time (\|V\| = 900 alone 560 s) | Container |
-| `make -C experiments/exp23` (with `frequency` and `frequency-header-wait`) | 1.7 s | Container |
+| `make -C experiments/exp23` (with `frequency` and `frequency-l0`) | 1.7 s | Container |
 | `make -C experiments/exp23 frequency` | 0.6 s | Container |
-| `make -C experiments/exp23 frequency-header-wait` | 0.4 s | Container |
+| `make -C experiments/exp23 frequency-l0` | 0.4 s | Container |
 | `make -C experiments/zll contention` (2624 GHDL runs) | 2 min 14 s alone; 6 min 29 s for `make -C experiments/zll check` with other jobs on the container | Container |
 | `make -C experiments figures` | 1.2 s | Container |
 | `make -C experiments/exp23 paper` | `vsim` alone: 5 min 46 s wall clock, 343.6 s user time, 54 MB of resident memory, for 20 ms of simulated time (`experiments/exp23/logs/F.time.txt`); the builds were not timed | Simulation host |
@@ -74,7 +74,7 @@ TODO(re-measure on the workstation): the container times come from a shared cont
 | Minimum frequency of application E: f* (network), f_CPU (CPU test) and max(f*, f_CPU), with the mapping file and with the Spiral Mapping | `apps/synthetic-app-e/synthetic-app-e.csv` (phase model, characterized costs), `arch/hermes-2x2.gml` | `make -C experiments/exp23 frequency`; the same numbers from `python -m rttools apps/synthetic-app-e/synthetic-app-e.csv <map or spiral> arch/hermes-2x2.gml 500000000` |
 | Zero-load latency L0 = 6(m+1) + p + 1 | Hermes RTL in `pkt-sim/hw/router/hermes` | `make -C experiments zll` |
 | Header wait at one router: 5 cycles per competing header, at most 20 cycles (4 competing headers); occupancy o_i = L0 + 20 (m + 1) | `experiments/zll/tb_cont.vhd`, `pkt-sim/hw/router/hermes/Hermes_switchcontrol.vhd:44-78, :126-141` | `make -C experiments/zll contention` |
-| Minimum frequency of application E with o_i = L0 + 20 (m + 1) | the inputs of `make frequency`; `rttools/modules/routing/router.py` (`HEADER_WAIT_CYCLES`) | `make -C experiments/exp23 frequency-header-wait`; the same numbers from `RTTOOLS_HEADER_WAIT=bound python -m rttools ...` |
+| Minimum frequency of application E with o_i = L0 (no header wait), for comparison with the default o_i = L0 + 20 (m + 1) | the inputs of `make frequency`; `rttools/modules/routing/router.py` (`HEADER_WAIT_CYCLES`, `HEADER_WAIT_DEFAULT`) | `make -C experiments/exp23 frequency-l0`; the same numbers from `RTTOOLS_HEADER_WAIT=off python -m rttools ...` |
 | Contraction criteria on the random graphs (\|V\| = 20 to 900) | `experiments/ch7/graphs` | `make -C experiments/ch7` (\|V\| up to 100); `make -C experiments/ch7 graphs full` (all graphs) |
 | Platform and setup (clock, tick, compiler, simulator) | `pkt-sim/software/ucx-os/arch/riscv/hf-riscv-e/arch.mak`, `experiments/exp23/README.md` | none |
 

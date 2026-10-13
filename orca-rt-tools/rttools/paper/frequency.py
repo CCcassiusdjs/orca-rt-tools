@@ -26,11 +26,12 @@ of the config).
 
 --header-wait selects the header wait w_h per router of the link
 occupancy o_i = L0 + w_h (m + 1) (rttools/modules/routing/router.py):
-`off` or 0 (default, o_i = L0), `bound` (w_h = router.HEADER_WAIT_CYCLES
-= 20, measured by make -C experiments/zll contention) or a number of
-cycles. Without the option, the pipeline uses the selection of the
-process (router.header_wait(): environment variable RTTOOLS_HEADER_WAIT,
-default 0). metrics.json records w_h in header_wait_cycles.
+`bound` (w_h = router.HEADER_WAIT_CYCLES = 20, measured by make -C
+experiments/zll contention; the default), `off` or 0 (o_i = L0) or a
+number of cycles. Without the option, the pipeline uses the selection of
+the process (router.header_wait(): environment variable
+RTTOOLS_HEADER_WAIT, default bound). metrics.json records w_h in
+header_wait_cycles.
 """
 from __future__ import annotations
 
@@ -172,8 +173,8 @@ def main(argv=None):
     r.add_argument("--f0", type=int, default=500000000, help="first frequency of the search (Hz)")
     r.add_argument("--config", default=None, help="experiments/exp23/config.json (f_CPU cross-check)")
     r.add_argument("--header-wait", default=None,
-                   help="header wait per router w_h of o_i = L0 + w_h (m + 1): off (default), bound "
-                        f"({router.HEADER_WAIT_CYCLES} cycles) or a number of cycles")
+                   help="header wait per router w_h of o_i = L0 + w_h (m + 1): bound (default, "
+                        f"{router.HEADER_WAIT_CYCLES} cycles), off or a number of cycles")
     r.add_argument("--out", required=True)
     a = p.parse_args(argv)
     m = run(a.app, a.map, a.arch, a.f0, a.out, a.config, a.header_wait)

@@ -1,7 +1,7 @@
 {
- "_doc": "Minimum frequency of application E with the header wait bound (make frequency-header-wait): the inputs and search parameters of reference_frequency.json, link occupancy o_i = L0 + 20 (m + 1) (rttools/modules/routing/router.py, HEADER_WAIT_CYCLES; wait measured by make -C ../zll contention).",
- "header_wait_cycles": 20,
- "occupancy": "L0 + 20 (m + 1)",
+ "_doc": "Minimum frequency of application E with the zero-load occupancy (make frequency-l0, --header-wait off): the inputs and search parameters of reference_frequency.json, link occupancy o_i = L0 (no header wait).",
+ "header_wait_cycles": 0,
+ "occupancy": "L0",
  "f_cpu_exp23_hz": 434900000,
  "f_cpu_equals_exp23": true,
  "runs": {
@@ -34,8 +34,8 @@
     "3": 217450
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 345417022.7050781,
-   "f_star_lower_hz": 345413208.0078125,
+   "f_star_hz": 345294952.3925781,
+   "f_star_lower_hz": 345291137.6953125,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {
@@ -75,8 +75,8 @@
     "3": 173370
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 345417022.7050781,
-   "f_star_lower_hz": 345413208.0078125,
+   "f_star_hz": 345294952.3925781,
+   "f_star_lower_hz": 345291137.6953125,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {

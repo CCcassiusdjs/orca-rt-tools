@@ -1,7 +1,7 @@
 {
- "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping.",
- "header_wait_cycles": 0,
- "occupancy": "L0",
+ "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py, link occupancy o_i = L0 + 20 (m + 1), the default of rttools/modules/routing/router.py (HEADER_WAIT_CYCLES; wait measured by make -C ../zll contention). f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping.",
+ "header_wait_cycles": 20,
+ "occupancy": "L0 + 20 (m + 1)",
  "f_cpu_exp23_hz": 434900000,
  "f_cpu_equals_exp23": true,
  "runs": {
@@ -34,8 +34,8 @@
     "3": 217450
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 345294952.3925781,
-   "f_star_lower_hz": 345291137.6953125,
+   "f_star_hz": 345417022.7050781,
+   "f_star_lower_hz": 345413208.0078125,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {
@@ -75,8 +75,8 @@
     "3": 173370
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 345294952.3925781,
-   "f_star_lower_hz": 345291137.6953125,
+   "f_star_hz": 345417022.7050781,
+   "f_star_lower_hz": 345413208.0078125,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {

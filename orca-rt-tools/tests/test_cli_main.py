@@ -69,8 +69,8 @@ def test_fixed_frequency_zero_hyperperiod_exits_cleanly(tmp_path):
     assert r.returncode == 1
 
 
-@pytest.mark.parametrize("value,text", [(None, "o_i = L0 ("), ("bound", "o_i = L0 + 20 (m + 1)"),
-                                        ("3", "o_i = L0 + 3 (m + 1)")])
+@pytest.mark.parametrize("value,text", [(None, "o_i = L0 + 20 (m + 1)"), ("off", "o_i = L0 ("),
+                                        ("bound", "o_i = L0 + 20 (m + 1)"), ("3", "o_i = L0 + 3 (m + 1)")])
 def test_link_occupancy_follows_header_wait(inputs, monkeypatch, value, text):
     d, files = inputs
     if value is not None:

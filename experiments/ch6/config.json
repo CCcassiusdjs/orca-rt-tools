@@ -1,6 +1,8 @@
 {
   "_doc": "Tables 6.5, 6.6 and 6.7 of the thesis. Thesis values as printed; Table 6.7 is labeled MHz in the thesis.",
   "pruning_factors": [10, 20, 40],
+  "header_wait": "off",
+  "_header_wait_doc": "Link occupancy of the thesis, o_i = L0 (rttools.paper.ch6 sets RTTOOLS_HEADER_WAIT=off for the run; the default of rttools is the header wait bound, o_i = L0 + 20 (m + 1)).",
   "start_frequency_hz": 2000000,
   "tolerance_hz": 5000,
   "apps": {

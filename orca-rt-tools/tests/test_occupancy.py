@@ -41,7 +41,7 @@ def test_routing_time_matches_measured_latency(m, p, cycles):
 @pytest.mark.parametrize("m,payload,p,l0", FLOWS_E)
 def test_occupancy_counts_kernel_header(m, payload, p, l0):
     assert router.getPacketFlits(payload) == p
-    assert router.occupancy(m, payload) == l0
+    assert router.occupancy(m, payload, "off") == l0
 
 
 def test_packet_flits_round_payload_to_words():
@@ -89,10 +89,12 @@ def test_header_wait_constants_come_from_ghdl_reference():
         assert w == router.HEADER_SERVICE_CYCLES * (int(n) - 1)
 
 
-def test_default_occupancy_is_zero_load_latency():
-    assert router.header_wait() == router.HEADER_WAIT_DEFAULT == 0
+def test_default_occupancy_is_the_header_wait_bound():
+    """Default o_i = L0 + 20 (m + 1): the header wait bound of the Hermes."""
+    assert router.header_wait() == router.HEADER_WAIT_DEFAULT == router.HEADER_WAIT_CYCLES == 20
     for m, payload, p, lat in FLOWS_E:
-        assert router.occupancy(m, payload) == lat == l0(m, payload)
+        assert lat == l0(m, payload)
+        assert router.occupancy(m, payload) == lat + 20 * (m + 1)
 
 
 @pytest.mark.parametrize("m,payload,p,lat", FLOWS_E)
@@ -104,12 +106,12 @@ def test_occupancy_with_header_wait_bound(m, payload, p, lat):
 
 
 def test_header_wait_from_environment(monkeypatch):
-    for value, w in (("bound", 20), ("BOUND", 20), ("7", 7), ("0", 0), ("off", 0), ("", 0)):
+    for value, w in (("bound", 20), ("BOUND", 20), ("7", 7), ("0", 0), ("off", 0), ("OFF", 0), ("", 20)):
         monkeypatch.setenv(router.HEADER_WAIT_ENV, value)
         assert router.header_wait() == w
         assert router.occupancy(2, 6780) == 1717 + w * 3
     monkeypatch.delenv(router.HEADER_WAIT_ENV)
-    assert router.occupancy(2, 6780) == 1717
+    assert router.occupancy(2, 6780) == 1717 + 20 * 3
 
 
 def test_set_header_wait_overrides_environment(monkeypatch):
@@ -135,6 +137,7 @@ def test_unwrapper_uses_header_wait():
     d = os.path.join(REPO_ROOT, "apps", "str2rts-dct-verify")
     files = (os.path.join(d, "DCT-Verify.csv"), os.path.join(d, "STR2RST-DCT-verify-ONTO-hermes3x2.map"),
              os.path.join(REPO_ROOT, "arch", "hermes-2x3.gml"))
+    router.set_header_wait("off")
     _, _, base = network.flows_at(network.load_case(*files), 2000000)
     router.set_header_wait("bound")
     rows, _, packets = network.flows_at(network.load_case(*files), 2000000)

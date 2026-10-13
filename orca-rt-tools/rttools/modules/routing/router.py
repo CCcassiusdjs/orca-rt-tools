@@ -69,18 +69,20 @@ HEADER_WAIT_CYCLES = HEADER_SERVICE_CYCLES * MAX_COMPETING_HEADERS
 
 # Selection of the header wait w_h of occupancy(), in cycles per router:
 # set_header_wait() in the process, otherwise the environment variable
-# RTTOOLS_HEADER_WAIT. Values: "0" or "off" (default when unset: w_h = 0,
-# o_i = L0, the occupancy of the paper results), "bound" (w_h =
-# HEADER_WAIT_CYCLES = 20), or a nonnegative integer.
+# RTTOOLS_HEADER_WAIT. Values: "bound" (default when unset or empty: w_h =
+# HEADER_WAIT_CYCLES = 20, o_i = L0 + 20 (m + 1), the occupancy of the
+# paper results), "0" or "off" (w_h = 0, o_i = L0, the zero-load latency
+# alone), or a nonnegative integer.
 HEADER_WAIT_ENV = "RTTOOLS_HEADER_WAIT"
-HEADER_WAIT_DEFAULT = 0
+HEADER_WAIT_DEFAULT = HEADER_WAIT_CYCLES
 _header_wait = None
 
 
 def parse_header_wait(value):
     """Cycles of header wait per router for a value of RTTOOLS_HEADER_WAIT
-    or of the --header-wait option: None, "", "0" or "off" give 0, "bound"
-    gives HEADER_WAIT_CYCLES, an integer (or integer string) gives itself."""
+    or of the --header-wait option: None and "" give HEADER_WAIT_DEFAULT
+    (the bound, 20), "0" or "off" give 0, "bound" gives HEADER_WAIT_CYCLES,
+    an integer (or integer string) gives itself."""
     if value is None:
         return HEADER_WAIT_DEFAULT
     if isinstance(value, bool):
@@ -89,7 +91,9 @@ def parse_header_wait(value):
         w = value
     else:
         v = str(value).strip().lower()
-        if v in ("", "off"):
+        if v == "":
+            return HEADER_WAIT_DEFAULT
+        if v == "off":
             return 0
         if v == "bound":
             return HEADER_WAIT_CYCLES
@@ -124,8 +128,9 @@ def occupancy(hops, datasize, wait=None):
     latency of the Hermes L0 = 6 (m + 1) + p + 1 (p from getPacketFlits;
     the GHDL simulation of the router reproduces L0 for m from 1 to 9 hops)
     and the header wait w_h per router of each of the m + 1 routers of the
-    path. `wait` gives w_h; None takes header_wait() (default 0, o_i = L0;
-    HEADER_WAIT_CYCLES = 20 bounds the wait of the Hermes)."""
+    path. `wait` gives w_h; None takes header_wait() (default
+    HEADER_WAIT_CYCLES = 20, the bound of the wait of the Hermes; "off"
+    or 0 gives o_i = L0)."""
     w = header_wait() if wait is None else parse_header_wait(wait)
     return getRoutingTime() * (hops + 1) + getPacketFlits(datasize) + 1 + w * (hops + 1)
 

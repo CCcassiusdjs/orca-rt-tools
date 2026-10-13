@@ -31,42 +31,51 @@ def test_frequency_pipeline_matches_reference(tmp_path):
 def test_network_frequency_is_set_by_flow_f_to_g():
     """f* = (f^(F) - s^(G) + o(F->G)) / T: the phase must hold the window of
     F->G (release 181 930, start of G 11 000 in the next phase, occupancy
-    1 717 cycles for 6 780 bytes over 2 hops)."""
+    o = L0 + 20 (m + 1) = 1 717 + 60 cycles for 6 780 bytes over 2 hops,
+    the default occupancy)."""
     with open(os.path.join(EXP, "reference_frequency.json")) as f:
         ref = json.load(f)
-    need = (181930 - 11000 + 1717) / 0.0005
+    need = (181930 - 11000 + 1717 + 60) / 0.0005
     for r in ref["runs"].values():
         assert r["f_star_lower_hz"] < need <= r["f_star_hz"]
 
 
-def test_frequency_pipeline_with_header_wait_bound(tmp_path):
-    """make frequency-header-wait: o_i = L0 + 20 (m + 1)."""
+def test_frequency_pipeline_with_zero_load_occupancy(tmp_path):
+    """make frequency-l0: o_i = L0 (--header-wait off)."""
     from rttools.modules.routing import router
     m = frequency.run(os.path.join(APP_E, "synthetic-app-e.csv"),
                       [os.path.join(APP_E, "synthetic-app-e-ONTO-hermes2x2.map"), "spiral"],
                       os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"), 500000000, str(tmp_path),
-                      os.path.join(EXP, "config.json"), header_wait="bound")
+                      os.path.join(EXP, "config.json"), header_wait="off")
     assert exp23.check(str(tmp_path / "metrics.json"),
-                       os.path.join(EXP, "reference_frequency_header_wait.json")) == []
-    # the run leaves the selection of the process unchanged
-    assert router.header_wait() == 0
-    assert m["header_wait_cycles"] == 20 and m["occupancy"] == "L0 + 20 (m + 1)"
-    # F->G (2 hops) holds 1 717 + 20 x 3 cycles
-    need = (181930 - 11000 + 1717 + 60) / 0.0005
+                       os.path.join(EXP, "reference_frequency_l0.json")) == []
+    # the run leaves the selection of the process unchanged (default: the bound)
+    assert router.header_wait() == router.HEADER_WAIT_CYCLES == 20
+    assert m["header_wait_cycles"] == 0 and m["occupancy"] == "L0"
+    # F->G (2 hops) holds L0 = 1 717 cycles
+    need = (181930 - 11000 + 1717) / 0.0005
     for r in m["runs"].values():
         assert r["f_star_lower_hz"] < need <= r["f_star_hz"] < r["f_cpu_hz"] == r["frequency_hz"]
         assert r["binding"] == "cpu"
         assert r["final_check"]["feasible"] is True and r["final_check"]["skipped"] == 0
     values = (tmp_path / "values.tex").read_text()
-    assert "\\ExpFrequencyHeaderWaitCycles}{20}" in values
-    assert "\\ExpFrequencyMapNetworkMhz}{345.4}" in values
+    assert "\\ExpFrequencyHeaderWaitCycles}{0}" in values
+    assert "\\ExpFrequencyMapNetworkMhz}{345.3}" in values
     assert "\\ExpFrequencyMapMinimumMhz}{434.9}" in values
 
 
-def test_frequency_default_header_wait_is_zero():
+def test_frequency_default_header_wait_is_the_bound(tmp_path):
     with open(os.path.join(EXP, "reference_frequency.json")) as f:
         ref = json.load(f)
+    assert ref["header_wait_cycles"] == 20 and ref["occupancy"] == "L0 + 20 (m + 1)"
+    with open(os.path.join(EXP, "reference_frequency_l0.json")) as f:
+        ref = json.load(f)
     assert ref["header_wait_cycles"] == 0 and ref["occupancy"] == "L0"
+    m = frequency.run(os.path.join(APP_E, "synthetic-app-e.csv"),
+                      [os.path.join(APP_E, "synthetic-app-e-ONTO-hermes2x2.map")],
+                      os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"), 500000000, str(tmp_path))
+    assert m["header_wait_cycles"] == 20 and m["occupancy"] == "L0 + 20 (m + 1)"
+    assert "\\ExpFrequencyHeaderWaitCycles}{20}" in (tmp_path / "values.tex").read_text()
 
 
 def test_frequency_cli_header_wait_option(tmp_path):
@@ -74,8 +83,8 @@ def test_frequency_cli_header_wait_option(tmp_path):
     r = run_module("rttools.paper.frequency", "run", "--app", os.path.join(APP_E, "synthetic-app-e.csv"),
                    "--arch", os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"),
                    "--map", os.path.join(APP_E, "synthetic-app-e-ONTO-hermes2x2.map"),
-                   "--header-wait", "bound", "--out", str(tmp_path))
+                   "--header-wait", "off", "--out", str(tmp_path))
     assert r.returncode == 0, r.stderr
-    assert "o_i = L0 + 20 (m + 1)" in r.stdout
+    assert "o_i = L0\n" in r.stdout
     with open(tmp_path / "metrics.json") as f:
-        assert json.load(f)["header_wait_cycles"] == 20
+        assert json.load(f)["header_wait_cycles"] == 0

@@ -12,7 +12,9 @@ hsearch.entered and "skipped" is hsearch.ignored (search3.py).
 Table 6.7 (minimum frequency): the frequency search of
 rttools/modules/frequency/search.py on the application files (CSV, map,
 GML), from the start frequency of the config, with the same criteria and
-PF values.
+PF values. Config key header_wait (default "off"): header wait w_h of the
+link occupancy o_i = L0 + w_h (m + 1) (rttools/modules/routing/router.py)
+for this run; "off" keeps the model of the thesis, o_i = L0.
 
 Each table puts the thesis value next to the value of the run and marks
 the cells that agree.
@@ -111,11 +113,25 @@ def run(cfg, out_dir, apps=None, jobs=1, repo_root=None):
                     keys.append(("frequency", app, pf, h))
                     tasks.append(("frequency", (files, h, pfx, pfx, cfg["start_frequency_hz"],
                                                 cfg["tolerance_hz"])))
-    if jobs > 1:
-        with ProcessPoolExecutor(max_workers=jobs) as ex:
-            results = list(ex.map(_job, tasks))
-    else:
-        results = [_job(t) for t in tasks]
+    # header wait of the run (the thesis: o_i = L0), also for the worker
+    # processes (environment variable)
+    from rttools.modules.routing import router
+    hw = cfg.get("header_wait", "off")
+    prev_env = os.environ.get(router.HEADER_WAIT_ENV)
+    prev_sel = router.set_header_wait(hw)
+    os.environ[router.HEADER_WAIT_ENV] = str(hw)
+    try:
+        if jobs > 1:
+            with ProcessPoolExecutor(max_workers=jobs) as ex:
+                results = list(ex.map(_job, tasks))
+        else:
+            results = [_job(t) for t in tasks]
+    finally:
+        router.set_header_wait(prev_sel)
+        if prev_env is None:
+            os.environ.pop(router.HEADER_WAIT_ENV, None)
+        else:
+            os.environ[router.HEADER_WAIT_ENV] = prev_env
 
     rows65, rows66, rows67 = [], [], []
     for (kind, app, pf, h), r in zip(keys, results):
@@ -134,7 +150,8 @@ def run(cfg, out_dir, apps=None, jobs=1, repo_root=None):
                            else round(r["frequency_hz"] / 1e3, 3),
                            "lowest_feasible_hz": r.get("lowest_feasible_hz"), "attempts": r["attempts"],
                            "seconds": r["seconds"]})
-    m = {"apps": apps, "pruning_factors": cfg["pruning_factors"], "tab65": rows65, "tab66": rows66,
+    m = {"apps": apps, "pruning_factors": cfg["pruning_factors"], "header_wait_cycles": router.parse_header_wait(hw),
+         "tab65": rows65, "tab66": rows66,
          "tab67": rows67,
          "summary": {
              "tab65_agree": sum(1 for r in rows65 if r["agrees"]), "tab65_cells": len(rows65),
