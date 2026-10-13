@@ -13,7 +13,12 @@ module manycore_pe #(parameter
   ADDRESS,
   INTERLEAVING_GRAIN,
   NOC_DIM_X,
-  NOC_DIM_Y
+  NOC_DIM_Y,
+  // release generator (manycore_top.sv): bit k enables the generator of the
+  // PE with node index k = y * NOC_DIM_X + x; defaults: PE 0, application E
+  parameter logic [63:0] RELEASE_MASK = 64'd1,
+  parameter int RELEASE_PERIOD_NS = 500_000,
+  parameter int RELEASE_DELAY_NS = 3_000_000
 )(
   input logic clock,
   input logic reset,
@@ -152,17 +157,25 @@ module manycore_pe #(parameter
   // workflow controller, mimics external comm system
   logic   wake_up_irq;
   integer wake_up_counter_next;
-  integer wake_up_alarm = 500_000;    // ns: release of A every 0.5 ms (same effective value as exp-23)
-  integer wake_up_delay = 3_000_000;  // ns: 3 ms warm-up (same effective value as exp-23)
+  integer wake_up_alarm = RELEASE_PERIOD_NS;  // ns: one release every 0.5 ms by default (exp-23)
+  integer wake_up_delay = RELEASE_DELAY_NS;   // ns: 3 ms warm-up by default (exp-23)
   wake_up_state_s wake_up_state;
   
   logic wakeup_ack_flip; // written by memory
   logic wakeup_ack_flip_sh; // written by process
 
-  
+  // node index of this PE (software numbering, device/ddma.c) and the
+  // generators: RELEASE_HERE enables the generator of this PE; the PE with
+  // the lowest enabled index (RELEASE_FIRST) prints the TRIGGER lines of
+  // application E, which the analysis reads as the release of an
+  // iteration; every other enabled PE prints "TRIGGER-PE" lines.
+  localparam int NODE_INDEX = (ADDRESS & 'hFF) * NOC_DIM_X + ((ADDRESS >> 8) & 'hFF);
+  localparam logic [63:0] RELEASE_LOWEST = RELEASE_MASK & (~RELEASE_MASK + 64'd1);
+  localparam bit RELEASE_HERE = RELEASE_MASK[NODE_INDEX];
+  localparam bit RELEASE_FIRST = RELEASE_HERE && RELEASE_LOWEST == (64'd1 << NODE_INDEX);
 
   always @(posedge clock) begin
-    if (~reset && (ADDRESS & 'h0000FFFF) == 0) begin
+    if (~reset && RELEASE_HERE) begin
 
       // $display(ADDRESS, ADDRESS & 'h0000FFFF);
         
@@ -177,8 +190,12 @@ module manycore_pe #(parameter
           wake_up_counter_next <= wake_up_counter_next;
           if (wakeup_ack_flip != wakeup_ack_flip_sh) begin
             wake_up_state <= INC_EPOCH;
-            $display("TRIGGER: workflow iteration at %0d ns.", $time);
-            $display("TRIGGER: next release will be at %0d ns",  wake_up_counter_next + wake_up_alarm);
+            if (RELEASE_FIRST) begin
+              $display("TRIGGER: workflow iteration at %0d ns.", $time);
+              $display("TRIGGER: next release will be at %0d ns",  wake_up_counter_next + wake_up_alarm);
+            end else begin
+              $display("TRIGGER-PE %0d-%0d: release acknowledged at %0d ns", addr_x(), addr_y(), $time);
+            end
           end else begin
             wake_up_state <= IRQ_SEND;
           end
