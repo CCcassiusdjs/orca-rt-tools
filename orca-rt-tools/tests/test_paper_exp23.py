@@ -795,3 +795,32 @@ def test_run_f_with_injected_markers(tmp_path):
     assert len(rows) == 32
     values = open(d / "values.tex").read()
     assert "\\newcommand{\\ExpMarkerResponseFromReleaseMaxCycles}{" + exp23.fmt_int(r["max_from_release_cycles"]) + "}" in values
+
+
+@pytest.fixture(scope="module")
+def runs_gh(tmp_path_factory):
+    """Runs G (500 MHz) and H (434.912 MHz), tag r10-rc1: ITER and FLIT
+    lines; listings of the image of each run."""
+    out = {}
+    for r in "GH":
+        d = tmp_path_factory.mktemp(r)
+        lg = os.path.join(EXP, "logs")
+        out[r] = (exp23.analyze(os.path.join(lg, f"{r}.events.txt"), cfg(), str(d),
+                                listing=os.path.join(lg, f"{r}.image.lst"),
+                                listing_without=os.path.join(lg, f"{r}.noinstr.lst")), str(d))
+    return out
+
+
+def test_markers_on_the_rising_edges_at_the_clock_of_the_flow(runs_gh):
+    """Run H (2.299314 ns per cycle): the ITER lines move to the rising edge
+    they round, as the other events, so the responses per iteration are
+    whole numbers of cycles; response of the iterations = response to the
+    end marker + pair_excess_cycles."""
+    m, _ = runs_gh["H"]
+    rows = m["per_iteration"]["responses"]["all"]
+    for x in rows:
+        for k in ("response_from_release_cycles", "response_cycles", "pair_excess_cycles"):
+            assert x[k] == int(x[k]), (k, x)
+    old = {x["iteration"]: x for x in m["iterations"]["all"]}
+    for x in rows:
+        assert x["response_cycles"] + x["pair_excess_cycles"] == old[x["iteration"]]["response_cycles"]

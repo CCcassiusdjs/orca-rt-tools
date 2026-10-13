@@ -204,6 +204,8 @@ def snap_to_edges(tr, half_fs):
         q["latency"] = None if q["send"] is None or q["recv"] is None else q["recv"] - q["send"]
         pk.append(q)
     meta["packets"] = pk
+    # ITER lines (iteration markers) are printed at rising edges too
+    meta["iterations"] = [dict(m, time=edge(m["time"])) for m in tr.meta.get("iterations") or []]
     meta["edges_snapped"] = True
     return Trace(tr.name, tr.unit, list(tr.lanes), slices, marks, meta)
 
