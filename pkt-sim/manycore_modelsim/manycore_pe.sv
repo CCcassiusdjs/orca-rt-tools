@@ -131,6 +131,12 @@ module manycore_pe #(parameter
   word_t cacc_counter_2;  // log sched
   word_t cacc_counter_3;  // log send ops
   word_t cacc_counter_4;  // log recv ops
+  word_t cacc_iter;       // log iteration markers (device/cacc.h, ITER_BEGIN/ITER_END)
+
+  // written word in the byte order of the registers; the iteration marker
+  // prints its fields: bit 31 end/begin, bits 30:24 task letter, 23:0 k
+  word_t cpu_wdata;
+  assign cpu_wdata = endianess(cpu_if.data_out);
 
 
   always_comb begin
@@ -284,6 +290,7 @@ module manycore_pe #(parameter
         'h20000030: cpu_if.data_in = endianess(cacc_counter_2);
         'h20000034: cpu_if.data_in = endianess(cacc_counter_3);
         'h20000038: cpu_if.data_in = endianess(cacc_counter_4);
+        'h2000003C: cpu_if.data_in = endianess(cacc_iter);
         'h2000004C: cpu_if.data_in = endianess(wakeup_ack_flip);
         default: begin
             $display("[%0d ns] illegal read to ddma %h %h.", ($time), 
@@ -345,6 +352,7 @@ module manycore_pe #(parameter
       cacc_counter_2 <= (a_cpu_addr_out == 'h20000030 && cpu_if.wb_out) ? endianess(cpu_if.data_out) : cacc_counter_2;
       cacc_counter_3 <= (a_cpu_addr_out == 'h20000034 && cpu_if.wb_out) ? endianess(cpu_if.data_out) : cacc_counter_3;
       cacc_counter_4 <= (a_cpu_addr_out == 'h20000038 && cpu_if.wb_out) ? endianess(cpu_if.data_out) : cacc_counter_4;
+      cacc_iter <= (a_cpu_addr_out == 'h2000003C && cpu_if.wb_out) ? cpu_wdata : cacc_iter;
 
       if(a_cpu_addr_out == 'h20000038 && cpu_if.wb_out) begin
         $display("%0d %0d-%0d <- TAG %0d", $time, addr_x(), addr_y(), endianess(cpu_if.data_out));
@@ -358,12 +366,22 @@ module manycore_pe #(parameter
         $display("%0d %0d-%0d scheduled %0d", $time, addr_x(), addr_y(), endianess(cpu_if.data_out));
       end
 
+      // one $display per kind: a ?: of "end" and "begin" pads "end" to 5 chars
+      if(a_cpu_addr_out == 'h2000003C && cpu_if.wb_out && cpu_wdata[31]) begin
+        $display("%0d %0d-%0d ITER end %c %0d", $time, addr_x(), addr_y(), {1'b0, cpu_wdata[30:24]}, cpu_wdata[23:0]);
+      end
+
+      if(a_cpu_addr_out == 'h2000003C && cpu_if.wb_out && !cpu_wdata[31]) begin
+        $display("%0d %0d-%0d ITER begin %c %0d", $time, addr_x(), addr_y(), {1'b0, cpu_wdata[30:24]}, cpu_wdata[23:0]);
+      end
+
     end else begin
       cacc_reg <= 0;
       cacc_counter <= 0;
       cacc_counter_2 <= 0;
       cacc_counter_3 <= 0;
       cacc_counter_4 <= 0;
+      cacc_iter <= 0;
     end
   end 
 
