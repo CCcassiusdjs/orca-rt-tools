@@ -136,8 +136,14 @@ void _hardware_init(void)
 	TIMER1 = TIMERSET;
 	TIMER1 = 0;
 
-	/* TIMER1 frequency: 100 interrupts/s (every 250000 cycles, 10ms timer @ 25MHz) */
-	TIMER1CTC = (F_CPU / F_TIMER) / 16;
+	/* TIMER1 counts from 0 to TIMER1CTC inclusive, one step per 16 cycles
+	 * (hw/peripherals/peripherals_minimal.vhd, TIMER1 process), so one tick
+	 * lasts 16 * (TIMER1CTC + 1) cycles. TIMER1CTC = F_CPU / F_TIMER / 16 - 1
+	 * gives a tick of F_CPU / F_TIMER cycles (250000 at 500 MHz and 2 kHz). */
+#if (F_CPU % (16 * F_TIMER)) != 0 || (F_CPU / F_TIMER / 16) > 65536
+#error "TIMER1: F_CPU / F_TIMER must be a multiple of 16 and at most 16 * 65536"
+#endif
+	TIMER1CTC = (F_CPU / F_TIMER) / 16 - 1;
 #endif
 }
 

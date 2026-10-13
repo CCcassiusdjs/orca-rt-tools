@@ -8,6 +8,8 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 |---|---|---|
 | `make` | Analyzes the stored log of run F (`logs/F.events.txt`, the simulation of this tree) and checks it against `reference_head.json`; these are the numbers of the paper | Python with `orca-rt-tools/requirements.txt` |
 | `make frequency` | Minimum frequency of application E with the analysis flow (CLI input `apps/synthetic-app-e/synthetic-app-e.csv`, `arch/hermes-2x2.gml`, first frequency 500 MHz): f* of the network bisection, f_CPU of the CPU test, the network check at f_CPU and the minimum frequency, with the `.map` file and with the Spiral Mapping; check against `reference_frequency.json` (also part of `make`) | Python |
+| `make tick` | Tick of the UCX-OS against the release period T of A (`tick_period.py code`): reads F_CLK and F_TICK (`arch.mak`), TIMER1PRE and the TIMER1CTC expression (`hal.c`, `hal.h`), the prescaler and the counter from 0 to TIMER1CTC inclusive (`peripherals_minimal.vhd`), `wake_up_alarm` (`manycore_pe.sv`), the clock period (`manycore_top.sv`) and `config.json`; passes when 16 x (TIMER1CTC + 1) = T x F_CLK (250000 cycles at 500 MHz; also part of `make`) | Python |
+| `make tick-log LOG=<events.txt>` | For each release of A in the log: release_to_dispatch (TRIGGER line to the first dispatch of A, as in `metrics.json`), request_to_dispatch (release request of the testbench to the same dispatch), IRQ 4 acknowledgement latency and spacing of the dispatches; passes when every spacing equals the tick and request_to_dispatch is constant | Python |
 | `make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D` | The same for run D (`E` and `reference_E.json` for run E) | Python <!-- anon:drop-line --> |
 | `make runs` | Analyzes the six stored runs into `build/runs/{A,B,C,D,E,F}` (join rule `any3` for A to E, `per_producer` for F) | Python <!-- anon:drop-line --> |
 | `make sim` | Simulates this tree (`simulate.sh build/sim`) | Questa or ModelSim, `riscv64-elf` toolchain |
@@ -19,6 +21,10 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 <!-- anon:drop-begin -->
 On the GAPH server: `make paper ENV_SETUP="source /soft64/source_gaph; module load riscv64-elf/12.2.0 questa/2025.3"` (run it under the simulation area, not under `/home`).
 <!-- anon:drop-end -->
+
+## Tick and release
+
+The UCX-OS tick lasts 16 x (TIMER1CTC + 1) cycles (TIMER1 of `peripherals_minimal.vhd` counts from 0 to TIMER1CTC inclusive). `hal.c` writes TIMER1CTC = F_CPU / F_TIMER / 16 - 1, so the tick equals the release period T of A (`wake_up_alarm` of `manycore_pe.sv`): 250 000 cycles at 500 MHz. The tick instants then keep a fixed phase to the releases, and the wait from each release to the dispatch of A is the same in every release; the boot time to the TIMER1 reset in `_hardware_init` and the path of the tick to the dispatch set its value. Run F (`logs/F.events.txt`) comes from a tree with TIMER1CTC = F_CPU / F_TIMER / 16 (tick of 250 016 cycles): `make tick-log` on it reports a dispatch spacing of 250 016 cycles and a wait that grows 16 cycles per release.
 
 ## Run identification (`RUN_INFO`)
 

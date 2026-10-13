@@ -4,6 +4,11 @@
 #   make analyze   tables, figure and metrics from $(LOG)
 #   make check     compare the metrics with $(REF)
 #   make all       analyze + check (default; stored log of run F against reference_head.json) + frequency
+#                  + tick
+#   make tick      tick of the UCX-OS (arch.mak, hal.c, peripherals_minimal.vhd) against the release
+#                  period of A (manycore_pe.sv, config.json): tick = T x F_CLK cycles (tick_period.py code)
+#   make tick-log  release_to_dispatch, request_to_dispatch and spacing of the dispatches of A in $(LOG);
+#                  passes when the spacing equals the tick and request_to_dispatch is constant
 #   make frequency minimum frequency of application E (CLI input apps/synthetic-app-e): f*, f_CPU and
 #                  max(f*, f_CPU) with the .map file and with the Spiral Mapping; check against
 #                  reference_frequency.json
@@ -39,9 +44,9 @@ APP_E   := ../../apps/synthetic-app-e
 ARCH    := ../../arch/hermes-2x2.gml
 F0      ?= 500000000
 
-.PHONY: all sim analyze check frequency paper info clean
+.PHONY: all sim analyze check frequency tick tick-log paper info clean
 
-all: analyze check frequency
+all: analyze check frequency tick
 
 sim:
 	./simulate.sh $(BUILD)/sim $(SIM_NS)
@@ -57,6 +62,12 @@ frequency:
 		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --map spiral --f0 $(F0) \
 		--config config.json --out $(BUILD)/frequency
 	$(RUN) check $(BUILD)/frequency/metrics.json reference_frequency.json
+
+tick:
+	$(PYTHON) tick_period.py code
+
+tick-log:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) tick_period.py log $(LOG)
 
 paper:
 	$(MAKE) sim

@@ -72,7 +72,7 @@ TODO(re-measure on the workstation): the container times come from a shared cont
 | Minimum frequency of application E: f* (network), f_CPU (CPU test) and max(f*, f_CPU), with the mapping file and with the Spiral Mapping | `apps/synthetic-app-e/synthetic-app-e.csv` (phase model, characterized costs), `arch/hermes-2x2.gml` | `make -C experiments/exp23 frequency`; the same numbers from `python -m rttools apps/synthetic-app-e/synthetic-app-e.csv <map or spiral> arch/hermes-2x2.gml 500000000` |
 | Zero-load latency L0 = 6(m+1) + p + 1 | Hermes RTL in `pkt-sim/hw/router/hermes` | `make -C experiments zll` |
 | Contraction criteria on the random graphs (\|V\| = 20 to 900) | `experiments/ch7/graphs` | `make -C experiments/ch7` (\|V\| up to 100); `make -C experiments/ch7 graphs full` (all graphs) |
-| Platform and setup (clock, tick, compiler, simulator) | `pkt-sim/software/ucx-os/arch/riscv/hf-riscv-e/arch.mak`, `experiments/exp23/README.md` | none |
+| Platform and setup (clock, tick, compiler, simulator); tick equal to the release period T of A (250 000 cycles) | `pkt-sim/software/ucx-os/arch/riscv/hf-riscv-e/arch.mak`, `hal.c`, `pkt-sim/hw/peripherals/peripherals_minimal.vhd`, `experiments/exp23/README.md` | `make -C experiments/exp23 tick` (from the sources); `pkt-sim/tests/rtl/run.sh tb_timer1` (GHDL) |
 
 ## Simulation runs
 
