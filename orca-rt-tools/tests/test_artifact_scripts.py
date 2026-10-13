@@ -33,7 +33,7 @@ def make_repo(tmp_path, tag="v1"):
     e = repo / "experiments" / "exp23"
     (e / "rtl").mkdir(parents=True)
     (repo / "pkt-sim").mkdir()
-    for f in ("source_info.sh", "simulate.sh", "VERSION", ".gitattributes"):
+    for f in ("source_info.sh", "simulate.sh", "build_sw.sh", "VERSION", ".gitattributes"):
         shutil.copy2(os.path.join(EXP23, f), e / f)
     (e / "rtl" / "mon.sv").write_text("module m; endmodule\n")
     (repo / "pkt-sim" / "a.v").write_text("// rtl\n")
@@ -186,6 +186,27 @@ def test_exp23_default_is_run_f():
     r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "LOG=logs/D.events.txt",
                         "REF=reference_D.json"], capture_output=True, text=True)
     assert "analyze logs/D.events.txt" in r.stdout and "reference_D.json" in r.stdout
+
+
+@needs_git
+def test_simulate_builds_with_the_writes(tmp_path):
+    """simulate.sh builds through build_sw.sh with UCX_CFLAGS empty, also
+    when the environment sets it."""
+    env = stub_tools(tmp_path)
+    log = tmp_path / "make.log"
+    (tmp_path / "bin" / "make").write_text(f'#!/bin/sh\necho "$PWD $*" >> {log}\n')
+    repo = make_repo(tmp_path)
+    sim_do = repo / "pkt-sim" / "manycore_modelsim" / "sim.do"
+    sim_do.parent.mkdir()
+    sim_do.write_text("vlog x\nvsim -c top\n")
+    for d in ("ucx-os", "hfrisc-software"):
+        (repo / "pkt-sim" / "software" / d).mkdir(parents=True)
+    r = simulate(repo, tmp_path / "o", env, UCX_CFLAGS="-DUCX_NO_INSTRUMENTATION")
+    assert r.returncode == 0, r.stdout + r.stderr
+    calls = log.read_text()
+    assert "ARCH=riscv/hf-riscv-e incl" in calls and "weird_a" in calls and "boot_sim" in calls
+    assert "UCX_NO_INSTRUMENTATION" not in calls
+    assert (tmp_path / "o" / "gcc.txt").read_text() == "gcc stub\n"
 
 
 @pytest.mark.skipif(shutil.which("ghdl") is None, reason="ghdl ausente")

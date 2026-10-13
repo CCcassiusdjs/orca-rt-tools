@@ -12,7 +12,7 @@ REPO=$(cd "${1:?usage: source_info.sh <repo_root> <run_info> [<status_file>]}" &
 INFO=${2:?usage: source_info.sh <repo_root> <run_info> [<status_file>]}
 STATUS=${3:-/dev/null}
 HERE=$(cd "$(dirname "$0")" && pwd -P)
-SOURCES=(pkt-sim experiments/exp23/rtl experiments/exp23/simulate.sh)
+SOURCES=(pkt-sim experiments/exp23/rtl experiments/exp23/simulate.sh experiments/exp23/build_sw.sh)
 
 commit=unknown
 state=nogit
