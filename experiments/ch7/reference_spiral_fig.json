@@ -1,0 +1,193 @@
+{
+ "_doc": "Reference of python -m rttools.paper.figures spiral on the metrics.json of make car: per position k, tile (x,y), shading cA!p (p = 3 + 57 * volume / 1,420,800, half up) and volume in 10^3 flits (half up) of the Spiral Mapping figure of CAR; frame of the inner ring in tile units.",
+ "width": 4,
+ "height": 4,
+ "criterion": "MAX_PROC",
+ "largest_volume": 1420800,
+ "tiles": [
+  {
+   "position": 1,
+   "x": 0,
+   "y": 0,
+   "shade": 3,
+   "volume_kflits": 2,
+   "tasks": [
+    "TPRC"
+   ]
+  },
+  {
+   "position": 2,
+   "x": 1,
+   "y": 0,
+   "shade": 4,
+   "volume_kflits": 15,
+   "tasks": [
+    "SPES"
+   ]
+  },
+  {
+   "position": 3,
+   "x": 2,
+   "y": 0,
+   "shade": 4,
+   "volume_kflits": 20,
+   "tasks": [
+    "THRC"
+   ]
+  },
+  {
+   "position": 4,
+   "x": 3,
+   "y": 0,
+   "shade": 4,
+   "volume_kflits": 23,
+   "tasks": [
+    "VIBS",
+    "TPMS",
+    "STAC"
+   ]
+  },
+  {
+   "position": 5,
+   "x": 3,
+   "y": 1,
+   "shade": 5,
+   "volume_kflits": 51,
+   "tasks": [
+    "FBU4",
+    "BFE4"
+   ]
+  },
+  {
+   "position": 6,
+   "x": 3,
+   "y": 2,
+   "shade": 5,
+   "volume_kflits": 51,
+   "tasks": [
+    "FBU1",
+    "BFE1"
+   ]
+  },
+  {
+   "position": 7,
+   "x": 3,
+   "y": 3,
+   "shade": 5,
+   "volume_kflits": 51,
+   "tasks": [
+    "FBU2",
+    "BFE2"
+   ]
+  },
+  {
+   "position": 8,
+   "x": 2,
+   "y": 3,
+   "shade": 5,
+   "volume_kflits": 51,
+   "tasks": [
+    "FBU5",
+    "BFE5"
+   ]
+  },
+  {
+   "position": 9,
+   "x": 1,
+   "y": 3,
+   "shade": 5,
+   "volume_kflits": 51,
+   "tasks": [
+    "FBU6",
+    "BFE6"
+   ]
+  },
+  {
+   "position": 10,
+   "x": 0,
+   "y": 3,
+   "shade": 5,
+   "volume_kflits": 51,
+   "tasks": [
+    "FBU7",
+    "BFE7"
+   ]
+  },
+  {
+   "position": 11,
+   "x": 0,
+   "y": 2,
+   "shade": 6,
+   "volume_kflits": 80,
+   "tasks": [
+    "POSI",
+    "NAVC",
+    "DIRC"
+   ]
+  },
+  {
+   "position": 12,
+   "x": 0,
+   "y": 1,
+   "shade": 9,
+   "volume_kflits": 141,
+   "tasks": [
+    "OBDB",
+    "USOS",
+    "OBMG"
+   ]
+  },
+  {
+   "position": 13,
+   "x": 1,
+   "y": 1,
+   "shade": 42,
+   "volume_kflits": 973,
+   "tasks": [
+    "FBU3",
+    "VOD1"
+   ]
+  },
+  {
+   "position": 14,
+   "x": 2,
+   "y": 1,
+   "shade": 42,
+   "volume_kflits": 973,
+   "tasks": [
+    "FBU8",
+    "VOD2"
+   ]
+  },
+  {
+   "position": 15,
+   "x": 2,
+   "y": 2,
+   "shade": 56,
+   "volume_kflits": 1318,
+   "tasks": [
+    "BFE8",
+    "FDF2"
+   ]
+  },
+  {
+   "position": 16,
+   "x": 1,
+   "y": 2,
+   "shade": 60,
+   "volume_kflits": 1421,
+   "tasks": [
+    "BFE3",
+    "FDF1",
+    "STPH"
+   ]
+  }
+ ],
+ "frame": [
+  0.5,
+  0.5,
+  2.5,
+  2.5
+ ],
+ "arrows": 15
+}

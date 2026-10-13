@@ -16,6 +16,9 @@ TESTS = {
     "tb_hermes_local": "ghdl",       # fix 23
     "tb_tcd": "verilator",           # fix 24
     "tb_manycore_pe": "verilator",   # fixes 25 to 27
+    "tb_release": "verilator",       # release generator in cycles, clock half period in fs
+    "tb_cpu_cycles": "ghdl",         # cycles per instruction (bound of the instrumentation writes)
+    "tb_release_mask": "verilator",  # release generator on the PEs of RELEASE_MASK (4x4 and 2x2)
 }
 
 
@@ -31,3 +34,8 @@ def test_rtl(name, tmp_path):
     assert r.returncode == 0, out[-4000:]
     assert ("PASS " + name) in r.stdout, out[-4000:]
     assert "FAIL" not in r.stdout, out[-4000:]
+    if name == "tb_manycore_pe":
+        # the printed iteration markers have the format of the trace parser
+        from rttools.tui.model import parsers
+        iters = [m.groups()[1:] for m in map(parsers.RE_ITER.match, r.stdout.splitlines()) if m]
+        assert iters == [("2-1", "begin", "E", "5"), ("2-1", "end", "J", "70000")], out[-4000:]

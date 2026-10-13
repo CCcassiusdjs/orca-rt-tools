@@ -135,8 +135,12 @@ def exportGmlFlows(tasks, flows):
 #   Parameter,Value
 #   release_model,phase          (phase or cpa)
 #   scheduler_cycles,11000       (cycles of one dispatch, included in each wcet)
-#   sequence,<node>,<task>,...   (dispatch order on one PE; one row per PE; a PE
-#                                 with the same tasks on another node takes it too)
+#   creation,<node>,<task>,...   (creation order on one PE: the order of ucx_task_add
+#                                 in app_main, without the idle task; the kernel rule
+#                                 gives the dispatch order; one row per PE; a PE with
+#                                 the same tasks on another node takes it too)
+#   sequence,<node>,<task>,...   (dispatch order on one PE, for a kernel with another
+#                                 rule; wins over the creation row)
 def readParameters(filename):
   params = {}
   mode = 0
@@ -150,10 +154,13 @@ def readParameters(filename):
       elif row and row[0].strip():
         key = row[0].strip()
         values = [c.strip() for c in row[1:] if c.strip()]
-        if key == "sequence":
+        if key in ("sequence", "creation"):
           if len(values) < 2:
-            raise ValueError("sequence row needs a node and at least one task: " + ",".join(row))
-          params.setdefault("sequences", {})[values[0]] = values[1:]
+            raise ValueError(key + " row needs a node and at least one task: " + ",".join(row))
+          group = "sequences" if key == "sequence" else "creation"
+          if values[0] in params.get(group, {}):
+            raise ValueError("two " + key + " rows for node " + values[0] + " in " + filename)
+          params.setdefault(group, {})[values[0]] = values[1:]
         elif key == "scheduler_cycles":
           params[key] = int(values[0].replace(',', ''))
         elif key == "release_model":

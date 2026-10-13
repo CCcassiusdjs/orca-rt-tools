@@ -8,8 +8,11 @@ synthetic-app-e.txt, release period 0.5 ms, end-to-end deadline 2 ms
 ucx-os/app/weird_a.c, E->I with 9010 bytes), the characterized costs
 c^(v) of rttools/bench_t/main.py (thesis scale / 10) as task capacity and
 the #parameters section of the phase model (scheduler cost and the
-dispatch order of each PE of the RTL).
+creation order of each PE, the source of the dispatch order of the
+analysis; weird_a.c and the log table of experiments/exp23/config.json
+must follow it).
 """
+import json
 import os
 import re
 
@@ -50,13 +53,58 @@ def test_csv_matches_the_graph_file():
 
 def test_csv_costs_are_the_characterized_costs():
     """Task capacity = c^(v) of rttools/bench_t/main.py / 10 (cycles of
-    the RTL), scheduler cost / 10, sequence per PE in dispatch order."""
+    the RTL), scheduler cost / 10, one creation row per cluster and no
+    sequence row (the kernel rule gives the dispatch order)."""
     g, _ = appparser.loadFromFile(CSV)
     costs = {t: c // 10 for ts in bench_t.TASK_SETS.values() for t, c in ts}
     assert {n: int(d["wcet"]) for n, d in g.nodes(data=True)} == costs
     assert g.graph["release_model"] == "phase"
     assert g.graph["scheduler_cycles"] == bench_t.SCHEDULER_CYCLES // 10
-    assert sorted(g.graph["sequences"].values()) == sorted([t for t, _ in ts] for ts in bench_t.TASK_SETS.values())
+    assert "sequences" not in g.graph
+    assert sorted(sorted(ts) for ts in g.graph["creation"].values()) == \
+        sorted(sorted(t for t, _ in ts) for ts in bench_t.TASK_SETS.values())
+
+
+def weird_a_creation():
+    """{cpu id: [task, ...]} of the ucx_task_add calls of app_main, in
+    call order, and the tasks added before the switch (every PE)."""
+    text = open(WEIRD_A).read()
+    body = text[text.index("int32_t app_main(void)"):]
+    body = body[:body.index("return 1;")]
+    head, cases = body.split("switch (cpu_id)")
+    common = re.findall(r'ucx_task_add\(\w+,\s*"(\w+)"', head)
+    out, cur = {}, []
+    for line in cases.splitlines():
+        m = re.match(r"\s*case\s+(\d+):", line)
+        if m:
+            cur = out.setdefault(m.group(1), [])
+            continue
+        m = re.search(r'ucx_task_add\(\w+,\s*"(\w+)"', line)
+        if m:
+            cur.append(m.group(1))
+    return common, out
+
+
+def test_creation_rows_are_app_main_of_weird_a():
+    """The creation rows of the CSV are the source of the order; app_main
+    adds the idle task first and then the tasks of each PE in the order of
+    its row (weird_a.c:401-422)."""
+    common, cases = weird_a_creation()
+    g, _ = appparser.loadFromFile(CSV)
+    assert common == ["IDLE"]
+    assert cases == g.graph["creation"]
+
+
+def test_log_table_of_exp23_is_the_creation_order():
+    """experiments/exp23/config.json pe_tasks decodes the task ids of the
+    log (id 0 = IDLE, then the creation order); it equals the creation row
+    of the cluster of each PE."""
+    with open(os.path.join(REPO_ROOT, "experiments", "exp23", "config.json")) as f:
+        cfg = json.load(f)
+    g, _ = appparser.loadFromFile(CSV)
+    rows = {"".join(sorted(ts)): ts for ts in g.graph["creation"].values()}
+    for pe, cluster in cfg["clusters"].items():
+        assert cfg["pe_tasks"][pe] == ["IDLE"] + rows["".join(sorted(cluster))], pe
 
 
 def test_csv_matches_weird_a():

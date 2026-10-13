@@ -9,6 +9,33 @@
 // produces an expected write (base address + 4k, data); each DDMA write on
 // port A (wb_in != 0) consumes the next expected write. A write without a
 // matching flit counts as spurious.
+//
+// Flit times (one line per packet and side, printed when the last flit
+// passes; cycle = rising edges of the clock since time 0, common to all
+// PEs; t = $time in ns):
+//   FLIT TX t=<t of the header> src=<x-y> dst=<x-y> tag=<n> size=<p>
+//           head=<cycle> last=<cycle> block=<n> gap=<n>
+//   FLIT RX t=<t of the last flit> src=<x-y> dst=<x-y> tag=<n> size=<p>
+//           head=<cycle> last=<cycle> stall=<n> gap=<n>
+// TX (LOCAL input port of the source router, flits of the DDMA): head =
+// edge where the router accepts the header (rx = 1, credit_o = 1), last =
+// edge where it accepts the last flit; between them, block = edges with
+// rx = 1 and credit_o = 0, gap = edges with rx = 0. RX (LOCAL output port
+// of the destination router, flits to the DDMA): head = first edge with
+// the header on data_o (tx = 1), last = edge where the DDMA takes the last
+// flit (tx = 1, credit_i = 1); between them, inclusive, stall = edges with
+// tx = 1 and credit_i = 0, gap = edges with tx = 0. size = size flit
+// (payload flits p). TX.head and RX.last are the two points of the
+// zero-load testbench (experiments/zll), where RX.last - TX.head =
+// 6(m+1) + p + 1; there, RX.head - TX.head = 6(m+1). Counting the edges of
+// the RX window gives RX.last - RX.head = p + 1 + stall + gap.
+// Labels x-y follow ADDRESS (X[15:8], Y[7:0]), as the CHKSUM lines and the
+// `scheduled` and TAG lines of manycore_pe.sv. dst of TX comes from the
+// header flit; src of RX from source_node (noc_packet_t word 0) as
+// id = y * DIMX + x; tag from noc_packet_t word 2. The core stores byte 0
+// of a word in bits 31:24 (core_rv32e/datapath.vhd, store half word): the
+// field at byte offset 0 of a word is {w[23:16], w[31:24]} and the field
+// at offset 2 is {w[7:0], w[15:8]}.
 module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) (
   input logic        clock,
   input logic        reset,
@@ -28,6 +55,8 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
   input logic [31:0] mem_addr_in,
   input logic [31:0] mem_data_in
 );
+  timeunit 1ns;
+  timeprecision 100ps;
   localparam int MAXERR = 20;
   int unsigned x = (ADDRESS >> 8) & 'hFF;
   int unsigned y = ADDRESS & 'hFF;
@@ -52,7 +81,28 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
     return (a & (RAM_MSIZE - 1)) >> 2;
   endfunction
 
+  // ---------------- flit times ----------------
+  longint unsigned cyc = 0;
+  int unsigned dimx = (ADDRESS >> 24) & 'hFF;
+  bit              ft_on = 0;            // TX window open (header accepted)
+  longint unsigned ft_head;
+  longint          ft_t;
+  int unsigned     ft_block, ft_gap;
+  bit              fr_on = 0;            // RX window open (header on data_o)
+  longint unsigned fr_head;
+  int unsigned     fr_stall, fr_gap;
+  logic [31:0]     fr_w0 = 0, fr_w2 = 0;
+
+  // noc_packet_t fields (see the header of this file)
+  function automatic int unsigned field_at0(input logic [31:0] w);
+    return 32'({w[23:16], w[31:24]});
+  endfunction
+  function automatic int unsigned field_at2(input logic [31:0] w);
+    return 32'({w[7:0], w[15:8]});
+  endfunction
+
   always @(posedge clock) begin
+    cyc++;
     if (!reset) begin
       // ---- send: new command ----
       if (send_cmd_in && !prev_cmd) begin
@@ -70,8 +120,16 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
       end
       prev_cmd <= send_cmd_in;
 
+      // ---- send: flit times (window from the header to the last flit) ----
+      if (ft_on && !(rx && credit_o)) begin
+        if (rx) ft_block++; else ft_gap++;
+      end
+
       // ---- send: flit accepted by the router ----
       if (rx && credit_o) begin
+        if (s_active && s_k == 0) begin
+          ft_on = 1; ft_head = cyc; ft_t = $time; ft_block = 0; ft_gap = 0;
+        end
         if (!s_active) begin
           s_err++;
           if (s_err <= MAXERR) $display("CHK %0t node %0d-%0d SEND flit %h outside a packet", $time, x, y, data_i);
@@ -87,8 +145,21 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
           if (s_k == s_size + 2) begin
             if (!s_bad) s_ok++;
             s_active = 0;
+            if (ft_on)
+              $display("FLIT TX t=%0d src=%0d-%0d dst=%0d-%0d tag=%0d size=%0d head=%0d last=%0d block=%0d gap=%0d",
+                       ft_t, x, y, (s_exp[0] >> 8) & 'hFF, s_exp[0] & 'hFF,
+                       (s_size >= 3) ? field_at2(s_exp[4]) : 0, s_size, ft_head, cyc, ft_block, ft_gap);
+            ft_on = 0;
           end
         end
+      end
+
+      // ---- receive: flit times (window from the header to the last flit) ----
+      if (tx && r_k == 0 && !fr_on) begin
+        fr_on = 1; fr_head = cyc; fr_stall = 0; fr_gap = 0; fr_w0 = 0; fr_w2 = 0;
+      end
+      if (fr_on && !(tx && credit_i)) begin
+        if (tx) fr_stall++; else fr_gap++;
       end
 
       // ---- receive: flit released by the router ----
@@ -99,9 +170,20 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
         end else if (r_k >= 2) begin
           automatic wr_t w; w.widx = widx(r_base + 4 * (r_k - 2)); w.data = data_o;
           r_expq.push_back(w);
+          if (r_k == 2) fr_w0 = data_o;
+          if (r_k == 4) fr_w2 = data_o;
         end
         r_k++;
-        if (r_k >= 2 && r_k == r_size + 2) begin r_k = 0; r_pkts++; end
+        if (r_k >= 2 && r_k == r_size + 2) begin
+          r_k = 0; r_pkts++;
+          if (fr_on) begin
+            automatic int unsigned sid = field_at0(fr_w0);
+            $display("FLIT RX t=%0d src=%0d-%0d dst=%0d-%0d tag=%0d size=%0d head=%0d last=%0d stall=%0d gap=%0d",
+                     $time, (dimx != 0) ? sid % dimx : sid, (dimx != 0) ? sid / dimx : 0, x, y,
+                     (r_size >= 3) ? field_at2(fr_w2) : 0, r_size, fr_head, cyc, fr_stall, fr_gap);
+          end
+          fr_on = 0;
+        end
       end
 
       // ---- receive: address given by the CPU ----

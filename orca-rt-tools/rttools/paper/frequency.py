@@ -1,7 +1,7 @@
 """Minimum frequency of application E with the analysis flow of the paper.
 
     python -m rttools.paper.frequency run --app <app.csv> --arch <arch.gml> --map <file.map|spiral> [--map ...]
-        [--f0 <Hz>] [--config <exp23 config.json>] --out <dir>
+        [--f0 <Hz>] [--config <exp23 config.json>] [--header-wait off|bound|<cycles>] --out <dir>
     python -m rttools.paper.exp23 check <dir>/metrics.json <reference.json>
 
 For each mapping (a .map file, or `spiral` for ORT/GCM and the Spiral
@@ -16,13 +16,22 @@ continues above f_CPU and the result is the first feasible frequency.
 
 | File | Content |
 |---|---|
-| metrics.json | Per mapping: mapping entries, CPU demand per node, f_CPU, f*, the lower bound of the bisection, the attempts, the network check at f_CPU and the minimum frequency |
+| metrics.json | Per mapping: mapping entries, dispatch order per node (phase model), CPU demand per node, f_CPU, f*, the lower bound of the bisection, the attempts, the network check at f_CPU and the minimum frequency |
 | frequency.csv | One row per mapping with f*, f_CPU, the verdict of the network at f_CPU and the minimum (Hz) |
 | values.tex | LaTeX macros with the frequencies in MHz and the network check at f_CPU |
 
 With --config (experiments/exp23/config.json), metrics.json also records
 whether f_CPU equals the f_CPU of the exp-23 analysis (characterized costs
 of the config).
+
+--header-wait selects the header wait w_h per router of the link
+occupancy o_i = L0 + w_h (m + 1) (rttools/modules/routing/router.py):
+`bound` (w_h = router.HEADER_WAIT_CYCLES = 20, measured by make -C
+experiments/zll contention; the default), `off` or 0 (o_i = L0) or a
+number of cycles. Without the option, the pipeline uses the selection of
+the process (router.header_wait(): environment variable
+RTTOOLS_HEADER_WAIT, default bound). metrics.json records w_h in
+header_wait_cycles.
 """
 from __future__ import annotations
 
@@ -34,8 +43,10 @@ import sys
 
 from rttools import __main__ as cli
 from rttools.modules.frequency import search
+from rttools.modules.instances import release
 from rttools.modules.io import appparser, mapparser, nocparser
 from rttools.modules.mapping import mapfile, spiral
+from rttools.modules.routing import router
 from rttools.tui.model import network
 
 
@@ -69,10 +80,15 @@ def run_one(app_file, map_arg, arch_file, f0):
         res = search.minimum_frequency(app, noc, entries, appname, search_config(f0))
     net = res["network"]
     cpu = res["cpu"]
+    rel = release.settings(app.graph)
+    seqs = None
+    if rel["model"] == release.PHASE:
+        seqs = release.pe_sequences(list(app.nodes), list(app.edges()), entries, rel["sequences"], rel["creation"])
     return {
         "map": map_arg if map_arg == cli.MAP_SPIRAL else os.path.basename(map_arg),
         "criterion": criterion,
         "mapping": {str(e["node"]): list(e["tasks"]) for e in entries},
+        "sequences": None if seqs is None else {str(k): v for k, v in seqs.items()},
         "cpu_demand_cycles": {str(k): v for k, v in cpu["demand"].items()} if cpu else None,
         "period_s": cpu["period_s"] if cpu else None,
         "f_cpu_hz": res["f_cpu_hz"],
@@ -89,17 +105,26 @@ def run_one(app_file, map_arg, arch_file, f0):
     }
 
 
-def run(app_file, maps, arch_file, f0, out_dir, config=None):
-    m = {"app": os.path.basename(app_file), "arch": os.path.basename(arch_file), "f0_hz": f0,
-         "search": {k: v for k, v in search_config(f0).items() if k != "heuristic"},
-         "heuristic": cli.RTTOOLS_HEURISTIC.__name__, "runs": {}}
-    for mp in maps:
-        r = run_one(app_file, mp, arch_file, f0)
-        m["runs"][r["map"]] = r
+def run(app_file, maps, arch_file, f0, out_dir, config=None, header_wait=None):
+    """Runs every mapping of `maps`; `header_wait` selects w_h of the link
+    occupancy for this run (router.parse_header_wait; None keeps the
+    selection of the process)."""
+    prev = router.set_header_wait(header_wait) if header_wait is not None else None
+    try:
+        w = router.header_wait()
+        m = {"app": os.path.basename(app_file), "arch": os.path.basename(arch_file), "f0_hz": f0,
+             "search": {k: v for k, v in search_config(f0).items() if k != "heuristic"},
+             "heuristic": cli.RTTOOLS_HEURISTIC.__name__, "header_wait_cycles": w,
+             "occupancy": "L0 + %d (m + 1)" % w if w else "L0", "runs": {}}
+        for mp in maps:
+            r = run_one(app_file, mp, arch_file, f0)
+            m["runs"][r["map"]] = r
+    finally:
+        if header_wait is not None:
+            router.set_header_wait(prev)
     if config is not None:
         from rttools.paper import exp23
-        with open(config) as f:
-            cfg = json.load(f)
+        cfg = exp23.load_config(config)
         f_exp = exp23.cpu_check(cfg, exp23.estimates(cfg))["f_cpu_hz"]
         m["f_cpu_exp23_hz"] = f_exp
         m["f_cpu_equals_exp23"] = all(r["f_cpu_hz"] == f_exp for r in m["runs"].values())
@@ -121,7 +146,8 @@ def run(app_file, maps, arch_file, f0, out_dir, config=None):
 
 def write_values(path, m):
     from rttools.paper.exp23 import macro_name
-    lines = ["% generated by python -m rttools.paper.frequency; do not edit"]
+    lines = ["% generated by python -m rttools.paper.frequency; do not edit",
+             f"\\newcommand{{\\{macro_name('frequency', 'header', 'wait', 'cycles')}}}{{{m['header_wait_cycles']}}}"]
     for key, r in m["runs"].items():
         tag = "spiral" if key == cli.MAP_SPIRAL else "map"
         for name, field in (("network", "f_star_hz"), ("cpu", "f_cpu_hz"), ("minimum", "frequency_hz")):
@@ -151,9 +177,13 @@ def main(argv=None):
     r.add_argument("--map", action="append", required=True, help=".map file or `spiral`; repeat for more")
     r.add_argument("--f0", type=int, default=500000000, help="first frequency of the search (Hz)")
     r.add_argument("--config", default=None, help="experiments/exp23/config.json (f_CPU cross-check)")
+    r.add_argument("--header-wait", default=None,
+                   help="header wait per router w_h of o_i = L0 + w_h (m + 1): bound (default, "
+                        f"{router.HEADER_WAIT_CYCLES} cycles), off or a number of cycles")
     r.add_argument("--out", required=True)
     a = p.parse_args(argv)
-    m = run(a.app, a.map, a.arch, a.f0, a.out, a.config)
+    m = run(a.app, a.map, a.arch, a.f0, a.out, a.config, a.header_wait)
+    print(f"  link occupancy o_i = {m['occupancy']}")
     for key, r in m["runs"].items():
         c = r["final_check"]
         net = "" if c is None else (f"; network at f_CPU {'feasible' if c['feasible'] else 'not feasible'} "

@@ -89,6 +89,14 @@ void sleep_forever()
 
 #define ITERATIONS 99999
 
+// Iteration markers (include/device/cacc.h): each task writes
+// ITER_BEGIN(task, k) after it has the input of iteration k and
+// ITER_END(task, k) after its last send of iteration k. The packets carry
+// no iteration number (the tag is the COMM_*_WORKLOAD of the flow), so k
+// is the count of passes of the loop of the task: every queue is FIFO and
+// each producer sends one packet per iteration, so the k-th pass consumes
+// the packet of iteration k. Iteration 1 is the first release of A.
+
 // ------------------------------ TASK A
 void task_a()
 {
@@ -97,11 +105,13 @@ void task_a()
   noc_packet_t *pkt2 = create_pkt(COMM_AC_WORKLOAD);
 
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do {
     // voluntary sleep
     kcb_p->tcb_p->state = TASK_BLOCKED;
     ucx_task_yield();
+    ITER_BEGIN('A', ++k);
 
     // simulate processing
     ucx_sleep(TASK_A_WORKLOAD); 
@@ -111,6 +121,7 @@ void task_a()
 
     // tprintf("A->C\n");
     ucx_noc_send(CPU_C, PORT_C, pkt2, COMM_AC_WORKLOAD);
+    ITER_END('A', k);
   } while (--it);
 
   ucx_free(pkt1);
@@ -125,15 +136,18 @@ void task_b()
   noc_packet_t *pkt = create_pkt(COMM_BD_WORKLOAD);
 
   int it = ITERATIONS;
+  uint32_t k = 0;
   
   do {
     recv_and_print();
+    ITER_BEGIN('B', ++k);
   
     // simulate processing
     ucx_sleep(TASK_B_WORKLOAD);
 
     // tprintf("B->D\n");
     ucx_noc_send(CPU_D, PORT_D, pkt, COMM_BD_WORKLOAD);
+    ITER_END('B', k);
 
    } while (--it);
 
@@ -151,15 +165,18 @@ void task_c()
   printf("x\n");
 
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do {
     recv_and_print();
+    ITER_BEGIN('C', ++k);
 
     // simulate processing
     ucx_sleep(TASK_C_WORKLOAD);
 
     // tprintf("C->E\n");
     ucx_noc_send(CPU_E, PORT_E, pkt, COMM_CE_WORKLOAD);
+    ITER_END('C', k);
 
   }while (--it);
 
@@ -174,15 +191,18 @@ void task_d()
   noc_packet_t *pkt = create_pkt(COMM_DF_WORKLOAD);
 
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do {
     recv_and_print();
+    ITER_BEGIN('D', ++k);
     
     // simulate processing
     ucx_sleep(TASK_D_WORKLOAD);
 
     // tprintf("D->F\n");
     ucx_noc_send(CPU_F, PORT_F, pkt, COMM_DF_WORKLOAD);
+    ITER_END('D', k);
 
   } while (--it);
 
@@ -198,10 +218,12 @@ void task_e()
   noc_packet_t *pkt2 = create_pkt(COMM_EH_WORKLOAD);
 
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do 
   {
     recv_and_print();
+    ITER_BEGIN('E', ++k);
 
     // simulate processing
     ucx_sleep(TASK_E_WORKLOAD);
@@ -211,6 +233,7 @@ void task_e()
 
     // tprintf("E->H\n");
     ucx_noc_send(CPU_H, PORT_H, pkt2, COMM_EH_WORKLOAD);
+    ITER_END('E', k);
 
   }while (--it);
 
@@ -226,16 +249,19 @@ void task_f()
   noc_packet_t *pkt = create_pkt(COMM_FG_WORKLOAD);
   
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do 
   {
     recv_and_print();
+    ITER_BEGIN('F', ++k);
 
     // simulate processing
     ucx_sleep(TASK_F_WORKLOAD);
 
     // tprintf("F->G\n");
     ucx_noc_send(CPU_G, PORT_G, pkt, COMM_FG_WORKLOAD);
+    ITER_END('F', k);
     
   }while (--it);
 
@@ -250,16 +276,19 @@ void task_g()
   noc_packet_t *pkt = create_pkt(COMM_GJ_WORKLOAD);
 
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do
   {
     recv_and_print();
+    ITER_BEGIN('G', ++k);
 
     // simulate processing
     ucx_sleep(TASK_G_WORKLOAD);
 
     // tprintf("G->J\n");
     ucx_noc_send(CPU_J, PORT_J, pkt, COMM_GJ_WORKLOAD);
+    ITER_END('G', k);
 
   } while (--it);
 
@@ -274,16 +303,19 @@ void task_h()
   noc_packet_t *pkt = create_pkt(COMM_HJ_WORKLOAD);
 
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do
   {
     recv_and_print();
+    ITER_BEGIN('H', ++k);
 
     // simulate processing
     ucx_sleep(TASK_H_WORKLOAD);
 
     // tprintf("H->J\n");
     ucx_noc_send(CPU_J, PORT_J, pkt, COMM_HJ_WORKLOAD);
+    ITER_END('H', k);
 
   } while (--it);
 
@@ -299,16 +331,19 @@ void task_i()
   noc_packet_t *pkt = create_pkt(COMM_IJ_WORKLOAD);
 
   int it = ITERATIONS;
+  uint32_t k = 0;
 
   do
   {
     recv_and_print();
+    ITER_BEGIN('I', ++k);
 
     // simulate processing
     ucx_sleep(TASK_I_WORKLOAD);
 
     // tprintf("I->J\n");
     ucx_noc_send(CPU_J, PORT_J, pkt, COMM_IJ_WORKLOAD);
+    ITER_END('I', k);
 
   }  while (--it);
 
@@ -375,9 +410,12 @@ void task_j()
         received[k]++;
     }
 
-    // simulate processing
+    // simulate processing; J marks each iteration it runs, also the
+    // second one of a run that serves two
+    ITER_BEGIN('J', done + 1);
     ucx_sleep(TASK_J_WORKLOAD);
     done++;
+    ITER_END('J', done);
 
   }while (--it);
 

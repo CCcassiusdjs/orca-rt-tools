@@ -67,10 +67,13 @@ def test_missing_map_file(work):
 @pytest.mark.parametrize("mapping", [MAP, "spiral"])
 def test_app_e_minimum_frequency(work, mapping):
     """f* from the bisection (phase model), f_CPU from the CPU test and the
-    maximum; experiments/exp23 make frequency keeps the same numbers."""
+    maximum; experiments/exp23 make frequency keeps the same numbers
+    (default link occupancy o_i = L0 + 20 (m + 1))."""
     r = run(work, mapping, "500000000")
     assert r.returncode == 0, r.stderr[-2000:]
-    assert "Network frequency f* = 345294952.3925781Hz (345.3 MHz)" in r.stdout
+    # dispatch order of the kernel rule (E, H, I and J, G): I->J sets f*,
+    # with the default occupancy o_i = L0 + 20 (m + 1)
+    assert "Network frequency f* = 327690124.51171875Hz (327.7 MHz)" in r.stdout
     assert "CPU frequency f_CPU = 434900000.0Hz (434.9 MHz)" in r.stdout
     assert "Minimum frequency max(f*, f_CPU) = 434900000.0Hz (434.9 MHz)" in r.stdout
     # f_CPU > f*: one network evaluation at f_CPU with the phase model

@@ -3,12 +3,14 @@
     python -m rttools.paper.figures contraction --graph <graph.txt> --n 4 --out <dir>
     python -m rttools.paper.figures table71 <ch7 metrics.json> --graphs <dir> --out <dir>
     python -m rttools.paper.figures exp23 <log> --config <exp23 config.json> --flows <figures config.json> --out <dir>
+    python -m rttools.paper.figures spiral <car metrics.json> --out <dir>
 
 | Command | Visual | Outputs |
 |---|---|---|
 | contraction | criteria table, contraction figure | contraction.json, criteria.csv, tab-criteria-rows.tex, fig-contraction-body.tex |
 | table71 | Table 7.1 summary and per-graph figure | metrics.json, table71.csv, sizes.csv, tab-table71-rows.tex, fig-table71-coords.tex |
 | exp23 | Gantt, iterations, flows of application E | metrics.json, gantt.csv, iterations.csv, flows.csv, fig-gantt-body.tex, fig-iterations-coords.tex, tab-flows-rows.tex |
+| spiral | Spiral Mapping of CAR (Figure 4) | fig-spiral.json, fig-spiral-body.tex |
 
 Each command writes a metrics.json (or contraction.json) with every
 number of its visuals, for `python -m rttools.paper.exp23 check`. The
@@ -41,7 +43,9 @@ def thin(x, d=0):
 
 
 def half_up(x):
-    return int(math.floor(x + 0.5))
+    # rounded to 1e-6 first: cycles of a clock whose period is not a whole
+    # number of ns carry float noise around the half cycle
+    return int(math.floor(round(x, 6) + 0.5))
 
 
 def write_csv(path, header, rows):
@@ -344,11 +348,12 @@ def gantt(tr, cfg, clk, window, resp):
     units): RTL bars, ORT/BENCH estimate bars, releases, responses of the
     two first iterations of the window and the deadline of the first."""
     w0, w1 = window
-    hp_ms = (w1 - w0) * tr.unit.seconds * 1e3
+    # platform ms (cycles / F_CLK; Clock.seconds)
+    hp_ms = clk.seconds(w1 - w0) * 1e3
     n_it = cfg["iterations_per_hyperperiod"]
 
     def ms(raw):
-        return (raw - w0) * tr.unit.seconds * 1e3
+        return clk.seconds(raw - w0) * 1e3
 
     rows = sorted(cfg["clusters"].items(), key=lambda kv: (pe_xy(kv[0])[1], pe_xy(kv[0])[0]))
     color = {}
@@ -410,7 +415,7 @@ def gantt(tr, cfg, clk, window, resp):
     ya = bottom - 0.04
     xmax = hp_ms + 0.06
     emit(f"\\draw[black!70] (0,{ya:.2f}) -- ({xmax:.2f},{ya:.2f});")
-    w0_ms = w0 * tr.unit.seconds * 1e3
+    w0_ms = clk.seconds(w0) * 1e3
     for k in range(int(round(hp_ms / 0.25)) + 1):
         x = k * 0.25
         emit(f"\\draw[black!70] ({x:.2f},{ya:.2f}) -- ++(0,-0.08);")
@@ -428,8 +433,8 @@ def gantt(tr, cfg, clk, window, resp):
     brackets = []
     for lvl, r in enumerate(win):
         s, e = r["start"], r["end"]
-        cyc = int(math.floor(clk.cycles(e - s)))
-        txt = f"{(e - s) * tr.unit.seconds * 1e3:.3f}~ms ({thin(cyc)} cycles)"
+        cyc = int(math.floor(round(clk.cycles(e - s), 6)))
+        txt = f"{clk.seconds(e - s) * 1e3:.3f}~ms ({thin(cyc)} cycles)"
         yb = top + 0.32 + 0.33 * (1 - lvl)
         xs, xe = ms(s), ms(e)
         brackets.append({"iteration": r["iteration"], "start": s, "end": e, "cycles": cyc,
@@ -453,7 +458,7 @@ def iterations(tr, cfg, clk, resp):
     pts = []
     for r in resp:
         before = [t for t in rel if t <= r["start"]]
-        release_ms = (before[-1] if before else r["start"]) * tr.unit.seconds * 1e3
+        release_ms = clk.seconds(before[-1] if before else r["start"]) * 1e3
         pts.append({"iteration": r["iteration"], "release_ms": release_ms, "response_ms": r["response_ms"],
                     "response_cycles": r["response_cycles"]})
     mx = max(pts, key=lambda p: p["response_ms"])
@@ -518,9 +523,10 @@ def flows(tr, cfg, clk, fcfg):
     return lines, rows
 
 
-def exp23_figures(log, cfg, fcfg, out_dir, join=None):
-    tr = X.load(log, cfg)
-    clk = X.Clock(tr.unit, cfg["clock_hz"])
+def exp23_figures(log, cfg, fcfg, out_dir, join=None, run_info="auto"):
+    # clock of the run: RUN_INFO next to the log, else config clock_hz
+    # (rttools.paper.exp23.load_run); cfg becomes the config of the run
+    tr, cfg, clk, clock = X.load_run(log, cfg, None, run_info)
     windows = X.hyperperiods(tr, cfg, clk)
     rule = X.join_rule(cfg, join)
     resp = X.responses(tr, cfg, clk, rule)
@@ -530,7 +536,7 @@ def exp23_figures(log, cfg, fcfg, out_dir, join=None):
     measured = X.cpu_per_iteration(tr, cfg, clk, windows[:1])
     g_info["busy_equals_tab83"] = all(math.isclose(g_info["busy_cycles_per_iteration"][c], measured[c]["mean"])
                                       for c in g_info["busy_cycles_per_iteration"])
-    m = {"log": os.path.basename(log), "unit": tr.unit.name, "swap_xy": bool(tr.meta["swap_xy"]),
+    m = {"log": os.path.basename(log), "unit": tr.unit.name, "swap_xy": bool(tr.meta["swap_xy"]), "clock": clock,
          "join_rule": rule, "gantt": g_info, "iterations": i_info, "flows": f_rows}
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
@@ -544,6 +550,76 @@ def exp23_figures(log, cfg, fcfg, out_dir, join=None):
     write_tex(os.path.join(out_dir, "fig-gantt-body.tex"), g_lines)
     write_tex(os.path.join(out_dir, "fig-iterations-coords.tex"), i_lines)
     write_tex(os.path.join(out_dir, "tab-flows-rows.tex"), f_lines)
+    return m
+
+
+# ============================================================= spiral
+
+# layout of the Spiral Mapping figure: distance between tile centers (cm),
+# shading cA!p of a tile with p = SHADE_MIN + SHADE_SPAN * volume / largest
+# volume (half up), text offset of the cluster label
+SPIRAL_PX = 1.5
+SPIRAL_PY = 1.25
+SHADE_MIN = 3
+SHADE_SPAN = 57
+
+
+def tex_name(name):
+    return name.replace("_", "\\_")
+
+
+def spiral_figure(metrics_path, out_dir):
+    """Body of the Spiral Mapping figure from the "spiral" key of the
+    metrics.json of rttools.paper.car: one tile per position k of the
+    spiral (shading by network volume, k in the corner, tasks of the
+    cluster and volume in 10^3 flits), one arrow between consecutive
+    positions, a frame around the nodes off the outer ring and the x and y
+    indices of the mesh. Styles sqt, sqk, sqc, sqar and sqax stay in the
+    article."""
+    with open(metrics_path) as f:
+        sp = json.load(f)["spiral"]
+    w, h = sp["width"], sp["height"]
+    rows = sp["rows"]
+    vmax = max(r["volume"] for r in rows)
+    tiles = []
+    body = [f"% Spiral Mapping of CAR ({sp['graph']}) on the {w}x{h} mesh, step 1 {sp['criterion']}; "
+            f"tile (x,y) at ({SPIRAL_PX:g} x, {SPIRAL_PY:g} y) cm",
+            f"% shading cA!p, p = {SHADE_MIN} + {SHADE_SPAN} * volume / {vmax} (half up); "
+            f"volume sum {sp['volume_sum']}, inner nodes {sp['inner_volume']} "
+            f"({sp['inner_volume_percent']:.1f} %)"]
+    for r in rows:
+        k, x, y = r["position"], r["x"], r["y"]
+        shade = half_up(SHADE_MIN + SHADE_SPAN * r["volume"] / vmax)
+        kflits = half_up(r["volume"] / 1000)
+        tiles.append({"position": k, "x": x, "y": y, "shade": shade, "volume_kflits": kflits,
+                      "tasks": r["tasks"], "mean_xy": round(r["mean_xy"], 2)})
+        label = "\\\\".join(tex_name(t) for t in r["tasks"])
+        body += [f"\\node[sqt={shade}] (t{k}) at ({SPIRAL_PX * x:.2f},{SPIRAL_PY * y:.3f}) {{}};"
+                 f" % k={k} node {r['node']} ({x},{y}) {r['cluster']} volume {r['volume']} "
+                 f"mean XY {r['mean_xy']:.2f}",
+                 f"\\node[sqk] at (t{k}.north west) {{{k}}};",
+                 f"\\node[sqc] at ([xshift=0.8mm]t{k}.center) {{{label}\\\\[0.6pt]\\textbf{{{kflits}}}}};"]
+    body.append("% spiral order: one arrow between consecutive positions")
+    body += [f"\\draw[sqar] (t{k}) -- (t{k + 1});" for k in range(1, len(rows))]
+    frame = None
+    if w > 2 and h > 2:
+        frame = [0.5, 0.5, w - 1.5, h - 1.5]
+        body.append(f"\\draw[thick] ({SPIRAL_PX * frame[0]:.3f},{SPIRAL_PY * frame[1]:.3f}) rectangle "
+                    f"({SPIRAL_PX * frame[2]:.3f},{SPIRAL_PY * frame[3]:.3f}); % nodes off the outer ring "
+                    f"{sp['inner_nodes']}")
+    for i in range(w):
+        body.append(f"\\node[sqax, anchor=north] at ({SPIRAL_PX * i:.2f},{-0.5 * SPIRAL_PY + 0.12:.3f}) {{{i}}};")
+    for i in range(h):
+        body.append(f"\\node[sqax, anchor=east] at ({-0.5 * SPIRAL_PX + 0.12:.2f},{SPIRAL_PY * i:.3f}) {{{i}}};")
+    body.append(f"\\node[sqax, anchor=north] at ({SPIRAL_PX * (w - 1) / 2:.2f},{-0.5 * SPIRAL_PY - 0.18:.3f}) {{$x$}};")
+    body.append(f"\\node[sqax, anchor=east] at ({-0.5 * SPIRAL_PX - 0.18:.2f},{SPIRAL_PY * (h - 1) / 2:.3f}) {{$y$}};")
+    m = {"source": os.path.basename(metrics_path), "width": w, "height": h, "criterion": sp["criterion"],
+         "largest_volume": vmax, "shade": {"min": SHADE_MIN, "span": SHADE_SPAN}, "tiles": tiles,
+         "frame": frame, "arrows": len(rows) - 1}
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "fig-spiral.json"), "w") as f:
+        json.dump(m, f, indent=1)
+    write_tex(os.path.join(out_dir, "fig-spiral-body.tex"), body)
     return m
 
 
@@ -566,12 +642,21 @@ def main(argv=None):
     e.add_argument("--flows", required=True, help="configuration of the flow table (router constants)")
     e.add_argument("--join", choices=X.JOIN_RULES, default=None,
                    help="join rule of J (default: config join.rule; any3 for the logs A to E)")
+    e.add_argument("--run-info", default="auto",
+                   help="RUN_INFO of the simulation (clock of the run); default: next to the log; "
+                        "`none`: config clock_hz")
     e.add_argument("--out", required=True)
+    s = sub.add_parser("spiral")
+    s.add_argument("metrics", help="metrics.json of rttools.paper.car (key spiral)")
+    s.add_argument("--out", required=True)
     a = p.parse_args(argv)
     if a.cmd == "contraction":
         m = contraction(a.graph, a.n, a.out)
         for k, r in m["criteria"].items():
             print(f"  {k:9s} max {r['max_demand']:6d}  M2 {r['M2']:9.1f}  W_NoC {r['w_noc']:6d}  {r['clusters']}")
+    elif a.cmd == "spiral":
+        m = spiral_figure(a.metrics, a.out)
+        print("  " + "  ".join(f"{t['position']}:{t['shade']}/{t['volume_kflits']}" for t in m["tiles"]))
     elif a.cmd == "table71":
         m = table71(a.metrics, a.graphs, a.out)
         for p_ in ("mc", "mp"):
@@ -580,11 +665,10 @@ def main(argv=None):
         if "cluster_sizes" in m["summary"]:
             print("  cluster sizes: " + json.dumps(m["summary"]["cluster_sizes"]))
     else:
-        with open(a.config) as f:
-            cfg = json.load(f)
+        cfg = X.load_config(a.config)
         with open(a.flows) as f:
             fcfg = json.load(f)
-        m = exp23_figures(a.log, cfg, fcfg, a.out, a.join)
+        m = exp23_figures(a.log, cfg, fcfg, a.out, a.join, None if a.run_info == "none" else a.run_info)
         print(f"  gantt: busy per iteration {m['gantt']['busy_cycles_per_iteration']} "
               f"(equal to tab83: {m['gantt']['busy_equals_tab83']})")
         print(f"  iterations: {len(m['iterations']['points'])}, max {m['iterations']['max_ms']} ms "

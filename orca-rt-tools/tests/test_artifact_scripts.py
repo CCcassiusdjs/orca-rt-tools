@@ -33,7 +33,7 @@ def make_repo(tmp_path, tag="v1"):
     e = repo / "experiments" / "exp23"
     (e / "rtl").mkdir(parents=True)
     (repo / "pkt-sim").mkdir()
-    for f in ("source_info.sh", "simulate.sh", "VERSION", ".gitattributes"):
+    for f in ("source_info.sh", "simulate.sh", "build_sw.sh", "VERSION", ".gitattributes"):
         shutil.copy2(os.path.join(EXP23, f), e / f)
     (e / "rtl" / "mon.sv").write_text("module m; endmodule\n")
     (repo / "pkt-sim" / "a.v").write_text("// rtl\n")
@@ -182,10 +182,47 @@ def test_exp23_default_is_run_f():
     r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3"], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     assert "analyze logs/F.events.txt --config config.json --join per_producer" in r.stdout
+    assert "--listing logs/F.image.lst --listing-without logs/F.noinstr.lst" in r.stdout
     assert "reference_head.json" in r.stdout
     r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "LOG=logs/D.events.txt",
                         "REF=reference_D.json"], capture_output=True, text=True)
     assert "analyze logs/D.events.txt" in r.stdout and "reference_D.json" in r.stdout
+    assert "--listing" not in r.stdout
+
+
+def test_exp23_paper_and_instrumentation_use_the_build_listings():
+    """make paper: listing of the simulated image and of the build without
+    the writes; make instrumentation: listings of make software."""
+    r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "paper"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "UCX_CFLAGS=-DUCX_NO_INSTRUMENTATION ./build_sw.sh build/sw/without" in r.stdout
+    assert ("--listing build/sim/pkt-sim/software/ucx-os/build/target/image.lst "
+            "--listing-without build/sw/without/pkt-sim/software/ucx-os/build/target/image.lst") in r.stdout
+    r = subprocess.run(["make", "-n", "-C", EXP23, "PYTHON=python3", "instrumentation"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "./build_sw.sh build/sw/with" in r.stdout
+    assert "--listing build/sw/with/pkt-sim/software/ucx-os/build/target/image.lst" in r.stdout
+
+
+@needs_git
+def test_simulate_builds_with_the_writes(tmp_path):
+    """simulate.sh builds through build_sw.sh with UCX_CFLAGS empty, also
+    when the environment sets it."""
+    env = stub_tools(tmp_path)
+    log = tmp_path / "make.log"
+    (tmp_path / "bin" / "make").write_text(f'#!/bin/sh\necho "$PWD $*" >> {log}\n')
+    repo = make_repo(tmp_path)
+    sim_do = repo / "pkt-sim" / "manycore_modelsim" / "sim.do"
+    sim_do.parent.mkdir()
+    sim_do.write_text("vlog x\nvsim -c top\n")
+    for d in ("ucx-os", "hfrisc-software"):
+        (repo / "pkt-sim" / "software" / d).mkdir(parents=True)
+    r = simulate(repo, tmp_path / "o", env, UCX_CFLAGS="-DUCX_NO_INSTRUMENTATION")
+    assert r.returncode == 0, r.stdout + r.stderr
+    calls = log.read_text()
+    assert "ARCH=riscv/hf-riscv-e incl" in calls and "weird_a" in calls and "boot_sim" in calls
+    assert "UCX_NO_INSTRUMENTATION" not in calls
+    assert (tmp_path / "o" / "gcc.txt").read_text() == "gcc stub\n"
 
 
 @pytest.mark.skipif(shutil.which("ghdl") is None, reason="ghdl ausente")

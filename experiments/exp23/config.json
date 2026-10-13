@@ -1,6 +1,8 @@
 {
-  "_doc": "Experiment of Ch. 8 (application E on a 2x2 manycore, pkt-sim/software/ucx-os/app/weird_a.c). PE labels follow the log of commit 4c299fc; the analysis swaps X and Y of logs of the fixed RTL automatically. Times in seconds or cycles of the 500 MHz clock.",
+  "_doc": "Experiment of Ch. 8 (application E on a 2x2 manycore, pkt-sim/software/ucx-os/app/weird_a.c). PE labels follow the log of commit 4c299fc; the analysis swaps X and Y of logs of the fixed RTL automatically. Times in seconds of platform time or cycles of clock_hz (F_CLK, 500 MHz in run F); the RUN_INFO of a simulation (simulate.sh f_clk_hz) overrides clock_hz.",
   "clock_hz": 500000000,
+  "application": "../../apps/synthetic-app-e/synthetic-app-e.csv",
+  "_application_doc": "CSV of application E (path relative to this file). Its creation rows (order of ucx_task_add in app_main of weird_a.c, without the idle task) are the source of the dispatch order of the analysis: rttools/bench_t/estimate.py dispatch_order (round robin in creation order from the idle task). pe_tasks below decodes the task ids of the log (id 0 = IDLE, then the creation order) and must follow the creation rows; the analysis stops otherwise.",
   "pe_tasks": {
     "0-0": ["IDLE", "F", "D", "B", "A"],
     "0-1": ["IDLE", "C"],
@@ -16,15 +18,21 @@
   "source": {"pe": "0-0", "task": "A"},
   "join": {"_doc": "rule per_producer: J runs iteration k after the k-th packet of each tag (weird_a.c of this tree); any3: J joins any packets_per_iteration packets (weird_a.c before 379f388, stored logs A to E; the Makefiles select it for these logs).", "pe": "1-1", "task": "J", "tags": ["8900", "5670", "1230"], "packets_per_iteration": 3, "rule": "per_producer"},
   "estimate": {
-    "_doc": "Characterized task costs of rttools/bench_t/main.py: tasks of each cluster in dispatch order, cost in thesis scale (10 times weird_a.c), scheduler cost included in each cost. rttools/bench_t/estimate.py runs the ORT/BENCH engine on each list.",
+    "_doc": "Characterized task costs of rttools/bench_t/main.py: tasks of each cluster (listed in the dispatch order that the kernel rule gives; the analysis takes the order from the creation rows of the application, not from this list), cost in thesis scale (10 times weird_a.c), scheduler cost included in each cost. rttools/bench_t/estimate.py runs the ORT/BENCH engine on each sequence.",
     "scale": 10,
     "scheduler_cycles": 110000,
     "clusters": {
       "ABDF": [["A", 285300], ["B", 586000], ["D", 140000], ["F", 808000]],
       "C": [["C", 963300]],
-      "EHI": [["E", 527000], ["I", 753700], ["H", 453000]],
-      "GJ": [["G", 1098800], ["J", 1075700]]
+      "EHI": [["E", 527000], ["H", 453000], ["I", 753700]],
+      "GJ": [["J", 1075700], ["G", 1098800]]
     }
+  },
+  "instrumentation": {
+    "_doc": "Bound of the instrumentation writes in the measured CPU time (rttools/paper/instrumentation.py). callees: functions of device/cacc.c that write the registers of manycore_pe.sv. events: kind of logged event -> function that writes its register (set_counter_2 prints `scheduled`, set_counter_3 `->`, set_counter_4 `<-`), in charge order. cycles: cycles per instruction class of the HF-RISC core on the bus of manycore_pe.sv (no stall, no wait state), measured by pkt-sim/tests/rtl/tb_cpu_cycles.vhd.",
+    "callees": ["set_cacc", "set_counter_1", "set_counter_2", "set_counter_3", "set_counter_4"],
+    "events": {"dispatch": "set_counter_2", "send": "set_counter_3", "receive": "set_counter_4"},
+    "cycles": {"alu": 1, "load": 3, "store": 3, "jump": 3, "branch_taken": 3, "branch_not_taken": 1}
   },
   "task_graph": {
     "_doc": "Edges of application E (apps/synthetic-app-e/synthetic-app-e.txt), for the phase index of each task and the response bound.",

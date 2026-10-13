@@ -2,11 +2,22 @@
 # Simulates the experiment of Ch. 8 (application E, weird_a.c) with
 # ModelSim/Questa and writes the transcript and the extracted events.
 #
-#   simulate.sh <out_dir> [<sim_ns>]
+#   simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]
 #
-# <sim_ns>: time of manycore_top in ns (default 20000000 = 20 ms).
+# <sim_ns>: time of manycore_top in ns (default 20000000 = 20 ms). The
+# clock runs at or above F_CLK, so <sim_ns> covers at least <sim_ns> of
+# platform time (cycles / F_CLK).
+# <app>:    application of pkt-sim/software/ucx-os (Makefile target and
+#           app/<app>.c; default weird_a, application E of run F). An
+#           application of rttools.ucxgen has app/<app>.sim with MESH and
+#           RELEASE_MASK, which this script passes to manycore_top
+#           (vsim -g).
+# <mesh>:   WxH of manycore_top (NOC_DIM_X x NOC_DIM_Y); default MESH of
+#           app/<app>.sim, otherwise 2x2.
+# With the defaults (weird_a, 2x2, no app/weird_a.sim) the vsim command is
+# the one of run F (tag exp23-F): no -g option.
 # The script copies pkt-sim to <out_dir>/pkt-sim, builds the software there
-# (riscv64-elf toolchain, ARCH=riscv/hf-riscv-e), adds the packet monitor
+# (build_sw.sh: riscv64-elf toolchain, ARCH=riscv/hf-riscv-e), adds the packet monitor
 # (rtl/pe_checker.sv, rtl/chk_binds.sv) and runs vsim in batch mode.
 #
 # Environment:
@@ -15,13 +26,36 @@
 #   MONITOR     1 (default) binds the packet monitor; 0 runs without it
 #               (then the log has no $printtimescale lines; pass --unit to
 #               the analysis)
+#   F_CLK       clock frequency in Hz (default 500000000, run F). The
+#               script derives from it, for the build and for vsim:
+#               F_CLK and F_TICK = 1 / RELEASE_NS of the software
+#               (arch.mak; tick of F_CLK / F_TICK cycles, hal.c);
+#               CLOCK_HALF_PERIOD_FS = floor(1e15 / (2 F_CLK)) of
+#               manycore_top.sv (timescale 1ns/1fs; the clock runs at
+#               1e15 / (2 CLOCK_HALF_PERIOD_FS) Hz, at or above F_CLK);
+#               RELEASE_CYCLES = RELEASE_NS F_CLK and WARMUP_CYCLES =
+#               WARMUP_NS F_CLK of the release generator (manycore_pe.sv).
+#               F_CLK RELEASE_NS / 1e9 must be a multiple of 16 (TIMER1
+#               counts steps of 16 cycles): with T = 0.5 ms, F_CLK is a
+#               multiple of 32000 Hz. F_CLK below 1 GHz (the analysis
+#               recovers the clock edges from $time in ns)
+#   RELEASE_NS  release period T of the source task in ns (default 500000,
+#               config.json release_period_s)
+#   WARMUP_NS   instant of the first release in ns of platform time
+#               (default 3000000, config.json warmup_s)
+#   RELEASE_MASK
+#               overrides the value of app/<app>.sim (release generator of
+#               manycore_pe.sv: bit k of the mask, decimal, = PE with node
+#               index k = y * W + x)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
 #               RUN_INFO below); use it for the run that a paper reports
 #
 # Outputs in <out_dir>: sim.log (transcript), events.txt (lines used by
-# the analysis), build_sw.log, build_boot.log, time.log, RUN_INFO.
+# the analysis), build_sw.log, build_boot.log, gcc.txt, time.log, RUN_INFO;
+# the image of ucx-os and its listing in
+# pkt-sim/software/ucx-os/build/target/image.{elf,lst}.
 #
 # RUN_INFO identifies the source of the run:
 #   repo_commit  commit hash: from git when the repository root is a git
@@ -33,16 +67,75 @@
 #                construction) or nogit (copy without git metadata)
 #   repo_tag     tag at the commit (git describe --tags --exact-match), or none
 #   src_sha256   SHA-256 of the sorted `sha256sum` lines of the simulated
-#                sources (pkt-sim, rtl/, simulate.sh), relative to the
+#                sources (pkt-sim, rtl/, simulate.sh, build_sw.sh), relative to the
 #                repository root; identifies the input also in a copy
 #                without git
+# and the clock of the run (read by rttools.paper.exp23):
+#   f_clk_hz, f_tick_hz, clock_half_period_fs, clock_hz_exact,
+#   release_cycles, warmup_cycles
 set -euo pipefail
 
-OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns>]}
+OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]}
 SIM_NS=${2:-20000000}
+APP=${3:-weird_a}
+MESH_ARG=${4:-}
 MONITOR=${MONITOR:-1}
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
+F_CLK=${F_CLK:-500000000}
+RELEASE_NS=${RELEASE_NS:-500000}
+WARMUP_NS=${WARMUP_NS:-3000000}
+
+# clock of the run (before any tool check, so a wrong value stops at once)
+for v in F_CLK RELEASE_NS WARMUP_NS; do
+	[[ "${!v}" =~ ^[1-9][0-9]*$ ]] || { echo "$v must be a positive integer: ${!v}" >&2; exit 2; }
+done
+fail_clock() { echo "F_CLK=$F_CLK RELEASE_NS=$RELEASE_NS WARMUP_NS=$WARMUP_NS: $*" >&2; exit 2; }
+(( F_CLK < 1000000000 )) || fail_clock "F_CLK must be below 1 GHz"
+(( 1000000000 % RELEASE_NS == 0 )) || fail_clock "1e9 / RELEASE_NS (F_TICK) is not an integer"
+F_TICK=$(( 1000000000 / RELEASE_NS ))
+(( F_CLK * RELEASE_NS % 1000000000 == 0 )) || fail_clock "RELEASE_NS F_CLK is not a whole number of cycles"
+RELEASE_CYCLES=$(( F_CLK * RELEASE_NS / 1000000000 ))
+(( RELEASE_CYCLES % 16 == 0 )) || fail_clock "release period of $RELEASE_CYCLES cycles is not a multiple of 16 (TIMER1)"
+(( F_CLK * WARMUP_NS % 1000000000 == 0 )) || fail_clock "WARMUP_NS F_CLK is not a whole number of cycles"
+WARMUP_CYCLES=$(( F_CLK * WARMUP_NS / 1000000000 ))
+HALF_FS=$(( 500000000000000 / F_CLK ))
+F_EXACT=$(awk -v h="$HALF_FS" 'BEGIN { printf "%.3f", 1e15 / (2 * h) }')
+# -g options only for values that differ from the defaults of
+# manycore_top.sv (the clock of run F): at 500 MHz the vsim command is the
+# one of run F
+GENERICS=""
+[ "$HALF_FS" != 1000000 ] && GENERICS="$GENERICS -gCLOCK_HALF_PERIOD_FS=$HALF_FS"
+[ "$RELEASE_CYCLES" != 250000 ] && GENERICS="$GENERICS -gRELEASE_CYCLES=$RELEASE_CYCLES"
+[ "$WARMUP_CYCLES" != 1500000 ] && GENERICS="$GENERICS -gWARMUP_CYCLES=$WARMUP_CYCLES"
+echo "clock: F_CLK $F_CLK Hz, half period $HALF_FS fs ($F_EXACT Hz), release every $RELEASE_CYCLES cycles, first at cycle $WARMUP_CYCLES, F_TICK $F_TICK Hz"
+
+# setup of the application (key=value lines of app/<app>.sim; read, not run)
+UCX_APP="$REPO/pkt-sim/software/ucx-os/app"
+if ! [[ "$APP" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+	echo "invalid application name: $APP" >&2; exit 2
+fi
+setup() { # setup <key>: value of <key> in app/<app>.sim, or empty
+	if [ -f "$UCX_APP/$APP.sim" ]; then
+		sed -n "s/^$1=\([0-9x]*\)\$/\1/p" "$UCX_APP/$APP.sim" | tail -1
+	fi
+}
+MESH=${MESH_ARG:-$(setup MESH)}
+MESH=${MESH:-2x2}
+if ! [[ "$MESH" =~ ^([1-9][0-9]*)x([1-9][0-9]*)$ ]]; then
+	echo "invalid mesh: $MESH (WxH)" >&2; exit 2
+fi
+DIM_X=${BASH_REMATCH[1]}
+DIM_Y=${BASH_REMATCH[2]}
+R_MASK=${RELEASE_MASK:-$(setup RELEASE_MASK)}
+if [ -n "$R_MASK" ] && ! [[ "$R_MASK" =~ ^[1-9][0-9]*$ ]]; then
+	echo "invalid RELEASE_MASK: $R_MASK (positive decimal integer)" >&2; exit 2
+fi
+# -g options only for values that differ from the defaults of manycore_top.sv
+APP_GENERICS=""
+[ "$DIM_X" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_X=$DIM_X"
+[ "$DIM_Y" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_Y=$DIM_Y"
+[ -n "$R_MASK" ] && [ "$R_MASK" != 1 ] && APP_GENERICS="$APP_GENERICS -gRELEASE_MASK=$R_MASK"
 
 if [ -n "${ENV_SETUP:-}" ]; then
 	set +u
@@ -67,13 +160,10 @@ if [ "${REQUIRE_CLEAN:-0}" = 1 ]; then
 		exit 3
 	fi
 fi
-rm -rf "$OUT/pkt-sim"
-cp -a "$REPO/pkt-sim" "$OUT/pkt-sim"
-mkdir -p "$OUT/pkt-sim/logs"
-
-( cd "$OUT/pkt-sim/software/ucx-os" && make -s ARCH=riscv/hf-riscv-e incl && make -s weird_a ) \
-	> "$OUT/build_sw.log" 2>&1
-( cd "$OUT/pkt-sim/software/hfrisc-software" && make -s boot_sim ) > "$OUT/build_boot.log" 2>&1
+# copy of pkt-sim and build of the software (build_sw.sh: application
+# $APP) at the clock of the run (F_CLK, F_TICK), always with the
+# instrumentation writes (UCX_CFLAGS empty)
+APP="$APP" F_CLK="$F_CLK" F_TICK="$F_TICK" UCX_CFLAGS= "$HERE/build_sw.sh" "$OUT"
 
 SIM="$OUT/pkt-sim/manycore_modelsim"
 cd "$SIM"
@@ -83,7 +173,7 @@ if [ "$MONITOR" = 1 ]; then
 	cat >> run.do <<EOD
 vlog -mixedsvvh -sv -work work $HERE/rtl/pe_checker.sv
 vlog -mixedsvvh -sv -work work $HERE/rtl/chk_binds.sv
-vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS
+vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$GENERICS$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run -all
@@ -91,7 +181,7 @@ quit -f
 EOD
 else
 	cat >> run.do <<EOD
-vsim -c work.manycore_top
+vsim -c work.manycore_top$GENERICS$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run ${SIM_NS}ns
@@ -101,9 +191,17 @@ fi
 
 {
 	echo "sim_ns=$SIM_NS monitor=$MONITOR"
+	ALL_GENERICS="$GENERICS$APP_GENERICS"
+	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${ALL_GENERICS# }"
 	echo "vsim=$(vsim -version 2>/dev/null | head -1)"
 	echo "gcc=$(riscv64-elf-gcc --version | head -1)"
 	echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+	echo "f_clk_hz=$F_CLK"
+	echo "f_tick_hz=$F_TICK"
+	echo "clock_half_period_fs=$HALF_FS"
+	echo "clock_hz_exact=$F_EXACT"
+	echo "release_cycles=$RELEASE_CYCLES"
+	echo "warmup_cycles=$WARMUP_CYCLES"
 } >> "$OUT/RUN_INFO"
 
 if command -v /usr/bin/time > /dev/null; then
@@ -112,7 +210,7 @@ else
 	vsim -batch -do run.do > "$OUT/sim.log" 2> "$OUT/time.log"
 fi
 
-grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG|CHKSUM|^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
+grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG| ITER (begin|end) |CHKSUM|FLIT (TX|RX) |^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
 if grep -qE "\*\* (Error|Fatal)" "$OUT/sim.log"; then
 	grep -E "\*\* (Error|Fatal)" "$OUT/sim.log" | head -5 >&2
 	exit 1

@@ -70,6 +70,22 @@ def test_parse_rtl_swap_xy():
     assert "1-0" in tr.lanes and "0-1" not in tr.lanes
 
 
+def test_parse_rtl_iteration_markers():
+    """ITER lines (manycore_pe.sv, register 0x2000003C) go to
+    meta["iterations"] in log order; they swap with the other lines and
+    move the end of the last slice; a log without them has an empty list."""
+    log = RTL_LOG + "# 2100 0-1 ITER begin C 1\n# 2300 0-1 ITER end C 1\n"
+    tr = parsers.parse_rtl(rtl_lines(log))
+    assert tr.meta["iterations"] == [
+        {"time": 2100, "lane": "0-1", "edge": "begin", "task": "C", "iteration": 1},
+        {"time": 2300, "lane": "0-1", "edge": "end", "task": "C", "iteration": 1}]
+    assert tr.lane_slices("0-0")[-1].end == 2300
+    assert [m["lane"] for m in parsers.parse_rtl(rtl_lines(log), swap_xy=True).meta["iterations"]] == ["1-0", "1-0"]
+    assert parsers.parse_rtl(rtl_lines()).meta["iterations"] == []
+    assert parsers.detect_format(["# 10 1-1 ITER end J 70000\n"]) == "rtl"
+    assert not parsers.RE_ITER.match("10 1-1 ITER end JJ 3")
+
+
 def test_detect_formats(tmp_path):
     assert parsers.detect_format(rtl_lines()) == "rtl"
     assert parsers.detect_format(["0 10 A\n", "10 15 B\n"]) == "bench"

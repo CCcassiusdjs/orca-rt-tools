@@ -12,7 +12,9 @@ INC_DIRS = -I $(ARCH_DIR)
 #F_CLK = 1000000000
 #F_CLK = 500000000
 #F_CLK = 1000000
-F_CLK = 500000000
+# default of run F (exp23-F); experiments/exp23/simulate.sh passes the
+# clock of the simulation (make ... F_CLK=<Hz> F_TICK=<Hz>)
+F_CLK ?= 500000000
 
 
 # uart baud rate
@@ -21,15 +23,20 @@ SERIAL_BAUDRATE = 57600
 # timer interrupt frequency (100 -> 100 ints/s -> 10ms tick time. 0 -> timer0 fixed frequency)
 #F_TICK = 10
 #F_TICK = 1000000
-F_TICK = 2000
+# 2000 = one tick per release period T = 0.5 ms; simulate.sh passes 1 / T
+F_TICK ?= 2000
 
 # remove unreferenced functions
 CFLAGS_STRIP = -fdata-sections -ffunction-sections
 LDFLAGS_STRIP = --gc-sections
 
+# extra definitions for every object (empty by default; the generated
+# applications of the Makefile pass UCX_DEFS=-DUCX_APP_IRQ4)
+UCX_DEFS ?=
+
 # this is stuff used everywhere - compiler and flags should be declared (ASFLAGS, CFLAGS, LDFLAGS, LD_SCRIPT, CC, AS, LD, DUMP, READ, OBJ and SIZE).
 ASFLAGS = -march=rv32e -mabi=ilp32e #-fPIC
-CFLAGS = -Wall -march=rv32e -mabi=ilp32e -O2 -c -mstrict-align -ffreestanding -nostdlib -ffixed-a5 $(INC_DIRS) -DF_CPU=${F_CLK} -D USART_BAUD=$(SERIAL_BAUDRATE) -DF_TIMER=${F_TICK} -DLITTLE_ENDIAN $(CFLAGS_STRIP) -DDEBUG_PORT #-mrvc -fPIC 
+CFLAGS = -Wall -march=rv32e -mabi=ilp32e -O2 -c -mstrict-align -ffreestanding -nostdlib -ffixed-a5 $(INC_DIRS) -DF_CPU=${F_CLK} -D USART_BAUD=$(SERIAL_BAUDRATE) -DF_TIMER=${F_TICK} -DLITTLE_ENDIAN $(CFLAGS_STRIP) -DDEBUG_PORT $(UCX_DEFS) #-mrvc -fPIC 
 ARFLAGS = r
 
 LDFLAGS = -melf32lriscv $(LDFLAGS_STRIP)

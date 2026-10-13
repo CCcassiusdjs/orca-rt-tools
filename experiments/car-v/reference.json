@@ -1,0 +1,675 @@
+{
+ "_doc": "Reference of make (experiments/car-v, python -m rttools.paper.carv run): generated application, candidates of the cost factor and of the payload divisor, and the analysis flow of the chosen pair (cost factor 6, payload divisor 16) on arch/hermes-4x4.gml at 500 MHz.",
+ "_header_wait": "Integration of PR 109 with PR 106: link occupancy o_i = L0 + 20 (m + 1), the default of rttools/modules/routing/router.py. Each flow between PEs holds 20 (m + 1) cycles more (net_time_cycles +40 for 1 hop to +100 for 4 hops; slack_cycles the same less); f* of the chosen candidate (k = 6, q = 16) 358638763.43 -> 359001159.67 Hz; f_CPU 380.0 MHz, the minimum frequency, R_bound and the memory do not change.",
+ "header_wait_cycles": 20,
+ "occupancy": "L0 + 20 (m + 1)",
+ "app": {
+  "csv": "car-v.csv",
+  "map": "car-v-ONTO-hermes4x4.map",
+  "csv_matches_repo": true,
+  "map_matches_repo": true
+ },
+ "selection": {
+  "source_period_s": 0.04,
+  "tasks": [
+   "FBU1",
+   "FBU2",
+   "FBU3",
+   "FBU4",
+   "FBU5",
+   "FBU6",
+   "FBU7",
+   "FBU8",
+   "NAVC",
+   "BFE1",
+   "BFE2",
+   "BFE3",
+   "BFE4",
+   "BFE5",
+   "BFE6",
+   "BFE7",
+   "BFE8",
+   "FDF1",
+   "FDF2",
+   "STPH",
+   "VOD1",
+   "VOD2",
+   "OBMG"
+  ],
+  "flows": 23,
+  "longest_path": 4
+ },
+ "scale": {
+  "period_s": 0.0005,
+  "deadline_s": 0.0025,
+  "cost_factor": 6,
+  "payload_divisor": 16,
+  "scheduler_cycles": 11000,
+  "utilization_preserving_factor": 6.25
+ },
+ "rule": {
+  "max_utilization": 0.8698,
+  "chosen_cost_factor": 6,
+  "config_matches_rule": true
+ },
+ "candidates": {
+  "k6_q8": {
+   "cost_factor": 6,
+   "payload_divisor": 8,
+   "largest_cost": 95000,
+   "criterion": "MAX_PROC",
+   "f_cpu_hz": 380000000.0,
+   "utilization_at_clock": 0.76,
+   "f_star_hz": 359512329.1015625,
+   "frequency_hz": 380000000.0,
+   "binding": "cpu",
+   "network_at_clock_feasible": true,
+   "packets": 16,
+   "skipped": 0,
+   "response_bound_ms": 2.19,
+   "deadline_percent": 87.6,
+   "memory_worst_pe": "4",
+   "memory_worst_bytes": 45448,
+   "memory_free_bytes": 5284,
+   "memory_fits": true,
+   "largest_cost_below_tick": true
+  },
+  "k6_q16": {
+   "cost_factor": 6,
+   "payload_divisor": 16,
+   "largest_cost": 95000,
+   "criterion": "MAX_PROC",
+   "f_cpu_hz": 380000000.0,
+   "utilization_at_clock": 0.76,
+   "f_star_hz": 359001159.66796875,
+   "frequency_hz": 380000000.0,
+   "binding": "cpu",
+   "network_at_clock_feasible": true,
+   "packets": 16,
+   "skipped": 0,
+   "response_bound_ms": 2.19,
+   "deadline_percent": 87.6,
+   "memory_worst_pe": "4",
+   "memory_worst_bytes": 26120,
+   "memory_free_bytes": 24612,
+   "memory_fits": true,
+   "largest_cost_below_tick": true
+  },
+  "k8_q8": {
+   "cost_factor": 8,
+   "payload_divisor": 8,
+   "largest_cost": 123000,
+   "criterion": "MAX_PROC",
+   "f_cpu_hz": 492000000.0,
+   "utilization_at_clock": 0.984,
+   "f_star_hz": 471511840.8203125,
+   "frequency_hz": 492000000.0,
+   "binding": "cpu",
+   "network_at_clock_feasible": true,
+   "packets": 16,
+   "skipped": 0,
+   "response_bound_ms": 2.246,
+   "deadline_percent": 89.84,
+   "memory_worst_pe": "4",
+   "memory_worst_bytes": 45448,
+   "memory_free_bytes": 5284,
+   "memory_fits": true,
+   "largest_cost_below_tick": true
+  },
+  "k8_q16": {
+   "cost_factor": 8,
+   "payload_divisor": 16,
+   "largest_cost": 123000,
+   "criterion": "MAX_PROC",
+   "f_cpu_hz": 492000000.0,
+   "utilization_at_clock": 0.984,
+   "f_star_hz": 471000671.38671875,
+   "frequency_hz": 492000000.0,
+   "binding": "cpu",
+   "network_at_clock_feasible": true,
+   "packets": 16,
+   "skipped": 0,
+   "response_bound_ms": 2.246,
+   "deadline_percent": 89.84,
+   "memory_worst_pe": "4",
+   "memory_worst_bytes": 26120,
+   "memory_free_bytes": 24612,
+   "memory_fits": true,
+   "largest_cost_below_tick": true
+  }
+ },
+ "chosen": {
+  "tasks": 23,
+  "flows": 23,
+  "deadline_s": 0.0025,
+  "largest_cost": 95000,
+  "clustering": {
+   "chosen": "MAX_PROC",
+   "rows": [
+    {
+     "criterion": "MIN_COMM",
+     "M2": 56639.39041964854,
+     "inter_edges": 16,
+     "noc_volume": 38272,
+     "largest_cost": 285000,
+     "chosen": false
+    },
+    {
+     "criterion": "MAX_COMM",
+     "M2": 101534.69504119946,
+     "inter_edges": 16,
+     "noc_volume": 102656,
+     "largest_cost": 475000,
+     "chosen": false
+    },
+    {
+     "criterion": "MIN_PROC",
+     "M2": 161564.36580233084,
+     "inter_edges": 16,
+     "noc_volume": 66304,
+     "largest_cost": 760000,
+     "chosen": false
+    },
+    {
+     "criterion": "MAX_PROC",
+     "M2": 45605.87184902153,
+     "inter_edges": 16,
+     "noc_volume": 38272,
+     "largest_cost": 190000,
+     "chosen": true
+    }
+   ]
+  },
+  "mapping": {
+   "0": [
+    "NAVC"
+   ],
+   "1": [
+    "FBU4",
+    "BFE4"
+   ],
+   "2": [
+    "FBU1",
+    "BFE1"
+   ],
+   "3": [
+    "FBU2",
+    "BFE2"
+   ],
+   "4": [
+    "FBU3",
+    "VOD1"
+   ],
+   "5": [
+    "FBU8",
+    "VOD2"
+   ],
+   "6": [
+    "BFE3"
+   ],
+   "7": [
+    "FBU5",
+    "BFE5"
+   ],
+   "8": [
+    "FBU7"
+   ],
+   "9": [
+    "BFE8"
+   ],
+   "10": [
+    "BFE7"
+   ],
+   "11": [
+    "FBU6",
+    "BFE6"
+   ],
+   "12": [
+    "STPH"
+   ],
+   "13": [
+    "FDF2"
+   ],
+   "14": [
+    "FDF1"
+   ],
+   "15": [
+    "OBMG"
+   ]
+  },
+  "cpu": {
+   "demand_cycles": {
+    "0": 95000,
+    "1": 161998,
+    "2": 190000,
+    "3": 190000,
+    "4": 190000,
+    "5": 190000,
+    "6": 95000,
+    "7": 190000,
+    "8": 95000,
+    "9": 95000,
+    "10": 95000,
+    "11": 190000,
+    "12": 95000,
+    "13": 95000,
+    "14": 95000,
+    "15": 95000
+   },
+   "phase_cycles": 250000,
+   "phase_percent": {
+    "0": 38.0,
+    "1": 64.7992,
+    "2": 76.0,
+    "3": 76.0,
+    "4": 76.0,
+    "5": 76.0,
+    "6": 38.0,
+    "7": 76.0,
+    "8": 38.0,
+    "9": 38.0,
+    "10": 38.0,
+    "11": 76.0,
+    "12": 38.0,
+    "13": 38.0,
+    "14": 38.0,
+    "15": 38.0
+   },
+   "f_cpu_hz": 380000000.0,
+   "utilization_at_clock": 0.76
+  },
+  "search": {
+   "f_star_hz": 359001159.66796875,
+   "f_star_lower_hz": 358997344.9707031,
+   "attempts": 18,
+   "final_check": {
+    "frequency_hz": 380000000.0,
+    "feasible": true,
+    "hyperperiod": 190000,
+    "packets": 16,
+    "skipped": 0
+   },
+   "frequency_hz": 380000000.0,
+   "binding": "cpu"
+  },
+  "network_at_clock": {
+   "frequency_hz": 500000000,
+   "feasible": true,
+   "hyperperiod": 250000,
+   "packets": 16,
+   "skipped": 0
+  },
+  "phase_max": 4,
+  "response_bound": {
+   "v_last": "OBMG",
+   "phase": 4,
+   "finish_cycles": 95000,
+   "cycles_at_clock": 1095000,
+   "ms_at_clock": 2.19,
+   "s_at_minimum": 0.00225,
+   "deadline_ms": 2.5,
+   "deadline_percent": 87.6,
+   "deadline_equals_phase_rule": true
+  },
+  "flow_windows": [
+   {
+    "flow": "f1",
+    "source": "FBU3",
+    "target": "VOD1",
+    "bytes": 9600,
+    "src_pe": "4",
+    "dst_pe": "4",
+    "on_noc": false,
+    "offset_cycles": 95000,
+    "end_cycles": 356000,
+    "window_cycles": 261000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_cycles": null
+   },
+   {
+    "flow": "f2",
+    "source": "FBU8",
+    "target": "VOD2",
+    "bytes": 9600,
+    "src_pe": "5",
+    "dst_pe": "5",
+    "on_noc": false,
+    "offset_cycles": 95000,
+    "end_cycles": 356000,
+    "window_cycles": 261000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_cycles": null
+   },
+   {
+    "flow": "f3",
+    "source": "VOD1",
+    "target": "NAVC",
+    "bytes": 128,
+    "src_pe": "4",
+    "dst_pe": "0",
+    "on_noc": true,
+    "offset_cycles": 190000,
+    "end_cycles": 261000,
+    "window_cycles": 71000,
+    "hops": 3,
+    "net_time_cycles": 88,
+    "slack_cycles": 70912
+   },
+   {
+    "flow": "f4",
+    "source": "VOD2",
+    "target": "NAVC",
+    "bytes": 128,
+    "src_pe": "5",
+    "dst_pe": "0",
+    "on_noc": true,
+    "offset_cycles": 190000,
+    "end_cycles": 261000,
+    "window_cycles": 71000,
+    "hops": 4,
+    "net_time_cycles": 114,
+    "slack_cycles": 70886
+   },
+   {
+    "flow": "f5",
+    "source": "FBU1",
+    "target": "BFE1",
+    "bytes": 9600,
+    "src_pe": "2",
+    "dst_pe": "2",
+    "on_noc": false,
+    "offset_cycles": 95000,
+    "end_cycles": 356000,
+    "window_cycles": 261000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_cycles": null
+   },
+   {
+    "flow": "f6",
+    "source": "FBU2",
+    "target": "BFE2",
+    "bytes": 9600,
+    "src_pe": "3",
+    "dst_pe": "3",
+    "on_noc": false,
+    "offset_cycles": 95000,
+    "end_cycles": 356000,
+    "window_cycles": 261000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_cycles": null
+   },
+   {
+    "flow": "f7",
+    "source": "FBU3",
+    "target": "BFE3",
+    "bytes": 9600,
+    "src_pe": "4",
+    "dst_pe": "6",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 4,
+    "net_time_cycles": 2482,
+    "slack_cycles": 163518
+   },
+   {
+    "flow": "f8",
+    "source": "FBU4",
+    "target": "BFE4",
+    "bytes": 9600,
+    "src_pe": "1",
+    "dst_pe": "1",
+    "on_noc": false,
+    "offset_cycles": 66998,
+    "end_cycles": 327998,
+    "window_cycles": 261000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_cycles": null
+   },
+   {
+    "flow": "f9",
+    "source": "FBU5",
+    "target": "BFE5",
+    "bytes": 9600,
+    "src_pe": "7",
+    "dst_pe": "7",
+    "on_noc": false,
+    "offset_cycles": 95000,
+    "end_cycles": 356000,
+    "window_cycles": 261000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_cycles": null
+   },
+   {
+    "flow": "f10",
+    "source": "FBU6",
+    "target": "BFE6",
+    "bytes": 9600,
+    "src_pe": "11",
+    "dst_pe": "11",
+    "on_noc": false,
+    "offset_cycles": 95000,
+    "end_cycles": 356000,
+    "window_cycles": 261000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_cycles": null
+   },
+   {
+    "flow": "f11",
+    "source": "FBU7",
+    "target": "BFE7",
+    "bytes": 9600,
+    "src_pe": "8",
+    "dst_pe": "10",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 4,
+    "net_time_cycles": 2482,
+    "slack_cycles": 163518
+   },
+   {
+    "flow": "f12",
+    "source": "FBU8",
+    "target": "BFE8",
+    "bytes": 9600,
+    "src_pe": "5",
+    "dst_pe": "9",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 3,
+    "net_time_cycles": 2456,
+    "slack_cycles": 163544
+   },
+   {
+    "flow": "f13",
+    "source": "BFE1",
+    "target": "FDF1",
+    "bytes": 512,
+    "src_pe": "2",
+    "dst_pe": "14",
+    "on_noc": true,
+    "offset_cycles": 190000,
+    "end_cycles": 261000,
+    "window_cycles": 71000,
+    "hops": 5,
+    "net_time_cycles": 236,
+    "slack_cycles": 70764
+   },
+   {
+    "flow": "f14",
+    "source": "BFE2",
+    "target": "FDF1",
+    "bytes": 512,
+    "src_pe": "3",
+    "dst_pe": "14",
+    "on_noc": true,
+    "offset_cycles": 190000,
+    "end_cycles": 261000,
+    "window_cycles": 71000,
+    "hops": 6,
+    "net_time_cycles": 262,
+    "slack_cycles": 70738
+   },
+   {
+    "flow": "f15",
+    "source": "BFE3",
+    "target": "FDF1",
+    "bytes": 512,
+    "src_pe": "6",
+    "dst_pe": "14",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 4,
+    "net_time_cycles": 210,
+    "slack_cycles": 165790
+   },
+   {
+    "flow": "f16",
+    "source": "BFE4",
+    "target": "FDF1",
+    "bytes": 512,
+    "src_pe": "1",
+    "dst_pe": "14",
+    "on_noc": true,
+    "offset_cycles": 161998,
+    "end_cycles": 261000,
+    "window_cycles": 99002,
+    "hops": 6,
+    "net_time_cycles": 262,
+    "slack_cycles": 98740
+   },
+   {
+    "flow": "f17",
+    "source": "BFE5",
+    "target": "FDF2",
+    "bytes": 512,
+    "src_pe": "7",
+    "dst_pe": "13",
+    "on_noc": true,
+    "offset_cycles": 190000,
+    "end_cycles": 261000,
+    "window_cycles": 71000,
+    "hops": 6,
+    "net_time_cycles": 262,
+    "slack_cycles": 70738
+   },
+   {
+    "flow": "f18",
+    "source": "BFE6",
+    "target": "FDF2",
+    "bytes": 512,
+    "src_pe": "11",
+    "dst_pe": "13",
+    "on_noc": true,
+    "offset_cycles": 190000,
+    "end_cycles": 261000,
+    "window_cycles": 71000,
+    "hops": 5,
+    "net_time_cycles": 236,
+    "slack_cycles": 70764
+   },
+   {
+    "flow": "f19",
+    "source": "BFE7",
+    "target": "FDF2",
+    "bytes": 512,
+    "src_pe": "10",
+    "dst_pe": "13",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 4,
+    "net_time_cycles": 210,
+    "slack_cycles": 165790
+   },
+   {
+    "flow": "f20",
+    "source": "BFE8",
+    "target": "FDF2",
+    "bytes": 512,
+    "src_pe": "9",
+    "dst_pe": "13",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 3,
+    "net_time_cycles": 184,
+    "slack_cycles": 165816
+   },
+   {
+    "flow": "f21",
+    "source": "FDF1",
+    "target": "STPH",
+    "bytes": 2048,
+    "src_pe": "14",
+    "dst_pe": "12",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 4,
+    "net_time_cycles": 594,
+    "slack_cycles": 165406
+   },
+   {
+    "flow": "f22",
+    "source": "FDF2",
+    "target": "STPH",
+    "bytes": 2048,
+    "src_pe": "13",
+    "dst_pe": "12",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 3,
+    "net_time_cycles": 568,
+    "slack_cycles": 165432
+   },
+   {
+    "flow": "f23",
+    "source": "STPH",
+    "target": "OBMG",
+    "bytes": 1024,
+    "src_pe": "12",
+    "dst_pe": "15",
+    "on_noc": true,
+    "offset_cycles": 95000,
+    "end_cycles": 261000,
+    "window_cycles": 166000,
+    "hops": 5,
+    "net_time_cycles": 364,
+    "slack_cycles": 165636
+   }
+  ],
+  "packets_per_period": 16,
+  "local_flows": 7,
+  "memory": {
+   "worst_pe": "4",
+   "worst_bytes": 26120,
+   "heap_bytes": 50732,
+   "fits": true,
+   "largest_payload": 9600,
+   "payload_fits": true,
+   "tasks_fit": true,
+   "queue_fits": true
+  },
+  "largest_cost_below_tick": true
+ }
+}
