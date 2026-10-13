@@ -23,6 +23,7 @@ def by_name(m):
 def test_app_e_matches_weird_a():
     m = model.build(E_CSV, E_MAP, "app_e", mesh="2x2")
     t = by_name(m)
+    assert m["warnings"] == []
     # PEs of weird_a.c (CPU_* defines)
     cpu = {"A": 0, "B": 0, "D": 0, "F": 0, "C": 1, "E": 2, "H": 2, "I": 2, "G": 3, "J": 3}
     assert {n: x["pe"] for n, x in t.items()} == cpu
@@ -55,6 +56,7 @@ def test_order_without_sequence_rows(tmp_path):
     m = model.build(str(csv), str(mp), "a", mesh="1x1")
     assert m["pe_tasks"] == {"0-0": ["IDLE", "S", "Y", "X"]}
     assert m["release"]["period_ns"] == 1000000
+    assert any("manycore_pe.sv fires every 500000 ns" in w for w in m["warnings"])
     assert all(f["local"] for f in m["flows"])
     assert [t["workload"] for t in m["tasks"]] == [2000, 2000, 2000]
 

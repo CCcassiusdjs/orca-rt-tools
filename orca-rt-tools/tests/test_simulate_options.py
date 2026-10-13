@@ -59,11 +59,14 @@ def test_simulate_carv_4x4(tmp_path):
     assert f"vsim -c work.manycore_top work.chk_binds +RUN_NS=11500000 {g}\n" in run_do(tmp_path / "o")
     assert "-s car_v" in log.read_text()
     assert f"app=car_v mesh=4x4 generics={g}\n" in (tmp_path / "o" / "RUN_INFO").read_text()
-    # mesh from car_v.sim; environment overrides the release; monitor off
+    # mesh from car_v.sim; the environment overrides the mask; monitor off
     r = subprocess.run(["bash", sh, str(tmp_path / "o2"), "1000", "car_v"], capture_output=True, text=True,
-                       env={**env, "RELEASE_PERIOD_NS": "250000", "MONITOR": "0"})
+                       env={**env, "RELEASE_MASK": "3", "MONITOR": "0"})
     assert r.returncode == 0, r.stdout + r.stderr
-    assert f"vsim -c work.manycore_top {g} -gRELEASE_PERIOD_NS=250000\n" in run_do(tmp_path / "o2")
+    assert "vsim -c work.manycore_top -gNOC_DIM_X=4 -gNOC_DIM_Y=4 -gRELEASE_MASK=3\n" in run_do(tmp_path / "o2")
+    r = subprocess.run(["bash", sh, str(tmp_path / "o4"), "1000", "car_v"], capture_output=True, text=True,
+                       env={**env, "RELEASE_MASK": "0x9be"})
+    assert r.returncode == 2 and "invalid RELEASE_MASK" in r.stderr
     r = subprocess.run(["bash", sh, str(tmp_path / "o3"), "1000", "car_v", "4by4"],
                        capture_output=True, text=True, env=env)
     assert r.returncode == 2 and "invalid mesh" in r.stderr

@@ -53,7 +53,7 @@ def test_carv_source():
     # PE 4 creates FBU3 before VOD1 (dispatch order of the model)
     case4 = src[src.index("  case 4:"):src.index("  case 5:")]
     assert case4.index("task_FBU3") < case4.index("task_VOD1")
-    assert "MESH=4x4\nRELEASE_MASK=2494\nRELEASE_PERIOD_NS=500000\nRELEASE_DELAY_NS=3000000\n" in sim
+    assert sim.endswith("MESH=4x4\nRELEASE_MASK=2494\n")
 
 
 # ---------------------------------------------------------------- memory

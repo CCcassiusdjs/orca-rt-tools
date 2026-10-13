@@ -20,6 +20,6 @@ file of the flow (node index y * width + x of arch/hermes-*.gml).
 
 Outputs in <dir>: <name>.c (application), <name>.json (manifest: tasks,
 flows, PE of each task, ports, tags, release mask; the input of the
-analysis of a run), <name>.sim (MESH and RELEASE_* for
+analysis of a run), <name>.sim (MESH and RELEASE_MASK for
 experiments/exp23/simulate.sh).
 """

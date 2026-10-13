@@ -253,9 +253,10 @@ def sim_setup(m):
     r = m["release"]
     return ("# Setup of manycore_top for app/{0}.c (rttools.ucxgen); read by\n"
             "# experiments/exp23/simulate.sh. RELEASE_MASK: bit k = PE with node index k\n"
-            "# (PEs {1}).\n"
-            "MESH={2}x{3}\nRELEASE_MASK={4}\nRELEASE_PERIOD_NS={5}\nRELEASE_DELAY_NS={6}\n").format(
-        m["name"], ", ".join(str(n) for n in r["pes"]), w, h, r["mask"], r["period_ns"], r["delay_ns"])
+            "# (PEs {1}). Release period {2} ns, first release at {3} ns: the\n"
+            "# defaults of the release generator (manycore_pe.sv).\n"
+            "MESH={4}x{5}\nRELEASE_MASK={6}\n").format(
+        m["name"], ", ".join(str(n) for n in r["pes"]), r["period_ns"], r["delay_ns"], w, h, r["mask"])
 
 
 def manifest(m):

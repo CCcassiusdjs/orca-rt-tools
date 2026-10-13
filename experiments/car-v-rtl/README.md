@@ -24,7 +24,7 @@ The analysis flow of CAR-V writes the final CSV and `.map`; `make app CSV=... MA
 |---|---|
 | `car_v.c` | One task per vertex (weird_a.c pattern): source tasks wait for the release interrupt; joins wait for the k-th packet of each input edge; `ucx_sleep((c(v) - 11,000) / 10)`; one `ucx_noc_send` per edge with tag = flow x 1024 + (k mod 1024); creation order of each PE = dispatch order of the model |
 | `car_v.json` | Manifest: PE, port, kernel id, workload and edges of each task; flows with source and target PE, payload, tag base; release mask; `pe_tasks` in the format of `experiments/exp23/config.json` |
-| `car_v.sim` | `MESH`, `RELEASE_MASK`, `RELEASE_PERIOD_NS`, `RELEASE_DELAY_NS` for `simulate.sh` |
+| `car_v.sim` | `MESH` and `RELEASE_MASK` for `simulate.sh` (period 0.5 ms and first release at 3 ms: defaults of the release generator) |
 
 ## Log of a run
 

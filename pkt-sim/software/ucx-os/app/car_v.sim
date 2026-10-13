@@ -1,7 +1,6 @@
 # Setup of manycore_top for app/car_v.c (rttools.ucxgen); read by
 # experiments/exp23/simulate.sh. RELEASE_MASK: bit k = PE with node index k
-# (PEs 1, 2, 3, 4, 5, 7, 8, 11).
+# (PEs 1, 2, 3, 4, 5, 7, 8, 11). Release period 500000 ns, first release at 3000000 ns: the
+# defaults of the release generator (manycore_pe.sv).
 MESH=4x4
 RELEASE_MASK=2494
-RELEASE_PERIOD_NS=500000
-RELEASE_DELAY_NS=3000000

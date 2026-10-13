@@ -14,7 +14,7 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 | `make paper` | `sim`, then analysis and check against `reference_head.json` | Questa or ModelSim, toolchain, Python |
 | `make paper REQUIRE_CLEAN=1` | The same, but `simulate.sh` stops unless the tree is a clean git checkout at a tag or a `git archive` of a commit | Same as `make paper`, git |
 | `make info` | Prints the source identification that `make sim` writes to `RUN_INFO` | git (optional) |
-| `./simulate.sh <out> [<sim_ns> [<app> [<mesh>]]]` | Simulation of another application of `pkt-sim/software/ucx-os` on a WxH mesh, for example `./simulate.sh build/carv 11500000 car_v 4x4` (`experiments/car-v-rtl`); `app/<app>.sim` gives the mesh and the release generator (`RELEASE_MASK`, `RELEASE_PERIOD_NS`, `RELEASE_DELAY_NS`, also as environment variables), which reach `manycore_top` as `vsim -g` options; the defaults (`weird_a`, 2x2) give the vsim command of run F | Questa or ModelSim, toolchain |
+| `./simulate.sh <out> [<sim_ns> [<app> [<mesh>]]]` | Simulation of another application of `pkt-sim/software/ucx-os` on a WxH mesh, for example `./simulate.sh build/carv 11500000 car_v 4x4` (`experiments/car-v-rtl`); `app/<app>.sim` gives the mesh and the PEs of the release generator (`RELEASE_MASK`, also as an environment variable), which reach `manycore_top` as `vsim -g` options; the defaults (`weird_a`, 2x2) give the vsim command of run F | Questa or ModelSim, toolchain |
 
 `ENV_SETUP` holds the shell commands that put the simulator and the toolchain on the `PATH`, for example `make paper ENV_SETUP="module load riscv64-elf/12.2.0 questa/2025.3"`.
 <!-- anon:drop-begin -->

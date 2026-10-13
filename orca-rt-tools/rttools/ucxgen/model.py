@@ -29,6 +29,9 @@ MAX_PAYLOAD = 0xFFFF - 3
 MAX_TASKS_PER_PE = 15
 MAX_NAME = 4               # char name[5] of struct tcb_s (include/kernel/kernel.h)
 DEFAULT_DELAY_NS = 3_000_000
+# release generator of manycore_pe.sv (wake_up_alarm, wake_up_delay)
+RTL_PERIOD_NS = 500_000
+RTL_DELAY_NS = 3_000_000
 
 
 class GenError(ValueError):
@@ -216,5 +219,8 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
         "tasks": out_tasks,
         "flows": out_flows,
         "warnings": [f"tasks {', '.join(ns)} share the kernel name {ns[0][:MAX_NAME]!r} on one PE"
-                     for ns in clash],
+                     for ns in clash]
+                    + ([f"release every {period_ns} ns from {delay_ns} ns: the release generator of "
+                        f"manycore_pe.sv fires every {RTL_PERIOD_NS} ns from {RTL_DELAY_NS} ns"]
+                       if (period_ns, delay_ns) != (RTL_PERIOD_NS, RTL_DELAY_NS) else []),
     }

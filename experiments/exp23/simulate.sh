@@ -8,8 +8,8 @@
 # <app>:    application of pkt-sim/software/ucx-os (Makefile target and
 #           app/<app>.c; default weird_a, application E of run F). An
 #           application of rttools.ucxgen has app/<app>.sim with MESH and
-#           RELEASE_MASK, RELEASE_PERIOD_NS, RELEASE_DELAY_NS, which this
-#           script passes to manycore_top (vsim -g).
+#           RELEASE_MASK, which this script passes to manycore_top
+#           (vsim -g).
 # <mesh>:   WxH of manycore_top (NOC_DIM_X x NOC_DIM_Y); default MESH of
 #           app/<app>.sim, otherwise 2x2.
 # With the defaults (weird_a, 2x2, no app/weird_a.sim) the vsim command is
@@ -24,10 +24,10 @@
 #   MONITOR     1 (default) binds the packet monitor; 0 runs without it
 #               (then the log has no $printtimescale lines; pass --unit to
 #               the analysis)
-#   RELEASE_MASK, RELEASE_PERIOD_NS, RELEASE_DELAY_NS
-#               override the values of app/<app>.sim (release generator of
-#               manycore_pe.sv: bit k of the mask = PE with node index
-#               k = y * W + x; period and warm-up in ns)
+#   RELEASE_MASK
+#               overrides the value of app/<app>.sim (release generator of
+#               manycore_pe.sv: bit k of the mask, decimal, = PE with node
+#               index k = y * W + x)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -77,20 +77,14 @@ fi
 DIM_X=${BASH_REMATCH[1]}
 DIM_Y=${BASH_REMATCH[2]}
 R_MASK=${RELEASE_MASK:-$(setup RELEASE_MASK)}
-R_PERIOD=${RELEASE_PERIOD_NS:-$(setup RELEASE_PERIOD_NS)}
-R_DELAY=${RELEASE_DELAY_NS:-$(setup RELEASE_DELAY_NS)}
+if [ -n "$R_MASK" ] && ! [[ "$R_MASK" =~ ^[1-9][0-9]*$ ]]; then
+	echo "invalid RELEASE_MASK: $R_MASK (positive decimal integer)" >&2; exit 2
+fi
 # -g options only for values that differ from the defaults of manycore_top.sv
-GENERICS=""
-[ "$DIM_X" != 2 ] && GENERICS="$GENERICS -gNOC_DIM_X=$DIM_X"
-[ "$DIM_Y" != 2 ] && GENERICS="$GENERICS -gNOC_DIM_Y=$DIM_Y"
-[ -n "$R_MASK" ] && [ "$R_MASK" != 1 ] && GENERICS="$GENERICS -gRELEASE_MASK=$R_MASK"
-[ -n "$R_PERIOD" ] && [ "$R_PERIOD" != 500000 ] && GENERICS="$GENERICS -gRELEASE_PERIOD_NS=$R_PERIOD"
-[ -n "$R_DELAY" ] && [ "$R_DELAY" != 3000000 ] && GENERICS="$GENERICS -gRELEASE_DELAY_NS=$R_DELAY"
-for v in "$R_MASK" "$R_PERIOD" "$R_DELAY"; do
-	if [ -n "$v" ] && ! [[ "$v" =~ ^[0-9]+$ ]]; then
-		echo "invalid release setting: $v (decimal integer)" >&2; exit 2
-	fi
-done
+APP_GENERICS=""
+[ "$DIM_X" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_X=$DIM_X"
+[ "$DIM_Y" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_Y=$DIM_Y"
+[ -n "$R_MASK" ] && [ "$R_MASK" != 1 ] && APP_GENERICS="$APP_GENERICS -gRELEASE_MASK=$R_MASK"
 
 if [ -n "${ENV_SETUP:-}" ]; then
 	set +u
@@ -131,7 +125,7 @@ if [ "$MONITOR" = 1 ]; then
 	cat >> run.do <<EOD
 vlog -mixedsvvh -sv -work work $HERE/rtl/pe_checker.sv
 vlog -mixedsvvh -sv -work work $HERE/rtl/chk_binds.sv
-vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$GENERICS
+vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run -all
@@ -139,7 +133,7 @@ quit -f
 EOD
 else
 	cat >> run.do <<EOD
-vsim -c work.manycore_top$GENERICS
+vsim -c work.manycore_top$APP_GENERICS
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run ${SIM_NS}ns
@@ -149,7 +143,7 @@ fi
 
 {
 	echo "sim_ns=$SIM_NS monitor=$MONITOR"
-	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${GENERICS# }"
+	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${APP_GENERICS# }"
 	echo "vsim=$(vsim -version 2>/dev/null | head -1)"
 	echo "gcc=$(riscv64-elf-gcc --version | head -1)"
 	echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
