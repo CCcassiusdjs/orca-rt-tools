@@ -55,7 +55,8 @@ def test_pack_is_deterministic_and_extract_inverts_it(tmp_path):
 
 def test_car_and_criterion_of_application_e(tmp_path):
     cfg = load(os.path.join(CH7, "car.json"))
-    m = car.write(str(tmp_path), car.run_car(cfg["car"], APPS), car.run_appe(cfg["appe"], APPS), cfg)
+    m = car.write(str(tmp_path), car.run_car(cfg["car"], APPS), car.run_appe(cfg["appe"], APPS), cfg,
+                  car.run_spiral(cfg["spiral"], APPS))
     assert check(str(tmp_path / "metrics.json"), os.path.join(CH7, "reference_car.json")) == []
     ref = m["car"]["rows"]["Reference"]
     assert (ref["E"], ref["intra_volume"], ref["noc_volume"]) == (38, 0, m["car"]["total_volume"])
