@@ -31,6 +31,7 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | `make -C experiments/ch7 car` | `experiments/ch7/build/car`: CAR on 16 clusters and the criterion of application E | seconds |
 | `make -C experiments/ch7 graphs full stats` | `experiments/ch7/build/{full,stats}`: all graphs and the summary of Table 7.1 | about 20 min |
 | `make -C experiments/exp23 paper ENV_SETUP="..."` | `experiments/exp23/build/sim` (transcript, events, `RUN_INFO`), then the analysis of the new log against `reference_head.json` | about 6 min of simulation |
+| `make -C experiments/exp23 instrumentation ENV_SETUP="..."` | `experiments/exp23/build/sw/{with,without}` (images with and without the instrumentation writes, `build_sw.sh`), then the bound of the writes in the measured CPU time of run F against `reference_head.json` | 4 s (container) |
 | `cd orca-rt-tools && python -m pytest -q` | Python, C host and RTL tests (the RTL tests skip without Verilator or GHDL) | about 1 min |
 
 ## Measured times
@@ -67,6 +68,7 @@ TODO(re-measure on the workstation): the container times come from a shared cont
 | Item of the paper | Source | Command |
 |---|---|---|
 | CPU time per iteration, measured and estimated, per cluster; Gantt of one hyperperiod; response time per iteration; flows with release, deadline and measured latency | `experiments/exp23/logs/F.events.txt` (stored log of the RTL simulation of tag exp23-F; `F.RUN_INFO`, `F.time.txt`) | `make -C experiments/exp23`; tables, `values.tex` and `metrics.json` in `build/results` |
+| Upper bound of the instrumentation writes in the measured CPU time per cluster (cycles per dispatch and per packet event, percent of the CPU time per iteration) | `experiments/exp23/logs/F.image.lst`, `F.noinstr.lst` (listings of the image of run F, `F.software.txt`), `F.events.txt`; cycles per instruction from `pkt-sim/tests/rtl/tb_cpu_cycles.vhd` | `make -C experiments/exp23` (stored listings; `instrumentation` in `metrics.json`, `\ExpInstrumentationMaxPercent` in `values.tex`); `make -C experiments/exp23 instrumentation` (build of this tree, riscv64-elf toolchain) |
 | Gantt of one hyperperiod, response per iteration and flow table (rows and coordinates of the article visuals); contraction criteria on the example graph | `experiments/exp23/logs/F.events.txt`, `apps/sample-graph-a/sample_graph.txt` | `make -C experiments figures` |
 | CAR clustering (Reference, MAX-PROC, MIN-COMM) and the criterion of application E | `apps/shi-2010/shi-2010.txt`, `apps/synthetic-app-e/synthetic-app-e.txt` | `make -C experiments/ch7 car` |
 | Minimum frequency of application E: f* (network), f_CPU (CPU test) and max(f*, f_CPU), with the mapping file and with the Spiral Mapping | `apps/synthetic-app-e/synthetic-app-e.csv` (phase model, characterized costs), `arch/hermes-2x2.gml` | `make -C experiments/exp23 frequency`; the same numbers from `python -m rttools apps/synthetic-app-e/synthetic-app-e.csv <map or spiral> arch/hermes-2x2.gml 500000000` |
