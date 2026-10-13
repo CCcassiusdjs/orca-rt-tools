@@ -4,15 +4,18 @@
 #   make analyze   tables, figure and metrics from $(LOG)
 #   make check     compare the metrics with $(REF)
 #   make all       analyze + check (default; stored log of run F against reference_head.json) + frequency
-#                  + tick
+#                  + frequency-l0 + tick
 #   make tick      tick of the UCX-OS (arch.mak, hal.c, peripherals_minimal.vhd) against the release
 #                  period of A (manycore_pe.sv, config.json): tick = T x F_CLK cycles (tick_period.py code;
 #                  make paper-flow also checks it at the clock of the flow, --f-clk)
 #   make tick-log  release_to_dispatch, request_to_dispatch and spacing of the dispatches of A in $(LOG);
 #                  passes when the spacing equals the tick and request_to_dispatch is constant
 #   make frequency minimum frequency of application E (CLI input apps/synthetic-app-e): f*, f_CPU and
-#                  max(f*, f_CPU) with the .map file and with the Spiral Mapping; check against
-#                  reference_frequency.json
+#                  max(f*, f_CPU) with the .map file and with the Spiral Mapping, link occupancy
+#                  o_i = L0 + 20 (m + 1) (header wait bound of the Hermes, make -C ../zll contention;
+#                  the default of rttools); check against reference_frequency.json
+#   make frequency-l0  the same with o_i = L0 (--header-wait off); check against
+#                  reference_frequency_l0.json
 #   make paper     sim + software-without + analyze + check (simulation of this tree against
 #                  reference_head.json), both builds at F_CLK
 #   make software  build of simulate.sh (build_sw.sh) into $(SW)/with and the same build with
@@ -86,10 +89,11 @@ LISTING ?= $(if $(filter $(F_LOG),$(LOG)),logs/F.image.lst)
 LISTING_WITHOUT ?= $(if $(filter $(F_LOG),$(LOG)),logs/F.noinstr.lst)
 INSTR_ARGS = $(if $(LISTING),--listing $(LISTING) --listing-without $(LISTING_WITHOUT))
 
-.PHONY: all sim analyze check frequency tick tick-log paper flow-clock paper-flow software software-without
+.PHONY: all sim analyze check frequency tick tick-log frequency-l0 paper flow-clock paper-flow software
+.PHONY: software-without
 .PHONY: instrumentation info clean
 
-all: analyze check frequency tick
+all: analyze check frequency frequency-l0 tick
 
 sim:
 	F_CLK=$(F_CLK) ./simulate.sh $(SIMDIR) $(SIM_NS)
@@ -103,8 +107,14 @@ check:
 frequency:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
 		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --map spiral --f0 $(F0) \
-		--config config.json --out $(BUILD)/frequency
+		--config config.json --header-wait bound --out $(BUILD)/frequency
 	$(RUN) check $(BUILD)/frequency/metrics.json reference_frequency.json
+
+frequency-l0:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
+		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --map spiral --f0 $(F0) \
+		--config config.json --header-wait off --out $(BUILD)/frequency_l0
+	$(RUN) check $(BUILD)/frequency_l0/metrics.json reference_frequency_l0.json
 
 tick:
 	$(PYTHON) tick_period.py code

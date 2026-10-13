@@ -1,5 +1,7 @@
 {
- "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping. The dispatch order of each node (sequences) comes from the creation rows of the CSV by the kernel rule (rttools/bench_t/estimate.py dispatch_order); with J before G on the node of GJ, f* is set by I->J (release f^(I) = 173 370, start of J 11 000 in the next phase, 1 434 cycles for 5 670 bytes over 1 hop).",
+ "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py, link occupancy o_i = L0 + 20 (m + 1), the default of rttools/modules/routing/router.py (HEADER_WAIT_CYCLES; wait measured by make -C ../zll contention). f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping.",
+ "header_wait_cycles": 20,
+ "occupancy": "L0 + 20 (m + 1)",
  "f_cpu_exp23_hz": 434900000,
  "f_cpu_equals_exp23": true,
  "runs": {
@@ -52,8 +54,8 @@
     "3": 217450
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 327610015.8691406,
-   "f_star_lower_hz": 327606201.171875,
+   "f_star_hz": 327690124.51171875,
+   "f_star_lower_hz": 327686309.8144531,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {
@@ -113,8 +115,8 @@
     "3": 173370
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 327610015.8691406,
-   "f_star_lower_hz": 327606201.171875,
+   "f_star_hz": 327690124.51171875,
+   "f_star_lower_hz": 327686309.8144531,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {
@@ -125,5 +127,6 @@
     "skipped": 0
    }
   }
- }
+ },
+ "_header_wait": "Integration of PR 105 (dispatch order of the kernel) and PR 106 (header wait bound): with the order E, H, I; J, G the flow I->J sets f* (1 hop, o = L0 + 20 (m + 1) = 1434 + 40 = 1474 cycles): f* = 327690124.51 Hz (bisection lower bound 327686309.81 Hz) against 327610015.87 Hz with o_i = L0 (reference_frequency_l0.json); f_CPU and the minimum frequency, 434.9 MHz, do not change."
 }
