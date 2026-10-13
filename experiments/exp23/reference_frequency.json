@@ -1,5 +1,5 @@
 {
- "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping.",
+ "_doc": "Minimum frequency of application E (make frequency): CLI input apps/synthetic-app-e/synthetic-app-e.csv (phase model, characterized costs), arch/hermes-2x2.gml, first frequency 500 MHz, search parameters of rttools/__main__.py. f* (network, bisection), f_CPU (CPU test, once) and the network check at f_CPU (final_check) and the minimum frequency for the .map file and for the Spiral Mapping. The dispatch order of each node (sequences) comes from the creation rows of the CSV by the kernel rule (rttools/bench_t/estimate.py dispatch_order); with J before G on the node of GJ, f* is set by I->J (release f^(I) = 173 370, start of J 11 000 in the next phase, 1 434 cycles for 5 670 bytes over 1 hop).",
  "f_cpu_exp23_hz": 434900000,
  "f_cpu_equals_exp23": true,
  "runs": {
@@ -25,6 +25,26 @@
      "J"
     ]
    },
+   "sequences": {
+    "0": [
+     "A",
+     "B",
+     "D",
+     "F"
+    ],
+    "1": [
+     "C"
+    ],
+    "2": [
+     "E",
+     "H",
+     "I"
+    ],
+    "3": [
+     "J",
+     "G"
+    ]
+   },
    "cpu_demand_cycles": {
     "0": 181930,
     "1": 96330,
@@ -32,8 +52,8 @@
     "3": 217450
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 345294952.3925781,
-   "f_star_lower_hz": 345291137.6953125,
+   "f_star_hz": 327610015.8691406,
+   "f_star_lower_hz": 327606201.171875,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {
@@ -66,6 +86,26 @@
      "I"
     ]
    },
+   "sequences": {
+    "0": [
+     "C"
+    ],
+    "1": [
+     "A",
+     "B",
+     "D",
+     "F"
+    ],
+    "2": [
+     "J",
+     "G"
+    ],
+    "3": [
+     "E",
+     "H",
+     "I"
+    ]
+   },
    "cpu_demand_cycles": {
     "0": 96330,
     "1": 181930,
@@ -73,8 +113,8 @@
     "3": 173370
    },
    "f_cpu_hz": 434900000.0,
-   "f_star_hz": 345294952.3925781,
-   "f_star_lower_hz": 345291137.6953125,
+   "f_star_hz": 327610015.8691406,
+   "f_star_lower_hz": 327606201.171875,
    "frequency_hz": 434900000.0,
    "binding": "cpu",
    "final_check": {
