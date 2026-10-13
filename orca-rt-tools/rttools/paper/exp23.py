@@ -21,6 +21,22 @@ cycles and milliseconds:
 
 `check` compares metrics.json with a reference file and exits with 1 when
 a value differs (integers exactly; floats within 1e-6 relative).
+
+Clock of the run: `analyze` reads it from the RUN_INFO of the simulation
+(experiments/exp23/simulate.sh: f_clk_hz, clock_half_period_fs,
+release_cycles), next to the log (<dir>/<name>.RUN_INFO or <dir>/RUN_INFO)
+or given by --run-info; without these keys, from config clock_hz. F_CLK is
+the clock of the platform: the release period, the tick and the model
+count cycles of F_CLK, and platform time = cycles / F_CLK. The simulator
+clock has the half period of RUN_INFO (1e15 / (2 half) Hz, at or above
+F_CLK); the log converts to cycles with that period, and the rising edges
+are restored from $time when the period is not a whole number of log
+units (see snap_to_edges).
+
+    python -m rttools.paper.exp23 clock <frequency metrics.json> --config <config.json>
+
+prints the clock of a run at the minimum frequency of the flow (see
+flow_clock).
 """
 from __future__ import annotations
 
@@ -36,6 +52,154 @@ from rttools.modules.instances import release
 from rttools.modules.io import appparser
 from rttools.tui.model import export, metrics, parsers
 from rttools.tui.model.trace import Trace
+
+
+# ------------------------------------------------------------ clock
+
+# keys of RUN_INFO (simulate.sh) that give the clock of the run
+RUN_INFO_CLOCK = ("f_clk_hz", "clock_half_period_fs")
+# TIMER1 of the platform counts steps of this many cycles (hal.c,
+# peripherals_minimal.vhd): the release period in cycles is a multiple
+TICK_STEP_CYCLES = 16
+# precision of the timescale of manycore_top.sv and manycore_pe.sv (1 fs)
+TIMESCALE_PRECISION_FS = 1
+
+
+def run_info_path(log_path):
+    """RUN_INFO of a log: <dir>/<name>.RUN_INFO (logs/F.events.txt ->
+    logs/F.RUN_INFO), else <dir>/RUN_INFO (output directory of
+    simulate.sh); None when neither exists."""
+    d, base = os.path.split(os.path.abspath(log_path))
+    for cand in (os.path.join(d, base.split(".")[0] + ".RUN_INFO"), os.path.join(d, "RUN_INFO")):
+        if os.path.isfile(cand):
+            return cand
+    return None
+
+
+def read_run_info(path):
+    """key=value tokens of a RUN_INFO file (several per line allowed)."""
+    out = {}
+    with open(path) as f:
+        for line in f:
+            for tok in line.split():
+                if "=" in tok:
+                    k, v = tok.split("=", 1)
+                    out.setdefault(k, v)
+    return out
+
+
+def half_period_fs(f_clk_hz, precision_fs=TIMESCALE_PRECISION_FS):
+    """Half period of the simulator clock for F_CLK: the largest multiple
+    of the timescale precision at or below 1e15 / (2 F_CLK) fs, so the
+    clock runs at or above F_CLK (simulate.sh, CLOCK_HALF_PERIOD_FS)."""
+    return (10 ** 15 // (2 * int(f_clk_hz) * precision_fs)) * precision_fs
+
+
+def simulation_clock(cfg, info=None):
+    """Clock of a run: {"clock_hz": F_CLK (cycles per second of platform
+    time), "cycle_hz": frequency of the simulator clock (1e15 / (2 half)),
+    "half_period_fs", "source": "RUN_INFO" or "config"}. RUN_INFO wins
+    over config clock_hz; its release_cycles must equal
+    release_period_s F_CLK of the config."""
+    if info and all(k in info for k in RUN_INFO_CLOCK):
+        f = int(info["f_clk_hz"])
+        half = int(info["clock_half_period_fs"])
+        if "release_cycles" in info:
+            want = exact(cfg["release_period_s"] * f)
+            if int(info["release_cycles"]) != want:
+                raise ValueError(f"RUN_INFO release_cycles={info['release_cycles']} differs from "
+                                 f"release_period_s * f_clk_hz = {want} of the config")
+        source = "RUN_INFO"
+    else:
+        f = cfg["clock_hz"]
+        half = None
+        source = "config"
+    if half is None or 2 * half * f == 10 ** 15:
+        cycle_hz = f
+    else:
+        cycle_hz = 10 ** 15 / (2 * half)
+    if cycle_hz < f:
+        raise ValueError(f"simulator clock {cycle_hz} Hz below F_CLK {f} Hz")
+    return {"clock_hz": f, "cycle_hz": cycle_hz, "half_period_fs": half, "source": source}
+
+
+def flow_clock(f_min_hz, period_s, precision_fs=TIMESCALE_PRECISION_FS, step_cycles=TICK_STEP_CYCLES):
+    """Clock of a run at the minimum frequency f_min of the flow: F_CLK is
+    the first frequency at or above f_min whose release period T F_CLK is a
+    whole number of TIMER1 steps (multiple of step_cycles / T Hz, 32 kHz
+    for T = 0.5 ms), so the tick (F_CLK / F_TIMER cycles, hal.c) and the
+    release generator (T F_CLK cycles, manycore_pe.sv) count the same
+    period; the simulator clock has the half period of half_period_fs, at
+    or above F_CLK."""
+    grid = step_cycles / period_s
+    if abs(grid - round(grid)) > 1e-6:
+        raise ValueError(f"{step_cycles} / T = {grid} Hz is not an integer")
+    grid = int(round(grid))
+    f_clk = -(-int(math.ceil(f_min_hz - 1e-6)) // grid) * grid
+    half = half_period_fs(f_clk, precision_fs)
+    return {"f_min_hz": f_min_hz, "f_clk_hz": f_clk, "grid_hz": grid, "half_period_fs": half,
+            "period_fs": 2 * half, "clock_hz_exact": 10 ** 15 / (2 * half),
+            "release_cycles": exact(period_s * f_clk), "tick_steps": exact(period_s * f_clk / step_cycles)}
+
+
+def clock_of_frequency_run(freq_metrics, cfg, map_name=None):
+    """flow_clock of the minimum frequency of a mapping in the metrics.json
+    of rttools.paper.frequency (default: the first .map file, the mapping
+    of the RTL), with T = config release_period_s."""
+    with open(freq_metrics) as f:
+        m = json.load(f)
+    runs = m["runs"]
+    if map_name is None:
+        map_name = next(k for k in runs if k.endswith(".map"))
+    f_min = runs[map_name]["frequency_hz"]
+    if f_min is None:
+        raise ValueError(f"{map_name}: the flow returned no frequency")
+    out = flow_clock(f_min, cfg["release_period_s"])
+    out["map"] = map_name
+    return out
+
+
+def snap_to_edges(tr, half_fs):
+    """Trace with each time moved to the rising edge of the simulator
+    clock that it rounds: manycore_pe.sv prints $time (integer, unit of the
+    log) at rising edges, and edge n occurs at (2 n + 1) half fs. With a
+    period that is not a whole number of units (435.2 MHz: 2.297794 ns),
+    the printed value differs from the edge by up to half a unit; the edge
+    is the nearest one while the period exceeds one unit. The cycles
+    between two events are then whole numbers."""
+    unit_fs = round(tr.unit.seconds * 1e15)
+    period_fs = 2 * half_fs
+    if period_fs <= unit_fs:
+        raise ValueError(f"clock period of {period_fs} fs not above the log unit of {unit_fs} fs")
+
+    cache = {}
+
+    def edge(t):
+        if t in cache:
+            return cache[t]
+        t_fs = t * unit_fs
+        n = round((t_fs - half_fs) / period_fs)
+        e_fs = (2 * n + 1) * half_fs
+        if abs(e_fs - t_fs) > unit_fs / 2 + 1e-6:
+            raise ValueError(f"time {t} is not within half a unit of a rising edge")
+        cache[t] = e_fs / unit_fs
+        return cache[t]
+
+    from dataclasses import replace
+    slices = [replace(s, start=edge(s.start), end=edge(s.end)) for s in tr.slices]
+    marks = [replace(m, time=edge(m.time)) for m in tr.marks]
+    meta = dict(tr.meta)
+    pk = []
+    for p in tr.meta.get("packets") or []:
+        q = dict(p)
+        for k in ("send", "recv"):
+            if q[k] is not None:
+                q[k] = edge(q[k])
+        q["latency"] = None if q["send"] is None or q["recv"] is None else q["recv"] - q["send"]
+        pk.append(q)
+    meta["packets"] = pk
+    meta["edges_snapped"] = True
+    return Trace(tr.name, tr.unit, list(tr.lanes), slices, marks, meta)
 
 
 # ------------------------------------------------------------ loading
@@ -94,34 +258,67 @@ def dispatch_sequences(cfg):
     return {c: cpu_estimate.dispatch_order(ts, edges, phi) for c, ts in creation_order(cfg).items()}
 
 
-def load(log_path, cfg, unit=None):
+def load(log_path, cfg, unit=None, clock=None):
+    """Trace of the log; `clock` (simulation_clock) gives the simulator
+    clock, else config clock_hz."""
     names = cfg["pe_tasks"]
     tr = parsers.load_trace(log_path, "rtl", names, "auto", unit)
-    clock = cfg["clock_hz"]
-    if tr.unit.clock_hz != clock:
-        tr.unit = tr.unit.with_clock(clock)
+    hz = clock["cycle_hz"] if clock else cfg["clock_hz"]
+    if tr.unit.clock_hz != hz:
+        tr.unit = tr.unit.with_clock(hz)
     if tr.unit.seconds is None:
         raise ValueError("unknown time unit")
+    tr.meta["edges_snapped"] = False
+    if clock and clock["half_period_fs"] is not None:
+        unit_fs = round(tr.unit.seconds * 1e15)
+        if (2 * clock["half_period_fs"]) % unit_fs:
+            tr = snap_to_edges(tr, clock["half_period_fs"])
     return tr
 
 
-class Clock:
-    """Conversion between raw units of the log, cycles and seconds."""
+def load_run(log_path, cfg, unit=None, run_info="auto"):
+    """(trace, config of the run, Clock, clock dict) of a log: the clock
+    comes from run_info (path; "auto" = run_info_path(log_path); None =
+    config only); the config of the run carries clock_hz = F_CLK."""
+    path = run_info_path(log_path) if run_info == "auto" else run_info
+    info = read_run_info(path) if path else None
+    clock = simulation_clock(cfg, info)
+    clock["run_info"] = os.path.basename(path) if path else None
+    run_cfg = dict(cfg, clock_hz=clock["clock_hz"])
+    tr = load(log_path, run_cfg, unit, clock)
+    clock["edges_snapped"] = tr.meta["edges_snapped"]
+    return tr, run_cfg, Clock(tr.unit, clock["clock_hz"], clock["cycle_hz"]), clock
 
-    def __init__(self, unit, clock_hz):
+
+class Clock:
+    """Conversion between raw units of the log, cycles and seconds.
+
+    clock_hz: F_CLK, cycles per second of platform time (config, RUN_INFO).
+    cycle_hz: frequency of the simulator clock (default clock_hz), for the
+    conversion of the log to cycles. Platform seconds = cycles / clock_hz."""
+
+    def __init__(self, unit, clock_hz, cycle_hz=None):
         self.unit = unit
         self.hz = clock_hz
+        self.cycle_hz = clock_hz if cycle_hz is None else cycle_hz
+        # platform seconds per second of the simulator (1.0 at F_CLK)
+        self.scale = self.cycle_hz / self.hz
 
     def raw(self, seconds):
-        return seconds / self.unit.seconds
+        """Raw units of `seconds` of platform time."""
+        return seconds / self.scale / self.unit.seconds
 
     def cycles(self, raw):
-        return raw * self.unit.seconds * self.hz
+        return raw * self.unit.seconds * self.cycle_hz
+
+    def seconds(self, raw):
+        """Platform time of `raw` units."""
+        return raw * self.unit.seconds * self.scale
 
     def ms(self, raw):
         # rounded to 1 ps: the products of 1e-10 and 1e-9 differ in the
         # last float digits for the same time
-        return round(raw * self.unit.seconds * 1e3, 9)
+        return round(raw * self.unit.seconds * self.scale * 1e3, 9)
 
 
 def exact(x):
@@ -138,7 +335,9 @@ def hyperperiods(tr, cfg, clk):
     t = clk.raw(cfg["first_hyperperiod_s"])
     out = []
     while t + hp <= tr.t1 + 1e-9:
-        out.append((int(round(t)), int(round(t + hp))))
+        # bounds at cycle boundaries; a clock period that is not a whole
+        # number of units gives non-integral bounds (exact keeps them)
+        out.append((exact(t), exact(t + hp)))
         t += hp
     return out
 
@@ -569,9 +768,15 @@ def monitor_summary(log_path):
 
 # ----------------------------------------------------------- commands
 
-def analyze(log_path, cfg, out_dir, unit=None, join=None):
-    tr = load(log_path, cfg, unit)
-    clk = Clock(tr.unit, cfg["clock_hz"])
+def mhz_text(hz):
+    """F_CLK in MHz for captions: 500, 435.2, 434.912."""
+    return f"{hz / 1e6:.6f}".rstrip("0").rstrip(".")
+
+
+def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto"):
+    """Every output of the module for one log; run_info: RUN_INFO path,
+    "auto" (next to the log) or None (config clock_hz)."""
+    tr, cfg, clk, clock = load_run(log_path, cfg, unit, run_info)
     windows = hyperperiods(tr, cfg, clk)
     if not windows:
         raise ValueError("the log has no complete hyperperiod after first_hyperperiod_s")
@@ -587,6 +792,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None):
         "log": os.path.basename(log_path),
         "unit": {"name": tr.unit.name, "seconds": tr.unit.seconds, "detected": tr.meta["timescale_detected"],
                  "swap_xy": bool(tr.meta["swap_xy"])},
+        "clock": clock,
         "parameters": {
             "clock_hz": cfg["clock_hz"],
             "release_period_ms": cfg["release_period_s"] * 1e3,
@@ -653,7 +859,8 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None):
                  ("Difference", "difference"), ("Difference (\\%)", "difference_percent"),
                  ("Utilization (\\%)", "utilization_percent")],
                 rows83, "lrrrrr",
-                f"CPU time per iteration (cycles at 500 MHz). Mean overestimation {mean83:.2f}\\%.",
+                f"CPU time per iteration (cycles at {mhz_text(cfg['clock_hz'])} MHz). "
+                f"Mean overestimation {mean83:.2f}\\%.",
                 "tab:exp23-cpu")
     write_table(os.path.join(out_dir, "iterations"),
                 [("Release offset (ms)", "release_offset_ms"), ("Iterations", "count"),
@@ -724,6 +931,15 @@ def main(argv=None):
     a.add_argument("--join", choices=JOIN_RULES, default=None,
                    help="join rule of J (default: config join.rule; any3 for the logs A to E of the "
                         "application before 379f388)")
+    a.add_argument("--run-info", default="auto",
+                   help="RUN_INFO of the simulation (clock of the run); default: next to the log; "
+                        "`none`: config clock_hz")
+    k = sub.add_parser("clock", help="clock of a run at the minimum frequency of the flow")
+    k.add_argument("frequency", help="metrics.json of rttools.paper.frequency run")
+    k.add_argument("--config", required=True)
+    k.add_argument("--map", default=None, help="mapping of the frequency run (default: the first .map file)")
+    k.add_argument("--field", default=None, help="print only this field (for example f_clk_hz)")
+    k.add_argument("--out", default=None, help="write the clock as JSON")
     c = sub.add_parser("check")
     c.add_argument("metrics")
     c.add_argument("reference")
@@ -734,9 +950,15 @@ def main(argv=None):
         if args.unit:
             from rttools.tui.model.timeunit import RTL_PRESETS
             unit = RTL_PRESETS[args.unit]
-        m = analyze(args.log, cfg, args.out, unit, args.join)
+        run_info = None if args.run_info == "none" else args.run_info
+        m = analyze(args.log, cfg, args.out, unit, args.join, run_info)
+        ck = m["clock"]
         print(f"{m['log']}: unit {m['unit']['name']} (detected {m['unit']['detected']}), "
               f"{m['parameters']['hyperperiods']} hyperperiods, join rule {m['join_rule']}")
+        print(f"  clock F_CLK {mhz_text(ck['clock_hz'])} MHz from {ck['source']}"
+              + ("" if ck["half_period_fs"] is None else
+                 f" (half period {ck['half_period_fs']} fs, simulator {ck['cycle_hz']:.3f} Hz"
+                 f"{', edges restored' if ck['edges_snapped'] else ''})"))
         for r in m["tab83"]["rows"]:
             print(f"  {r['cluster']:5s} measured {cycles_text(r['measured']):>10} "
                   f"estimated {cycles_text(r['estimated']):>10} "
@@ -750,6 +972,21 @@ def main(argv=None):
                                        f"{mon['errors']} errors in {mon['send_pkts']} sent and "
                                        f"{mon['recv_pkts']} received packets ({mon['nodes']} PEs)"))
         print("wrote " + args.out)
+        return 0
+    if args.cmd == "clock":
+        with open(args.config) as f:
+            cfg = json.load(f)
+        ck = clock_of_frequency_run(args.frequency, cfg, args.map)
+        if args.out:
+            with open(args.out, "w") as f:
+                json.dump(ck, f, indent=1)
+        if args.field:
+            print(ck[args.field])
+        else:
+            print(f"minimum frequency {ck['f_min_hz']:.0f} Hz ({ck['map']}) -> F_CLK {ck['f_clk_hz']} Hz "
+                  f"(multiple of {ck['grid_hz']} Hz), half period {ck['half_period_fs']} fs, "
+                  f"period {ck['period_fs']} fs, clock {ck['clock_hz_exact']:.3f} Hz, "
+                  f"release {ck['release_cycles']} cycles = {ck['tick_steps']} TIMER1 steps")
         return 0
     diffs = check(args.metrics, args.reference)
     for d in diffs:

@@ -16,6 +16,7 @@ TESTS = {
     "tb_hermes_local": "ghdl",       # fix 23
     "tb_tcd": "verilator",           # fix 24
     "tb_manycore_pe": "verilator",   # fixes 25 to 27
+    "tb_release": "verilator",       # release generator in cycles, clock half period in fs
 }
 
 

@@ -41,7 +41,9 @@ def thin(x, d=0):
 
 
 def half_up(x):
-    return int(math.floor(x + 0.5))
+    # rounded to 1e-6 first: cycles of a clock whose period is not a whole
+    # number of ns carry float noise around the half cycle
+    return int(math.floor(round(x, 6) + 0.5))
 
 
 def write_csv(path, header, rows):
@@ -344,11 +346,12 @@ def gantt(tr, cfg, clk, window, resp):
     units): RTL bars, ORT/BENCH estimate bars, releases, responses of the
     two first iterations of the window and the deadline of the first."""
     w0, w1 = window
-    hp_ms = (w1 - w0) * tr.unit.seconds * 1e3
+    # platform ms (cycles / F_CLK; Clock.seconds)
+    hp_ms = clk.seconds(w1 - w0) * 1e3
     n_it = cfg["iterations_per_hyperperiod"]
 
     def ms(raw):
-        return (raw - w0) * tr.unit.seconds * 1e3
+        return clk.seconds(raw - w0) * 1e3
 
     rows = sorted(cfg["clusters"].items(), key=lambda kv: (pe_xy(kv[0])[1], pe_xy(kv[0])[0]))
     color = {}
@@ -410,7 +413,7 @@ def gantt(tr, cfg, clk, window, resp):
     ya = bottom - 0.04
     xmax = hp_ms + 0.06
     emit(f"\\draw[black!70] (0,{ya:.2f}) -- ({xmax:.2f},{ya:.2f});")
-    w0_ms = w0 * tr.unit.seconds * 1e3
+    w0_ms = clk.seconds(w0) * 1e3
     for k in range(int(round(hp_ms / 0.25)) + 1):
         x = k * 0.25
         emit(f"\\draw[black!70] ({x:.2f},{ya:.2f}) -- ++(0,-0.08);")
@@ -428,8 +431,8 @@ def gantt(tr, cfg, clk, window, resp):
     brackets = []
     for lvl, r in enumerate(win):
         s, e = r["start"], r["end"]
-        cyc = int(math.floor(clk.cycles(e - s)))
-        txt = f"{(e - s) * tr.unit.seconds * 1e3:.3f}~ms ({thin(cyc)} cycles)"
+        cyc = int(math.floor(round(clk.cycles(e - s), 6)))
+        txt = f"{clk.seconds(e - s) * 1e3:.3f}~ms ({thin(cyc)} cycles)"
         yb = top + 0.32 + 0.33 * (1 - lvl)
         xs, xe = ms(s), ms(e)
         brackets.append({"iteration": r["iteration"], "start": s, "end": e, "cycles": cyc,
@@ -453,7 +456,7 @@ def iterations(tr, cfg, clk, resp):
     pts = []
     for r in resp:
         before = [t for t in rel if t <= r["start"]]
-        release_ms = (before[-1] if before else r["start"]) * tr.unit.seconds * 1e3
+        release_ms = clk.seconds(before[-1] if before else r["start"]) * 1e3
         pts.append({"iteration": r["iteration"], "release_ms": release_ms, "response_ms": r["response_ms"],
                     "response_cycles": r["response_cycles"]})
     mx = max(pts, key=lambda p: p["response_ms"])
@@ -518,9 +521,10 @@ def flows(tr, cfg, clk, fcfg):
     return lines, rows
 
 
-def exp23_figures(log, cfg, fcfg, out_dir, join=None):
-    tr = X.load(log, cfg)
-    clk = X.Clock(tr.unit, cfg["clock_hz"])
+def exp23_figures(log, cfg, fcfg, out_dir, join=None, run_info="auto"):
+    # clock of the run: RUN_INFO next to the log, else config clock_hz
+    # (rttools.paper.exp23.load_run); cfg becomes the config of the run
+    tr, cfg, clk, clock = X.load_run(log, cfg, None, run_info)
     windows = X.hyperperiods(tr, cfg, clk)
     rule = X.join_rule(cfg, join)
     resp = X.responses(tr, cfg, clk, rule)
@@ -530,7 +534,7 @@ def exp23_figures(log, cfg, fcfg, out_dir, join=None):
     measured = X.cpu_per_iteration(tr, cfg, clk, windows[:1])
     g_info["busy_equals_tab83"] = all(math.isclose(g_info["busy_cycles_per_iteration"][c], measured[c]["mean"])
                                       for c in g_info["busy_cycles_per_iteration"])
-    m = {"log": os.path.basename(log), "unit": tr.unit.name, "swap_xy": bool(tr.meta["swap_xy"]),
+    m = {"log": os.path.basename(log), "unit": tr.unit.name, "swap_xy": bool(tr.meta["swap_xy"]), "clock": clock,
          "join_rule": rule, "gantt": g_info, "iterations": i_info, "flows": f_rows}
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
@@ -566,6 +570,9 @@ def main(argv=None):
     e.add_argument("--flows", required=True, help="configuration of the flow table (router constants)")
     e.add_argument("--join", choices=X.JOIN_RULES, default=None,
                    help="join rule of J (default: config join.rule; any3 for the logs A to E)")
+    e.add_argument("--run-info", default="auto",
+                   help="RUN_INFO of the simulation (clock of the run); default: next to the log; "
+                        "`none`: config clock_hz")
     e.add_argument("--out", required=True)
     a = p.parse_args(argv)
     if a.cmd == "contraction":
@@ -583,7 +590,7 @@ def main(argv=None):
         cfg = X.load_config(a.config)
         with open(a.flows) as f:
             fcfg = json.load(f)
-        m = exp23_figures(a.log, cfg, fcfg, a.out, a.join)
+        m = exp23_figures(a.log, cfg, fcfg, a.out, a.join, None if a.run_info == "none" else a.run_info)
         print(f"  gantt: busy per iteration {m['gantt']['busy_cycles_per_iteration']} "
               f"(equal to tab83: {m['gantt']['busy_equals_tab83']})")
         print(f"  iterations: {len(m['iterations']['points'])}, max {m['iterations']['max_ms']} ms "

@@ -12,8 +12,11 @@ Application E (`pkt-sim/software/ucx-os/app/weird_a.c`) on the 2x2 manycore: sim
 | `make tick-log LOG=<events.txt>` | For each release of A in the log: release_to_dispatch (TRIGGER line to the first dispatch of A, as in `metrics.json`), request_to_dispatch (release request of the testbench to the same dispatch), IRQ 4 acknowledgement latency and spacing of the dispatches; passes when every spacing equals the tick and request_to_dispatch is constant | Python |
 | `make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D` | The same for run D (`E` and `reference_E.json` for run E) | Python <!-- anon:drop-line --> |
 | `make runs` | Analyzes the six stored runs into `build/runs/{A,B,C,D,E,F}` (join rule `any3` for A to E, `per_producer` for F) | Python <!-- anon:drop-line --> |
-| `make sim` | Simulates this tree (`simulate.sh build/sim`) | Questa or ModelSim, `riscv64-elf` toolchain |
-| `make paper` | `sim`, then analysis and check against `reference_head.json` | Questa or ModelSim, toolchain, Python |
+| `make sim` | Simulates this tree (`simulate.sh build/sim`) at `F_CLK` (default 500000000 Hz, the clock of run F) | Questa or ModelSim, `riscv64-elf` toolchain |
+| `make sim F_CLK=435200000 SIMDIR=build/sim-435` | The same at 435.2 MHz: software with `F_CLK`, clock half period 1 148 897 fs (435 200 022.282 Hz), release every 217 600 cycles | Same as `make sim` |
+| `make paper` | `sim`, then analysis and check against `reference_head.json` (`PAPER_REF`) | Questa or ModelSim, toolchain, Python |
+| `make flow-clock` | `frequency`, then the clock of a run at the minimum frequency of the flow (`build/frequency/clock.json`): 434.9 MHz gives `F_CLK` = 434 912 000 Hz, half period 1 149 657 fs (434 912 326.024 Hz) | Python |
+| `make paper-flow` | `flow-clock`, `sim` at that `F_CLK` in `build/sim-flow`, analysis in `build/results-flow` and check against `reference_flow.json` (model at that clock, packet monitor and pairing) | Same as `make paper` |
 | `make paper REQUIRE_CLEAN=1` | The same, but `simulate.sh` stops unless the tree is a clean git checkout at a tag or a `git archive` of a commit | Same as `make paper`, git |
 | `make info` | Prints the source identification that `make sim` writes to `RUN_INFO` | git (optional) |
 
@@ -37,6 +40,9 @@ The UCX-OS tick lasts 16 x (TIMER1CTC + 1) cycles (TIMER1 of `peripherals_minima
 | `repo_tag` | Tag at the commit, or `none` |
 | `src_sha256` | SHA-256 over the `sha256sum` lines of the simulated sources (`pkt-sim`, `rtl/`, `simulate.sh`), sorted by path; equal in a clean checkout, in a `git archive` of the same commit and in a copy without git |
 | `sim_ns`, `monitor`, `vsim`, `gcc`, `date` | Simulation length, packet monitor, simulator and compiler versions, UTC date |
+| `f_clk_hz`, `f_tick_hz` | `F_CLK` and `F_TICK` = 1 / T of the software build (`arch.mak`; tick of `F_CLK / F_TICK` cycles) |
+| `clock_half_period_fs`, `clock_hz_exact` | Half period of the clock of `manycore_top.sv`, floor(1e15 / (2 F_CLK)) fs, and its frequency 1e15 / (2 half) Hz (at or above `F_CLK`) |
+| `release_cycles`, `warmup_cycles` | Release period T F_CLK and first release (3 ms) F_CLK of the release generator (`manycore_pe.sv`), in cycles |
 
 A copy of a work tree without its git metadata (for example a copy of a `git worktree`, whose `.git` file points to a directory that does not exist on the simulation server) gives `repo_commit=unknown` and `repo_state=nogit`. The run that a paper reports comes from a tagged clean checkout:
 
@@ -64,7 +70,8 @@ or, on a server without access to the repository, from an archive of the tag: `g
 
 | Quantity | Definition |
 |---|---|
-| Time unit | Read from the `$printtimescale` lines of the monitor (`rtl/chk_binds.sv`); `--unit 100ps` or `--unit 1ns` when the log has none. Commit 4c299fc prints the PE time in units of 100 ps; the fixed RTL in ns. |
+| Time unit | Read from the `$printtimescale` lines of the monitor (`rtl/chk_binds.sv`); `--unit 100ps` or `--unit 1ns` when the log has none. Commit 4c299fc prints the PE time in units of 100 ps; the fixed RTL in ns (timescale 1ns/100ps up to run F, 1ns/1fs after it). |
+| Clock | `F_CLK` from the `RUN_INFO` next to the log (`<dir>/<name>.RUN_INFO` or `<dir>/RUN_INFO`; option `--run-info`), else `clock_hz` of `config.json`. The release period, the tick and the model count cycles of `F_CLK`; platform time = cycles / `F_CLK`. The log converts to cycles with the half period of `RUN_INFO`; when the period is not a whole number of ns, the analysis moves each `$time` (integer ns) to the rising edge it rounds, so the cycles between events are whole numbers. `logs/F.RUN_INFO` has no clock fields: run F uses `clock_hz` = 500 MHz |
 | Hyperperiod | 4 releases of A (2 ms), from `first_hyperperiod_s` (4 ms, the window of Fig. 8.12) to the end of the log |
 | CPU time per iteration (measured) | Non-IDLE time of the PE of the cluster in each hyperperiod, divided by 4, and the mean over the complete hyperperiods; the analysis reports whether all hyperperiods give the same value. The log counts ns and a cycle lasts 2 ns, so a slice can end on half a cycle and a value per iteration on a multiple of 1/8 cycle; the tables print one decimal. In run F, GJ gives 176 457.125 cycles in the first hyperperiod (4 to 6 ms: G runs 85 724.4 cycles per iteration while PE 1-1 settles into its pattern of two phases) and 182 647.75 or 182 648.5 in the other six, so the mean is 181 763.589, printed 181 763.6 |
 | CPU time per iteration (estimated) | CPU demand of the PE: sum of the characterized costs of the cluster in `rttools/bench_t/main.py` (thesis scale), divided by 10 |

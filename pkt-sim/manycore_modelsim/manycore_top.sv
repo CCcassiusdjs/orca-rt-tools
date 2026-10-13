@@ -1,10 +1,20 @@
-`timescale 1ns/100ps
-//`timescale 10ps/10ps
+// Time unit 1 ns: $time of the logs counts ns, as in run F (exp23-F).
+// Precision 1 fs: the half period of a clock below 1 GHz is a whole
+// number of fs, so a clock frequency other than 500 MHz keeps its period
+// within 2 fs (with 100 ps, the half period 1.148897 ns of 435.2 MHz
+// rounds to 1.1 ns, a clock of 454.5 MHz).
+`timescale 1ns/1fs
 
 
-module manycore_top #(parameter 
-  // CLOCK_BORDER_PERIOD = 2020, // 2 => ns, 18 -> 900ps, 
-  CLOCK_BORDER_PERIOD = 2,
+module manycore_top #(parameter
+  // clock: half period in fs; experiments/exp23/simulate.sh passes
+  // floor(1e15 / (2 F_CLK)), a clock at or above F_CLK; 1_000_000 = 500 MHz
+  longint CLOCK_HALF_PERIOD_FS = 1_000_000,
+  // release of the source task (manycore_pe.sv, PE 0-0): every
+  // RELEASE_CYCLES cycles (T F_CLK), the first one after WARMUP_CYCLES
+  // cycles; defaults: T = 0.5 ms and 3 ms at 500 MHz
+  longint RELEASE_CYCLES = 250_000,
+  longint WARMUP_CYCLES = 1_500_000,
   FLIT_WIDTH = 32,        // 32-bit flit width
   MEMORY_BUS_WIDTH = 32,  // memory data bus width
   RAM_MSIZE = 65536,      //32768, 65536   // 32k, 65k bytes
@@ -20,11 +30,11 @@ module manycore_top #(parameter
   bit clock = 0;
   bit reset = 1; 
 
-  // clock generator
-  always # (CLOCK_BORDER_PERIOD / 2.0) clock = ~clock;
+  // clock generator: rising edge n at (2 n + 1) CLOCK_HALF_PERIOD_FS
+  always #(CLOCK_HALF_PERIOD_FS * 1fs) clock = ~clock;
 
   // reset goes down after 2nd cycle
-  always # (CLOCK_BORDER_PERIOD * 2.0) reset = 0; 
+  always #(4 * CLOCK_HALF_PERIOD_FS * 1fs) reset = 0;
 
   // simulation time reporting
   always #1_000_000 $display("Elapsed %0d nanoseconds.", $realtime);
@@ -53,7 +63,8 @@ module manycore_top #(parameter
         localparam ADDRESS = DIM | XY;
 
         manycore_pe #(MEMORY_BUS_WIDTH, FLIT_WIDTH, RAM_MSIZE, BOOT_MSIZE,
-          ADDRESS, INTERLEAVING_GRAIN, NOC_DIM_X, NOC_DIM_Y
+          ADDRESS, INTERLEAVING_GRAIN, NOC_DIM_X, NOC_DIM_Y,
+          CLOCK_HALF_PERIOD_FS, RELEASE_CYCLES, WARMUP_CYCLES
         ) pe_mod(
           .clock(clock), .reset(reset),
           .pe_if(pe_if.PE)

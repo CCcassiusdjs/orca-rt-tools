@@ -12,7 +12,9 @@ INC_DIRS = -I $(ARCH_DIR)
 #F_CLK = 1000000000
 #F_CLK = 500000000
 #F_CLK = 1000000
-F_CLK = 500000000
+# default of run F (exp23-F); experiments/exp23/simulate.sh passes the
+# clock of the simulation (make ... F_CLK=<Hz> F_TICK=<Hz>)
+F_CLK ?= 500000000
 
 
 # uart baud rate
@@ -21,7 +23,8 @@ SERIAL_BAUDRATE = 57600
 # timer interrupt frequency (100 -> 100 ints/s -> 10ms tick time. 0 -> timer0 fixed frequency)
 #F_TICK = 10
 #F_TICK = 1000000
-F_TICK = 2000
+# 2000 = one tick per release period T = 0.5 ms; simulate.sh passes 1 / T
+F_TICK ?= 2000
 
 # remove unreferenced functions
 CFLAGS_STRIP = -fdata-sections -ffunction-sections

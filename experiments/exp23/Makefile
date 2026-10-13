@@ -13,6 +13,12 @@
 #                  max(f*, f_CPU) with the .map file and with the Spiral Mapping; check against
 #                  reference_frequency.json
 #   make paper     sim + analyze + check (simulation of this tree against reference_head.json)
+#   make flow-clock  clock of a run at the minimum frequency of the flow (after `make frequency`):
+#                  F_CLK = first multiple of 32 kHz at or above it (T F_CLK in steps of 16
+#                  cycles of TIMER1), half period floor(1e15 / (2 F_CLK)) fs; writes
+#                  $(BUILD)/frequency/clock.json
+#   make paper-flow  sim at that F_CLK in $(BUILD)/sim-flow, analyze into $(BUILD)/results-flow,
+#                  check against reference_flow.json (model at that clock, no measured value)
 #   make runs      analyze the six stored runs (logs/A..F) into build/runs  (anon:drop-line)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
 #
@@ -27,6 +33,12 @@
 # Run D: make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D  (anon:drop-line)
 # Run E: make LOG=logs/E.events.txt REF=reference_E.json OUTDIR=build/results_E  (anon:drop-line)
 # After `make sim`, use LOG=build/sim/events.txt (make paper does it).
+#
+# Clock: F_CLK (Hz) sets the clock of the simulation (simulate.sh: F_CLK of
+# the software, half period of manycore_top, release period T F_CLK cycles);
+# default 500 MHz, the clock of run F. `make sim F_CLK=435200000` runs at
+# 435.2 MHz. The analysis reads the clock from the RUN_INFO next to the log
+# (else config.json clock_hz).
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
@@ -42,14 +54,20 @@ OUTDIR  ?= $(BUILD)/results
 RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23
 APP_E   := ../../apps/synthetic-app-e
 ARCH    := ../../arch/hermes-2x2.gml
+# first frequency of the search of the flow (rttools CLI), not the clock of the simulation
 F0      ?= 500000000
+# clock of the simulation (Hz) and its output directory
+F_CLK   ?= 500000000
+SIMDIR  ?= $(BUILD)/sim
+PAPER_REF ?= reference_head.json
+CLOCK   := $(BUILD)/frequency/clock.json
 
-.PHONY: all sim analyze check frequency tick tick-log paper info clean
+.PHONY: all sim analyze check frequency tick tick-log paper flow-clock paper-flow info clean
 
 all: analyze check frequency tick
 
 sim:
-	./simulate.sh $(BUILD)/sim $(SIM_NS)
+	F_CLK=$(F_CLK) ./simulate.sh $(SIMDIR) $(SIM_NS)
 
 analyze:
 	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR)
@@ -71,7 +89,15 @@ tick-log:
 
 paper:
 	$(MAKE) sim
-	$(MAKE) analyze check LOG=$(BUILD)/sim/events.txt REF=reference_head.json
+	$(MAKE) analyze check LOG=$(SIMDIR)/events.txt REF=$(PAPER_REF)
+
+flow-clock: frequency
+	$(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --out $(CLOCK)
+
+paper-flow: flow-clock
+	$(MAKE) sim F_CLK=$$($(RUN) clock $(BUILD)/frequency/metrics.json --config config.json --field f_clk_hz) \
+		SIMDIR=$(BUILD)/sim-flow
+	$(MAKE) analyze check LOG=$(BUILD)/sim-flow/events.txt OUTDIR=$(BUILD)/results-flow REF=reference_flow.json
 
 # anon:drop-begin
 .PHONY: runs
