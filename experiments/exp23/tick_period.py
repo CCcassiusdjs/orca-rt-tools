@@ -29,7 +29,9 @@ request_to_dispatch (release request of the testbench, the start of cycle
 WARMUP_CYCLES + k RELEASE_CYCLES: the cycle of "next release will be at"
 minus RELEASE_CYCLES, to the same dispatch) and the spacing of the
 dispatches of A. The log passes when every spacing equals the tick of the
-code and request_to_dispatch takes one value; release_to_dispatch then
+code at the clock of the run (f_clk_hz of the RUN_INFO next to the log, as
+--f-clk of `code`; the defaults of the code when RUN_INFO has no clock)
+and request_to_dispatch takes one value; release_to_dispatch then
 varies only by the acknowledgement latency of IRQ 4.
 
 Exit status: 0 when every check passes, 1 otherwise, 2 when a source
@@ -208,6 +210,16 @@ def load_rttools(repo):
     return exp23
 
 
+def log_clock(repo, log_path):
+    """F_CLK of the run of a log (f_clk_hz of the RUN_INFO next to it,
+    exp23.run_info_path), or None (a log without clock fields: the
+    defaults of the code, as run F)."""
+    exp23 = load_rttools(repo)
+    path = exp23.run_info_path(log_path)
+    info = exp23.read_run_info(path) if path else {}
+    return int(info["f_clk_hz"]) if "f_clk_hz" in info else None
+
+
 def log_values(repo, log_path, v):
     """Per release of the log; the clock of the run comes from the RUN_INFO
     next to the log (exp23.load_run; else config clock_hz)."""
@@ -293,8 +305,11 @@ def main(argv=None):
     lg.add_argument("events")
     lg.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
+    f_clk_run = getattr(a, "f_clk", None)
+    if a.cmd == "log":
+        f_clk_run = log_clock(a.repo, a.events)
     try:
-        v = code_values(a.repo, getattr(a, "f_clk", None))
+        v = code_values(a.repo, f_clk_run)
     except (SourceError, OSError, KeyError) as e:
         print("source error: " + str(e), file=sys.stderr)
         return 2

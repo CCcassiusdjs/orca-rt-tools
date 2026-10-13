@@ -1,0 +1,499 @@
+{
+ "_doc": "Values of run G (logs/G.events.txt, logs/G.RUN_INFO, logs/G.time.txt): simulation (simulate.sh) of a git archive of tag r10-rc1 (commit 9686dff, repo_state=archive) at F_CLK = 500 MHz, 20 ms of platform time, on the GAPH server, Questa 2025.3, riscv64-elf-gcc 12.2.0, 2026-10-13 (make sim software-without SIMDIR=build/sim-G SW=build/sw-G). Application E with the iteration markers (ITER lines) and the flit times of the packet monitor (FLIT lines); tick of 250000 cycles (PR 101). Analysis with the join rule per_producer; instrumentation from logs/G.image.lst and logs/G.noinstr.lst (listings of the build of the run). make LOG=logs/G.events.txt REF=reference_G.json OUTDIR=build/results_G",
+ "unit": {
+  "name": "1 ns"
+ },
+ "clock": {
+  "clock_hz": 500000000,
+  "half_period_fs": 1000000,
+  "source": "RUN_INFO",
+  "edges_snapped": false
+ },
+ "parameters": {
+  "release_period_ms": 0.5,
+  "hyperperiod_ms": 2.0,
+  "release_period_cycles": 250000,
+  "hyperperiods": 7
+ },
+ "tab83": {
+  "rows": [
+   {
+    "cluster": "ABDF",
+    "measured": 144226,
+    "estimated": 181930,
+    "difference": 37704
+   },
+   {
+    "cluster": "C",
+    "measured": 80999.50000000001,
+    "estimated": 96330,
+    "difference": 15330.499999999985
+   },
+   {
+    "cluster": "EHI",
+    "measured": 119436,
+    "estimated": 173370,
+    "difference": 53934
+   },
+   {
+    "cluster": "GJ",
+    "measured": 181844.9107142857,
+    "estimated": 217450,
+    "difference": 35605.08928571429
+   }
+  ],
+  "mean_difference_percent": 27.451531046842437
+ },
+ "cpu": {
+  "demand_cycles": {
+   "ABDF": 181930,
+   "C": 96330,
+   "EHI": 173370,
+   "GJ": 217450
+  },
+  "phase_cycles": 250000,
+  "f_cpu_hz": 434900000,
+  "meets_phase": true
+ },
+ "response_bound": {
+  "cycles": 857570,
+  "ms": 1.71514,
+  "task": "J",
+  "phase": 3,
+  "deadline_ms": 2.0
+ },
+ "iterations": {
+  "per_release_offset": [
+   {
+    "release_offset_ms": 0.0,
+    "count": 8,
+    "max_ms": 1.86058
+   },
+   {
+    "release_offset_ms": 0.5,
+    "count": 8,
+    "max_ms": 1.36058
+   },
+   {
+    "release_offset_ms": 1.0,
+    "count": 8,
+    "max_ms": 1.861206
+   },
+   {
+    "release_offset_ms": 1.5,
+    "count": 8,
+    "max_ms": 1.361206
+   }
+  ],
+  "max_ms": 1.861206,
+  "complete": 32,
+  "max_cycles": 930603,
+  "release_to_dispatch": {
+   "min_cycles": 1303,
+   "max_cycles": 1303
+  },
+  "release_to_dispatch_all_releases": {
+   "releases": 34,
+   "min_cycles": 1303,
+   "max_cycles": 1303
+  },
+  "response_from_release_max": {
+   "cycles": 931906,
+   "ms": 1.863812
+  },
+  "deadline_ms": 2.0
+ },
+ "tab82": [
+  {
+   "flow": "F1",
+   "min_release": 28530,
+   "deadline": 261000,
+   "volume_bytes": 1230,
+   "latency_min_cycles": 1890,
+   "latency_max_cycles": 1984
+  },
+  {
+   "flow": "F2",
+   "min_release": 181930,
+   "deadline": 368570,
+   "volume_bytes": 6780,
+   "latency_min_cycles": 3295,
+   "latency_max_cycles": 3437
+  },
+  {
+   "flow": "F3",
+   "min_release": 96330,
+   "deadline": 261000,
+   "volume_bytes": 1200,
+   "latency_min_cycles": 1909,
+   "latency_max_cycles": 2150
+  },
+  {
+   "flow": "F4",
+   "min_release": 173370,
+   "deadline": 261000,
+   "volume_bytes": 5670,
+   "latency_min_cycles": 2991,
+   "latency_max_cycles": 2993
+  },
+  {
+   "flow": "F5",
+   "min_release": 98000,
+   "deadline": 261000,
+   "volume_bytes": 8900,
+   "latency_min_cycles": 3800,
+   "latency_max_cycles": 3992
+  }
+ ],
+ "monitor": {
+  "errors": 0,
+  "nodes": 4,
+  "send_pkts": 166,
+  "recv_pkts": 166,
+  "send_err": 0,
+  "send_incomplete": 0,
+  "recv_err": 0,
+  "recv_spurious": 0,
+  "recv_missing": 0
+ },
+ "join_rule": "per_producer",
+ "packet_pairs": {
+  "unexpected": 0
+ },
+ "sequences": {
+  "ABDF": [
+   "A",
+   "B",
+   "D",
+   "F"
+  ],
+  "C": [
+   "C"
+  ],
+  "EHI": [
+   "E",
+   "H",
+   "I"
+  ],
+  "GJ": [
+   "J",
+   "G"
+  ]
+ },
+ "per_iteration": {
+  "markers": 661,
+  "source": "markers",
+  "responses": {
+   "complete": 32,
+   "releases_unique": true,
+   "max_from_release_cycles": 841261,
+   "max_from_release_ms": 1.682522,
+   "max_cycles": 839958,
+   "max_ms": 1.679916,
+   "max_pair_excess_cycles": 90645,
+   "deadline_ms": 2.0
+  },
+  "flows": [
+   {
+    "flow": "F1",
+    "packets": 34,
+    "min_release": 28530,
+    "deadline": 261000,
+    "phase": 0,
+    "send": {
+     "min": 14259,
+     "max": 14259
+    },
+    "arrival": {
+     "min": 16149,
+     "max": 16243
+    },
+    "sent_after_release": 0,
+    "min_slack_cycles": 244757,
+    "unassigned": 0,
+    "fifo_mismatch": 0
+   },
+   {
+    "flow": "F2",
+    "packets": 34,
+    "min_release": 181930,
+    "deadline": 368570,
+    "phase": 0,
+    "send": {
+     "min": 144055,
+     "max": 144055
+    },
+    "arrival": {
+     "min": 147350,
+     "max": 147492
+    },
+    "sent_after_release": 0,
+    "min_slack_cycles": 221078,
+    "unassigned": 0,
+    "fifo_mismatch": 0
+   },
+   {
+    "flow": "F3",
+    "packets": 34,
+    "min_release": 96330,
+    "deadline": 261000,
+    "phase": 1,
+    "send": {
+     "min": -88171,
+     "max": 81390
+    },
+    "arrival": {
+     "min": -86261,
+     "max": 83539
+    },
+    "sent_after_release": 0,
+    "min_slack_cycles": 177461,
+    "unassigned": 0,
+    "fifo_mismatch": 0
+   },
+   {
+    "flow": "F4",
+    "packets": 32,
+    "min_release": 173370,
+    "deadline": 261000,
+    "phase": 2,
+    "send": {
+     "min": -11301,
+     "max": 180478
+    },
+    "arrival": {
+     "min": -8309,
+     "max": 183470
+    },
+    "sent_after_release": 16,
+    "min_slack_cycles": 77530,
+    "unassigned": 0,
+    "fifo_mismatch": 0
+   },
+   {
+    "flow": "F5",
+    "packets": 32,
+    "min_release": 98000,
+    "deadline": 261000,
+    "phase": 2,
+    "send": {
+     "min": -128131,
+     "max": 96950
+    },
+    "arrival": {
+     "min": -124331,
+     "max": 100941
+    },
+    "sent_after_release": 0,
+    "min_slack_cycles": 160059,
+    "unassigned": 0,
+    "fifo_mismatch": 0
+   }
+  ]
+ },
+ "network": {
+  "tx": 166,
+  "rx": 166,
+  "packets": 166,
+  "unpaired_tx": 0,
+  "unpaired_rx": 0,
+  "outside_flows": 0,
+  "identity_errors": 0,
+  "flows": [
+   {
+    "flow": "F1",
+    "hops": 1,
+    "flits": 311,
+    "L0": 324,
+    "header_model": 12,
+    "packets": 34,
+    "tag_mismatch": 0,
+    "header_at_model": 34,
+    "latency_min": 578,
+    "latency_max": 672,
+    "latency_minus_L0_min": 254,
+    "latency_minus_L0_max": 348,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 254,
+    "stall_max": 348,
+    "gap_min": 0,
+    "gap_max": 0
+   },
+   {
+    "flow": "F2",
+    "hops": 2,
+    "flits": 1698,
+    "L0": 1717,
+    "header_model": 18,
+    "packets": 34,
+    "tag_mismatch": 0,
+    "header_at_model": 34,
+    "latency_min": 1969,
+    "latency_max": 2111,
+    "latency_minus_L0_min": 252,
+    "latency_minus_L0_max": 394,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 252,
+    "stall_max": 394,
+    "gap_min": 0,
+    "gap_max": 0
+   },
+   {
+    "flow": "F3",
+    "hops": 2,
+    "flits": 303,
+    "L0": 322,
+    "header_model": 18,
+    "packets": 34,
+    "tag_mismatch": 0,
+    "header_at_model": 34,
+    "latency_min": 574,
+    "latency_max": 812,
+    "latency_minus_L0_min": 252,
+    "latency_minus_L0_max": 490,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 252,
+    "stall_max": 490,
+    "gap_min": 0,
+    "gap_max": 0
+   },
+   {
+    "flow": "F4",
+    "hops": 1,
+    "flits": 1421,
+    "L0": 1434,
+    "header_model": 12,
+    "packets": 32,
+    "tag_mismatch": 0,
+    "header_at_model": 32,
+    "latency_min": 1686,
+    "latency_max": 1688,
+    "latency_minus_L0_min": 252,
+    "latency_minus_L0_max": 254,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 252,
+    "stall_max": 254,
+    "gap_min": 0,
+    "gap_max": 0
+   },
+   {
+    "flow": "F5",
+    "hops": 1,
+    "flits": 2228,
+    "L0": 2241,
+    "header_model": 12,
+    "packets": 32,
+    "tag_mismatch": 0,
+    "header_at_model": 32,
+    "latency_min": 2495,
+    "latency_max": 2685,
+    "latency_minus_L0_min": 254,
+    "latency_minus_L0_max": 444,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 254,
+    "stall_max": 444,
+    "gap_min": 0,
+    "gap_max": 0
+   }
+  ]
+ },
+ "instrumentation": {
+  "cycles_per_class": {
+   "alu": 1,
+   "load": 3,
+   "store": 3,
+   "jump": 3,
+   "branch": 3
+  },
+  "callees": {
+   "set_cacc": {
+    "instructions": 4,
+    "cycles": 10
+   },
+   "set_counter_1": {
+    "instructions": 4,
+    "cycles": 10
+   },
+   "set_counter_2": {
+    "instructions": 4,
+    "cycles": 10
+   },
+   "set_counter_3": {
+    "instructions": 4,
+    "cycles": 10
+   },
+   "set_counter_4": {
+    "instructions": 4,
+    "cycles": 10
+   }
+  },
+  "events": {
+   "dispatch": {
+    "functions": [
+     "krnl_schedule"
+    ],
+    "instructions": 42,
+    "cycles": 100
+   },
+   "send": {
+    "functions": [
+     "ucx_noc_send"
+    ],
+    "instructions": 23,
+    "cycles": 55
+   },
+   "receive": {
+    "functions": [
+     "irq3_handler"
+    ],
+    "instructions": 8,
+    "cycles": 20
+   }
+  },
+  "clusters": {
+   "ABDF": {
+    "max_cycles": 835.0,
+    "max_percent": 0.5789524773619181,
+    "events_per_iteration_at_max": {
+     "dispatch": 5.0,
+     "send": 5.0,
+     "receive": 3.0
+    }
+   },
+   "C": {
+    "max_cycles": 225.0,
+    "max_percent": 0.2777794924660028,
+    "events_per_iteration_at_max": {
+     "dispatch": 1.5,
+     "send": 1.0,
+     "receive": 1.0
+    }
+   },
+   "EHI": {
+    "max_cycles": 530.0,
+    "max_percent": 0.44375230248836195,
+    "events_per_iteration_at_max": {
+     "dispatch": 2.5,
+     "send": 4.0,
+     "receive": 3.0
+    }
+   },
+   "GJ": {
+    "max_cycles": 385.0,
+    "max_percent": 0.2106948140344636,
+    "events_per_iteration_at_max": {
+     "dispatch": 2.5,
+     "send": 1.0,
+     "receive": 4.0
+    }
+   }
+  },
+  "max_percent": 0.5789524773619181,
+  "max_cluster": "ABDF"
+ }
+}

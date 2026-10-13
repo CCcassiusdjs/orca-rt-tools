@@ -795,3 +795,68 @@ def test_run_f_with_injected_markers(tmp_path):
     assert len(rows) == 32
     values = open(d / "values.tex").read()
     assert "\\newcommand{\\ExpMarkerResponseFromReleaseMaxCycles}{" + exp23.fmt_int(r["max_from_release_cycles"]) + "}" in values
+
+
+@pytest.fixture(scope="module")
+def runs_gh(tmp_path_factory):
+    """Runs G (500 MHz) and H (434.912 MHz), tag r10-rc1: ITER and FLIT
+    lines; listings of the image of each run."""
+    out = {}
+    for r in "GH":
+        d = tmp_path_factory.mktemp(r)
+        lg = os.path.join(EXP, "logs")
+        out[r] = (exp23.analyze(os.path.join(lg, f"{r}.events.txt"), cfg(), str(d),
+                                listing=os.path.join(lg, f"{r}.image.lst"),
+                                listing_without=os.path.join(lg, f"{r}.noinstr.lst")), str(d))
+    return out
+
+
+@pytest.mark.parametrize("run", ["G", "H"])
+def test_runs_g_and_h_match_their_references(runs_gh, run):
+    m, d = runs_gh[run]
+    assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, f"reference_{run}.json")) == []
+    info = open(os.path.join(EXP, "logs", f"{run}.RUN_INFO")).read()
+    assert "repo_state=archive\n" in info and "repo_tag=r10-rc1\n" in info
+    assert m["monitor"]["errors"] == 0 and m["packet_pairs"] == {"unexpected": 0}
+
+
+def test_run_h_matches_the_reference_of_the_flow(runs_gh):
+    """make paper-flow checks the run at the clock of the flow against
+    reference_flow.json (model at that clock, monitor, pairing)."""
+    _, d = runs_gh["H"]
+    assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_flow.json")) == []
+
+
+@pytest.mark.parametrize("run", ["G", "H"])
+def test_runs_g_and_h_against_the_model(runs_gh, run):
+    """Response of each iteration (release to the end marker of J for it)
+    below R_bound and the deadline; every packet arrives before the
+    deadline of its window; header at 6 (m + 1) and latency - L0 = stall +
+    gap for every packet."""
+    m, _ = runs_gh[run]
+    r = m["per_iteration"]["responses"]
+    assert r["complete"] == 32 and r["releases_unique"]
+    assert r["max_from_release_cycles"] < m["response_bound"]["cycles"]
+    assert r["max_from_release_ms"] < r["deadline_ms"]
+    assert all(f["min_slack_cycles"] > 0 and f["fifo_mismatch"] == 0 and f["unassigned"] == 0
+               for f in m["per_iteration"]["flows"])
+    net = m["network"]
+    assert net["packets"] == 166 and net["identity_errors"] == 0
+    assert all(f["header_minus_model_min"] == f["header_minus_model_max"] == 0 for f in net["flows"])
+    assert m["iterations"]["release_to_dispatch_all_releases"] == {"releases": 34, "min_cycles": 1303,
+                                                                   "max_cycles": 1303}
+
+
+def test_markers_on_the_rising_edges_at_the_clock_of_the_flow(runs_gh):
+    """Run H (2.299314 ns per cycle): the ITER lines move to the rising edge
+    they round, as the other events, so the responses per iteration are
+    whole numbers of cycles; response of the iterations = response to the
+    end marker + pair_excess_cycles."""
+    m, _ = runs_gh["H"]
+    rows = m["per_iteration"]["responses"]["all"]
+    for x in rows:
+        for k in ("response_from_release_cycles", "response_cycles", "pair_excess_cycles"):
+            assert x[k] == int(x[k]), (k, x)
+    old = {x["iteration"]: x for x in m["iterations"]["all"]}
+    for x in rows:
+        assert x["response_cycles"] + x["pair_excess_cycles"] == old[x["iteration"]]["response_cycles"]

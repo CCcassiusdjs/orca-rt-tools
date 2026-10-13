@@ -23,6 +23,14 @@
  * same PE goes to the local queue of the target task (lib/noc.c). On each
  * PE, app_main creates the tasks in the creation order of the model; the
  * kernel dispatches them in the order of the model (dispatch_order).
+ *
+ * Iteration markers (include/device/cacc.h, as weird_a.c): each task
+ * writes ITER_BEGIN(letter, k) when it has the input of iteration k (a
+ * source task after the release) and ITER_END(letter, k) after its last
+ * send of iteration k (after the work, for a task without output edge);
+ * the PE prints `<t> <x-y> ITER begin|end <letter> <k>` (manycore_pe.sv).
+ * The letter of each task is in the manifest (iter_letter); a run that
+ * serves iterations k and k + 1 writes the markers of both.
  */
 #include <ucx.h>
 
@@ -43,6 +51,7 @@ struct out_s {
 
 struct task_s {
   char name[5];
+  char letter;                    /* letter of the iteration markers */
   uint16_t port;
   int32_t workload;               /* counts of ucx_sleep */
   uint8_t n_in, n_out;
@@ -51,52 +60,52 @@ struct task_s {
 };
 
 static const struct task_s TASKS[N_TASKS] = {
-  /* FBU1: PE 2 (2-0), position 0, c(v) = 95000 */
-  {"FBU1", 1, 8400, 0, 1, {0}, {{2, 10, 9600, 5}}},
-  /* FBU2: PE 3 (3-0), position 0, c(v) = 95000 */
-  {"FBU2", 2, 8400, 0, 1, {0}, {{3, 11, 9600, 6}}},
-  /* FBU3: PE 4 (0-1), position 0, c(v) = 95000 */
-  {"FBU3", 3, 8400, 0, 2, {0}, {{4, 21, 9600, 1}, {6, 12, 9600, 7}}},
-  /* FBU4: PE 1 (1-0), position 0, c(v) = 66998 */
-  {"FBU4", 4, 5600, 0, 1, {0}, {{1, 13, 9600, 8}}},
-  /* FBU5: PE 7 (3-1), position 0, c(v) = 95000 */
-  {"FBU5", 5, 8400, 0, 1, {0}, {{7, 14, 9600, 9}}},
-  /* FBU6: PE 11 (3-2), position 0, c(v) = 95000 */
-  {"FBU6", 6, 8400, 0, 1, {0}, {{11, 15, 9600, 10}}},
-  /* FBU7: PE 8 (0-2), position 0, c(v) = 95000 */
-  {"FBU7", 7, 8400, 0, 1, {0}, {{10, 16, 9600, 11}}},
-  /* FBU8: PE 5 (1-1), position 0, c(v) = 95000 */
-  {"FBU8", 8, 8400, 0, 2, {0}, {{5, 22, 9600, 2}, {9, 17, 9600, 12}}},
-  /* NAVC: PE 0 (0-0), position 0, c(v) = 95000 */
-  {"NAVC", 9, 8400, 2, 0, {21, 22}, {{0, 0, 0, 0}}},
-  /* BFE1: PE 2 (2-0), position 1, c(v) = 95000 */
-  {"BFE1", 10, 8400, 1, 1, {1}, {{14, 18, 512, 13}}},
-  /* BFE2: PE 3 (3-0), position 1, c(v) = 95000 */
-  {"BFE2", 11, 8400, 1, 1, {2}, {{14, 18, 512, 14}}},
-  /* BFE3: PE 6 (2-1), position 0, c(v) = 95000 */
-  {"BFE3", 12, 8400, 1, 1, {3}, {{14, 18, 512, 15}}},
-  /* BFE4: PE 1 (1-0), position 1, c(v) = 95000 */
-  {"BFE4", 13, 8400, 1, 1, {4}, {{14, 18, 512, 16}}},
-  /* BFE5: PE 7 (3-1), position 1, c(v) = 95000 */
-  {"BFE5", 14, 8400, 1, 1, {5}, {{13, 19, 512, 17}}},
-  /* BFE6: PE 11 (3-2), position 1, c(v) = 95000 */
-  {"BFE6", 15, 8400, 1, 1, {6}, {{13, 19, 512, 18}}},
-  /* BFE7: PE 10 (2-2), position 0, c(v) = 95000 */
-  {"BFE7", 16, 8400, 1, 1, {7}, {{13, 19, 512, 19}}},
-  /* BFE8: PE 9 (1-2), position 0, c(v) = 95000 */
-  {"BFE8", 17, 8400, 1, 1, {8}, {{13, 19, 512, 20}}},
-  /* FDF1: PE 14 (2-3), position 0, c(v) = 95000 */
-  {"FDF1", 18, 8400, 4, 1, {10, 11, 12, 13}, {{12, 20, 2048, 21}}},
-  /* FDF2: PE 13 (1-3), position 0, c(v) = 95000 */
-  {"FDF2", 19, 8400, 4, 1, {14, 15, 16, 17}, {{12, 20, 2048, 22}}},
-  /* STPH: PE 12 (0-3), position 0, c(v) = 95000 */
-  {"STPH", 20, 8400, 2, 1, {18, 19}, {{15, 23, 1024, 23}}},
-  /* VOD1: PE 4 (0-1), position 1, c(v) = 95000 */
-  {"VOD1", 21, 8400, 1, 1, {3}, {{0, 9, 128, 3}}},
-  /* VOD2: PE 5 (1-1), position 1, c(v) = 95000 */
-  {"VOD2", 22, 8400, 1, 1, {8}, {{0, 9, 128, 4}}},
-  /* OBMG: PE 15 (3-3), position 0, c(v) = 95000 */
-  {"OBMG", 23, 8400, 1, 0, {20}, {{0, 0, 0, 0}}},
+  /* FBU1: PE 2 (2-0), position 0, c(v) = 95000, marker A */
+  {"FBU1", 'A', 1, 8400, 0, 1, {0}, {{2, 10, 9600, 5}}},
+  /* FBU2: PE 3 (3-0), position 0, c(v) = 95000, marker B */
+  {"FBU2", 'B', 2, 8400, 0, 1, {0}, {{3, 11, 9600, 6}}},
+  /* FBU3: PE 4 (0-1), position 0, c(v) = 95000, marker C */
+  {"FBU3", 'C', 3, 8400, 0, 2, {0}, {{4, 21, 9600, 1}, {6, 12, 9600, 7}}},
+  /* FBU4: PE 1 (1-0), position 0, c(v) = 66998, marker D */
+  {"FBU4", 'D', 4, 5600, 0, 1, {0}, {{1, 13, 9600, 8}}},
+  /* FBU5: PE 7 (3-1), position 0, c(v) = 95000, marker E */
+  {"FBU5", 'E', 5, 8400, 0, 1, {0}, {{7, 14, 9600, 9}}},
+  /* FBU6: PE 11 (3-2), position 0, c(v) = 95000, marker F */
+  {"FBU6", 'F', 6, 8400, 0, 1, {0}, {{11, 15, 9600, 10}}},
+  /* FBU7: PE 8 (0-2), position 0, c(v) = 95000, marker G */
+  {"FBU7", 'G', 7, 8400, 0, 1, {0}, {{10, 16, 9600, 11}}},
+  /* FBU8: PE 5 (1-1), position 0, c(v) = 95000, marker H */
+  {"FBU8", 'H', 8, 8400, 0, 2, {0}, {{5, 22, 9600, 2}, {9, 17, 9600, 12}}},
+  /* NAVC: PE 0 (0-0), position 0, c(v) = 95000, marker I */
+  {"NAVC", 'I', 9, 8400, 2, 0, {21, 22}, {{0, 0, 0, 0}}},
+  /* BFE1: PE 2 (2-0), position 1, c(v) = 95000, marker J */
+  {"BFE1", 'J', 10, 8400, 1, 1, {1}, {{14, 18, 512, 13}}},
+  /* BFE2: PE 3 (3-0), position 1, c(v) = 95000, marker K */
+  {"BFE2", 'K', 11, 8400, 1, 1, {2}, {{14, 18, 512, 14}}},
+  /* BFE3: PE 6 (2-1), position 0, c(v) = 95000, marker L */
+  {"BFE3", 'L', 12, 8400, 1, 1, {3}, {{14, 18, 512, 15}}},
+  /* BFE4: PE 1 (1-0), position 1, c(v) = 95000, marker M */
+  {"BFE4", 'M', 13, 8400, 1, 1, {4}, {{14, 18, 512, 16}}},
+  /* BFE5: PE 7 (3-1), position 1, c(v) = 95000, marker N */
+  {"BFE5", 'N', 14, 8400, 1, 1, {5}, {{13, 19, 512, 17}}},
+  /* BFE6: PE 11 (3-2), position 1, c(v) = 95000, marker O */
+  {"BFE6", 'O', 15, 8400, 1, 1, {6}, {{13, 19, 512, 18}}},
+  /* BFE7: PE 10 (2-2), position 0, c(v) = 95000, marker P */
+  {"BFE7", 'P', 16, 8400, 1, 1, {7}, {{13, 19, 512, 19}}},
+  /* BFE8: PE 9 (1-2), position 0, c(v) = 95000, marker Q */
+  {"BFE8", 'Q', 17, 8400, 1, 1, {8}, {{13, 19, 512, 20}}},
+  /* FDF1: PE 14 (2-3), position 0, c(v) = 95000, marker R */
+  {"FDF1", 'R', 18, 8400, 4, 1, {10, 11, 12, 13}, {{12, 20, 2048, 21}}},
+  /* FDF2: PE 13 (1-3), position 0, c(v) = 95000, marker S */
+  {"FDF2", 'S', 19, 8400, 4, 1, {14, 15, 16, 17}, {{12, 20, 2048, 22}}},
+  /* STPH: PE 12 (0-3), position 0, c(v) = 95000, marker T */
+  {"STPH", 'T', 20, 8400, 2, 1, {18, 19}, {{15, 23, 1024, 23}}},
+  /* VOD1: PE 4 (0-1), position 1, c(v) = 95000, marker U */
+  {"VOD1", 'U', 21, 8400, 1, 1, {3}, {{0, 9, 128, 3}}},
+  /* VOD2: PE 5 (1-1), position 1, c(v) = 95000, marker V */
+  {"VOD2", 'V', 22, 8400, 1, 1, {8}, {{0, 9, 128, 4}}},
+  /* OBMG: PE 15 (3-3), position 0, c(v) = 95000, marker W */
+  {"OBMG", 'W', 23, 8400, 1, 0, {20}, {{0, 0, 0, 0}}},
 };
 
 /* ------------------------------ release */
@@ -187,6 +196,7 @@ static void run_task(const struct task_s *t)
         while (received[i] <= done)
           receive_one(t, received);
     }
+    ITER_BEGIN(t->letter, done + 1);
 
     /* simulate processing */
     ucx_sleep(t->workload);
@@ -194,6 +204,7 @@ static void run_task(const struct task_s *t)
 
     for (int o = 0; o < t->n_out; o++)
       ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+    ITER_END(t->letter, done);
   } while (--it);
 
   for (int o = 0; o < t->n_out; o++)

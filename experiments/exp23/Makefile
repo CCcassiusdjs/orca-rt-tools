@@ -30,7 +30,8 @@
 #                  $(BUILD)/frequency/clock.json
 #   make paper-flow  sim at that F_CLK in $(BUILD)/sim-flow, analyze into $(BUILD)/results-flow,
 #                  check against reference_flow.json (model at that clock, no measured value)
-#   make runs      analyze the six stored runs (logs/A..F) into build/runs  (anon:drop-line)
+#   make runs      analyze the eight stored runs (logs/A..H) into build/runs and check G and H  (anon:drop-line)
+#                  against reference_G.json and reference_H.json  (anon:drop-line)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
 #
 # The run that a paper reports: make paper REQUIRE_CLEAN=1 from a clean
@@ -43,6 +44,9 @@
 # of the paper.
 # Run D: make LOG=logs/D.events.txt REF=reference_D.json OUTDIR=build/results_D  (anon:drop-line)
 # Run E: make LOG=logs/E.events.txt REF=reference_E.json OUTDIR=build/results_E  (anon:drop-line)
+# Run G (r10-rc1, 500 MHz): make LOG=logs/G.events.txt REF=reference_G.json OUTDIR=build/results_G
+# Run H (r10-rc1, clock of the flow, 434.912 MHz): make LOG=logs/H.events.txt REF=reference_H.json
+#   OUTDIR=build/results_H
 # After `make sim`, use LOG=build/sim/events.txt (make paper does it).
 #
 # Clock: F_CLK (Hz) sets the clock of the simulation (simulate.sh: F_CLK of
@@ -55,7 +59,8 @@
 # the image with and without the instrumentation writes, for the bound of
 # their cycles in the measured CPU time (metrics.json `instrumentation`,
 # values.tex). Run F keeps them in logs/F.image.lst and logs/F.noinstr.lst
-# (logs/F.software.txt); make paper and make instrumentation build them.
+# (logs/F.software.txt), runs G and H in logs/G.* and logs/H.* (the image.lst
+# of the build of the run); make paper and make instrumentation build them.
 # Other logs: no listing, no bound.
 
 PYTHON  ?= python3
@@ -84,9 +89,10 @@ CLOCK   := $(BUILD)/frequency/clock.json
 
 SW      ?= $(BUILD)/sw
 UCX_IMG := pkt-sim/software/ucx-os/build/target
-F_LOG   := logs/F.events.txt
-LISTING ?= $(if $(filter $(F_LOG),$(LOG)),logs/F.image.lst)
-LISTING_WITHOUT ?= $(if $(filter $(F_LOG),$(LOG)),logs/F.noinstr.lst)
+# stored run of LOG (logs/<run>.events.txt) and its listings, when logs/ has them (F, G, H)
+LOG_RUN := $(patsubst logs/%.events.txt,%,$(filter logs/%.events.txt,$(LOG)))
+LISTING ?= $(if $(LOG_RUN),$(wildcard logs/$(LOG_RUN).image.lst))
+LISTING_WITHOUT ?= $(if $(LOG_RUN),$(wildcard logs/$(LOG_RUN).noinstr.lst))
 INSTR_ARGS = $(if $(LISTING),--listing $(LISTING) --listing-without $(LISTING_WITHOUT))
 
 .PHONY: all sim analyze check frequency tick tick-log frequency-l0 paper flow-clock paper-flow software
@@ -151,8 +157,10 @@ instrumentation: software
 .PHONY: runs
 runs:
 	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --join any3 --out $(BUILD)/runs/$$r || exit 1; done
-	$(RUN) analyze logs/F.events.txt --config config.json --join per_producer --out $(BUILD)/runs/F \
-		--listing logs/F.image.lst --listing-without logs/F.noinstr.lst
+	for r in F G H; do $(RUN) analyze logs/$$r.events.txt --config config.json --join per_producer \
+		--out $(BUILD)/runs/$$r --listing logs/$$r.image.lst --listing-without logs/$$r.noinstr.lst || exit 1; done
+	$(RUN) check $(BUILD)/runs/G/metrics.json reference_G.json
+	$(RUN) check $(BUILD)/runs/H/metrics.json reference_H.json
 # anon:drop-end
 
 info:

@@ -4,7 +4,11 @@
 #
 #   make app     write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} from $(CSV) and $(MAP)
 #   make check   the stored $(NAME).{c,json,sim} match a new generation; heap demand of
-#                each PE (rttools.ucxgen.memory) against HEAP (default target)
+#                each PE (rttools.ucxgen.memory) against HEAP; analyze + check-run of the
+#                stored run CV (default target)
+#   make analyze analysis of $(LOG) against the phase model (rttools.paper.rtlapp): CPU per PE,
+#                response per iteration, packets against [r, d], network latency; into $(OUTDIR)
+#   make check-run  compare $(OUTDIR)/metrics.json with $(REF)
 #   make build   build $(NAME) in build/pkt-sim (riscv64-elf toolchain); heap demand
 #                against _heap_size of the image
 #   make sim     RTL simulation (Questa and riscv64-elf; ENV_SETUP as in exp23) at F_CLK:
@@ -21,6 +25,9 @@
 # SIM_NS: release delay 3 ms + (n(OBMG) = 4 warm-up iterations + 8 measured
 # iterations - 1) x 0.5 ms + R_bound 2.25 ms + one tick (0.5 ms) of release
 # offset = 11.25 ms, rounded up to 11.5 ms (PR-110-car-v-rtl.md).
+# LOG and REF default to run CV (logs/CV.*, reference_CV.json): car_v of tag
+# r10-rc1 (without iteration markers) at F_CLK = 380 MHz, 11.5 ms. After
+# `make sim`, use LOG=$(BUILD)/sim/events.txt (RUN_INFO next to it).
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
@@ -40,11 +47,16 @@ FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \
 	print(exp23.flow_clock(m['chosen']['search']['frequency_hz'], m['scale']['period_s'])['f_clk_hz'])"
 # _heap_size of the image of car_v built with riscv64-unknown-elf-gcc 13.2
 # (make build reads the value of the toolchain in use)
-HEAP    ?= 50756
+HEAP    ?= 50676
 IN_FLIGHT ?= 2
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
+ARCH    := ../../arch/hermes-4x4.gml
+LOG     ?= logs/CV.events.txt
+REF     ?= reference_CV.json
+OUTDIR  ?= $(BUILD)/results_CV
+ANALYZE  = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp
 
-.PHONY: all app check build sim flow-clock sim-flow clean
+.PHONY: all app check analyze check-run build sim flow-clock sim-flow clean
 
 all: check
 
@@ -54,6 +66,14 @@ app:
 check:
 	$(GEN) check $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR) $(GENFLAGS)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
+	$(MAKE) analyze check-run
+
+analyze:
+	$(ANALYZE) analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json --csv $(CSV) --map $(MAP) --arch $(ARCH) \
+		--out $(OUTDIR)
+
+check-run:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(OUTDIR)/metrics.json $(REF)
 
 build:
 	rm -rf $(BUILD)/pkt-sim
