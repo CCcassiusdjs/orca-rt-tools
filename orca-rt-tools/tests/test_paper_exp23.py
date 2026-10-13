@@ -1,5 +1,6 @@
 """Pipeline of Ch. 8 (rttools/paper/exp23.py) on the stored logs."""
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -275,3 +276,219 @@ def test_release_to_dispatch_and_response_from_release(run_f):
     assert "\\newcommand{\\ExpResponseFromReleaseMaxCycles}{932\\,143}" in values
     assert "\\newcommand{\\ExpReleaseToDispatchAllMaxCycles}{1\\,924}" in values
     assert "\\newcommand{\\ExpCompleteIterations}{32}" in values
+
+
+# ------------------------------------------------- clock of the simulation
+
+def test_half_period_and_flow_clock():
+    """simulate.sh: half period floor(1e15 / (2 F_CLK)) fs, clock at or
+    above F_CLK. The flow returns f_CPU = 434.9 MHz; with T = 0.5 ms the
+    release period must be a whole number of TIMER1 steps of 16 cycles,
+    so F_CLK is a multiple of 32 kHz: 434.912 MHz."""
+    assert exp23.half_period_fs(500_000_000) == 1_000_000
+    assert exp23.half_period_fs(435_200_000) == 1_148_897
+    ck = exp23.flow_clock(434_900_000, 0.0005)
+    assert (ck["f_clk_hz"], ck["grid_hz"], ck["half_period_fs"], ck["period_fs"]) == (434_912_000, 32_000, 1_149_657,
+                                                                                      2_299_314)
+    assert (ck["release_cycles"], ck["tick_steps"]) == (217_456, 13_591)
+    assert ck["clock_hz_exact"] == pytest.approx(434_912_326.024, abs=1e-3)
+    assert ck["clock_hz_exact"] >= ck["f_clk_hz"] >= 434_900_000
+    # a frequency on the grid stays; 500 MHz and 435.2 MHz are on it
+    assert exp23.flow_clock(434_912_000, 0.0005)["f_clk_hz"] == 434_912_000
+    assert exp23.flow_clock(500_000_000, 0.0005)["half_period_fs"] == 1_000_000
+    assert exp23.flow_clock(435_200_000, 0.0005)["clock_hz_exact"] == pytest.approx(435_200_022.282, abs=1e-3)
+    # 1 ps precision: half period 1149 ps
+    assert exp23.flow_clock(434_900_000, 0.0005, precision_fs=1000)["half_period_fs"] == 1_149_000
+
+
+def test_clock_of_frequency_run_and_cli(capsys):
+    """make flow-clock: the minimum frequency of the .map mapping of the
+    frequency pipeline gives F_CLK."""
+    ref = os.path.join(EXP, "reference_frequency.json")
+    ck = exp23.clock_of_frequency_run(ref, cfg())
+    assert ck["map"] == "synthetic-app-e-ONTO-hermes2x2.map" and ck["f_clk_hz"] == 434_912_000
+    assert exp23.main(["clock", ref, "--config", os.path.join(EXP, "config.json"), "--field", "f_clk_hz"]) == 0
+    assert capsys.readouterr().out.strip() == "434912000"
+
+
+def write_run_info(path, f_clk, release_cycles=None):
+    half = exp23.half_period_fs(f_clk)
+    lines = ["repo_commit=unknown", "sim_ns=20000000 monitor=1", f"f_clk_hz={f_clk}",
+             f"clock_half_period_fs={half}"]
+    if release_cycles is not None:
+        lines.append(f"release_cycles={release_cycles}")
+    with open(path, "w") as f:
+        f.write("\n".join(lines) + "\n")
+
+
+def test_simulation_clock_sources(tmp_path):
+    """RUN_INFO with the clock keys wins over config clock_hz; RUN_INFO of
+    run F (no clock keys) and no RUN_INFO fall back to the config; a
+    release period in cycles different from the config stops."""
+    c = cfg()
+    f_info = exp23.run_info_path(os.path.join(EXP, "logs", "F.events.txt"))
+    assert os.path.basename(f_info) == "F.RUN_INFO"
+    assert exp23.simulation_clock(c, exp23.read_run_info(f_info))["source"] == "config"
+    assert exp23.run_info_path(os.path.join(EXP, "logs", "A.events.txt")) is None
+    p = tmp_path / "RUN_INFO"
+    write_run_info(p, 435_200_000, 217_600)
+    assert exp23.run_info_path(str(tmp_path / "events.txt")) == str(p)
+    ck = exp23.simulation_clock(c, exp23.read_run_info(p))
+    assert ck["source"] == "RUN_INFO" and ck["clock_hz"] == 435_200_000 and ck["half_period_fs"] == 1_148_897
+    assert ck["cycle_hz"] == pytest.approx(1e15 / 2_297_794)
+    write_run_info(p, 500_000_000, 250_000)
+    ck = exp23.simulation_clock(c, exp23.read_run_info(p))
+    assert ck["cycle_hz"] == 500_000_000 and ck["clock_hz"] == 500_000_000
+    write_run_info(p, 435_200_000, 250_000)
+    with pytest.raises(ValueError, match="release_cycles"):
+        exp23.simulation_clock(c, exp23.read_run_info(p))
+
+
+def test_run_f_with_run_info_at_500_mhz_matches_head_reference(tmp_path):
+    """A new run at the default clock writes the clock keys to RUN_INFO;
+    the analysis gives the numbers of run F (no edge restoration at 2 ns)."""
+    d = tmp_path / "sim"
+    d.mkdir()
+    shutil.copy(os.path.join(EXP, "logs", "F.events.txt"), d / "events.txt")
+    write_run_info(d / "RUN_INFO", 500_000_000, 250_000)
+    m = exp23.analyze(str(d / "events.txt"), cfg(), str(tmp_path / "out"))
+    assert m["clock"]["source"] == "RUN_INFO" and m["clock"]["edges_snapped"] is False
+    assert exp23.check(str(tmp_path / "out" / "metrics.json"), os.path.join(EXP, "reference_head.json")) == []
+
+
+F_SYNTH = 435_200_000
+
+
+def synthetic_run(tmp_path):
+    """Log of run F moved to a 435.2 MHz clock with the same events in
+    cycles: event at rising edge n (2 n + 1 ns at 500 MHz) printed at
+    round((2 n + 1) half) ns, half = 1 148 897 fs (manycore_top.sv with
+    timescale 1ns/1fs prints integer ns). The config keeps the cycles of
+    run F: T = 250 000 cycles, warm-up 1 500 000, first hyperperiod
+    2 000 000, deadline 1 000 000."""
+    import re
+    half = exp23.half_period_fs(F_SYNTH)
+    d = tmp_path / "synth"
+    d.mkdir()
+    out = []
+    with open(os.path.join(EXP, "logs", "F.events.txt")) as f:
+        for line in f:
+            if "Time scale of" in line:
+                out.append(line.replace("100ps", "1fs"))
+                continue
+            m = (re.match(r"(# TRIGGER: workflow iteration at )(\d+)(.*)", line, re.S)
+                 or re.match(r"(# )(\d+)( .*)", line, re.S))
+            if m:
+                t = int(m.group(2))
+                assert t % 2 == 1
+                t = ((t * half) + 500_000) // 1_000_000
+                line = m.group(1) + str(t) + m.group(3)
+            out.append(line)
+    (d / "events.txt").write_text("".join(out))
+    write_run_info(d / "RUN_INFO", F_SYNTH, 250_000)
+    c = cfg()
+    for k, cyc in (("release_period_s", 250_000), ("warmup_s", 1_500_000), ("first_hyperperiod_s", 2_000_000),
+                   ("response_deadline_s", 1_000_000)):
+        c[k] = cyc / F_SYNTH
+    return str(d / "events.txt"), c
+
+
+def close(a, b):
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)) and not isinstance(a, bool):
+        return math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-6)
+    return a == b
+
+
+def test_cycles_at_another_clock_equal_run_f(run_f, tmp_path):
+    """With a clock period that is not a whole number of ns, the analysis
+    restores the rising edges and gives the cycles of run F: CPU time per
+    iteration, responses, release to dispatch and packet latencies. The
+    platform ms are cycles / F_CLK."""
+    log, c = synthetic_run(tmp_path)
+    m = exp23.analyze(log, c, str(tmp_path / "out"))
+    a = run_f[0]
+    assert m["clock"] == {"clock_hz": F_SYNTH, "cycle_hz": pytest.approx(1e15 / 2_297_794),
+                          "half_period_fs": 1_148_897, "source": "RUN_INFO", "run_info": "RUN_INFO",
+                          "edges_snapped": True}
+    for r, s in zip(a["tab83"]["rows"], m["tab83"]["rows"]):
+        assert (r["cluster"], r["estimated"]) == (s["cluster"], s["estimated"])
+        assert close(r["measured"], s["measured"])
+    for cl in a["tab83"]["per_cluster"]:
+        assert all(close(x, y) for x, y in zip(a["tab83"]["per_cluster"][cl]["per_hyperperiod"],
+                                              m["tab83"]["per_cluster"][cl]["per_hyperperiod"]))
+    keys = ("iteration", "response_cycles", "release_to_dispatch_cycles", "response_from_release_cycles")
+    assert [{k: p[k] for k in keys} for p in a["iterations"]["all"]] == \
+        [{k: p[k] for k in keys} for p in m["iterations"]["all"]]
+    assert m["iterations"]["release_to_dispatch_all_releases"] == a["iterations"]["release_to_dispatch_all_releases"]
+    lat = ("flow", "latency_min_cycles", "latency_max_cycles", "packets", "min_release", "deadline")
+    assert [{k: r[k] for k in lat} for r in a["tab82"]] == [{k: r[k] for k in lat} for r in m["tab82"]]
+    assert m["iterations"]["max_cycles"] == 930_585
+    assert m["iterations"]["max_ms"] == pytest.approx(930_585 / F_SYNTH * 1e3, abs=1e-9)
+    assert m["parameters"]["release_period_cycles"] == 250_000
+    assert "cycles at 435.2 MHz" in open(tmp_path / "out" / "tab83.tex").read()
+
+
+def test_figures_at_another_clock_equal_run_f(tmp_path):
+    """experiments/figures (rttools.paper.figures exp23) on the same log:
+    the flow table and the Gantt busy times of reference_exp23.json."""
+    from rttools.paper import figures
+    log, c = synthetic_run(tmp_path)
+    with open(os.path.join(REPO_ROOT, "experiments", "figures", "config.json")) as f:
+        fcfg = json.load(f)
+    with open(os.path.join(REPO_ROOT, "experiments", "figures", "reference_exp23.json")) as f:
+        ref = json.load(f)
+    m = figures.exp23_figures(log, c, fcfg, str(tmp_path / "fig"))
+    cols = ("flow", "latency_min", "latency_max", "send_min", "send_max", "arrival_max", "release", "deadline")
+    assert [{k: r[k] for k in cols} for r in m["flows"]] == [{k: r[k] for k in cols} for r in ref["flows"]]
+    assert m["gantt"]["busy_equals_tab83"] is True
+    assert m["iterations"]["max_cycles"] == ref["iterations"]["max_cycles"]
+
+
+def test_snap_to_edges_rejects_a_time_off_the_clock(tmp_path):
+    """A time farther than half a unit from every rising edge stops the
+    analysis (wrong half period in RUN_INFO)."""
+    log, c = synthetic_run(tmp_path)
+    tr = exp23.load(log, dict(c, clock_hz=F_SYNTH), None, None)
+    with pytest.raises(ValueError, match="rising edge"):
+        exp23.snap_to_edges(tr, 1_100_000)
+
+
+def test_no_500_mhz_constant_in_the_pipeline():
+    """The exp23 pipeline takes the clock from RUN_INFO or config.json:
+    no 500 MHz, 250000 or 250016 literal in rttools/paper and in the
+    scripts of experiments/exp23 (the defaults of simulate.sh and of the
+    Makefile are the clock of run F; F0 is the first frequency of the
+    search of the flow)."""
+    import re
+    pat = re.compile(r"\b(500[_,]?000[_,]?000|5e8|500e6|250[_,]?000|250[_,]?016)\b|500 ?MHz")
+    root = os.path.join(REPO_ROOT, "orca-rt-tools", "rttools", "paper")
+    hits = []
+    for name in sorted(os.listdir(root)):
+        if name.endswith(".py"):
+            with open(os.path.join(root, name)) as f:
+                for i, line in enumerate(f, 1):
+                    if pat.search(line) and "--f0" not in line:
+                        hits.append(f"{name}:{i}: {line.strip()}")
+    assert hits == []
+
+
+@pytest.mark.parametrize("f_clk, rc, text", [
+    ("435200000", 2, "clock: F_CLK 435200000 Hz, half period 1148897 fs (435200022.282 Hz), release every 217600 "
+                     "cycles, first at cycle 1305600, F_TICK 2000 Hz"),
+    ("434912000", 2, "half period 1149657 fs (434912326.024 Hz), release every 217456 cycles"),
+    ("500000000", 2, "half period 1000000 fs (500000000.000 Hz), release every 250000 cycles, first at cycle 1500000"),
+    ("434900000", 2, "not a multiple of 16"),
+    ("1000000000", 2, "below 1 GHz"),
+    ("4.352e8", 2, "positive integer"),
+])
+def test_simulate_sh_clock(tmp_path, f_clk, rc, text):
+    """simulate.sh derives the clock of the run from F_CLK before any tool
+    check; without vsim on PATH it stops after printing it."""
+    path = "/usr/bin:/bin"
+    if shutil.which("vsim", path=path):
+        pytest.skip("vsim on " + path)
+    r = subprocess.run([os.path.join(EXP, "simulate.sh"), str(tmp_path / "out"), "1000"],
+                       env={"PATH": path, "F_CLK": f_clk}, capture_output=True, text=True, timeout=60)
+    assert r.returncode == rc
+    assert text in r.stdout + r.stderr
+    assert not (tmp_path / "out").exists()
