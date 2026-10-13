@@ -32,10 +32,22 @@ ghdl_hermes() { # ghdl_hermes <nome> <generics...>
 		| grep -E "PASS|FAIL|wrong" | sed 's/.*(report note): //' || true
 }
 
+ghdl_cpu() { # cycles per instruction of the HF-RISC core (tb_cpu_cycles.vhd)
+	W="$OUT/ghdl_cpu"
+	mkdir -p "$W"
+	for f in bshifter alu reg_bank control int_control datapath cpu; do
+		ghdl -a --workdir="$W" -fsynopsys -fexplicit "$HW/cpu/core_rv32e/$f.vhd" 2>/dev/null
+	done
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_cpu_cycles.vhd"
+	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_cpu_cycles
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_cycles -gHEX="$T/cpu_cycles.hex" \
+		--stop-time=1ms 2>&1) | grep -E "^(CPI|PASS|FAIL)" || true
+}
+
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
 	$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/ddma/ddma.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_cpu_cycles}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
 	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
@@ -59,6 +71,7 @@ for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe}; 
 	tb_hermes_local)
 		ghdl_hermes A -gSRC=4 -gDST=4 -gP=4 -gM=0 -gNAME=A
 		ghdl_hermes B -gSRC=0 -gDST=8 -gP=4 -gM=4 -gNAME=B ;;
+	tb_cpu_cycles) ghdl_cpu ;;
 	*) echo "unknown test: $t"; exit 2 ;;
 	esac
 done
