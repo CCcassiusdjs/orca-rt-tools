@@ -6,7 +6,7 @@
 #   make contention  header wait at one router: 3x3 mesh, five packets that cross
 #               router 4 on disjoint links, 2624 runs (subsets, injection offsets,
 #               p in {1, 4, 16, 64}); check against reference_contention.json
-#               (about 2 to 5 min)
+#               (2 to 6 min on 2 vCPU)
 #   make check  zll and contention
 #   make clean
 #

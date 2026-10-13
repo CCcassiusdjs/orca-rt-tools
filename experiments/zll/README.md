@@ -8,7 +8,7 @@
 |---|---|---|
 | `make` or `make zll` | 8x3 mesh: from nodes (0,0) and (7,2) to every node; 2x2 mesh: from every node to every node; `p` in {1, 4, 16, 64}; fails if a point differs from the model | GHDL (tested with GHDL 4.1.0, mcode backend), about 30 s |
 | `./run.sh <out>` | One sweep; `XR`, `YR`, `SRCS`, `PS` and `GHDL` select the mesh, the sources, the payload sizes and the simulator | GHDL |
-| `make contention` | Header wait at one router (`tb_cont.vhd`, `contention.py`): 2624 runs, check against `reference_contention.json` | GHDL and Python 3 (standard library), 2 to 5 min |
+| `make contention` | Header wait at one router (`tb_cont.vhd`, `contention.py`): 2624 runs, check against `reference_contention.json` | GHDL and Python 3 (standard library), 2 to 6 min on 2 vCPU (`--jobs` = number of CPUs) |
 | `make check` | `zll` and `contention` | GHDL and Python 3 |
 
 ## Outputs (`build/<mesh>/`)
@@ -45,4 +45,4 @@ L0 = 6(m + 1) + p + 1 cycles
 | 4 | 1644 | 15 |
 | 5 | 430 | 20 |
 
-6769 packets arrive with 0 flits in error. The largest wait is 5 (n − 1) cycles: the SwitchControl routes one header at a time in five states (S1, S2, S3, one of S4/S5/S6, S7; `pkt-sim/hw/router/hermes/Hermes_switchcontrol.vhd:126-141`) and selects the next input port in round-robin order from the last port served (`:44-78`). A router has five input ports, so a header waits for at most the four headers of the other ports, 20 cycles per router. `rttools/modules/routing/router.py` (`HEADER_WAIT_CYCLES`) uses this value for the occupancy L0 + 20 (m + 1).
+6769 packets arrive with 0 flits in error. The largest wait is 5 (n − 1) cycles: the SwitchControl routes one header at a time in five states (S1, S2, S3, one of S4/S5/S6, S7; `pkt-sim/hw/router/hermes/Hermes_switchcontrol.vhd:126-141`) and selects the next input port in round-robin order from the last port served (`:44-78`). A router has five input ports, so a header waits for at most the four headers of the other ports, 20 cycles per router. `rttools/modules/routing/router.py` (`HEADER_WAIT_CYCLES`) uses this value for the occupancy o_i = L0 + 20 (m + 1) when `RTTOOLS_HEADER_WAIT=bound` or `--header-wait bound` (`rttools.paper.frequency`) selects it; the default stays o_i = L0.
