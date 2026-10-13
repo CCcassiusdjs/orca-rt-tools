@@ -33,7 +33,36 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | `make -C experiments/exp23 paper ENV_SETUP="..."` | `experiments/exp23/build/sim` (transcript, events, `RUN_INFO`), then the analysis of the new log against `reference_head.json` | about 6 min of simulation |
 | `cd orca-rt-tools && python -m pytest -q` | Python, C host and RTL tests (the RTL tests skip without Verilator or GHDL) | about 1 min |
 
+## Measured times
+
+Each time below comes from one run of the command.
+
+| Machine | Hardware and software |
+|---|---|
+| Container | 2 vCPU Intel Xeon 2.1 GHz, Python 3.13.16, GHDL |
+| Simulation host | Intel Core i9-7940X (14 cores, 28 threads), 128 GB, Rocky Linux 8.10, Questa Sim-64 2025.3, riscv64-elf-gcc 12.2.0 |
+
+| Command | Time | Machine |
+|---|---|---|
+| `make -C experiments` (`ch7`, `exp23`, `figures`, `zll` and their checks) | 37.6 s (`zll` alone 27.3 s) | Container |
+| `make -C experiments/ch7` (\|V\| = 20 to 100) | 2.3 s | Container |
+| `make -C experiments/ch7 car` | 0.5 s | Container |
+| `make -C experiments/ch7 graphs full` (17 graphs) | 21 min 32 s wall clock, 17 min 1 s user time (\|V\| = 900 alone 560 s) | Container |
+| `make -C experiments/exp23` (with `frequency`) | 2.3 s | Container |
+| `make -C experiments/exp23 frequency` | 0.6 s | Container |
+| `make -C experiments figures` | 1.2 s | Container |
+| `make -C experiments/exp23 paper` | `vsim` alone: 5 min 46 s wall clock, 343.6 s user time, 54 MB of resident memory, for 20 ms of simulated time (`experiments/exp23/logs/F.time.txt`); the builds were not timed | Simulation host |
+
+TODO(re-measure on the workstation): the container times come from a shared container; measure every command again on the simulation host.
+
 ## Numbers of the paper
+
+| Research question or result | Pipeline |
+|---|---|
+| RQ1: contraction criteria on the random graphs and on CAR | `experiments/ch7` |
+| RQ2 (CPU time per iteration), RQ3 (response time and flows), f* (f_NoC in the paper) and f_CPU of application E | `experiments/exp23` |
+| Rows and coordinates of the criteria table, the Gantt, the response per iteration and the flow table | `experiments/figures` |
+| L0 = 6(m+1) + p + 1 at 256 points of the Hermes RTL (GHDL) | `experiments/zll` |
 
 | Item of the paper | Source | Command |
 |---|---|---|
