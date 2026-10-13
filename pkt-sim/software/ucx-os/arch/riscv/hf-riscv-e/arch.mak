@@ -23,13 +23,13 @@ SERIAL_BAUDRATE = 57600
 #F_TICK = 1000000
 F_TICK = 2000
 
-# extra definitions for every object (empty by default; the generated
-# applications of the Makefile pass UCX_DEFS=-DUCX_APP_IRQ4)
-UCX_DEFS ?=
-
 # remove unreferenced functions
 CFLAGS_STRIP = -fdata-sections -ffunction-sections
 LDFLAGS_STRIP = --gc-sections
+
+# extra definitions for every object (empty by default; the generated
+# applications of the Makefile pass UCX_DEFS=-DUCX_APP_IRQ4)
+UCX_DEFS ?=
 
 # this is stuff used everywhere - compiler and flags should be declared (ASFLAGS, CFLAGS, LDFLAGS, LD_SCRIPT, CC, AS, LD, DUMP, READ, OBJ and SIZE).
 ASFLAGS = -march=rv32e -mabi=ilp32e #-fPIC
