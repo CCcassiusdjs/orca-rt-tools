@@ -453,6 +453,22 @@ def test_snap_to_edges_rejects_a_time_off_the_clock(tmp_path):
         exp23.snap_to_edges(tr, 1_100_000)
 
 
+def test_reference_flow_is_the_model_at_the_flow_clock():
+    """reference_flow.json (make paper-flow) holds the model at F_CLK of
+    make flow-clock; recomputed from config.json."""
+    with open(os.path.join(EXP, "reference_flow.json")) as f:
+        ref = json.load(f)
+    ck = exp23.clock_of_frequency_run(os.path.join(EXP, "reference_frequency.json"), cfg())
+    c = dict(cfg(), clock_hz=ck["f_clk_hz"])
+    assert ref["clock"]["clock_hz"] == ck["f_clk_hz"] and ref["clock"]["half_period_fs"] == ck["half_period_fs"]
+    assert ref["parameters"]["release_period_cycles"] == ck["release_cycles"]
+    cpu = exp23.cpu_check(c, exp23.estimates(c))
+    assert {k: ref["cpu"][k] for k in ref["cpu"]} == {k: cpu[k] for k in ref["cpu"]}
+    rb = exp23.response_bound(c)
+    assert {k: ref["response_bound"][k] for k in ref["response_bound"]} == {k: rb[k] for k in ref["response_bound"]}
+    assert rb["ms"] <= rb["deadline_ms"]
+
+
 def test_no_500_mhz_constant_in_the_pipeline():
     """The exp23 pipeline takes the clock from RUN_INFO or config.json:
     no 500 MHz, 250000 or 250016 literal in rttools/paper and in the

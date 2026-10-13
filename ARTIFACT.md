@@ -31,6 +31,7 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | `make -C experiments/ch7 car` | `experiments/ch7/build/car`: CAR on 16 clusters and the criterion of application E | seconds |
 | `make -C experiments/ch7 graphs full stats` | `experiments/ch7/build/{full,stats}`: all graphs and the summary of Table 7.1 | about 20 min |
 | `make -C experiments/exp23 paper ENV_SETUP="..."` | `experiments/exp23/build/sim` (transcript, events, `RUN_INFO`), then the analysis of the new log against `reference_head.json` | about 6 min of simulation |
+| `make -C experiments/exp23 paper-flow ENV_SETUP="..."` | The same at the minimum frequency of the flow (`F_CLK` = 434.912 MHz, `experiments/exp23/build/sim-flow`), checked against `reference_flow.json`; `make sim F_CLK=<Hz>` sets any other clock | about 5 min of simulation (estimate) |
 | `cd orca-rt-tools && python -m pytest -q` | Python, C host and RTL tests (the RTL tests skip without Verilator or GHDL) | about 1 min |
 
 ## Measured times

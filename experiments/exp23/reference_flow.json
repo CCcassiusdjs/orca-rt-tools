@@ -1,0 +1,61 @@
+{
+ "_doc": "Expected values of a run at the minimum frequency of the flow (make paper-flow): F_CLK = 434912000 Hz, the first multiple of 32000 Hz at or above f_CPU = 434900000 Hz (reference_frequency.json), half period 1149657 fs (simulator clock 434912326.024 Hz). Only the values of the model at that clock and the integrity of the run (packet monitor, pairing of packets); the measured values have no reference before the first run. tests/test_paper_exp23.py recomputes these values from config.json.",
+ "clock": {
+  "clock_hz": 434912000,
+  "half_period_fs": 1149657,
+  "source": "RUN_INFO",
+  "edges_snapped": true
+ },
+ "parameters": {
+  "clock_hz": 434912000,
+  "release_period_cycles": 217456,
+  "release_period_ms": 0.5,
+  "hyperperiod_ms": 2.0
+ },
+ "tab83": {
+  "rows": [
+   {
+    "cluster": "ABDF",
+    "estimated": 181930
+   },
+   {
+    "cluster": "C",
+    "estimated": 96330
+   },
+   {
+    "cluster": "EHI",
+    "estimated": 173370
+   },
+   {
+    "cluster": "GJ",
+    "estimated": 217450
+   }
+  ]
+ },
+ "cpu": {
+  "demand_cycles": {
+   "ABDF": 181930,
+   "C": 96330,
+   "EHI": 173370,
+   "GJ": 217450
+  },
+  "phase_cycles": 217456,
+  "f_cpu_hz": 434900000,
+  "meets_phase": true
+ },
+ "response_bound": {
+  "cycles": 869818,
+  "ms": 1.999986204,
+  "task": "J",
+  "phase": 3,
+  "deadline_ms": 2.0
+ },
+ "join_rule": "per_producer",
+ "packet_pairs": {
+  "unexpected": 0
+ },
+ "monitor": {
+  "errors": 0,
+  "nodes": 4
+ }
+}
