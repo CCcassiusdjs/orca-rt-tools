@@ -13,8 +13,12 @@ from tests.conftest import REPO_ROOT, run_module
 from rttools.ucxgen import memory, model
 
 CARV = os.path.join(REPO_ROOT, "experiments", "car-v-rtl")
-CARV_CSV = os.path.join(CARV, "input", "car-v.csv")
-CARV_MAP = os.path.join(CARV, "input", "car-v.map")
+# inputs of experiments/car-v-rtl/Makefile: the CAR-V analysis flow (apps/car-v)
+# when present, otherwise the provisional files of input/
+FLOW_CSV = os.path.join(REPO_ROOT, "apps", "car-v", "car-v.csv")
+FLOW_MAP = os.path.join(REPO_ROOT, "apps", "car-v", "car-v-ONTO-hermes4x4.map")
+CARV_CSV = FLOW_CSV if os.path.exists(FLOW_CSV) else os.path.join(CARV, "input", "car-v.csv")
+CARV_MAP = FLOW_MAP if os.path.exists(FLOW_MAP) else os.path.join(CARV, "input", "car-v.map")
 UCX = os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os")
 APP_DIR = os.path.join(UCX, "app")
 

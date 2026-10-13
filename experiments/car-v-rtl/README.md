@@ -16,7 +16,7 @@ CAR-V is the vision subgraph of CAR (23 tasks, 23 flows, one release period) at 
 | `input/car-v.csv` | Tasks (Capacity = c(v) in cycles), flows (payload in bytes, period 0.5 ms), `scheduler_cycles` 11,000 | Provisional: variant `vscaled` of the r9 analysis of CAR (cost of Shi et al. x 0.04 x 8 + 11,000 cycles; payload / 16) |
 | `input/car-v.map` | Node of each task (node index y * 4 + x of `arch/hermes-4x4.gml`), MAX-PROC clustering and Spiral Mapping | Provisional: the same r9 run |
 
-The analysis flow of CAR-V writes the final CSV and `.map`; `make app CSV=... MAP=...` regenerates the application from them, and the generator does not hold any number of CAR-V.
+The Makefile and the tests take `apps/car-v/car-v.csv` and `apps/car-v/car-v-ONTO-hermes4x4.map` (the CAR-V analysis flow, `rttools.paper.carv`) when they exist, and `input/` otherwise. When the source changes, `make check` fails until `make app` writes `car_v.{c,json,sim}` again; the generator holds no number of CAR-V.
 
 ## Generated files
 

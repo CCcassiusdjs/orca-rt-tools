@@ -10,10 +10,11 @@
 #   make sim     RTL simulation (Questa and riscv64-elf; ENV_SETUP as in exp23):
 #                ../exp23/simulate.sh build/sim $(SIM_NS) $(NAME) $(MESH)
 #
-# CSV and MAP: input/car-v.csv and input/car-v.map are provisional (subgraph
-# "vscaled" of the r9 analysis: T = 0.5 ms, cost x 8 + 11,000 cycles,
-# payload / 16). After the analysis flow of CAR-V writes its CSV and .map,
-# run `make app CSV=<csv> MAP=<map>` and commit the three files.
+# CSV and MAP: the files of the CAR-V analysis flow (apps/car-v, rttools.paper.carv)
+# when they exist, otherwise input/car-v.csv and input/car-v.map, provisional
+# (subgraph "vscaled" of the r9 analysis: T = 0.5 ms, cost x 8 + 11,000 cycles,
+# payload / 16). When the source changes, `make check` fails until `make app`
+# writes the three files again (commit them).
 # SIM_NS: release delay 3 ms + (n(OBMG) = 4 warm-up iterations + 8 measured
 # iterations - 1) x 0.5 ms + R_bound 2.25 ms + one tick (0.5 ms) of release
 # offset = 11.25 ms, rounded up to 11.5 ms (PR-110-car-v-rtl.md).
@@ -22,8 +23,8 @@ PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
 APP_DIR := ../../pkt-sim/software/ucx-os/app
 NAME    ?= car_v
-CSV     ?= input/car-v.csv
-MAP     ?= input/car-v.map
+CSV     ?= $(firstword $(wildcard ../../apps/car-v/car-v.csv) input/car-v.csv)
+MAP     ?= $(firstword $(wildcard ../../apps/car-v/car-v-ONTO-hermes4x4.map) input/car-v.map)
 MESH    ?= 4x4
 GENFLAGS ?=
 BUILD   ?= build
