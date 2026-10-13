@@ -16,8 +16,20 @@ count as separate edges). NoC volume is the sum of the inter-cluster edge
 values; load is the sum of the WCETs of a cluster divided by the cycles
 of the hyperperiod (config: load_capacity_cycles).
 
-Outputs: metrics.json, car.csv, appe.csv and tab-car-rows.tex (rows of
-the table of the article, in its column order).
+Spiral Mapping of CAR (Sec. 6.2, config key "spiral"): steps 1 and 2 of
+the analysis flow (rttools.modules.mapping.spiral.map_application) on the
+mesh of the config; per position k of the spiral: node, tile (x, y), mean
+XY distance from the node to the other nodes, cluster, tasks and network
+volume. Placement cost: sum over the inter-cluster edges of payload times
+XY hops, for the Spiral, for the reversed spiral (the k-th smallest volume
+on position n + 1 - k) and for random placements (random.Random(seed),
+one random.sample of the nodes per placement, clusters in step-1 order);
+share of the volume on the nodes off the outer ring.
+
+Outputs: metrics.json, car.csv, appe.csv, tab-car-rows.tex (rows of the
+table of the article, in its column order), spiral.csv (one row per
+position), spiral-edges.csv (inter-cluster edges with hops) and values.tex
+(LaTeX macros ExpCarSpiral... for the text).
 """
 from __future__ import annotations
 
@@ -25,11 +37,14 @@ import argparse
 import csv
 import json
 import os
+import random
+import statistics
 import sys
 
 from rttools.gcm.gicc import CriteriaICC, GraphICC
 from rttools.gde import __main__ as gde
 from rttools.gsl.graph import Graph, GraphEdge, GraphNode
+from rttools.modules.mapping import spiral as sm
 from rttools.paper.ch7 import load_graph
 
 NAMES = {"MAX_PROC": "MAX-PROC", "MIN_PROC": "MIN-PROC", "MAX_COMM": "MAX-COMM", "MIN_COMM": "MIN-COMM"}
@@ -124,6 +139,122 @@ def run_appe(cfg, apps):
     return out
 
 
+def xy(node, width):
+    return node % width, node // width
+
+
+def hops(a, b, width):
+    """XY hops between node indices a and b (y * width + x)."""
+    (xa, ya), (xb, yb) = xy(a, width), xy(b, width)
+    return abs(xa - xb) + abs(ya - yb)
+
+
+def mean_xy(node, width, height):
+    """Mean XY distance from `node` to the other nodes of the mesh."""
+    n = width * height
+    return sum(hops(node, m, width) for m in range(n) if m != node) / (n - 1)
+
+
+def outer_ring(node, width, height):
+    x, y = xy(node, width)
+    return x in (0, width - 1) or y in (0, height - 1)
+
+
+def placement_cost(inter, place, width):
+    """Sum of payload times XY hops over the inter-cluster edges
+    (cluster a, cluster b, payload) for the placement cluster -> node."""
+    return sum(p * hops(place[a], place[b], width) for a, b, p in inter)
+
+
+def run_spiral(cfg, apps):
+    """Spiral Mapping of CAR on the mesh of cfg (graph, width, height,
+    permutations, seed)."""
+    w, h = cfg["width"], cfg["height"]
+    tasks, edges = sm.from_orca(load_graph(os.path.join(apps, cfg["graph"])))
+    r = sm.map_application(tasks, edges, w, h)
+    clusters, vol, cn = r["clusters"], r["volumes"], r["cluster_nodes"]
+    wcet = dict(tasks)
+    owner = {t: c for c, ts in clusters.items() for t in ts}
+    inter = [(owner[a], owner[b], p) for a, b, p in edges if owner[a] != owner[b]]
+    order = sm.spiral_order(w, h)
+    pos = {node: k + 1 for k, node in enumerate(order)}
+    rows = []
+    for c in sorted(cn, key=lambda c: pos[cn[c]]):
+        node = cn[c]
+        x, y = xy(node, w)
+        rows.append({"position": pos[node], "node": node, "x": x, "y": y,
+                     "mean_xy": mean_xy(node, w, h), "outer_ring": outer_ring(node, w, h),
+                     "cluster": c, "tasks": clusters[c], "volume": vol[c],
+                     "demand": sum(wcet[t] for t in clusters[c]),
+                     "inter_edges": sum(1 for a, b, _ in inter if c in (a, b))})
+    total = sum(vol.values())
+    w_noc = sum(p for _, _, p in inter)
+    inner = sum(row["volume"] for row in rows if not row["outer_ring"])
+    cost = placement_cost(inter, cn, w)
+    ranked = [row["cluster"] for row in rows]
+    reverse = {c: order[len(ranked) - 1 - k] for k, c in enumerate(ranked)}
+    rng = random.Random(cfg["seed"])
+    step1 = list(clusters)
+    vals = sorted(placement_cost(inter, dict(zip(step1, rng.sample(range(w * h), len(step1)))), w)
+                  for _ in range(cfg["permutations"]))
+    median = statistics.median(vals)
+    median = int(median) if float(median).is_integer() else median
+    dist = {"outer": [row["mean_xy"] for row in rows if row["outer_ring"]],
+            "inner": [row["mean_xy"] for row in rows if not row["outer_ring"]]}
+    return {
+        "graph": cfg["graph"], "width": w, "height": h, "criterion": r["criterion"],
+        "step1_sigma": {row["criterion"]: row["sigma"] for row in r["rows"]},
+        "order": order, "rows": rows,
+        "edges": [{"source": a, "target": b, "payload": p, "source_node": cn[a], "target_node": cn[b],
+                   "hops": hops(cn[a], cn[b], w)} for a, b, p in inter],
+        "volume_sum": total, "w_noc": w_noc,
+        "inner_nodes": sorted(row["node"] for row in rows if not row["outer_ring"]),
+        "inner_volume": inner, "inner_volume_percent": 100 * inner / total,
+        "mean_xy": {k: {"min": min(v), "max": max(v)} for k, v in dist.items() if v},
+        "payload_hops": {
+            "spiral": cost, "spiral_mean_hops": cost / w_noc,
+            "reverse_spiral": placement_cost(inter, reverse, w),
+            "random": {"permutations": cfg["permutations"], "seed": cfg["seed"], "min": vals[0],
+                       "median": median, "max": vals[-1],
+                       "below_spiral": sum(1 for v in vals if v < cost),
+                       "equal_spiral": sum(1 for v in vals if v == cost)}},
+    }
+
+
+def write_spiral(out_dir, s):
+    """spiral.csv, spiral-edges.csv and values.tex of the Spiral Mapping."""
+    from rttools.paper.exp23 import fmt_int, macro_name
+    cols = ["position", "node", "x", "y", "mean_xy", "outer_ring", "cluster", "volume", "demand", "inter_edges"]
+    with open(os.path.join(out_dir, "spiral.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(cols + ["tasks"])
+        for row in s["rows"]:
+            w.writerow([row[c] for c in cols] + [" ".join(row["tasks"])])
+    cols = ["source", "target", "payload", "source_node", "target_node", "hops"]
+    with open(os.path.join(out_dir, "spiral-edges.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(cols)
+        for e in s["edges"]:
+            w.writerow([e[c] for c in cols])
+    ph, rnd = s["payload_hops"], s["payload_hops"]["random"]
+    vals = [("criterion", NAMES.get(s["criterion"], s["criterion"])),
+            ("mesh", f"\\ensuremath{{{s['width']}\\times{s['height']}}}"),
+            ("volume sum", fmt_int(s["volume_sum"])), ("w noc", fmt_int(s["w_noc"])),
+            ("inner volume", fmt_int(s["inner_volume"])),
+            ("inner volume percent", f"{s['inner_volume_percent']:.1f}"),
+            ("payload hops", fmt_int(ph["spiral"])), ("mean hops", f"{ph['spiral_mean_hops']:.2f}"),
+            ("reverse payload hops", fmt_int(ph["reverse_spiral"])),
+            ("random permutations", fmt_int(rnd["permutations"])), ("random seed", str(rnd["seed"])),
+            ("random min", fmt_int(rnd["min"])), ("random median", fmt_int(rnd["median"])),
+            ("random max", fmt_int(rnd["max"])), ("random below", fmt_int(rnd["below_spiral"]))]
+    for ring, d in s["mean_xy"].items():
+        vals += [(f"mean xy {ring} min", f"{d['min']:.2f}"), (f"mean xy {ring} max", f"{d['max']:.2f}")]
+    lines = ["% generated by python -m rttools.paper.car; do not edit"]
+    lines += [f"\\newcommand{{\\{macro_name('car', 'spiral', *k.split())}}}{{{v}}}" for k, v in vals]
+    with open(os.path.join(out_dir, "values.tex"), "w") as f:
+        f.write("\n".join(lines) + "\n")
+
+
 def num(x, d=0):
     return f"{x:,.{d}f}"
 
@@ -141,9 +272,12 @@ def tab_rows(car, order):
     return lines
 
 
-def write(out_dir, car, appe, cfg):
+def write(out_dir, car, appe, cfg, spiral=None):
     os.makedirs(out_dir, exist_ok=True)
     m = {"car": car, "appe": appe}
+    if spiral is not None:
+        m["spiral"] = spiral
+        write_spiral(out_dir, spiral)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
         json.dump(m, f, indent=1)
     cols = ["clustering", "V", "E", "E_pairs", "noc_volume", "noc_volume_percent", "M1", "M2", "M3",
@@ -177,7 +311,8 @@ def main(argv=None):
         cfg = json.load(f)
     car = run_car(cfg["car"], a.apps)
     appe = run_appe(cfg["appe"], a.apps)
-    write(a.out, car, appe, cfg)
+    spiral = run_spiral(cfg["spiral"], a.apps) if "spiral" in cfg else None
+    write(a.out, car, appe, cfg, spiral)
     print(f"CAR ({car['input']['V']} tasks, {car['input']['E']} edges, volume {car['total_volume']:,}) "
           f"on {car['n']} clusters")
     for k, r in car["rows"].items():
@@ -189,6 +324,18 @@ def main(argv=None):
         cl = ", ".join("".join(sorted(c["tasks"])) + f" {c['load']}" for c in r["clusters"])
         print(f"  {k:9s} M2 {r['M2']:10.2f}  NoC {r['noc_volume']} ({r['noc_volume_percent']:.1f}%)  {cl}")
     print(f"  chosen (lowest M2): {appe['chosen']}")
+    if spiral is not None:
+        s = spiral
+        print(f"Spiral Mapping of CAR on {s['width']}x{s['height']} (step 1: {s['criterion']})")
+        for row in s["rows"]:
+            print(f"  k {row['position']:2d}  node {row['node']:2d} ({row['x']},{row['y']})  mean XY "
+                  f"{row['mean_xy']:.3f}  volume {row['volume']:8d}  {row['cluster']}")
+        ph, rnd = s["payload_hops"], s["payload_hops"]["random"]
+        print(f"  volume {s['volume_sum']:,} (W_NoC {s['w_noc']:,}); inner nodes {s['inner_volume']:,} "
+              f"({s['inner_volume_percent']:.1f}%)")
+        print(f"  payload x hops: spiral {ph['spiral']:,} (mean {ph['spiral_mean_hops']:.4f} hops), reversed "
+              f"{ph['reverse_spiral']:,}, {rnd['permutations']} random (seed {rnd['seed']}): min {rnd['min']:,} "
+              f"median {rnd['median']:,} max {rnd['max']:,}, {rnd['below_spiral']} below the spiral")
     print("wrote " + a.out)
     return 0
 

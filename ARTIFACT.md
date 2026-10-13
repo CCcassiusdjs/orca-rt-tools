@@ -28,7 +28,7 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | Command | Output | Time |
 |---|---|---|
 | `make -C experiments PYTHON=<python>` | `experiments/*/build`; each Python pipeline prints `match`; `zll` writes `experiments/zll/build/{8x3,2x2}/zll.csv` and prints `192 of 192` and `64 of 64` points that satisfy L0 = 6(m+1) + p + 1 | about 40 s |
-| `make -C experiments/ch7 car` | `experiments/ch7/build/car`: CAR on 16 clusters and the criterion of application E | seconds |
+| `make -C experiments/ch7 car` | `experiments/ch7/build/car`: CAR on 16 clusters, the criterion of application E and the Spiral Mapping of CAR with the body of its figure | seconds |
 | `make -C experiments/ch7 graphs full stats` | `experiments/ch7/build/{full,stats}`: all graphs and the summary of Table 7.1 | about 20 min |
 | `make -C experiments/exp23 paper ENV_SETUP="..."` | `experiments/exp23/build/sim` (transcript, events, `RUN_INFO`), then the analysis of the new log against `reference_head.json` | about 6 min of simulation |
 | `make -C experiments/exp23 paper-flow ENV_SETUP="..."` | The same at the minimum frequency of the flow (`F_CLK` = 434.912 MHz, `experiments/exp23/build/sim-flow`), checked against `reference_flow.json`; `make sim F_CLK=<Hz>` sets any other clock | about 5 min of simulation (estimate) |
@@ -48,7 +48,7 @@ Each time below comes from one run of the command.
 |---|---|---|
 | `make -C experiments` (`ch7`, `exp23`, `figures`, `zll` and their checks) | 37.6 s (`zll` alone 27.3 s) | Container |
 | `make -C experiments/ch7` (\|V\| = 20 to 100) | 2.3 s | Container |
-| `make -C experiments/ch7 car` | 0.5 s | Container |
+| `make -C experiments/ch7 car` | 1.2 s (with the Spiral Mapping and 10,000 random placements) | Container |
 | `make -C experiments/ch7 graphs full` (17 graphs) | 21 min 32 s wall clock, 17 min 1 s user time (\|V\| = 900 alone 560 s) | Container |
 | `make -C experiments/exp23` (with `frequency` and `frequency-l0`) | 1.7 s | Container |
 | `make -C experiments/exp23 frequency` | 0.6 s | Container |
@@ -74,6 +74,7 @@ TODO(re-measure on the workstation): the container times come from a shared cont
 | Upper bound of the instrumentation writes in the measured CPU time per cluster (cycles per dispatch and per packet event, percent of the CPU time per iteration) | `experiments/exp23/logs/F.image.lst`, `F.noinstr.lst` (listings of the image of run F, `F.software.txt`), `F.events.txt`; cycles per instruction from `pkt-sim/tests/rtl/tb_cpu_cycles.vhd` | `make -C experiments/exp23` (stored listings; `instrumentation` in `metrics.json`, `\ExpInstrumentationMaxPercent` in `values.tex`); `make -C experiments/exp23 instrumentation` (build of this tree, riscv64-elf toolchain) |
 | Gantt of one hyperperiod, response per iteration and flow table (rows and coordinates of the article visuals); contraction criteria on the example graph | `experiments/exp23/logs/F.events.txt`, `apps/sample-graph-a/sample_graph.txt` | `make -C experiments figures` |
 | CAR clustering (Reference, MAX-PROC, MIN-COMM) and the criterion of application E | `apps/shi-2010/shi-2010.txt`, `apps/synthetic-app-e/synthetic-app-e.txt` | `make -C experiments/ch7 car` |
+| Spiral Mapping of CAR (Figure 4): cluster, tasks and volume per position, mean XY distance, payload x hops of the Spiral, the reversed spiral and 10,000 random placements, volume share of the inner nodes | `apps/shi-2010/shi-2010.txt` | `make -C experiments/ch7 car`; `spiral.csv`, `values.tex`, `fig-spiral-body.tex` in `build/car` |
 | Minimum frequency of application E: f* (network), f_CPU (CPU test) and max(f*, f_CPU), with the mapping file and with the Spiral Mapping | `apps/synthetic-app-e/synthetic-app-e.csv` (phase model, characterized costs), `arch/hermes-2x2.gml` | `make -C experiments/exp23 frequency`; the same numbers from `python -m rttools apps/synthetic-app-e/synthetic-app-e.csv <map or spiral> arch/hermes-2x2.gml 500000000` |
 | Zero-load latency L0 = 6(m+1) + p + 1 | Hermes RTL in `pkt-sim/hw/router/hermes` | `make -C experiments zll` |
 | Header wait at one router: 5 cycles per competing header, at most 20 cycles (4 competing headers); occupancy o_i = L0 + 20 (m + 1) | `experiments/zll/tb_cont.vhd`, `pkt-sim/hw/router/hermes/Hermes_switchcontrol.vhd:44-78, :126-141` | `make -C experiments/zll contention` |
