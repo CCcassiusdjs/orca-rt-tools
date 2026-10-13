@@ -78,9 +78,11 @@ long long unsigned int disp_timer = 0;
 uint16_t krnl_schedule(int block)
 {  
   // *((volatile int*)(0x20000050)) = 0x1;
+#ifndef UCX_NO_INSTRUMENTATION
   disp_timer++;
   set_cacc(disp_timer);
   set_counter_1(0);
+#endif
 
   // put current task into ready state if still running
   if(block) {
@@ -111,7 +113,9 @@ uint16_t krnl_schedule(int block)
   // put next task into running state
 	kcb_p->tcb_p->state = TASK_RUNNING;
   
+#ifndef UCX_NO_INSTRUMENTATION
   set_counter_2(kcb_p->tcb_p->id);
+#endif
   // *((volatile int*)(0x20000050)) = 0x2;
 	return kcb_p->tcb_p->id;
 }

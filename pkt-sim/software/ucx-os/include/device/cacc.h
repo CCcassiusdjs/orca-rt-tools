@@ -1,3 +1,7 @@
+/* The kernel writes these registers in each dispatch (sched.c) and packet
+ * event (noc.c); the RTL logs the writes. -DUCX_NO_INSTRUMENTATION removes
+ * the writes (experiments/exp23/build_sw.sh builds both variants to bound
+ * the cost of the writes). */
 extern volatile uint32_t * CACC_REGISTER;
 extern volatile uint32_t * CACC_COUNTER1;
 extern volatile uint32_t * CACC_COUNTER2;
