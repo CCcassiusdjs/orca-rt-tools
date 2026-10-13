@@ -160,3 +160,21 @@ def test_rtl_timer1_period(variant, tmp_path):
     assert "PASS tb_timer1" in r.stdout, r.stdout[-4000:]
     ticks = [int(x) for x in re.findall(r"TICK (\d+) cycles", r.stdout)]
     assert ticks and all(t == expect for t in ticks)
+
+
+@pytest.mark.parametrize("name,tick", [("G", 250000), ("H", 217456)])
+def test_log_of_runs_g_and_h_at_the_clock_of_the_run(name, tick):
+    """Runs G (500 MHz) and H (434.912 MHz, the clock of make paper-flow),
+    tag r10-rc1: the tick of the code at f_clk_hz of the RUN_INFO next to
+    the log; the dispatches of A come every tick and the wait from the
+    release request to the dispatch of A takes one value."""
+    rc, out = run("log", os.path.join(REPO_ROOT, "experiments", "exp23", "logs", f"{name}.events.txt"))
+    lv = out["log"]
+    assert rc == 0 and out["pass"]
+    assert out["code"]["f_clk_hz"] == {"G": 500000000, "H": 434912000}[name]
+    assert out["code"]["tick_cycles"] == out["code"]["release_cycles"] == tick
+    assert lv["releases"] == 34
+    assert lv["dispatch_spacing_cycles"] == {"min": tick, "max": tick}
+    assert lv["release_to_dispatch_cycles"] == {"min": 1303, "max": 1303}
+    assert lv["request_to_dispatch_cycles"] == {"min": 1690.5, "max": 1690.5}
+    assert lv["ack_latency_cycles"] == {"min": 387.5, "max": 387.5}
