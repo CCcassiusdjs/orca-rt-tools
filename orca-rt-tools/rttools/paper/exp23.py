@@ -16,6 +16,7 @@ cycles and milliseconds:
 | thesis.tex, thesis.csv | Values printed in the thesis next to the values of this run |
 | values.tex | LaTeX macros with the numbers, for the text of the article |
 | (metrics.json) cpu, response_bound | CPU demand per PE, f_CPU and the response bound R^ of the estimate |
+| (metrics.json) per_iteration; packets_per_iteration.csv | Send and arrival of each packet against the phase of its own iteration; with ITER lines, also the response of each iteration to the end of J for it (iterations_markers.csv) and the iterations that a task runs in the run of the previous one |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
 
 `check` compares metrics.json with a reference file and exits with 1 when
@@ -24,6 +25,7 @@ a value differs (integers exactly; floats within 1e-6 relative).
 from __future__ import annotations
 
 import argparse
+import bisect
 import csv
 import json
 import math
@@ -190,13 +192,9 @@ def tab83(measured, estimated, cfg):
     return rows, mean
 
 
-def iteration_releases(tr, cfg, clk):
-    """(release, start) of each iteration: the release is the TRIGGER line
-    (without TRIGGER lines, each multiple of the release period from
-    warmup) and the start is the first dispatch of the source task at or
-    after it."""
-    src = cfg["source"]
-    a_starts = [s.start for s in tr.lane_slices(src["pe"]) if s.label == src["task"]]
+def release_times(tr, cfg, clk):
+    """Releases of the source task in raw units: the TRIGGER lines; without
+    TRIGGER lines, each multiple of the release period from warmup."""
     releases = [m.time for m in tr.lane_marks("TRIGGER")]
     if not releases:
         p = clk.raw(cfg["release_period_s"])
@@ -204,6 +202,17 @@ def iteration_releases(tr, cfg, clk):
         while t <= tr.t1:
             releases.append(t)
             t += p
+    return releases
+
+
+def iteration_releases(tr, cfg, clk):
+    """(release, start) of each iteration: the release is the TRIGGER line
+    (without TRIGGER lines, each multiple of the release period from
+    warmup) and the start is the first dispatch of the source task at or
+    after it."""
+    src = cfg["source"]
+    a_starts = [s.start for s in tr.lane_slices(src["pe"]) if s.label == src["task"]]
+    releases = release_times(tr, cfg, clk)
     out = []
     for r in releases:
         nxt = next((a for a in a_starts if a >= r), None)
@@ -309,6 +318,188 @@ def responses(tr, cfg, clk, rule=None):
                     "response_from_release_cycles": exact(clk.cycles(end - r)),
                     "response_from_release_ms": clk.ms(end - r),
                     "release_offset_ms": round(clk.ms(offset - (offset % clk.raw(cfg["release_period_s"]))), 6)})
+    return out
+
+
+# ---------------------------------------------------- iteration markers
+
+ITER_MARKERS = "markers"   # iteration of a packet from the ITER lines of its source task
+ITER_FIFO = "fifo"         # iteration k = k-th packet of the flow (log without ITER lines)
+
+
+def iteration_marks(tr):
+    """Begin and end of the work of each iteration of each task, from the
+    ITER lines (weird_a.c ITER_BEGIN/ITER_END, register 0x2000003C of
+    manycore_pe.sv): {task: {k: {"lane", "begin", "end"}}}, raw units; {}
+    for a log without markers (runs A to F). A repeated marker raises
+    ValueError."""
+    out = {}
+    for m in tr.meta.get("iterations") or []:
+        it = out.setdefault(m["task"], {}).setdefault(
+            m["iteration"], {"lane": m["lane"], "begin": None, "end": None})
+        if it[m["edge"]] is not None:
+            raise ValueError(f"repeated ITER {m['edge']} {m['task']} {m['iteration']} at {m['time']}")
+        it[m["edge"]] = m["time"]
+    return out
+
+
+def marker_iterations(tr, cfg, clk, marks):
+    """Iterations of the markers: release r_j of iteration j = last
+    release at or before the begin marker of the source task for j; start
+    = first dispatch of the source task at or after r_j (as
+    iteration_releases); end = end marker of J for j. The response of
+    iteration j goes from r_j (and from the start) to the end of J for j,
+    also when one run of J serves j and j + 1. run_end = exit of J from
+    the CPU after the end marker (the end of the response of `responses`);
+    pair_excess_cycles = run_end - end. One row per begin marker of the
+    source task that follows a release; end and the responses are None
+    while J has no end marker for the iteration (end of the log)."""
+    src, j = cfg["source"]["task"], cfg["join"]["task"]
+    rel = sorted(release_times(tr, cfg, clk))
+    start_of = dict(iteration_releases(tr, cfg, clk))
+    runs = closed_runs(tr, cfg["join"]["pe"], j)
+    out = []
+    for k in sorted(marks.get(src, {})):
+        b = marks[src][k]["begin"]
+        e = marks.get(j, {}).get(k, {}).get("end")
+        i = bisect.bisect_right(rel, b) - 1 if b is not None else -1
+        if i < 0:
+            continue
+        r = rel[i]
+        s = start_of.get(r)
+        done = e is not None
+        run_end = next((re_ for (rb, re_) in runs if rb <= e <= re_), None) if done else None
+        out.append({"iteration": k, "release": r, "start": s, "end": e, "run_end": run_end,
+                    "response_from_release_cycles": exact(clk.cycles(e - r)) if done else None,
+                    "response_from_release_ms": clk.ms(e - r) if done else None,
+                    "response_cycles": exact(clk.cycles(e - s)) if done and s is not None else None,
+                    "response_ms": clk.ms(e - s) if done and s is not None else None,
+                    "pair_excess_cycles": exact(clk.cycles(run_end - e)) if run_end is not None else None})
+    return out
+
+
+def same_run_iterations(tr, cfg, marks):
+    """For each task with markers: iterations, and iterations k whose begin
+    falls in the CPU slice (run) of the end of k - 1, i.e. one run serves
+    k - 1 and k (weird_a.c, recv_and_print consumes every queued packet)."""
+    lanes = {t: pe for pe, ts in cfg["pe_tasks"].items() for t in ts}
+    out = {}
+    for task, its in sorted(marks.items()):
+        lane = lanes.get(task) or next(iter(its.values()))["lane"]
+        same = []
+        for k in sorted(its):
+            prev = its.get(k - 1)
+            if prev is None or prev["end"] is None or its[k]["begin"] is None:
+                continue
+            a, b = tr.slice_at(lane, prev["end"]), tr.slice_at(lane, its[k]["begin"])
+            if a is not None and a is b:
+                same.append(k)
+        out[task] = {"iterations": len(its), "same_run_as_previous": len(same), "iterations_same_run": same}
+    return out
+
+
+def _range(v):
+    return {"min": min(v), "max": max(v)} if v else {"min": None, "max": None}
+
+
+def _packet_summary(rows, r0):
+    send = [p["send_cycles"] for p in rows]
+    arr = [p["arrival_cycles"] for p in rows if p["arrival_cycles"] is not None]
+    slack = [p["slack_cycles"] for p in rows if p["slack_cycles"] is not None]
+    return {"packets": len(rows), "send": _range(send), "arrival": _range(arr),
+            "sent_after_release": sum(1 for v in send if v > r0),
+            "min_slack_cycles": min(slack) if slack else None}
+
+
+def packet_iterations(tr, cfg, clk, marks=None, releases=None):
+    """Send and arrival of each packet of each flow of the config against
+    the phase of its own iteration k: cycles from r_k + phi(source) T, with
+    r_k the release of iteration k, phi the phase index of the source
+    (response_bound) and T the release period; compared with the release
+    offset and the deadline of the phase model (phase_windows).
+
+    The iteration of a packet: with ITER lines (`marks`), the iteration of
+    the begin/end interval of the source task that contains the send;
+    without them, k = position of the packet in the flow (FIFO, one packet
+    per iteration from the first release). The arrival is the receive of
+    the same position in the flow (FIFO per flow). `releases` maps
+    iteration -> release (marker_iterations); default: the k-th release
+    of iteration_releases."""
+    period = exact(cfg["release_period_s"] * cfg["clock_hz"])
+    phi = response_bound(cfg)["phases"]
+    win = phase_windows(cfg)
+    if releases is None:
+        releases = {k: r for k, (r, _) in enumerate(iteration_releases(tr, cfg, clk), start=1)}
+    mode = ITER_MARKERS if marks else ITER_FIFO
+    flows = []
+    for f in cfg["flows"]:
+        tag = "TAG " + f["tag"]
+        sends = sorted(m.time for m in tr.lane_marks(f["src_pe"]) if m.kind == "send" and m.label == tag)
+        recvs = sorted(m.time for m in tr.lane_marks(f["dst_pe"]) if m.kind == "recv" and m.label == tag)
+        spans = sorted((v["begin"], v["end"], k) for k, v in (marks or {}).get(f["source"], {}).items()
+                       if v["begin"] is not None and v["end"] is not None)
+        begins = [b for b, _, _ in spans]
+        r0, d0 = win[f["name"]]
+        shift = phi[f["source"]] * period
+        rows, unassigned, mismatch = [], 0, 0
+        for pos, t in enumerate(sends, start=1):
+            if mode == ITER_MARKERS:
+                i = bisect.bisect_right(begins, t) - 1
+                k = spans[i][2] if i >= 0 and t <= spans[i][1] else None
+                if k is None:
+                    unassigned += 1
+                    continue
+                mismatch += k != pos
+            else:
+                k = pos
+            r = releases.get(k)
+            if r is None:
+                continue
+            a = recvs[pos - 1] if pos <= len(recvs) else None
+            sc = exact(clk.cycles(t - r) - shift)
+            ac = exact(clk.cycles(a - r) - shift) if a is not None else None
+            rows.append({"flow": f["name"], "iteration": k, "parity": "odd" if k % 2 else "even",
+                         "send_cycles": sc, "arrival_cycles": ac,
+                         "after_release": sc > r0, "slack_cycles": exact(d0 - ac) if ac is not None else None})
+        summary = _packet_summary(rows, r0)
+        summary.update({"flow": f["name"], "source": f["source"], "target": f["target"],
+                        "min_release": r0, "deadline": d0, "phase": phi[f["source"]],
+                        "unassigned": unassigned, "fifo_mismatch": mismatch if mode == ITER_MARKERS else None,
+                        "by_parity": {p: _packet_summary([x for x in rows if x["parity"] == p], r0)
+                                      for p in ("odd", "even")},
+                        "rows": rows})
+        flows.append(summary)
+    return {"source": mode, "flows": flows}
+
+
+def per_iteration(tr, cfg, clk):
+    """metrics.json per_iteration: packets against their own iteration
+    (markers or FIFO); with markers, also the response of each iteration
+    and the iterations served in the run of the previous one."""
+    marks = iteration_marks(tr)
+    out = {"markers": len(tr.meta.get("iterations") or []), "responses": None, "tasks": None}
+    releases = None
+    if marks:
+        rows = marker_iterations(tr, cfg, clk, marks)
+        rel = [r["release"] for r in rows]
+        releases = {r["iteration"]: r["release"] for r in rows}
+        its = [r for r in rows if r["end"] is not None]
+        resp = [r["response_from_release_cycles"] for r in its]
+        excess = [r["pair_excess_cycles"] for r in its if r["pair_excess_cycles"] is not None]
+        out["responses"] = {
+            "all": [{k: r[k] for k in ("iteration", "response_from_release_cycles", "response_from_release_ms",
+                                       "response_cycles", "response_ms", "pair_excess_cycles")} for r in its],
+            "complete": len(its),
+            "releases_unique": len(set(rel)) == len(rel),
+            "max_from_release_cycles": max(resp) if resp else None,
+            "max_from_release_ms": max(r["response_from_release_ms"] for r in its) if its else None,
+            "max_cycles": max((r["response_cycles"] for r in its if r["response_cycles"] is not None), default=None),
+            "max_ms": max((r["response_ms"] for r in its if r["response_ms"] is not None), default=None),
+            "max_pair_excess_cycles": max(excess) if excess else None,
+            "deadline_ms": cfg["response_deadline_s"] * 1e3,
+        }
+        out["tasks"] = same_run_iterations(tr, cfg, marks)
+    out.update(packet_iterations(tr, cfg, clk, marks, releases))
     return out
 
 
@@ -442,6 +633,15 @@ def write_values(path, m):
             fmt_int(it["response_from_release_max"]["cycles"]))
         put(macro_name("response", "from", "release", "max", "ms"), f"{it['response_from_release_max']['ms']:.3f}")
         put(macro_name("complete", "iterations"), str(it["complete"]))
+    pr = (m.get("per_iteration") or {}).get("responses")
+    if pr and pr["max_from_release_cycles"] is not None:
+        # logs with ITER lines: response of each iteration to the end of J for it
+        put(macro_name("marker", "response", "from", "release", "max", "cycles"),
+            fmt_int(pr["max_from_release_cycles"]))
+        put(macro_name("marker", "response", "from", "release", "max", "ms"), f"{pr['max_from_release_ms']:.3f}")
+        put(macro_name("marker", "response", "max", "ms"), f"{pr['max_ms']:.3f}")
+        if pr["max_pair_excess_cycles"] is not None:
+            put(macro_name("marker", "pair", "excess", "max", "cycles"), fmt_int(pr["max_pair_excess_cycles"]))
     put(macro_name("release", "period", "ms"), f"{m['parameters']['release_period_ms']:g}")
     put(macro_name("hyperperiod", "ms"), f"{m['parameters']['hyperperiod_ms']:g}")
     put(macro_name("cpu", "frequency", "mhz"), f"{m['cpu']['f_cpu_hz'] / 1e6:.1f}")
@@ -450,6 +650,26 @@ def write_values(path, m):
     put(macro_name("response", "bound", "deadline", "percent"), f"{m['response_bound']['deadline_percent']:.0f}")
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")
+
+
+def write_per_iteration(out_dir, pi):
+    """packets_per_iteration.csv (every log) and iterations_markers.csv
+    (logs with ITER lines)."""
+    with open(os.path.join(out_dir, "packets_per_iteration.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        keys = ("flow", "iteration", "parity", "send_cycles", "arrival_cycles", "after_release", "slack_cycles")
+        w.writerow(keys + ("iteration_source",))
+        for fl in pi["flows"]:
+            for r in fl["rows"]:
+                w.writerow([r[k] for k in keys] + [pi["source"]])
+    if pi["responses"] is not None:
+        with open(os.path.join(out_dir, "iterations_markers.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            keys = ("iteration", "response_from_release_cycles", "response_from_release_ms",
+                    "response_cycles", "response_ms", "pair_excess_cycles")
+            w.writerow(keys)
+            for r in pi["responses"]["all"]:
+                w.writerow([r[k] for k in keys])
 
 
 def write_figure(tr, cfg, out_dir, window):
@@ -549,6 +769,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None):
         "join_rule": rule,
         "packet_pairs": packet_pairs(tr, cfg),
         "monitor": monitor_summary(log_path),
+        "per_iteration": per_iteration(tr, cfg, clk),
     }
     th = cfg.get("thesis", {})
     thesis_rows = []
@@ -603,6 +824,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None):
     write_table(os.path.join(out_dir, "thesis"),
                 [("Item", "item"), ("Thesis", "thesis"), ("This run", "this_run")],
                 thesis_rows, "lrr", "Values of the thesis and of this run.", "tab:exp23-thesis")
+    write_per_iteration(out_dir, m["per_iteration"])
     write_values(os.path.join(out_dir, "values.tex"), m)
     write_figure(tr, cfg, out_dir, windows[0])
     return m
@@ -676,6 +898,13 @@ def main(argv=None):
               f"max response {m['iterations']['max_ms']:.3f} ms of {m['iterations']['deadline_ms']:g} ms")
         print(f"  f_CPU {m['cpu']['f_cpu_hz'] / 1e6:.1f} MHz; response bound {m['response_bound']['ms']:.3f} ms "
               f"(task {m['response_bound']['task']}, phase {m['response_bound']['phase']})")
+        pi = m["per_iteration"]
+        late = ", ".join(f"{fl['flow']} {fl['sent_after_release']}/{fl['packets']}" for fl in pi["flows"])
+        print(f"  per iteration ({pi['source']}, {pi['markers']} ITER lines): sent after the release {late}")
+        if pi["responses"] is not None:
+            pr = pi["responses"]
+            print(f"  response to the end of J per iteration: max {pr['max_from_release_ms']:.3f} ms from the "
+                  f"release, {pr['max_ms']:.3f} ms from the start ({pr['complete']} iterations)")
         mon = m["monitor"]
         print("  packet monitor: " + ("no CHKSUM lines" if mon is None else
                                        f"{mon['errors']} errors in {mon['send_pkts']} sent and "

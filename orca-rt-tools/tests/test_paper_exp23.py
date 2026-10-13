@@ -1,4 +1,5 @@
 """Pipeline of Ch. 8 (rttools/paper/exp23.py) on the stored logs."""
+import csv
 import json
 import os
 import shutil
@@ -275,3 +276,219 @@ def test_release_to_dispatch_and_response_from_release(run_f):
     assert "\\newcommand{\\ExpResponseFromReleaseMaxCycles}{932\\,143}" in values
     assert "\\newcommand{\\ExpReleaseToDispatchAllMaxCycles}{1\\,924}" in values
     assert "\\newcommand{\\ExpCompleteIterations}{32}" in values
+
+
+# ----------------------------------------------------- iteration markers
+
+def test_run_f_packets_against_their_own_iteration(run_f):
+    """Run F has no ITER lines: the iteration of a packet is its position in
+    the flow (FIFO). Send and arrival in cycles from r_k + phi(source) T;
+    the numbers of r9/threats/scripts/per_iteration2.py (E, I, H; G, J)."""
+    m, d = run_f
+    pi = m["per_iteration"]
+    assert pi["source"] == "fifo" and pi["markers"] == 0
+    assert pi["responses"] is None and pi["tasks"] is None
+    fl = {f["flow"]: f for f in pi["flows"]}
+    assert {k: (f["packets"], f["sent_after_release"], f["min_slack_cycles"]) for k, f in fl.items()} == {
+        "F1": (34, 0, 244154), "F2": (34, 0, 113022), "F3": (34, 0, 176855),
+        "F4": (32, 16, 186947), "F5": (32, 0, 269413)}
+    f3 = fl["F3"]["by_parity"]
+    assert f3["odd"]["send"] == {"min": 81485, "max": 81996} and f3["odd"]["sent_after_release"] == 0
+    assert f3["even"]["send"] == {"min": -88106, "max": -87595}
+    f4 = fl["F4"]["by_parity"]
+    assert f4["odd"]["send"] == {"min": 180462, "max": 180942} and f4["odd"]["sent_after_release"] == 16
+    assert f4["even"]["sent_after_release"] == 0
+    assert all(f["unassigned"] == 0 and f["fifo_mismatch"] is None for f in fl.values())
+    rows = list(csv.DictReader(open(os.path.join(d, "packets_per_iteration.csv"))))
+    assert len(rows) == 166 and rows[0]["flow"] == "F1" and rows[0]["iteration_source"] == "fifo"
+    assert not os.path.exists(os.path.join(d, "iterations_markers.csv"))
+    assert "Marker" not in open(os.path.join(d, "values.tex")).read()
+
+
+# Synthetic log with ITER lines, lanes in the order of the config (no X-Y
+# swap), raw unit 1 ns (2 ns per cycle). A runs iterations 1 and 2; one
+# run of C serves both, and so does one run of J.
+SYNTH = """\
+# Time scale of (manycore_top.pe_x[0].pe_y[0].pe_mod) is  1ns /  100ps
+# TRIGGER: workflow iteration at 3000000 ns.
+# 3000100 0-0 scheduled 4
+# 3000200 0-0 ITER begin A 1
+# 3000400 0-0 -> TAG 1230
+# 3000450 0-1 <- TAG 1230
+# 3000500 0-0 ITER end A 1
+# 3000600 0-0 scheduled 0
+# TRIGGER: workflow iteration at 3500000 ns.
+# 3500100 0-0 scheduled 4
+# 3500200 0-0 ITER begin A 2
+# 3500400 0-0 -> TAG 1230
+# 3500450 0-1 <- TAG 1230
+# 3500500 0-0 ITER end A 2
+# 3500600 0-0 scheduled 0
+# 3600000 0-1 scheduled 1
+# 3600010 0-1 ITER begin C {c1}
+# 3600100 0-1 -> TAG 1200
+# 3600110 0-1 ITER end C {c1}
+# 3600120 0-1 ITER begin C {c2}
+# 3600150 1-0 <- TAG 1200
+# 3600200 0-1 -> TAG 1200
+# 3600210 0-1 ITER end C {c2}
+# 3600250 1-0 <- TAG 1200
+{extra}# 3600300 0-1 scheduled 0
+# 3700000 1-1 scheduled 1
+# 3700010 1-1 ITER begin J 1
+# 3700100 1-1 ITER end J 1
+# 3700110 1-1 ITER begin J 2
+# 3700200 1-1 ITER end J 2
+# 3700300 1-1 scheduled 0
+# 3800000 1-0 scheduled 0
+"""
+
+
+def synth_trace(tmp_path, c1=1, c2=2, extra=""):
+    p = tmp_path / "synth.events.txt"
+    p.write_text(SYNTH.format(c1=c1, c2=c2, extra=extra))
+    c = cfg()
+    tr = exp23.load(str(p), c)
+    return tr, c, exp23.Clock(tr.unit, c["clock_hz"])
+
+
+def test_markers_response_to_the_end_of_j_per_iteration(tmp_path):
+    tr, c, clk = synth_trace(tmp_path)
+    assert not tr.meta["swap_xy"] and len(tr.meta["iterations"]) == 12
+    marks = exp23.iteration_marks(tr)
+    assert sorted(marks) == ["A", "C", "J"] and marks["J"][2] == {"lane": "1-1", "begin": 3700110, "end": 3700200}
+    pi = exp23.per_iteration(tr, c, clk)
+    assert pi["source"] == "markers" and pi["markers"] == 12
+    r = pi["responses"]
+    # iteration 1: release 3 000 000, end of J for 1 at 3 700 100 (not the
+    # exit of J from the CPU at 3 700 300, which ends iteration 2 too)
+    assert [x["response_from_release_cycles"] for x in r["all"]] == [350050, 100100]
+    assert [x["response_cycles"] for x in r["all"]] == [350000, 100050]   # from the dispatch of A
+    assert [x["pair_excess_cycles"] for x in r["all"]] == [100, 50]
+    assert r["complete"] == 2 and r["releases_unique"] and r["max_from_release_cycles"] == 350050
+    assert r["max_from_release_ms"] == pytest.approx(0.7001)
+    # the exit of J from the CPU (3 700 300) ends both iterations
+    assert [x["run_end"] for x in exp23.marker_iterations(tr, c, clk, marks)] == [3700300, 3700300]
+    # one run of C and one of J serve iterations 1 and 2
+    t = pi["tasks"]
+    assert t["C"]["iterations_same_run"] == [2] and t["J"]["iterations_same_run"] == [2]
+    assert t["A"] == {"iterations": 2, "same_run_as_previous": 0, "iterations_same_run": []}
+
+
+def test_markers_packets_against_their_own_iteration(tmp_path):
+    tr, c, clk = synth_trace(tmp_path)
+    fl = {f["flow"]: f for f in exp23.per_iteration(tr, c, clk)["flows"]}
+    # F1 (A -> C, phase 0): send 400 ns, arrival 450 ns after the release
+    assert [(x["iteration"], x["send_cycles"], x["arrival_cycles"]) for x in fl["F1"]["rows"]] == [
+        (1, 200, 225), (2, 200, 225)]
+    # F3 (C -> E, phase 1): the run of C at 3.6 ms serves iteration 1 in its
+    # phase and iteration 2 one phase before its phase (250 000 cycles)
+    f3 = fl["F3"]
+    assert [(x["iteration"], x["send_cycles"], x["arrival_cycles"]) for x in f3["rows"]] == [
+        (1, 50050, 50075), (2, -199900, -199875)]
+    assert f3["min_slack_cycles"] == 261000 - 50075 and f3["deadline"] == 261000
+    assert f3["fifo_mismatch"] == 0 and f3["unassigned"] == 0
+    assert fl["F4"]["packets"] == 0 and fl["F4"]["min_slack_cycles"] is None
+
+
+def test_markers_find_packets_out_of_fifo_order(tmp_path):
+    """C marks iterations 2 and 3 (a lost packet of iteration 1) and sends
+    once outside its markers: the FIFO position and the marker differ for
+    both packets, iteration 3 has no release (A ran 1 and 2), and the send
+    outside the markers counts as unassigned."""
+    tr, c, clk = synth_trace(tmp_path, c1=2, c2=3, extra="# 3600290 0-1 -> TAG 1200\n")
+    f3 = next(f for f in exp23.per_iteration(tr, c, clk)["flows"] if f["flow"] == "F3")
+    assert f3["fifo_mismatch"] == 2 and f3["unassigned"] == 1
+    assert [x["iteration"] for x in f3["rows"]] == [2]
+
+
+def test_repeated_marker_is_an_error(tmp_path):
+    tr, _, _ = synth_trace(tmp_path, c1=1, c2=1)
+    with pytest.raises(ValueError, match="repeated ITER begin C 1"):
+        exp23.iteration_marks(tr)
+
+
+def inject_markers(log_path, c, out_path):
+    """Log F plus ITER lines that the application would write: A from its
+    dispatch to its send to C; F, C, I, H around their send of each flow; J
+    for each iteration, splitting a run that serves two iterations at its
+    midpoint. Returns {iteration: end of J for it} in raw units."""
+    tr = exp23.load(log_path, c)
+    clk = exp23.Clock(tr.unit, c["clock_hz"])
+    resp = exp23.responses(tr, c, clk)
+    lines = []
+
+    def put(t, lane, edge, task, k):
+        x, y = lane.split("-")
+        lines.append((t, f"# {t} {y}-{x} ITER {edge} {task} {k}\n"))   # log F prints X-Y swapped
+
+    sends = {f["source"]: sorted(m.time for m in tr.lane_marks(f["src_pe"])
+                                 if m.kind == "send" and m.label == "TAG " + f["tag"]) for f in c["flows"]}
+    lane = {f["source"]: f["src_pe"] for f in c["flows"]}
+    for k, (_, s) in enumerate(exp23.iteration_releases(tr, c, clk), start=1):
+        put(s + 2, "0-0", "begin", "A", k)
+        put(sends["A"][k - 1] + 2, "0-0", "end", "A", k)
+    for task in ("F", "C", "I", "H"):
+        for k, t in enumerate(sends[task], start=1):
+            put(t - 2, lane[task], "begin", task, k)
+            put(t + 2, lane[task], "end", task, k)
+    runs = {e: b for b, e in exp23.closed_runs(tr, "1-1", "J")}
+    ends = {}
+    by_run = {}
+    for r in resp:
+        by_run.setdefault(r["end"], []).append(r["iteration"])
+    for e, ks in by_run.items():
+        b = runs[e]
+        cut = [b + 2] + ([(b + e) // 2] if len(ks) == 2 else []) + [e - 2]
+        for i, k in enumerate(ks):
+            put(cut[i] + (1 if i else 0), "1-1", "begin", "J", k)
+            put(cut[i + 1], "1-1", "end", "J", k)
+            ends[k] = cut[i + 1]
+    # merge by time; a line without time (TRIGGER, Time scale) keeps the
+    # time of the line before it, and an ITER line goes after the lines of
+    # its instant
+    with open(log_path) as f:
+        body = f.readlines()
+    timed, last = [], 0
+    for i, l in enumerate(body):
+        tok = l.lstrip("# ").split()
+        last = int(tok[0]) if tok and tok[0].isdigit() else last
+        timed.append((last, 0, i, l))
+    timed += [(t, 1, j, l) for j, (t, l) in enumerate(lines)]
+    with open(out_path, "w") as f:
+        f.writelines(l for *_, l in sorted(timed))
+    return ends
+
+
+def test_run_f_with_injected_markers(tmp_path):
+    """analyze() on log F plus ITER lines: the metrics of the reference stay
+    the same; the packets get the iterations of the markers, equal to the
+    FIFO positions; the response of each iteration ends at the end marker of
+    J for it."""
+    c = cfg()
+    log = os.path.join(EXP, "logs", "F.events.txt")
+    synth = str(tmp_path / "F_markers.events.txt")
+    ends = inject_markers(log, c, synth)
+    assert len(ends) == 32
+    d = tmp_path / "out"
+    m = exp23.analyze(synth, c, str(d))
+    assert exp23.check(str(d / "metrics.json"), os.path.join(EXP, "reference_head.json")) == []
+    pi = m["per_iteration"]
+    assert pi["source"] == "markers" and pi["markers"] > 0
+    base = exp23.per_iteration(exp23.load(log, c), c, exp23.Clock(exp23.load(log, c).unit, c["clock_hz"]))
+    for a, b in zip(pi["flows"], base["flows"]):
+        assert a["fifo_mismatch"] == 0 and a["unassigned"] == 0
+        assert a["rows"] == b["rows"], a["flow"]
+    r = pi["responses"]
+    assert r["complete"] == 32 and r["releases_unique"]
+    old = {x["iteration"]: x for x in m["iterations"]["all"]}
+    pair_first = [x for x in r["all"] if x["pair_excess_cycles"] > 1]
+    assert len(pair_first) == 16        # the first iteration of each pair of the 1.86 ms pattern
+    for x in r["all"]:
+        # end marker = exit of J from the CPU minus pair_excess_cycles
+        assert x["response_cycles"] == old[x["iteration"]]["response_cycles"] - x["pair_excess_cycles"]
+    assert r["max_ms"] < m["iterations"]["max_ms"]
+    rows = list(csv.DictReader(open(d / "iterations_markers.csv")))
+    assert len(rows) == 32
+    values = open(d / "values.tex").read()
+    assert "\\newcommand{\\ExpMarkerResponseFromReleaseMaxCycles}{" + exp23.fmt_int(r["max_from_release_cycles"]) + "}" in values
