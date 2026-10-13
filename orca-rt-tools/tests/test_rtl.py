@@ -31,3 +31,8 @@ def test_rtl(name, tmp_path):
     assert r.returncode == 0, out[-4000:]
     assert ("PASS " + name) in r.stdout, out[-4000:]
     assert "FAIL" not in r.stdout, out[-4000:]
+    if name == "tb_manycore_pe":
+        # the printed iteration markers have the format of the trace parser
+        from rttools.tui.model import parsers
+        iters = [m.groups()[1:] for m in map(parsers.RE_ITER.match, r.stdout.splitlines()) if m]
+        assert iters == [("2-1", "begin", "E", "5"), ("2-1", "end", "J", "70000")], out[-4000:]
