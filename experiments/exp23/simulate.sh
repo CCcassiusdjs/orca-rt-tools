@@ -112,7 +112,7 @@ else
 	vsim -batch -do run.do > "$OUT/sim.log" 2> "$OUT/time.log"
 fi
 
-grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG|CHKSUM|^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
+grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG| ITER (begin|end) |CHKSUM|^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
 if grep -qE "\*\* (Error|Fatal)" "$OUT/sim.log"; then
 	grep -E "\*\* (Error|Fatal)" "$OUT/sim.log" | head -5 >&2
 	exit 1
