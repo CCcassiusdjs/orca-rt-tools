@@ -15,10 +15,8 @@ module manycore_pe #(parameter
   NOC_DIM_X,
   NOC_DIM_Y,
   // release generator (manycore_top.sv): bit k enables the generator of the
-  // PE with node index k = y * NOC_DIM_X + x; defaults: PE 0, application E
-  parameter logic [63:0] RELEASE_MASK = 64'd1,
-  parameter int RELEASE_PERIOD_NS = 500_000,
-  parameter int RELEASE_DELAY_NS = 3_000_000
+  // PE with node index k = y * NOC_DIM_X + x; default: PE 0, application E
+  parameter logic [63:0] RELEASE_MASK = 64'd1
 )(
   input logic clock,
   input logic reset,
@@ -157,8 +155,8 @@ module manycore_pe #(parameter
   // workflow controller, mimics external comm system
   logic   wake_up_irq;
   integer wake_up_counter_next;
-  integer wake_up_alarm = RELEASE_PERIOD_NS;  // ns: one release every 0.5 ms by default (exp-23)
-  integer wake_up_delay = RELEASE_DELAY_NS;   // ns: 3 ms warm-up by default (exp-23)
+  integer wake_up_alarm = 500_000;    // ns: release of A every 0.5 ms (same effective value as exp-23)
+  integer wake_up_delay = 3_000_000;  // ns: 3 ms warm-up (same effective value as exp-23)
   wake_up_state_s wake_up_state;
   
   logic wakeup_ack_flip; // written by memory
