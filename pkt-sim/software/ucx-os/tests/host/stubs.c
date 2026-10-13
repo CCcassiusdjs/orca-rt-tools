@@ -69,6 +69,15 @@ void _di(void) { host_irq_enabled = 0; }
 void _ei(void) { host_irq_enabled = 1; }
 void set_counter_3(uint32_t v) { host_counter3 = v; }
 void set_counter_4(uint32_t v) { host_counter4 = v; }
+/* iteration markers (device/cacc.c), in the order of the writes */
+uint32_t host_iter_marks[HOST_ITER_MARKS];
+int host_iter_nmarks = 0;
+void set_iter_mark(uint32_t v)
+{
+	if (host_iter_nmarks < HOST_ITER_MARKS)
+		host_iter_marks[host_iter_nmarks] = v;
+	host_iter_nmarks++;
+}
 uint16_t ucx_task_id(void) { return host_current_task; }
 
 /* circular list of TCBs with ids 0..n-1, as the kernel builds it */

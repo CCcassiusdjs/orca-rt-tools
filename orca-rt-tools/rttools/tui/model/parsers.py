@@ -2,7 +2,7 @@
 
 | Format | Source | Lines |
 |---|---|---|
-| rtl | Transcript of the manycore RTL (ModelSim/Questa) or the events extracted from it | `<t> <x-y> scheduled <i>`, `<t> <x-y> -> TAG <n>`, `<t> <x-y> <- TAG <n>`, optionally prefixed by `#` |
+| rtl | Transcript of the manycore RTL (ModelSim/Questa) or the events extracted from it | `<t> <x-y> scheduled <i>`, `<t> <x-y> -> TAG <n>`, `<t> <x-y> <- TAG <n>`, `<t> <x-y> ITER begin\|end <task> <k>`, optionally prefixed by `#` |
 | bench | Output of `python -m rttools.bench` | `<start> <end> <task>` |
 | kprofiler | Trace of HellfireOS/KProfiler (.sch) | header line, then `<task> <period> <capacity> <deadline> <start> (<event> <time>)+` |
 | csv | Export of this TUI | `lane,start,end,label,kind` |
@@ -30,6 +30,10 @@ DEFAULT_RTL_NAMES = {
 
 RE_SCHED = re.compile(r"^(\d+)\s+(\d+-\d+)\s+scheduled\s+(\d+)\s*$")
 RE_TAG = re.compile(r"^(\d+)\s+(\d+-\d+)\s+(->|<-)\s+TAG\s+(\S+)\s*$")
+# iteration marker of the application (manycore_pe.sv, register 0x2000003C;
+# ucx-os device/cacc.h ITER_BEGIN/ITER_END): begin or end of the work of
+# iteration k of a task
+RE_ITER = re.compile(r"^(\d+)\s+(\d+-\d+)\s+ITER\s+(begin|end)\s+([A-Za-z])\s+(\d+)\s*$")
 RE_TIMESCALE = re.compile(r"Time scale of \(([^)]*)\) is\s*(\d+)\s*(fs|ps|ns|us|ms|s)\b")
 # a component of the hierarchical path that names the PE
 # (manycore_pe, pe0, pe_x[0], pe_mod; not pipeline or perf)
@@ -75,7 +79,7 @@ def detect_format(lines, filename=""):
         return "csv"
     for l in head:
         s = _strip(l)
-        if RE_SCHED.match(s) or RE_TAG.match(s):
+        if RE_SCHED.match(s) or RE_TAG.match(s) or RE_ITER.match(s):
             return "rtl"
     bench = sum(1 for l in head if RE_BENCH.match(l.strip()))
     if bench and bench >= len([l for l in head if l.strip() and l.strip()[0].isdigit()]) * 0.9:
@@ -107,7 +111,9 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
     """Trace of the manycore RTL. Each `scheduled` event opens a slice on
     the PE until the next `scheduled` event of the same PE; the last slice
     of each PE ends at the last time of the log. `->` and `<-` lines become
-    send and receive marks.
+    send and receive marks. `ITER` lines go to meta["iterations"] (dicts
+    time, lane, edge begin/end, task, iteration, in the order of the log);
+    a log without them (runs A to F) gives an empty list.
 
     The raw unit is $time of manycore_pe. The parser reads it from a
     `$printtimescale` line when the log has one; otherwise it assumes
@@ -122,6 +128,7 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
     marks = []
     sends = []
     recvs = []
+    iters = []
     t_end = 0
     detected = None
     for raw in lines:
@@ -153,6 +160,15 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
             marks.append(Mark(node, t, kind, "TAG " + tag))
             (sends if kind == "send" else recvs).append((t, node, tag))
             t_end = max(t_end, t)
+            continue
+        m = RE_ITER.match(s)
+        if m:
+            t, node = int(m.group(1)), m.group(2)
+            if swap_xy:
+                node = swap_node(node)
+            iters.append({"time": t, "lane": node, "edge": m.group(3), "task": m.group(4),
+                          "iteration": int(m.group(5))})
+            t_end = max(t_end, t)
 
     if not sched and not marks:
         raise TraceFormatError("no `scheduled` or `TAG` lines in the log")
@@ -179,6 +195,7 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
         "swap_xy": swap_xy,
         "timescale_detected": detected is not None,
         "packets": pair_packets(sends, recvs),
+        "iterations": iters,
     })
     return trace
 

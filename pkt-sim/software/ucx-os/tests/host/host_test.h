@@ -6,6 +6,9 @@
 extern int host_live_blocks, host_fail_next_malloc, host_irq_enabled;
 extern uint32_t host_counter3, host_counter4, host_ddma_regs[16];
 extern uint16_t host_current_task;
+#define HOST_ITER_MARKS 64
+extern uint32_t host_iter_marks[HOST_ITER_MARKS];
+extern int host_iter_nmarks;
 void host_arena_init(void);
 void host_tasks_init(int n);
 uint8_t host_task_state(int id);

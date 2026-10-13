@@ -12,6 +12,10 @@
 //     kept the initial simulation value (X in ModelSim; random
 //     in Verilator with --x-initial unique).
 //
+// Iteration marker (0x2000003C, device/cacc.h): cleared by the reset, read
+// back, and printed as `<t> <x-y> ITER begin|end <task> <k>`; the test in
+// orca-rt-tools/tests/test_rtl.py parses the two printed lines.
+//
 // The PE runs with stubs for the router, core and peripherals (pe_stubs.sv).
 `timescale 1ns/100ps
 module tb_manycore_pe;
@@ -57,6 +61,7 @@ module tb_manycore_pe;
     bus_read(32'h20000030, v); if (v !== 0) begin $display("FAIL reset cacc_counter_2 = %h", v); errors++; end
     bus_read(32'h20000034, v); if (v !== 0) begin $display("FAIL reset cacc_counter_3 = %h", v); errors++; end
     bus_read(32'h20000038, v); if (v !== 0) begin $display("FAIL reset cacc_counter_4 = %h", v); errors++; end
+    bus_read(32'h2000003C, v); if (v !== 0) begin $display("FAIL reset cacc_iter = %h", v); errors++; end
 
     // 25: node coordinates
     if (dut.addr_x() != X || dut.addr_y() != Y) begin
@@ -73,6 +78,11 @@ module tb_manycore_pe;
     bus_write(32'h20000030, 7);
     bus_read(32'h20000030, v); if (v !== 7) begin $display("FAIL cacc_counter_2 = %h", v); errors++; end
     bus_read(32'h20000000, v); if (v !== ADDRESS) begin $display("FAIL node address reg = %h", v); errors++; end
+
+    // iteration marker: begin of E, iteration 5; end of J, iteration 70000
+    bus_write(32'h2000003C, 32'h45000005);
+    bus_read(32'h2000003C, v); if (v !== 32'h45000005) begin $display("FAIL cacc_iter = %h", v); errors++; end
+    bus_write(32'h2000003C, 32'hCA011170);
 
     if (errors == 0) $display("PASS tb_manycore_pe");
     else $display("FAIL tb_manycore_pe: %0d errors", errors);
