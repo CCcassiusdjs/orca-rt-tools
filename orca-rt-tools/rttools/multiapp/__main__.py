@@ -1,10 +1,15 @@
 """Command line of rttools.multiapp (see the package docstring).
 
     python -m rttools.multiapp <composition.json> [--f0 <Hz>] [--out <dir>]
+                               [--costs <application>=<costs.json> ...]
 
 Prints the placement of each application, f_CPU per application, f_NoC of
 the union of the packets, the frequency of the platform, the network check
-at f_CPU and R_bound of each application at that frequency. With --out,
+at f_CPU and R_bound of each application at that frequency (with several
+release periods or a cycle, the general phase model: the largest data age
+over the cause-effect chains of each application). --costs (or the key
+"costs" of an application in the composition file) replaces the Capacity
+column of the application with the static t(v) of rttools.wcet. With --out,
 writes <dir>/<application>.map (node indices of the mesh) for each
 application. Exit status 1 when the composition has a mapping problem or
 the flow finds no frequency.
@@ -29,7 +34,15 @@ def main(argv=None):
     p.add_argument("composition")
     p.add_argument("--f0", type=int, default=500000000, help="first frequency of the search (Hz)")
     p.add_argument("--out", default=None, help="directory for the .map file of each application")
+    p.add_argument("--costs", action="append", default=[], metavar="APP=FILE",
+                   help="static t(v) of rttools.wcet for application APP (repeat for several applications)")
     a = p.parse_args(argv)
+    costs = {}
+    for item in a.costs:
+        name, sep, path = item.partition("=")
+        if not sep or not name or not path:
+            p.error(f"--costs expects APP=FILE, got {item!r}")
+        costs[name] = path
     from rttools import __main__ as cli
     from rttools.tui.model import network
     cfg = {"frequency": a.f0, "pruning_factor": cli.RTTOOLS_PRUNNING_FACTOR,
@@ -37,7 +50,7 @@ def main(argv=None):
            "scaling_tolerance": cli.RTTOOLS_SCALING_TOLERANCE}
     try:
         with network.quiet():
-            comp = compose.load(compose.read_spec(a.composition))
+            comp = compose.load(compose.set_costs(compose.read_spec(a.composition), costs))
     except compose.CompositionError as e:
         print("error: " + str(e), file=sys.stderr)
         return 1
@@ -47,8 +60,15 @@ def main(argv=None):
         how = pl["method"] if pl["method"] != compose.MAP_SPIRAL else f"spiral, {pl['criterion']}"
         print(f"{x['name']}: {x['pes']} PEs ({how}): "
               + "; ".join(f"{e['node']}:{','.join(e['tasks'])}" for e in x["entries"]))
-    with network.quiet():
-        r = compose.minimum_frequency(comp["apps"], comp["noc"], cfg)
+    try:
+        with network.quiet():
+            r = compose.minimum_frequency(comp["apps"], comp["noc"], cfg)
+    except compose.CompositionError as e:
+        print("error: " + str(e), file=sys.stderr)
+        return 1
+    if r.get("model") == "multirate":
+        c = next(iter(r["cpu"].values()))
+        print(f"general phase model: phase {c['period_s'] * 1e3:.6g} ms, hyperperiod {c['hyper_s'] * 1e3:.6g} ms")
     for n, f in r["f_cpu_by_app"].items():
         print(f"{n}: f_CPU = {hz(f)}")
     print(f"union: f_NoC = {hz(r['f_star_hz'])}")
@@ -59,10 +79,16 @@ def main(argv=None):
     f = r["frequency_hz"]
     print(f"frequency of the platform = {hz(f)}")
     if f is not None:
+        with network.quiet():
+            rbs = compose.response_bounds(comp["apps"], comp["noc"], f)
         for x in comp["apps"]:
-            rb = compose.response_bound(x, comp["noc"], f)
-            print(f"{x['name']}: R_bound = {rb['cycles']} cycles ({rb['s'] * 1e3:.3f} ms), v_last {rb['v_last']}, "
-                  f"n(v_last) = {rb['phase']}")
+            rb = rbs[x["name"]]
+            if rb.get("model") == "multirate":
+                print(f"{x['name']}: largest data age = {rb['cycles']} cycles ({rb['s'] * 1e3:.3f} ms), chain "
+                      f"{'-'.join(rb['chain'])} ({rb['chains']} chains)")
+            else:
+                print(f"{x['name']}: R_bound = {rb['cycles']} cycles ({rb['s'] * 1e3:.3f} ms), v_last {rb['v_last']}, "
+                      f"n(v_last) = {rb['phase']}")
     if a.out:
         os.makedirs(a.out, exist_ok=True)
         for x in comp["apps"]:

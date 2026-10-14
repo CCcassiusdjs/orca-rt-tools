@@ -24,6 +24,25 @@ of two applications meet only on the links of routes that cross.
 The packets of application a keep their flow and packet names with the
 prefix "<a>/" (SEP), so the flows of two applications stay distinct in
 the AGS criteria (heuristics._flow counts packets per flow).
+
+Several release periods (general phase model, rttools/bench_t/multirate.py):
+when every application has release_model phase and the task periods of the
+composition are not all equal, or one application has a cycle or a flow
+period other than the period of its source, the composition is analyzed
+as one application of the general model on the mesh (union_graph: the
+disjoint union of the graphs, flows numbered across the applications, the
+mapping entries of every application). The phase is P = gcd of all task
+periods and the hyperperiod H = lcm of them, so the periods in cycles
+share floor(P f) at every frequency. f_CPU,a is P_min,a / P with the
+ORT/BENCH sequences of the PEs of a (multirate.cpu_test); f_CPU = max_a
+f_CPU,a; the packets of every application are the windows [F of the
+sending job, S of the reading job] of one periodic hyperperiod; f is the
+lowest frequency at or above f_CPU with a feasible link schedule (network
+check at f_CPU, search above when it fails, as search.minimum_frequency);
+the response of application a is the largest data age over its
+cause-effect chains (multirate.data_age), which equals R_bound for an
+application with one period and no cycle. The applications keep distinct
+task labels and their own scheduler cost (scheduler_cycles) on their PEs.
 """
 from __future__ import annotations
 
@@ -31,7 +50,7 @@ import json
 import math
 import os
 
-from rttools.bench_t import estimate
+from rttools.bench_t import estimate, multirate
 from rttools.modules.frequency import search
 from rttools.modules.instances import instantiator, release
 from rttools.modules.io import appparser, nocparser
@@ -67,8 +86,22 @@ def read_spec(path):
     for a in spec["apps"]:
         m = a.get("map", MAP_SPIRAL)
         out["apps"].append({"name": a["name"], "csv": res(a["csv"]),
-                            "map": m if m == MAP_SPIRAL else res(m), "pes": a.get("pes")})
+                            "map": m if m == MAP_SPIRAL else res(m), "pes": a.get("pes"),
+                            "costs": res(a["costs"]) if a.get("costs") else None})
     return out
+
+
+def set_costs(spec, costs):
+    """Sets the costs file (rttools.wcet, option --costs) of applications of
+    a composition (read_spec): `costs` = {application name: path}."""
+    names = [a["name"] for a in spec["apps"]]
+    for n in costs:
+        if n not in names:
+            raise CompositionError(f"--costs: application {n!r} not in the composition ({', '.join(names)})")
+    for a in spec["apps"]:
+        if a["name"] in costs:
+            a["costs"] = costs[a["name"]]
+    return spec
 
 
 def load(spec):
@@ -83,13 +116,21 @@ def load(spec):
         if not n or SEP in n or ":" in n:
             raise CompositionError(f"application name {n!r}: empty or with {SEP!r} or ':'")
     for p in [spec["arch"]] + [a["csv"] for a in spec["apps"]] + [
-            a["map"] for a in spec["apps"] if a["map"] != MAP_SPIRAL]:
+            a["map"] for a in spec["apps"] if a["map"] != MAP_SPIRAL] + [
+            a["costs"] for a in spec["apps"] if a.get("costs")]:
         if not os.path.isfile(p):
             raise CompositionError("missing file " + p)
     noc = nocparser.loadFromFile(spec["arch"])
     apps = []
     for a in spec["apps"]:
         g, appname = appparser.loadFromFile(a["csv"])
+        if a.get("costs"):
+            # static t(v) of rttools.wcet in place of the Capacity column
+            from rttools.wcet import costs as wcosts
+            try:
+                wcosts.apply(g, a["costs"])
+            except (wcosts.CostsError, ValueError) as e:
+                raise CompositionError(f"application {a['name']}: {e}") from None
         apps.append(dict(a, graph=g, appname=appname))
     width, height = mesh_size(noc)
     place(apps, width, height, list(noc.nodes))
@@ -175,6 +216,199 @@ def node_owner(apps):
     return {str(e["node"]): a["name"] for a in apps for e in a["entries"] if e["tasks"]}
 
 
+# ------------------------------------------------------------ general phase model
+
+def _phase_model(a):
+    return release.settings(getattr(a["graph"], "graph", {}) or {})["model"] == release.PHASE
+
+
+def _app_rates(a):
+    """multirate.graph_rates of application a (None: one period, no cycle)."""
+    try:
+        return multirate.graph_rates(a["graph"])
+    except multirate.MultirateError as e:
+        raise CompositionError(f"application {a['name']}: {e}") from None
+
+
+def _task_periods(a):
+    g = a["graph"]
+    flows = [(u, v, d["period"]) for u, v, d in g.edges(data=True)]
+    try:
+        return multirate.task_periods(list(g.nodes), flows, (getattr(g, "graph", {}) or {}).get("task_periods"))
+    except multirate.MultirateError as e:
+        raise CompositionError(f"application {a['name']}: {e}") from None
+
+
+def general(apps):
+    """True when the composition takes the general phase model of
+    rttools/bench_t/multirate.py (module docstring): every application has
+    release_model phase and the task periods of the composition differ, or
+    one application has several periods or a cycle. With another release
+    model (cpa) the applications keep their own instances over the lcm of
+    their hyperperiods; an application of the general model then raises
+    CompositionError."""
+    phase = [a for a in apps if _phase_model(a)]
+    gen = [a["name"] for a in phase if _app_rates(a) is not None]
+    if len(phase) != len(apps):
+        if gen:
+            raise CompositionError("applications " + ", ".join(gen) + " follow the general phase model (several "
+                                   "periods or a cycle); the composition then needs release_model phase in "
+                                   "every application")
+        return False
+    if gen:
+        return True
+    periods = {multirate.seconds(T) for a in apps for T in _task_periods(a).values()}
+    return len(periods) > 1
+
+
+def union_graph(apps):
+    """The composition as one application graph of the general model:
+    (graph, mapping entries, {union flow label: (application, flow label)},
+    {task: application}). Tasks keep their labels (distinct across the
+    applications); flows are numbered f1, f2, ... in the order of the
+    applications and of their flows; the creation and sequence rows keep
+    their tasks under the key "<application>/<node>" (release.
+    matching_sequence finds a row by its tasks); feedback rows and task
+    periods are joined. Applications with different scheduler_cycles (for
+    example static costs of rttools.wcet, --costs) keep their own on their
+    PEs (graph attribute scheduler_cycles_pe, multirate.Spec.sigma_pe)."""
+    g0 = apps[0]["graph"]
+    U = type(g0)()
+    owner, flow_of = {}, {}
+    sigma = {}
+    creation, sequences, feedback, periods = {}, {}, [], {}
+    k = 0
+    for a in apps:
+        g = a["graph"]
+        attrs = getattr(g, "graph", {}) or {}
+        sigma[a["name"]] = release.settings(attrs)["scheduler_cycles"]
+        for n, d in g.nodes(data=True):
+            if n in owner:
+                raise CompositionError(f"task {n} in applications {owner[n]} and {a['name']}: the general phase "
+                                       "model of the composition needs distinct task labels")
+            owner[n] = a["name"]
+            U.add_node(n, **d)
+        for u, v, d in sorted(g.edges(data=True), key=lambda e: multirate._flow_index(e[2].get("label"))):
+            k += 1
+            U.add_edge(u, v, **dict(d, label=f"f{k}"))
+            flow_of[f"f{k}"] = (a["name"], d.get("label"))
+        for key, grp in (("creation", creation), ("sequences", sequences)):
+            for node, ts in (attrs.get(key) or {}).items():
+                grp[f"{a['name']}{SEP}{node}"] = list(ts)
+        feedback += [tuple(e) for e in attrs.get("feedback") or []]
+        periods.update(attrs.get("task_periods") or {})
+    U.graph.update({"release_model": release.PHASE, "scheduler_cycles": next(iter(sigma.values()))})
+    if len(set(sigma.values())) > 1:
+        # each PE keeps the scheduler cost of its application
+        U.graph["scheduler_cycles_pe"] = {str(e["node"]): sigma[a["name"]] for a in apps for e in a["entries"]
+                                          if e["tasks"]}
+    if creation:
+        U.graph["creation"] = creation
+    if sequences:
+        U.graph["sequences"] = sequences
+    if feedback:
+        U.graph["feedback"] = feedback
+    if periods:
+        U.graph["task_periods"] = periods
+    entries = [dict(e, tasks=list(e["tasks"])) for a in apps for e in a["entries"]]
+    return U, entries, flow_of, owner
+
+
+def union_spec(apps):
+    """(graph, entries, flow_of, owner, rates, multirate.Spec) of union_graph."""
+    U, entries, flow_of, owner = union_graph(apps)
+    try:
+        r = multirate.graph_rates(U, force=True)
+        spec = multirate.spec_from_graph(U, entries, r)
+    except multirate.MultirateError as e:
+        raise CompositionError(str(e)) from None
+    return U, entries, flow_of, owner, r, spec
+
+
+def app_spec(spec, tasks):
+    """Part of the union spec with the tasks of one application (same phase
+    and hyperperiod); the PEs of an application hold only its tasks."""
+    ts = [t for t in spec.tasks if t in tasks]
+    return multirate.Spec(ts, spec.cost, spec.ticks, spec.phase_s, spec.hyper_ticks,
+                          [f for f in spec.flows if f[1] in tasks], {t: spec.node_of[t] for t in ts},
+                          {n: list(q) for n, q in spec.orders.items() if q and q[0] in tasks}, spec.sigma,
+                          [e for e in spec.feedback if e[0] in tasks], spec.offsets, spec.task_period_s,
+                          spec.sigma_pe)
+
+
+def general_cpu_tests(apps):
+    """CPU test of each application in the general model of the
+    composition: multirate.cpu_test on the PEs of the application with the
+    phase P of the composition. {name: result of release.cpu_bound for the
+    general model}; f_CPU of the composition is the largest f_CPU,a (the
+    PEs are disjoint, so P_min of the union is max_a P_min,a)."""
+    _, entries, _, _, r, spec = union_spec(apps)
+    out = {}
+    for a in apps:
+        tasks = set(a["graph"].nodes)
+        sub = app_spec(spec, tasks)
+        try:
+            test = multirate.cpu_test(sub)
+        except multirate.MultirateError as e:
+            raise CompositionError(f"application {a['name']}: {e}") from None
+        members = release.pe_members(list(sub.tasks), entries)
+        res = {k: v for k, v in test.items() if k != "schedule"}
+        res.update({"demand": {node: sum(sub.cost[t] * (sub.hyper_ticks // sub.ticks[t]) for t in ts)
+                               for node, ts in members.items()},
+                    "period_s": float(r["phase_s"]), "model": "multirate", "hyper_s": float(r["hyper_s"])})
+        out[a["name"]] = res
+    return out
+
+
+def general_packets(apps, noc, frequency):
+    """union_packets in the general model: the instance of union_graph at
+    `frequency` (packet windows of one periodic hyperperiod), names with the
+    prefix of the application and its own flow label."""
+    U, entries, flow_of, owner, r, spec = union_spec(apps)
+    inst = instantiator.createInstance(U, noc, frequency)
+    packets, hp, nlinks = flowUnwrapper.unwrap(inst, noc, entries)
+    info = {a["name"]: {"hyperperiod": None, "packets": None} for a in apps}
+    if hp == 0:
+        return None, 0, None, info
+    P = inst["rates"]["phase_cycles"]
+    out = []
+    for p in packets:
+        app, label = flow_of[p["flow"]]
+        q = dict(p)
+        q["name"] = qualify(app, label) + ":" + p["name"].rpartition(":")[2]
+        q["flow"] = qualify(app, label)
+        q["app"] = app
+        out.append(q)
+    for a in apps:
+        Ha = P * math.lcm(*[spec.ticks[t] for t in a["graph"].nodes])
+        n = sum(1 for q in out if q["app"] == a["name"])
+        info[a["name"]] = {"hyperperiod": Ha, "packets": n * Ha // hp, "packets_in_H": n}
+    return out, hp, nlinks, info
+
+
+def general_responses(apps, frequency):
+    """Response of each application in the general model at `frequency`:
+    the largest data age over its cause-effect chains (multirate.data_age;
+    R_bound for an application with one period and no cycle)."""
+    from fractions import Fraction
+    _, _, _, _, _, spec = union_spec(apps)
+    P = math.floor(spec.phase_s * Fraction(frequency))
+    sched = multirate.schedule(spec, P)
+    if not sched.feasible:
+        raise CompositionError(f"the CPU schedule of the composition misses a deadline at {frequency} Hz")
+    every = multirate.chains(spec.tasks, spec.edges())
+    out = {}
+    for a in apps:
+        tasks = set(a["graph"].nodes)
+        ages = multirate.data_age(spec, sched, [c for c in every if c[0] in tasks])
+        worst = max(ages, key=lambda x: (x["max_cycles"], "-".join(x["chain"])))
+        out[a["name"]] = {"model": "multirate", "chain": list(worst["chain"]), "v_last": worst["chain"][-1],
+                          "cycles": worst["max_cycles"], "s": worst["max_cycles"] / frequency,
+                          "phase_cycles": P, "chains": len(ages),
+                          "ages": [{"chain": "-".join(x["chain"]), "max_cycles": x["max_cycles"]} for x in ages]}
+    return out
+
+
 # ------------------------------------------------------------ packets
 
 def qualify(app_name, name):
@@ -218,7 +452,10 @@ def union_packets(apps, noc, frequency):
     """Packet instance of the composition at `frequency`: (packets, H,
     links, per application {"hyperperiod", "packets"}), H = lcm of the
     hyperperiods of the applications; (None, 0, None, info) when one
-    application has no hyperperiod."""
+    application has no hyperperiod. In the general phase model (general)
+    the packets are those of union_graph (general_packets)."""
+    if general(apps):
+        return general_packets(apps, noc, frequency)
     per = []
     info = {}
     for a in apps:
@@ -261,7 +498,10 @@ def scheduler(apps):
 # ------------------------------------------------------------ frequency
 
 def cpu_tests(apps):
-    """CPU test of each application (search.cpu_check): {name: result}."""
+    """CPU test of each application (search.cpu_check): {name: result};
+    general_cpu_tests in the general phase model."""
+    if general(apps):
+        return general_cpu_tests(apps)
     return {a["name"]: search.cpu_check(a["graph"], a["entries"]) for a in apps}
 
 
@@ -269,6 +509,11 @@ def minimum_frequency(apps, noc, cfg, on_attempt=None):
     """Minimum frequency of the platform: steps of search.minimum_frequency
     with f_CPU = max_a f_CPU,a and the network search on the union of the
     packets (schedule_union).
+
+    In the general phase model (general) the packet windows exist only at
+    f >= f_CPU: the network is evaluated at f_CPU first and the search runs
+    above f_CPU when it fails, the steps of search.minimum_frequency for an
+    application of that model ("network" is None, "model" = "multirate").
 
     Returns the keys of search.minimum_frequency ("cpu" holds the result
     per application) plus "f_cpu_by_app"."""
@@ -278,6 +523,19 @@ def minimum_frequency(apps, noc, cfg, on_attempt=None):
     f_cpu = max(known) if known else None
     run = scheduler(apps)
     name = "+".join(a["name"] for a in apps)
+    if general(apps):
+        check = search.network_check(None, noc, None, name, f_cpu, cfg, schedule=run)
+        above = None
+        if check["feasible"]:
+            final = f_cpu
+        else:
+            up = dict(cfg)
+            up["frequency"] = 2 * f_cpu
+            above = search.search_minimum_frequency(None, noc, None, name, up, on_attempt, floor=f_cpu,
+                                                    schedule=run)
+            final = above["frequency"] if above is not None else None
+        return {"cpu": cpu, "f_cpu_by_app": f_by, "network": None, "f_star_hz": final, "f_cpu_hz": f_cpu,
+                "final_check": check, "final_search": above, "frequency_hz": final, "model": "multirate"}
     net = search.search_minimum_frequency(None, noc, None, name, cfg, on_attempt, schedule=run)
     f_star = net["frequency"] if net is not None else None
     check = above = None
@@ -304,8 +562,19 @@ def minimum_frequency(apps, noc, cfg, on_attempt=None):
 def app_period_s(a):
     periods = {float(d["period"]) for _, _, d in a["graph"].edges(data=True)}
     if len(periods) != 1:
-        raise CompositionError(f"application {a['name']}: the phase model needs one release period")
+        raise CompositionError(f"application {a['name']}: R_bound needs one release period; with several "
+                               "periods the response is the data age of response_bounds")
     return periods.pop()
+
+
+def response_bounds(apps, noc, frequency):
+    """Response of every application at `frequency`: {name: result}.
+    One release period for the composition: response_bound (R_bound, n(v_last)
+    and F(v_last)); general phase model: general_responses (largest data age
+    over the chains of the application, "model": "multirate")."""
+    if general(apps):
+        return general_responses(apps, frequency)
+    return {a["name"]: response_bound(a, noc, frequency) for a in apps}
 
 
 def response_bound(a, noc, frequency):

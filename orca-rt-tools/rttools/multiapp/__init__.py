@@ -1,6 +1,7 @@
 """Analysis flow for several periodic applications that share the NoC.
 
     python -m rttools.multiapp <composition.json> [--f0 <Hz>] [--out <dir>]
+                               [--costs <application>=<costs.json> ...]
 
 A composition places each application on its own set of PEs of one 2D
 mesh; the applications share the routers and the links. The flow keeps
@@ -20,8 +21,24 @@ applications:
 composition.json:
 
     {"arch": "<arch.gml>",
-     "apps": [{"name": "<id>", "csv": "<app.csv>", "map": "<app.map>" | "spiral", "pes": <N>}, ...]}
+     "apps": [{"name": "<id>", "csv": "<app.csv>", "map": "<app.map>" | "spiral", "pes": <N>,
+               "costs": "<costs.json>"}, ...]}
 
 Paths are relative to the file. `pes` is the number of PEs of an
 application with `map` = "spiral" (the number of clusters of ORT/GCM).
+`costs` (optional; also --costs <name>=<file>) is a costs file of
+rttools.wcet: the static t(v) replaces the Capacity column of the
+application and its scheduler_cycles.
+
+Several release periods or a cycle: when the applications have release
+model phase and different task periods, or one application has several
+periods or a cycle, the composition takes the general phase model of
+rttools/bench_t/multirate.py on the union of the applications (phase P =
+gcd of all periods, H = lcm; f_CPU,a from the ORT/BENCH sequences of the
+PEs of a over H; packets of every job that sends; f = lowest frequency at
+or above f_CPU with a feasible link schedule; response of each
+application = largest data age over its cause-effect chains, R_bound for
+an application with one period). The UCX-OS image of such a composition is
+outside rttools.ucxgen compose, which needs one release period (one kernel
+tick and one release generator period per image).
 """
