@@ -3,7 +3,7 @@
 # analysis flow (rttools/bench_t/multirate.py), and its UCX-OS application for
 # the 4x4 manycore (rttools.ucxgen, time-triggered tasks).
 #
-#   make          app + run + check + ucx-check + analyze + check-run of run CF (seconds)
+#   make          app + run + check + ucx-check + analyze + check-run of run CF + check-cf2 (seconds)
 #   make app      compare apps/car-full/car-full.{csv,map} with the generator (fails when they differ)
 #   make generate write apps/car-full/car-full.{csv,map} from apps/shi-2010 and config.json
 #   make run      CPU test (ORT/BENCH over the hyperperiod), frequency search, network at the clock,
@@ -19,6 +19,8 @@
 #                 rttools.paper.rtlmr): jobs, progress, jobs per phase, reads, CPU per phase, data age per
 #                 chain, packets; into $(OUTDIR)
 #   make check-run  compare $(OUTDIR)/metrics.json with $(REF)
+#   make check-cf2  analyze + check-run of the stored run CF2 (logs/CF2.*, reference_CF2.json) into
+#                 $(BUILD)/results_CF2
 #
 # LOG, REF and OUTDIR default to run CF (logs/CF.*, reference_CF.json): car_full of tag
 # r11-multirate-rc1 (48bb43a) at 432 MHz, 64 ms. In run CF five PEs (0-1, 0-2, 1-2, 2-0, 3-0) stop
@@ -28,8 +30,10 @@
 # (the image of CF is the kernel with -DUCX_ISR_NESTING; RUN_INFO without the line isr). In run CF2 (tag
 # r11-rc3) six tasks (TPMS, VIBS, DIRC, BFE3, FDF1, OBMG; the same as in CF) loop on the jalr of the
 # return of _isr: yield() resumes a task that the tick preempted, through that return with interrupts
-# disabled, and an interrupt pending then comes before the jump; the build of this tree assembles crt0.s
-# of car_full with UCX_ISR_RETURN_GUARD (pkt-sim/software/ucx-os/Makefile, TT_ASDEFS). After `make sim`:
+# disabled, and an interrupt pending then comes before the jump (logs/CF2.*, reference_CF2.json: crt0.s
+# up to r11-rc3, clock.crt0 = plain). Run CF3 (tag r11-rc4) has the return test of _isr in car_full only
+# (crt0 guard); the crt0.s of this tree has it in every image, with the read back of IRQ_STATUS in
+# _interrupt_set(0) (crt0 guard_readback; pkt-sim/software/ucx-os/Makefile). After `make sim`:
 #   make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim
 #
 # F_CLK: f_CPU of the chosen candidate (432 MHz, reference.json chosen.cpu.f_cpu_hz); the phase of
@@ -60,9 +64,9 @@ LOG     ?= logs/CF.events.txt
 REF     ?= reference_CF.json
 OUTDIR  ?= $(BUILD)/results_CF
 
-.PHONY: all app generate run check ucx ucx-check build sim analyze check-run clean
+.PHONY: all app generate run check ucx ucx-check build sim analyze check-run check-cf2 clean
 
-all: app run check ucx-check analyze check-run
+all: app run check ucx-check analyze check-run check-cf2
 
 app:
 	$(RUN) generate --config config.json --apps $(APPS) --check
@@ -100,6 +104,10 @@ analyze:
 
 check-run:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(OUTDIR)/metrics.json $(REF)
+
+check-cf2:
+	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF2.events.txt REF=reference_CF2.json \
+		OUTDIR=$(BUILD)/results_CF2
 
 clean:
 	rm -rf $(BUILD)
