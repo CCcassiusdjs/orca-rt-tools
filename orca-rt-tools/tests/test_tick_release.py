@@ -264,6 +264,10 @@ def test_conformance_rules():
     pc = run_conformance(slices, b2)
     assert pc["phases_with_a_task_twice"] == 1 and pc["early_jobs"] == 1 and not pc["conforms"]
     assert pc["rows"] == [{"phase": 1, "start_ms": 0.1, "twice": ["V"], "cpu_above": []}]
+    # V begins iteration 2 in phase 3 instead of 2: late, reported and not checked
+    pc = run_conformance({"0-0": slices["0-0"], "1-0": [(p, p + 40, "V") for p in (100, 200)]},
+                         {"U": begins["U"], "V": {1: 100, 2: 300}})
+    assert pc["late_jobs"] == 1 and pc["tasks"]["V"]["late"] == 1 and pc["conforms"]
     # CPU of PE 0-0 above the bound in every phase
     pc = run_conformance(slices, begins, demand=40)
     assert pc["phases_cpu_above"] == 4 and pc["pes"]["0-0"]["excess_max"] == 10 and not pc["conforms"]

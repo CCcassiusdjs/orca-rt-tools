@@ -24,6 +24,7 @@ serve every iteration whose packets are in its queue.
 | Execution of v in phase p | ITER begin marker of v (one job, one iteration) at a time in phase p |
 | Twice in a phase | a task with two or more executions in one phase |
 | Early execution | the job j of v begins before phase a(v, j): a = j - 1 + n(v) for one release period (iteration j released at r_j), a = o_v + (j - 1) k_v for the general phase model |
+| Late execution | the job j of v begins after phase a(v, j); reported, not checked (its effect on the response is the check of R_bound) |
 | Dispatches of v in phase p | CPU slices of v (`scheduled` lines) that start in phase p; reported, not checked (a task that waits for a packet takes one slice per arrival) |
 | CPU of PE k in phase p | non-IDLE time of the PE in phase p, cycles at F_CLK, against t(V_k) (one period) or the busy time of the PE in that phase of the hyperperiod of the model (general model) |
 
@@ -81,6 +82,7 @@ def conformance(tr, clk, releases, begins, allowed, pe_of, demand, rule, ms=None
     tasks = sorted(pe_of)
     per = {v: [0] * n for v in tasks}
     early = {v: 0 for v in tasks}
+    late = {v: 0 for v in tasks}
     jobs = 0
     for v in tasks:
         for j, t in sorted((begins.get(v) or {}).items()):
@@ -94,6 +96,8 @@ def conformance(tr, clk, releases, begins, allowed, pe_of, demand, rule, ms=None
             a = allowed(v, j)
             if a is not None and p < a:
                 early[v] += 1
+            if a is not None and p > a:
+                late[v] += 1
     disp = {v: [0] * n for v in tasks}
     for v in tasks:
         for s in tr.lane_slices(pe_of[v]):
@@ -134,11 +138,12 @@ def conformance(tr, clk, releases, begins, allowed, pe_of, demand, rule, ms=None
         "jobs": jobs,
         "tasks": {v: {"pe": pe_of[v], "jobs": sum(per[v]), "phases_with_jobs": sum(1 for x in per[v] if x),
                       "max_jobs_per_phase": max(per[v], default=0),
-                      "phases_twice": sum(1 for x in per[v] if x >= 2), "early": early[v],
+                      "phases_twice": sum(1 for x in per[v] if x >= 2), "early": early[v], "late": late[v],
                       "max_dispatches_per_phase": max(disp[v], default=0)} for v in tasks},
         "pes": pes,
         "phases_with_a_task_twice": len(twice_at),
         "early_jobs": sum(early.values()),
+        "late_jobs": sum(late.values()),
         "phases_cpu_above": len(above_at),
         "rows": rows,
     }
@@ -151,7 +156,7 @@ def summary(pc, name=""):
     """Lines of text for one conformance."""
     head = (f"{name}: release {pc['release']}, {pc['phases']} phases, {pc['jobs']} executions: "
             f"{pc['phases_with_a_task_twice']} phases with a task twice, {pc['early_jobs']} early executions, "
-            f"{pc['phases_cpu_above']} phases above the CPU bound -> "
+            f"{pc['phases_cpu_above']} phases above the CPU bound ({pc['late_jobs']} late executions) -> "
             + ("conforms" if pc["conforms"] else "does not conform"))
     lines = [head]
     for v, t in pc["tasks"].items():
