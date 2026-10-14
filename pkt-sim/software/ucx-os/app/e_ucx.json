@@ -28,7 +28,21 @@
   "pe_labels": [
    "0-0"
   ],
-  "mask": 1
+  "mask": 1,
+  "rule": "tick",
+  "tick_pes": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "tick_pe_labels": [
+   "0-0",
+   "1-0",
+   "0-1",
+   "1-1"
+  ],
+  "tick_mask": 15
  },
  "pe_tasks": {
   "0-0": [
@@ -91,7 +105,8 @@
     1,
     2
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "B",
@@ -110,7 +125,8 @@
    "outputs": [
     3
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "C",
@@ -129,7 +145,8 @@
    "outputs": [
     4
    ],
-   "source": false
+   "source": false,
+   "phase": 1
   },
   {
    "name": "D",
@@ -148,7 +165,8 @@
    "outputs": [
     5
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "E",
@@ -168,7 +186,8 @@
     7,
     8
    ],
-   "source": false
+   "source": false,
+   "phase": 2
   },
   {
    "name": "F",
@@ -187,7 +206,8 @@
    "outputs": [
     6
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "G",
@@ -206,7 +226,8 @@
    "outputs": [
     11
    ],
-   "source": false
+   "source": false,
+   "phase": 1
   },
   {
    "name": "H",
@@ -225,7 +246,8 @@
    "outputs": [
     10
    ],
-   "source": false
+   "source": false,
+   "phase": 2
   },
   {
    "name": "I",
@@ -244,7 +266,8 @@
    "outputs": [
     9
    ],
-   "source": false
+   "source": false,
+   "phase": 2
   },
   {
    "name": "J",
@@ -263,7 +286,8 @@
     11
    ],
    "outputs": [],
-   "source": false
+   "source": false,
+   "phase": 3
   }
  ],
  "flows": [

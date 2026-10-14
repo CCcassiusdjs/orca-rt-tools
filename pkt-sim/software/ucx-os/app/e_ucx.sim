@@ -1,6 +1,8 @@
-# Setup of manycore_top for app/e_ucx.c (rttools.ucxgen); read by
+# Setup of manycore_top for app/e_ucx.c (rttools.ucxgen, release by tick); read by
 # experiments/exp23/simulate.sh. RELEASE_MASK: bit k = PE with node index k
-# (PEs 0). Release period 500000 ns, first release at 3000000 ns: the
-# defaults of the release generator (manycore_pe.sv).
+# (PEs 0, 1, 2, 3): every PE with a task counts the phases
+# (lib/tick_release.c); source tasks on PEs 0. Release period 500000 ns,
+# first release at 3000000 ns: the defaults of the release generator (manycore_pe.sv).
 MESH=2x2
-RELEASE_MASK=1
+RELEASE_MASK=15
+TICK_RELEASE=1

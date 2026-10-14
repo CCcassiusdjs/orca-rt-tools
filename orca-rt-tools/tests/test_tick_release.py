@@ -87,12 +87,16 @@ def unifdef(text, macro="UCX_TICK_RELEASE"):
     return text
 
 
-@pytest.mark.parametrize("name", ["car_v", "wcet_e", "carv_e"])
+@pytest.mark.parametrize("name", ["car_v", "wcet_e", "carv_e", "e_ucx"])
 def test_data_path_of_the_generated_code(name):
     """Without UCX_TICK_RELEASE, the stored code (release by tick, the
     default of the generator) is the code of the data-driven release
     (--release data): the code of runs CV, CV2 and MA."""
-    if name == "carv_e":
+    if name == "e_ucx":
+        e_map2 = os.path.join(APPS, "synthetic-app-e", "synthetic-app-e-ONTO-hermes2x2.map")
+        tick = model.build(E_CSV, e_map2, "e_ucx", mesh="2x2")
+        data = model.build(E_CSV, e_map2, "e_ucx", mesh="2x2", release_rule=model.DATA)
+    elif name == "carv_e":
         tick = model.compose(PARTS, "carv_e", mesh="4x5")
         data = model.compose(PARTS, "carv_e", mesh="4x5", release_rule=model.DATA)
     elif name == "car_v":
