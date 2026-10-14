@@ -11,7 +11,9 @@ weird_a.c) to any generated application: the tasks, flows, PEs and tags
 come from the manifest of the generator, the costs and the period from the
 CSV, the mapping from the .map file, the clock from the RUN_INFO of the
 simulation (experiments/exp23/simulate.sh). No number of an application
-is in this file.
+is in this file. The command line sends a time-triggered application
+(manifest "model": "time_triggered": several release periods or cycles)
+to rttools.paper.rtlmr.
 
 Model (at the clock F_CLK of the run; P = T F_CLK cycles):
 
@@ -843,8 +845,17 @@ def main(argv=None):
     a.add_argument("--arch", default=None,
                    help="architecture (.gml) for the link schedule of the analysis flow at F_CLK (AGS)")
     args = p.parse_args(argv)
-    m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch)
-    for line in summary_lines(m):
+    with open(args.manifest) as f:
+        time_triggered = json.load(f).get("model") == "time_triggered"
+    if time_triggered:
+        # several release periods or cycles: general phase model (rttools/paper/rtlmr.py)
+        from rttools.paper import rtlmr
+        m = rtlmr.analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk)
+        lines = rtlmr.summary_lines(m)
+    else:
+        m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch)
+        lines = summary_lines(m)
+    for line in lines:
         print(line)
     print("wrote " + args.out)
     return 0
