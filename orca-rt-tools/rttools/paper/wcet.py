@@ -410,18 +410,40 @@ def write_values(path, m):
         f.write("\n".join(lines) + "\n")
 
 
-def run_log(log, spec, image, manifest, csv_path, map_path, out_dir):
+def run_log(log, spec, image, manifest, csv_path, map_path, out_dir, arch=None):
     """Static costs of the image of an RTL run against its log (WCET-E
-    after `make sim`)."""
+    after `make sim`): CPU per PE and per task, and the phase-model
+    analysis of rtlapp (responses against R_bound and the deadline,
+    packets against [r, d], network, monitor) with the static t(v) of
+    that image in the CSV (a copy in `out_dir`), under the key rtlapp."""
+    import shutil
     res = static(spec, out_dir, image)
     meas = measured_app(log, manifest, csv_path, map_path)
     tasks, pes = compare_app(res, meas)
+    csv_run = os.path.join(out_dir, os.path.basename(csv_path))
+    shutil.copyfile(csv_path, csv_run)
+    set_csv(os.path.join(out_dir, "costs.json"), csv_run)
+    rt = rtlapp.analyze(log, manifest, csv_run, map_path, os.path.join(out_dir, "rtlapp"), arch=arch)
+    resp = rt["responses"]
     m = {"log": os.path.basename(log), "image": res["image"], "clock_hz": meas["clock_hz"], "windows": meas["windows"],
          "kernel": res["kernel"], "tasks": tasks, "groups": pes,
          "summary": {"static_margin_percent": summary(list(pes.values()), "static_margin_percent"),
                      "run_margin_percent": summary(list(tasks.values()), "run_margin_percent"),
+                     "per_iteration_margin_percent": summary(list(tasks.values()), "per_iteration_margin_percent"),
                      "all_groups_sound": all(x["sound"] for x in pes.values()),
-                     "all_runs_sound": all(x["run_sound"] is not False for x in tasks.values())}}
+                     "all_runs_sound": all(x["run_sound"] is not False for x in tasks.values())},
+         "rtlapp": {k: rt[k] for k in ("clock", "model", "releases", "markers", "responses", "cpu_windows",
+                                       "cpu_attributed", "packets", "network", "monitor") if k in rt}}
+    mdl = rt["model"]
+    pk = rt["packets"]
+    mon = rt.get("monitor") or {}
+    m["summary"]["rtlapp"] = {
+        "response_bound_cycles": mdl["response_bound"]["cycles"],
+        "deadline_cycles": mdl["deadline"]["cycles"] if mdl.get("deadline") else None,
+        "responses": resp["complete"], "response_max_cycles": resp["max_cycles"],
+        "above_bound": resp["above_bound"], "above_deadline": resp["above_deadline"],
+        "packets_late": pk["late"], "min_slack_remote_cycles": pk["min_slack_remote_cycles"],
+        "monitor_errors": mon.get("errors")}
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
         json.dump(m, f, indent=1)
         f.write("\n")
@@ -491,6 +513,7 @@ def main(argv=None):
     r.add_argument("--manifest", required=True)
     r.add_argument("--csv", required=True)
     r.add_argument("--map", required=True)
+    r.add_argument("--arch", default=None, help="architecture of the run (link schedule of rtlapp)")
     r.add_argument("--out", required=True)
     c = sub.add_parser("set-csv")
     c.add_argument("costs")
@@ -505,7 +528,7 @@ def main(argv=None):
         print_summary(m)
         print("wrote " + args.out)
         return 0
-    m = run_log(args.log, args.spec, args.image, args.manifest, args.csv, args.map, args.out)
+    m = run_log(args.log, args.spec, args.image, args.manifest, args.csv, args.map, args.out, args.arch)
     print_summary({"apps": {"run": dict(m, t={}, terms={})}})
     print("wrote " + args.out)
     return 0

@@ -51,3 +51,26 @@ def test_reference_values(cfg):
     assert ref["apps"]["WCET-E"]["csv_equals_static"]
     for key, r in ref["flow"].items():
         assert r["static"]["f_cpu_hz"] < r["measured"]["f_cpu_hz"]
+
+
+def test_run_w1_of_wcet_e(tmp_path):
+    """Run W1 (RTL of WCET-E, gcc 12.2.0): the static t(v) of the image of
+    the run covers the CPU time per iteration of every PE and the runs of
+    every task; the responses stay within R_bound of these t(v) and the
+    deadline; no late packet and no monitor error."""
+    from rttools.paper import exp23
+    logs = os.path.join(EXP, "logs")
+    app = os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os", "app", "wcet_e.json")
+    m = pw.run_log(os.path.join(logs, "W1.events.txt"), os.path.join(EXP, "specs", "wcet_e.json"),
+                   os.path.join(logs, "W1.image.elf"), app,
+                   os.path.join(REPO_ROOT, "apps", "wcet-e", "wcet-e.csv"),
+                   os.path.join(REPO_ROOT, "apps", "wcet-e", "wcet-e-ONTO-hermes2x2.map"), str(tmp_path),
+                   os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"))
+    s = m["summary"]
+    assert s["all_groups_sound"] and s["all_runs_sound"]
+    r = s["rtlapp"]
+    assert r["responses"] == 12 and r["above_bound"] == 0 and r["above_deadline"] == 0
+    assert r["response_max_cycles"] <= r["response_bound_cycles"] <= r["deadline_cycles"]
+    assert r["packets_late"] == 0 and r["monitor_errors"] == 0
+    assert m["image"]["file"] == "W1.image.elf"
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(EXP, "reference_W1.json")) == []
