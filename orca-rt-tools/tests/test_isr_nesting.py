@@ -109,6 +109,49 @@ def test_stored_runs_are_of_the_previous_image(log, ref):
     assert [v for k, v in flat.items() if k.endswith("clock.isr")] == ["nesting"]
 
 
+# ---------------------------------------------------------------- static t(v)
+
+
+def test_static_kernel_terms_without_nesting():
+    """rttools.wcet on the images of this kernel (experiments/wcet/images/
+    isr) against the images of the previous kernel (images/tick, the
+    handlers of UCX_ISR_NESTING), same compiler and clocks: the tick term
+    without _interrupt_tick, the receive and release terms without _di/_ei
+    in the handlers, the send term unchanged; yield saves and restores the
+    interrupt state in every image (dispatch term of the data-driven code
+    equal to the one of the release by tick). t(V_k) of E stays below the
+    CSV costs."""
+    pytest.importorskip("elftools")
+    pytest.importorskip("scipy")
+    from rttools.wcet.__main__ import load_spec, run_spec
+    img = os.path.join(EXP, "wcet", "images")
+    got = {}
+    for app, sp in (("weird_a", "weird_a_H.json"), ("weird_a_data", "weird_a_H.json"), ("car_v", "car_v.json"),
+                    ("wcet_e", "wcet_e.json")):
+        spec = load_spec(os.path.join(EXP, "wcet", "specs", sp))
+        spec["annotations"] = [a for a in spec["annotations"] if not a.endswith("H.image.json")]
+        new = run_spec(spec, os.path.join(img, "isr", f"{app}.elf"))
+        got[app] = new
+        if app == "wcet_e":
+            assert new["kernel"] == got["weird_a"]["kernel"]
+            continue
+        old = run_spec(spec, os.path.join(img, "tick", f"{app}.elf"))
+        k, o = new["kernel"], old["kernel"]
+        assert new["release_rule"] == old["release_rule"]
+        assert k["send_isr"] == o["send_isr"]
+        assert k["tick"] < o["tick"] and k["receive_isr"] < o["receive_isr"] and k["release"] < o["release"]
+        if app == "weird_a_data":
+            assert k["dispatch"] > o["dispatch"] and k["dispatch"] == got["weird_a"]["kernel"]["dispatch"]
+        else:
+            assert k["dispatch"] == o["dispatch"]
+    tick = got["weird_a"]
+    cfg = exp23.load_config(os.path.join(EXP, "exp23", "config.json"))
+    cfg["clock_hz"] = 434912000
+    est = exp23.estimates(cfg)
+    for cluster, tasks in exp23.dispatch_sequences(cfg).items():
+        assert sum(tick["tasks"][v]["t"] for v in tasks) <= est[cluster]
+
+
 # ---------------------------------------------------------------- build
 
 

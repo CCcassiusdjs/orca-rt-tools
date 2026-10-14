@@ -28,6 +28,20 @@ ucx_task_yield. The number of dispatches per phase does not change: the
 tick readies the task that the release of the data-driven code readied,
 and a packet arrival does not wake a task that waits for its phase.
 
+Interrupts (kernel without UCX_ISR_NESTING, pkt-sim/software/ucx-os/
+kernel/sched.c): every handler runs with interrupts disabled up to the
+return of _isr, so each term above holds one handler and no handler runs
+inside another; the tick term has no _interrupt_tick in dispatch, the
+dispatch term has the save and the restore of the interrupt state in
+yield (every image, not only the release by tick), and the receive and
+release terms have no _di/_ei in the handlers. The first entry of a task
+(_task_start, hal.c) runs once per task, before its first phase, and is
+not a term. The image of a run up to r11 (kernel with UCX_ISR_NESTING)
+has _ei in irq2_handler, irq3_handler and irq4_handler and
+_interrupt_tick in dispatch; the analysis reads the code of the image in
+both cases (experiments/wcet/images/tick: previous kernel;
+experiments/wcet/images/isr: this kernel).
+
 The flow composes t(v) before the mapping (step 1 clusters with t(v)), so
 the terms do not depend on the mapping: every edge counts as an edge
 between PEs (the driver path of ucx_noc_send is the maximum of its local
