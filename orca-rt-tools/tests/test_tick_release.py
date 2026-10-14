@@ -72,13 +72,15 @@ def unifdef(text, macro="UCX_TICK_RELEASE"):
         if s in (f"#ifdef {macro}", f"#ifndef {macro}"):
             stack.append(s.startswith("#ifndef"))
             continue
-        if stack and s == "#else":
+        if s.startswith("#if"):                 # another macro: kept as it is
+            stack.append(None)
+        elif stack and stack[-1] is not None and s == "#else":
             stack[-1] = not stack[-1]
             continue
-        if stack and s == "#endif":
-            stack.pop()
-            continue
-        if all(stack):
+        elif stack and s == "#endif":
+            if stack.pop() is not None:
+                continue
+        if all(x is not False for x in stack):
             out.append(line)
     text = "".join(out)
     a = text.find(" *\n * Release by tick")

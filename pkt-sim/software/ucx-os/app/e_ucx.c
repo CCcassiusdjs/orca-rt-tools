@@ -103,17 +103,23 @@ static struct tcb_s *release_tcb[MAX_RELEASE];
 static int n_release = 0;
 
 /* release of the source tasks of this PE (manycore_pe.sv, wake-up
- * generator; the kernel handler of application E marks task A of PE 0) */
+ * generator; the kernel handler of application E marks task A of PE 0);
+ * interrupts stay disabled until the return of _isr (kernel/sched.c,
+ * UCX_ISR_NESTING) */
 void irq4_handler(void)
 {
+#ifdef UCX_ISR_NESTING
   _di();
+#endif
   for (int i = 0; i < n_release; i++)
     release_tcb[i]->state = TASK_READY;
 
   /* flag interruption down */
   volatile int *irq_flag_down = (volatile int *)(0x2000004C);
   *irq_flag_down = !(*irq_flag_down);
+#ifdef UCX_ISR_NESTING
   _ei();
+#endif
 }
 #endif
 

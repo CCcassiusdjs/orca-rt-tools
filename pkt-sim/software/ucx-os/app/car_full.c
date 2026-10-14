@@ -18,10 +18,10 @@
  * before the scheduler (kernel/sched.c, -DUCX_APP_TICK), and the hook
  * releases job j of task v at phase o_v + j k_v (k_v = period of v in
  * phases). The kernel and the NoC driver leave interrupts disabled inside
- * every interrupt handler (-DUCX_ISR_NO_NESTING): _isr returns through a5,
- * which it does not save, so a second interrupt inside the return of the
- * first one corrupts the return (pkt-sim/tests/rtl/tb_cpu_irq.vhd). A
- * released task reads the latest packet of each input edge
+ * every interrupt handler (kernel/sched.c, without UCX_ISR_NESTING): _isr
+ * returns through a5, which it does not save, so a second interrupt inside
+ * the return of the first one corrupts the return (pkt-sim/tests/rtl/
+ * tb_cpu_irq.vhd). A released task reads the latest packet of each input edge
  * without waiting (lib/noc.c, -DUCX_NOC_LATEST: one queued packet per
  * source, the arrival does not wake the task), waits
  * ucx_sleep(workload) cycles, workload = (c(v) - 11000) / 10, and
@@ -147,7 +147,7 @@ static volatile uint32_t irq_pending = 0;   /* release interrupts not applied ye
 static uint32_t phase = 0;                  /* index of the next phase */
 
 /* release interrupt (manycore_pe.sv, every phase on every PE with a task);
- * interrupts stay disabled until the return of _isr (-DUCX_ISR_NO_NESTING) */
+ * interrupts stay disabled until the return of _isr (kernel/sched.c) */
 void irq4_handler(void)
 {
   irq_pending++;

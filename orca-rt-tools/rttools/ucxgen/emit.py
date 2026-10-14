@@ -78,17 +78,23 @@ static struct tcb_s *release_tcb[MAX_RELEASE];
 static int n_release = 0;
 
 /* release of the source tasks of this PE (manycore_pe.sv, wake-up
- * generator; the kernel handler of application E marks task A of PE 0) */
+ * generator; the kernel handler of application E marks task A of PE 0);
+ * interrupts stay disabled until the return of _isr (kernel/sched.c,
+ * UCX_ISR_NESTING) */
 void irq4_handler(void)
 {{
+#ifdef UCX_ISR_NESTING
   _di();
+#endif
   for (int i = 0; i < n_release; i++)
     release_tcb[i]->state = TASK_READY;
 
   /* flag interruption down */
   volatile int *irq_flag_down = (volatile int *)(0x2000004C);
   *irq_flag_down = !(*irq_flag_down);
+#ifdef UCX_ISR_NESTING
   _ei();
+#endif
 }}
 
 /* ------------------------------ tasks */
@@ -272,17 +278,23 @@ static struct tcb_s *release_tcb[MAX_RELEASE];
 static int n_release = 0;
 
 /* release of the source tasks of this PE (manycore_pe.sv, wake-up
- * generator; the kernel handler of application E marks task A of PE 0) */
+ * generator; the kernel handler of application E marks task A of PE 0);
+ * interrupts stay disabled until the return of _isr (kernel/sched.c,
+ * UCX_ISR_NESTING) */
 void irq4_handler(void)
 {{
+#ifdef UCX_ISR_NESTING
   _di();
+#endif
   for (int i = 0; i < n_release; i++)
     release_tcb[i]->state = TASK_READY;
 
   /* flag interruption down */
   volatile int *irq_flag_down = (volatile int *)(0x2000004C);
   *irq_flag_down = !(*irq_flag_down);
+#ifdef UCX_ISR_NESTING
   _ei();
+#endif
 }}
 
 /* ------------------------------ work */
@@ -568,7 +580,7 @@ TICK_HEADER = """\
 # code of the data-driven release that the release by tick replaces or
 # keeps under #ifndef UCX_TICK_RELEASE (BODY and WORK_BODY)
 _DATA_RELEASE_START = "/* ------------------------------ release */\n"
-_DATA_RELEASE_END = "  _ei();\n}\n"
+_DATA_RELEASE_END = "#ifdef UCX_ISR_NESTING\n  _ei();\n#endif\n}\n"
 _DATA_WAIT = ("  do {\n    if (t->n_in == 0) {\n      /* voluntary sleep until the release */\n"
               "      kcb_p->tcb_p->state = TASK_BLOCKED;\n      ucx_task_yield();\n")
 _TICK_WAIT = ("  do {\n#ifdef UCX_TICK_RELEASE\n"
@@ -767,10 +779,10 @@ TT_HEADER = """\
  * before the scheduler (kernel/sched.c, -DUCX_APP_TICK), and the hook
  * releases job j of task v at phase o_v + j k_v (k_v = period of v in
  * phases). The kernel and the NoC driver leave interrupts disabled inside
- * every interrupt handler (-DUCX_ISR_NO_NESTING): _isr returns through a5,
- * which it does not save, so a second interrupt inside the return of the
- * first one corrupts the return (pkt-sim/tests/rtl/tb_cpu_irq.vhd). A
- * released task reads the latest packet of each input edge
+ * every interrupt handler (kernel/sched.c, without UCX_ISR_NESTING): _isr
+ * returns through a5, which it does not save, so a second interrupt inside
+ * the return of the first one corrupts the return (pkt-sim/tests/rtl/
+ * tb_cpu_irq.vhd). A released task reads the latest packet of each input edge
  * without waiting (lib/noc.c, -DUCX_NOC_LATEST: one queued packet per
  * source, the arrival does not wake the task), waits
  * ucx_sleep(workload) cycles, workload = (c(v) - {reserve}) / {cpc}, and
@@ -834,7 +846,7 @@ static volatile uint32_t irq_pending = 0;   /* release interrupts not applied ye
 static uint32_t phase = 0;                  /* index of the next phase */
 
 /* release interrupt (manycore_pe.sv, every phase on every PE with a task);
- * interrupts stay disabled until the return of _isr (-DUCX_ISR_NO_NESTING) */
+ * interrupts stay disabled until the return of _isr (kernel/sched.c) */
 void irq4_handler(void)
 {{
   irq_pending++;
