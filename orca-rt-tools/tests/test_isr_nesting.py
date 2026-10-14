@@ -109,6 +109,24 @@ def test_stored_runs_are_of_the_previous_image(log, ref):
     assert [v for k, v in flat.items() if k.endswith("clock.isr")] == ["nesting"]
 
 
+@pytest.mark.parametrize("log,ref", [
+    ("exp23/logs/TG.events.txt", "exp23/reference_TG.json"),
+    ("exp23/logs/TH.events.txt", "exp23/reference_TH.json"),
+    ("car-v-rtl/logs/TCV.events.txt", "car-v-rtl/reference_TCV.json"),
+    ("multiapp/logs/TMA.events.txt", "multiapp/reference_TMA_CARV.json"),
+    ("multiapp/logs/TMA.events.txt", "multiapp/reference_TMA_E.json"),
+    ("wcet/logs/W2.events.txt", "wcet/reference_W2.json"),
+])
+def test_r11c_runs_are_of_this_kernel(log, ref):
+    """The runs of tag r11-rc3 have isr=no_nesting in the RUN_INFO and the
+    reference of each states clock.isr = no_nesting."""
+    info = exp23.read_run_info(exp23.run_info_path(os.path.join(EXP, log)))
+    assert info["repo_tag"] == "r11-rc3" and exp23.isr_rule(info) == "no_nesting"
+    with open(os.path.join(EXP, ref)) as f:
+        flat = exp23.flatten(json.load(f))
+    assert [v for k, v in flat.items() if k.endswith("clock.isr")] == ["no_nesting"]
+
+
 # ---------------------------------------------------------------- static t(v)
 
 

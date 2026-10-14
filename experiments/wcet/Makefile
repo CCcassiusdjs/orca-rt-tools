@@ -22,9 +22,19 @@
 #                  and the phase-model analysis of rtlapp with the static t(v) of that image
 #                  (rttools.paper.wcet run-log) into $(OUTDIR)
 #   make check-run compare $(OUTDIR)/metrics.json with $(REF) (default reference_W1.json)
+#   make analyze-r11c  the analysis of `make analyze` on the runs of tag r11-rc3 (release by tick,
+#                  kernel without nested interrupts; config_r11c.json): E on the image and the log
+#                  of run TH (../exp23/logs/TH.*), CAR-V on run TCV (../car-v-rtl/logs/TCV.*),
+#                  WCET-E on run W2 (logs/W2.*), flow of E with the static costs of the image of
+#                  TH; into $(BUILD)/r11c (metrics.json, values.tex with the macro names of
+#                  $(BUILD)/values.tex)
+#   make check-r11c  $(BUILD)/r11c/metrics.json against reference_r11c.json
 #
 # Run W1 (logs/W1.*): wcet_e of tag r11-wcet-rc1 (git archive), Questa 2025.3, riscv64-elf-gcc 12.2.0,
 # 10 ms at 500 MHz (make sim); W1.image.elf and W1.image.lst are the image of the run.
+# Run W2 (logs/W2.*, reference_W2.json): wcet_e of tag r11-rc3 (release by tick, kernel without
+# nested interrupts), same tools, clock and duration: make run-analyze check-run LOG=logs/W2.events.txt
+# REF=reference_W2.json (`make check` runs W1, W2 and check-r11c).
 #
 # SIM_NS: release delay 3 ms + 14 releases of 0.5 ms (rtlapp cpu_windows takes windows of
 # n(J) + 1 = 4 releases from the release of iteration 4) = 10 ms.
@@ -53,7 +63,7 @@ CC_BODIES ?= riscv64-elf-gcc
 RTL     := ../../pkt-sim/tests/rtl
 UCX_IMG := pkt-sim/software/ucx-os/build/target
 
-.PHONY: all analyze check app csv images bodies trace sim run-analyze check-run clean
+.PHONY: all analyze check app csv images bodies trace sim run-analyze check-run analyze-r11c check-r11c clean
 
 all: analyze check
 
@@ -64,6 +74,8 @@ check:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/metrics.json reference.json
 	$(GEN) check $(GENARGS)
 	$(MAKE) run-analyze check-run
+	$(MAKE) run-analyze check-run LOG=logs/W2.events.txt REF=reference_W2.json
+	$(MAKE) analyze-r11c check-r11c
 
 app:
 	$(GEN) generate $(GENARGS)
@@ -95,6 +107,12 @@ run-analyze:
 
 check-run:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(OUTDIR)/metrics.json $(REF)
+
+analyze-r11c:
+	$(RUN) analyze --config config_r11c.json --out $(BUILD)/r11c
+
+check-r11c:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/r11c/metrics.json reference_r11c.json
 
 clean:
 	rm -rf $(BUILD)

@@ -5,7 +5,8 @@
 #   make app     write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} from $(CSV) and $(MAP)
 #   make check   the stored $(NAME).{c,json,sim} match a new generation; heap demand of
 #                each PE (rttools.ucxgen.memory) against HEAP; analyze + check-run of the
-#                stored runs CV and CV2 (default target)
+#                stored runs CV and CV2, and analyze + check-run + phase-check of run TCV
+#                (default target)
 #   make analyze analysis of $(LOG) against the phase model (rttools.paper.rtlapp): CPU per PE,
 #                response per iteration, packets against [r, d], network latency; into $(OUTDIR)
 #   make check-run  compare $(OUTDIR)/metrics.json with $(REF)
@@ -30,6 +31,10 @@
 # (logs/CV2.*, reference_CV2.json): car_v of tag r10-rc2 (with iteration
 # markers, the car_v.c of this tree), same clock and duration:
 #   make analyze check-run LOG=logs/CV2.events.txt REF=reference_CV2.json OUTDIR=build/results_CV2
+# Run TCV (logs/TCV.*, reference_TCV.json): car_v of tag r11-rc3 (release by tick, RELEASE_MASK
+# of the 16 PEs, kernel without nested interrupts; TCV.image.elf for experiments/wcet), same clock
+# and duration:
+#   make analyze check-run phase-check LOG=logs/TCV.events.txt REF=reference_TCV.json OUTDIR=build/results_TCV
 # After `make sim`, use LOG=$(BUILD)/sim/events.txt (RUN_INFO next to it).
 #
 #   make phase-check  conformance of $(OUTDIR)/metrics.json with the phase model (rttools.paper.
@@ -82,6 +87,8 @@ check:
 	$(MAKE) analyze check-run RELEASE=data
 	$(MAKE) analyze check-run LOG=logs/CV2.events.txt REF=reference_CV2.json OUTDIR=$(BUILD)/results_CV2 \
 		RELEASE=data
+	$(MAKE) analyze check-run phase-check LOG=logs/TCV.events.txt REF=reference_TCV.json \
+		OUTDIR=$(BUILD)/results_TCV
 
 analyze:
 	$(ANALYZE) analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json --csv $(CSV) --map $(MAP) --arch $(ARCH) \

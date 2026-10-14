@@ -1,6 +1,6 @@
 # Pipelines, each checked against its stored reference:
 #   make          every directory of DIRS (exp23 and figures: stored log of
-#                 run E; zll: GHDL testbench of the NoC, about 30 s; car-v:
+#                 run E, and exp23 check-run: runs TG and TH; zll: GHDL testbench of the NoC, about 30 s; car-v:
 #                 generation of CAR-V and its analysis flow, seconds; car-full:
 #                 CAR with four periods and two cycles, general phase model,
 #                 about 10 s; wcet: static t(v) against the stored runs H and
@@ -20,8 +20,9 @@ DIRS   += multiapp
 
 all: $(DIRS)
 
+# exp23: also the stored runs TG and TH of the release by tick (check-run)
 $(DIRS):
-	$(MAKE) -C $@ PYTHON=$(PYTHON) GHDL=$(GHDL)
+	$(MAKE) -C $@ PYTHON=$(PYTHON) GHDL=$(GHDL) $(if $(filter exp23,$@),all check-run)
 
 clean:
 	for d in $(DIRS); do $(MAKE) -C $$d clean; done

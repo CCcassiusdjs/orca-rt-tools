@@ -32,6 +32,9 @@
 #                  check against reference_flow.json (model at that clock, no measured value)
 #   make runs      analyze the eight stored runs (logs/A..H) into build/runs and check G and H  (anon:drop-line)
 #                  against reference_G.json and reference_H.json  (anon:drop-line)
+#   make check-run analyze + check + phase-check of the stored runs of the release by tick, TG
+#                  (500 MHz) and TH (434.912 MHz), against reference_TG.json and reference_TH.json,
+#                  into $(BUILD)/results_TG and $(BUILD)/results_TH (values.tex of each run there)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
 #   make phase-check  conformance of $(OUTDIR)/metrics.json with the phase model (after analyze):
 #                  no task twice in a phase, no execution before phase j + n(v), CPU per phase at
@@ -41,8 +44,9 @@
 #
 # Release rule (RELEASE, --release of the analysis): auto takes the line `release` of the
 # RUN_INFO (simulate.sh writes release=tick for weird_a, the application with the release by
-# tick, app/weird_a.sim; release=data for weird_a_data); the stored logs have no such line and
-# are of the release rule data, the code of weird_a_data (pkt-sim/software/ucx-os/Makefile).
+# tick, app/weird_a.sim; release=data for weird_a_data); the stored logs A to H have no such line
+# and are of the release rule data, the code of weird_a_data (pkt-sim/software/ucx-os/Makefile);
+# TG and TH have release=tick.
 #
 # Interrupt rule (clock.isr of metrics.json, line isr of the RUN_INFO): the stored logs are of the
 # kernel whose handlers enable interrupts before the return of _isr (nesting; ISR_NESTING=1 in
@@ -61,6 +65,10 @@
 # Run G (r10-rc1, 500 MHz): make LOG=logs/G.events.txt REF=reference_G.json OUTDIR=build/results_G
 # Run H (r10-rc1, clock of the flow, 434.912 MHz): make LOG=logs/H.events.txt REF=reference_H.json
 #   OUTDIR=build/results_H
+# Runs TG and TH (r11-rc3: weird_a with the release by tick, kernel without nested interrupts,
+#   logs/{TG,TH}.{events.txt,RUN_INFO,image.lst,noinstr.lst,time.txt}; TH.image.elf for
+#   experiments/wcet): make check-run, or make LOG=logs/TH.events.txt REF=reference_TH.json
+#   OUTDIR=build/results_TH analyze check
 # After `make sim`, use LOG=build/sim/events.txt (make paper does it).
 #
 # Clock: F_CLK (Hz) sets the clock of the simulation (simulate.sh: F_CLK of
@@ -89,8 +97,9 @@ OLD_APP_LOGS := $(foreach r,A B C D E,logs/$(r).events.txt)
 JOIN    ?= $(if $(filter $(OLD_APP_LOGS),$(LOG)),any3,per_producer)
 OUTDIR  ?= $(BUILD)/results
 RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23
-# release rule of LOG (auto: RUN_INFO line `release`; data for the stored logs)
-RELEASE ?= $(if $(filter logs/%,$(LOG)),data,auto)
+# release rule of LOG (auto: RUN_INFO line `release`; data for a RUN_INFO without it, the stored
+# logs A to H; tick for TG and TH)
+RELEASE ?= auto
 APP_E   := ../../apps/synthetic-app-e
 ARCH    := ../../arch/hermes-2x2.gml
 # first frequency of the search of the flow (rttools CLI), not the clock of the simulation
@@ -113,7 +122,7 @@ INSTR_ARGS = $(if $(LISTING),--listing $(LISTING) --listing-without $(LISTING_WI
 
 .PHONY: all sim analyze check frequency tick tick-log frequency-l0 paper flow-clock paper-flow software
 .PHONY: software-without
-.PHONY: instrumentation info clean phase-check
+.PHONY: instrumentation info clean phase-check check-run
 
 all: analyze check frequency frequency-l0 tick
 
@@ -161,6 +170,11 @@ paper-flow: flow-clock
 
 phase-check:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.phasecheck $(OUTDIR)/metrics.json --rows 5
+
+TICK_RUNS ?= TG TH
+check-run:
+	for r in $(TICK_RUNS); do $(MAKE) --no-print-directory analyze check phase-check LOG=logs/$$r.events.txt \
+		REF=reference_$$r.json OUTDIR=$(BUILD)/results_$$r || exit 1; done
 
 software: software-without
 	F_CLK=$(F_CLK) F_TICK=$(F_TICK) ./build_sw.sh $(SW)/with
