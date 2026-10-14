@@ -111,6 +111,8 @@ def test_analysis_of_a_log_of_the_model(runs):
     m = runs[0]["ok"]
     assert m["model"]["phase_cycles"] == 125000 and m["model"]["cpu_feasible"]
     assert m["jobs"]["deadline_misses"] == 0 and m["jobs"]["end_after_model_finish"] == 0
+    # the log of the model has its ticks at the release lines: begin = first dispatch + sigma
+    assert m["jobs"]["begin_after_release_min_cycles"] == 11000
     assert m["reads"]["older_than_model"] == 0 and m["reads"]["newer_than_model"] == 0
     assert m["markers"]["stray"] == 0
     assert m["cpu_phases"]["phases_above_model"] == 0

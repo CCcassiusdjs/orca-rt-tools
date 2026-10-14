@@ -25,6 +25,7 @@ Measurement (log of the run):
 | Read of a job | the read markers after the begin marker of the job on its PE (iteration 0x800000 + i, letter of the source): job i of the source (0: no packet) |
 | CPU per phase | non-IDLE time of each PE in [r_p, r_{p+1}) against the busy time of the PE in phase p of the model (periodic hyperperiod) |
 | Job end against the model | end of job j minus r_p of its release phase, against F - r of the model job; a deadline miss is an end after r of the next release of the task |
+| Begin after the release | begin marker of a job minus r_p of its release phase: the smallest value bounds the delay from the release interrupt to the tick plus the dispatch |
 | Data age of a chain v_0 ... v_n | for each job of v_n, the reads backwards along the chain give the job of v_0; age = end of the job of v_n minus r_p of the release phase of that job of v_0, against the bound of the chain (largest model value) |
 | Read against the model | the job of the source that a job read, against the job of the model (multirate.read_index): older reads break the assumption of the bound |
 | Packet against its deadline | arrival (TAG receive line on the target PE) minus r_0, against the deadline of the model packet (S of the reading job) from the tick of phase 0 |
@@ -165,6 +166,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
     # ---------------------------------------------------------- jobs
     late = misses = complete = 0
     over = []
+    begin_off = []
     for (v, j), row in jobs.items():
         if row["begin"] is None or row["end"] is None:
             continue
@@ -172,6 +174,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
         if r_of(p) is None:
             continue
         complete += 1
+        begin_off.append(cyc(row["begin"] - r_of(p)))
         rel_m, _, fin_m = sched.job(v, j - 1)
         end = cyc(row["end"] - r_of(p))
         over.append(end - (fin_m - rel_m))
@@ -281,7 +284,11 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
                      if len(rel) > 1 else None},
         "markers": {"jobs": len(jobs), "stray": stray},
         "jobs": {"complete": complete, "end_after_model_finish": late, "deadline_misses": misses,
-                 "end_minus_model_max_cycles": max(over) if over else None},
+                 "end_minus_model_max_cycles": max(over) if over else None,
+                 # begin marker of a job after the release interrupt of its phase: the delay to
+                 # the tick of the PE plus the dispatch (the model counts from the tick)
+                 "begin_after_release_min_cycles": min(begin_off) if begin_off else None,
+                 "begin_after_release_max_cycles": max(begin_off) if begin_off else None},
         "reads": {"older_than_model": older, "newer_than_model": newer, "equal_to_model": equal},
         "cpu_phases": {"first_phase": first, "pes": pes,
                        "phases_above_model": sum(p["phases_above_model"] for p in pes.values())},
