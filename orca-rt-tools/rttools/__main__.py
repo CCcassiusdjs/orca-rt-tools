@@ -169,6 +169,14 @@ def main():
 
     header(welcome_msg)
     args = sys.argv[1:]
+    # --costs <file>: static t(v) of rttools.wcet in place of the
+    # Capacity column of the application (rttools/wcet/costs.py)
+    from rttools.wcet import costs as wcosts
+    try:
+        args, costs_file = wcosts.split_flag(args)
+    except wcosts.CostsError as e:
+        error(str(e))
+        return 1
 
     for i in args:
         info("-> " + i)
@@ -179,7 +187,8 @@ def main():
     # [3] frequency
     if len(args) not in [3, 4, 5, 6, 7]:
         error("Usage: ")
-        error("  __main__.py <app> <map> <arch> [<freq>] [<pruning factor>] [<fail threshold>] [<optimize True|False>]")
+        error("  __main__.py <app> <map> <arch> [<freq>] [<pruning factor>] [<fail threshold>] [<optimize True|False>]"
+              " [--costs <costs.json>]")
         error("  <map>: mapping file (.map) or `" + MAP_SPIRAL + "` (ORT/GCM clustering and Spiral Mapping)")
         return 1
 
@@ -203,6 +212,14 @@ def main():
 
     info("Loading application file `" + app_file + "`")
     app, appname = appparser.loadFromFile(app_file)
+    if costs_file is not None:
+        info("Task costs t(v) from `" + costs_file + "` (static WCET, rttools.wcet)")
+        try:
+            for label, (old, new) in sorted(wcosts.apply(app, costs_file).items()):
+                info("  t(" + label + ") = " + str(new) + " cycles (application: " + str(old) + ")")
+        except (wcosts.CostsError, OSError, ValueError) as e:
+            error(str(e))
+            return 1
 
     # print(app, appname)
 
