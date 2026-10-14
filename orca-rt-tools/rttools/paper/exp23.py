@@ -105,7 +105,7 @@ def isr_rule(info):
     ISR_NESTING=1, -DUCX_ISR_NESTING). A RUN_INFO without the line (the
     runs up to r11: A to H, CV, CV2, MA, W1, CF) or no RUN_INFO gives
     nesting, the kernel whose handlers enable interrupts before that
-    return (previous version of the image)."""
+    return (the image of those runs)."""
     rule = (info or {}).get("isr", "nesting")
     if rule not in ISR_RULES:
         raise ValueError(f"RUN_INFO isr={rule!r}: expected one of {', '.join(ISR_RULES)}")
