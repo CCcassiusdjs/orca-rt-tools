@@ -170,6 +170,22 @@ void _interrupt_tick(void)
 	_ei();
 }
 
+#ifndef UCX_ISR_NESTING
+/* First entry of a task: the context of _context_init returns here (ra)
+ * with the task function in s0. dispatch() of the tick and yield() switch
+ * with interrupts disabled (kernel/sched.c), so a task that starts there
+ * enables them before its first instruction, as the first task does after
+ * _dispatch_init. The task returns to the jump below (ra), the address of
+ * the task in the context of the previous kernel. */
+static void __attribute__((naked, used)) _task_start(void)
+{
+	__asm__ volatile(
+		"li	a0, 1\n\t"
+		"jal	ra, _interrupt_set\n\t"
+		"jalr	zero, 0(s0)\n\t");
+}
+#endif
+
 void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra)
 {
 	uint32_t *ctx_p;
@@ -177,5 +193,10 @@ void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra)
 	ctx_p = (uint32_t *)ctx;
 	
 	ctx_p[CONTEXT_SP] = sp + ss;
+#ifdef UCX_ISR_NESTING
 	ctx_p[CONTEXT_RA] = ra;
+#else
+	ctx_p[CONTEXT_S0] = ra;
+	ctx_p[CONTEXT_RA] = (uint32_t)_task_start;
+#endif
 }

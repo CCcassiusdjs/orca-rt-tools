@@ -67,6 +67,19 @@ void ucx_free(void *ptr)
 
 void _di(void) { host_irq_enabled = 0; }
 void _ei(void) { host_irq_enabled = 1; }
+
+/* interrupt entry and return of _isr (arch/riscv/hf-riscv-e/crt0.s): the
+ * core disables interrupts on entry and the return enables them; a handler
+ * that enables them before the return counts in host_isr_nested */
+int host_isr_nested = 0;
+void host_isr(void (*handler)(void))
+{
+	host_irq_enabled = 0;
+	handler();
+	if (host_irq_enabled)
+		host_isr_nested++;
+	host_irq_enabled = 1;
+}
 void set_counter_3(uint32_t v) { host_counter3 = v; }
 void set_counter_4(uint32_t v) { host_counter4 = v; }
 /* iteration markers (device/cacc.c), in the order of the writes */

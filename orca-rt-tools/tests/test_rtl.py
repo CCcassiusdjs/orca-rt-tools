@@ -38,7 +38,8 @@ def test_rtl(name, tmp_path):
     assert "FAIL" not in r.stdout, out[-4000:]
     if name == "tb_cpu_irq":
         # a handler that enables interrupts before it returns lets a second
-        # interrupt corrupt the return of _isr (UCX_ISR_NO_NESTING avoids it)
+        # interrupt corrupt the return of _isr (the kernel built without
+        # UCX_ISR_NESTING leaves interrupts disabled in every handler)
         assert "NESTED tb_cpu_irq MODE=1" in r.stdout, out[-4000:]
     if name == "tb_manycore_pe":
         # the printed iteration markers have the format of the trace parser

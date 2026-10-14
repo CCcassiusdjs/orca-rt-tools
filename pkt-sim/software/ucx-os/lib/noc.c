@@ -41,13 +41,14 @@ void enable_receiver(uint16_t task_id){
   p->state = TASK_READY;
 }
 
-// With -DUCX_ISR_NO_NESTING the handlers irq2_handler and irq3_handler
-// leave interrupts disabled: the return of _isr (arch/riscv/hf-riscv-e/
-// crt0.s) enables them after the frame is restored. _isr keeps the address
-// of the return in a5 without saving it, so an interrupt taken inside the
-// return of another one, after a handler enabled interrupts, changes a5
-// before `sb a5, 0(a5)` and `jalr zero, 0(a5)` (pkt-sim/tests/rtl/
-// tb_cpu_irq.vhd reproduces it on the core).
+// The handlers irq2_handler and irq3_handler leave interrupts disabled:
+// the return of _isr (arch/riscv/hf-riscv-e/crt0.s) enables them after the
+// frame is restored. _isr keeps the address of the return in a5 without
+// saving it, so an interrupt taken inside the return of another one, after
+// a handler enabled interrupts, changes a5 before `sb a5, 0(a5)` and
+// `jalr zero, 0(a5)` (pkt-sim/tests/rtl/tb_cpu_irq.vhd reproduces it on
+// the core). -DUCX_ISR_NESTING keeps the _ei() at the end of both handlers
+// (the image of the runs up to r11).
 
 #ifdef UCX_NOC_LATEST
 // Latest-value delivery, for the time-triggered applications of
@@ -106,7 +107,7 @@ void irq2_handler(void){
 
   _ddma_set_recv_addr((uint32_t)pkt); // send packet address to the ddma
   _ddma_recv_ack();
-#ifndef UCX_ISR_NO_NESTING
+#ifdef UCX_ISR_NESTING
   _ei();
 #endif
 }
@@ -172,7 +173,7 @@ void irq3_handler(void){
   }
   _ddma_recv_ack();
   asm("nop;nop;");
-#ifndef UCX_ISR_NO_NESTING
+#ifdef UCX_ISR_NESTING
   _ei();  
 #endif
 }

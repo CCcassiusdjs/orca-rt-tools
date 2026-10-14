@@ -74,10 +74,10 @@ ghdl_cpu_irq() { # interrupt return of _isr of crt0.s on the HF-RISC core (tb_cp
 	done
 	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_cpu_irq.vhd"
 	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq
-	# MODE 0: handlers leave interrupts disabled (UCX_ISR_NO_NESTING): must pass
+	# MODE 0: handlers leave interrupts disabled (default of the UCX-OS kernel): must pass
 	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=0 \
 		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" || true
-	# MODE 1: handlers enable interrupts before they return (_ei, _interrupt_tick):
+	# MODE 1: handlers enable interrupts before they return (_ei, _interrupt_tick; -DUCX_ISR_NESTING):
 	# the second interrupt of a pair corrupts the return; printed as NESTED
 	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=1 \
 		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/^FAIL/NESTED/; s/^PASS/NESTED-NOT-REPRODUCED/' || true

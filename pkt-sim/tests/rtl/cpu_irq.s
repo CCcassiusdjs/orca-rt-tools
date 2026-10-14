@@ -3,7 +3,7 @@
 # interrupts that arrive at every cycle offset of the return. The handler
 # acknowledges the source (store to 0x20000040) and, when tp != 0, enables
 # interrupts before it returns, as the irq handlers and dispatch() of
-# UCX-OS do (_ei, _interrupt_tick). The main loop stores its counter to
+# UCX-OS do when built with -DUCX_ISR_NESTING (_ei, _interrupt_tick). The main loop stores its counter to
 # 0x2000002C and stops at 0x20000030 when sp differs from its value.
 	.text
 	.globl _start

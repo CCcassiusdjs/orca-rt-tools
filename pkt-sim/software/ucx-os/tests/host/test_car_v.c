@@ -76,7 +76,7 @@ static int marks_are(const uint32_t *expected, int n)
 static void deliver(uint16_t src_node, uint16_t src_port, uint16_t port, uint16_t tag)
 {
 	host_ddma_regs[8] = 4;                      /* 4 flits = 16 bytes */
-	irq2_handler();
+	host_isr(irq2_handler);
 	noc_packet_t *pkt = (noc_packet_t *)(uintptr_t)host_ddma_regs[6];
 	CHECK(pkt != NULL);
 	if (!pkt)
@@ -88,7 +88,7 @@ static void deliver(uint16_t src_node, uint16_t src_port, uint16_t port, uint16_
 	pkt->payload_size = 4;
 	pkt->tag = tag;
 	host_ddma_regs[7] = host_ddma_regs[6];      /* RECV_ADDR_OUT */
-	irq3_handler();
+	host_isr(irq3_handler);
 }
 
 /* ------------------------------------------- OBMG (no output edge) */

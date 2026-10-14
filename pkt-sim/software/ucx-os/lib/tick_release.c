@@ -30,16 +30,21 @@ static volatile uint32_t tr_phase = 0;     /* phase index of this PE */
 static uint32_t tr_wait[MAX_TASKS];        /* phase a blocked task waits for (0: none) */
 static uint32_t tr_last[MAX_TASKS];        /* phase of the previous start of each task */
 
-/* release interrupt (manycore_pe.sv, wake-up generator) */
+/* release interrupt (manycore_pe.sv, wake-up generator); interrupts stay
+ * disabled until the return of _isr (kernel/sched.c, UCX_ISR_NESTING) */
 void irq4_handler(void)
 {
+#ifdef UCX_ISR_NESTING
 	_di();
+#endif
 	tr_pending++;
 
 	/* flag interruption down */
 	volatile int *irq_flag_down = (volatile int *)(0x2000004C);
 	*irq_flag_down = !(*irq_flag_down);
+#ifdef UCX_ISR_NESTING
 	_ei();
+#endif
 }
 
 /* tick hook (kernel/sched.c, dispatch): applies the releases since the

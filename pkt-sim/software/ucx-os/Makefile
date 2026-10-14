@@ -122,6 +122,16 @@ endif
 	hexdump -v -e '4/1 "%02x" "\n"' $(BUILD_TARGET_DIR)/image.bin > $(BUILD_TARGET_DIR)/code.txt
 
 ## applications
+# Interrupts (every image): the handlers leave interrupts disabled until the
+# return of _isr (arch/riscv/hf-riscv-e/crt0.s), which returns through a5
+# without saving it; dispatch() of the tick does not enable them, yield()
+# restores the state of its caller and a task starts through _task_start
+# (hal.c), which enables them (kernel/sched.c, lib/noc.c,
+# lib/tick_release.c). The images of the runs up to r11 (A to H, CV, CV2,
+# MA, W1, CF) enable interrupts inside the handlers: build them with
+# -DUCX_ISR_NESTING, e.g. make weird_a_data CC="riscv64-elf-gcc
+# -DUCX_ISR_NESTING" or UCX_CFLAGS=-DUCX_ISR_NESTING
+# experiments/exp23/build_sw.sh (ISR_NESTING=1 in simulate.sh)
 delay: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/delay.o app/delay.c
 	@$(MAKE) --no-print-directory link
@@ -154,7 +164,7 @@ weird_a: incl
 
 # application E of runs A to H (data-driven release: a task serves every
 # iteration whose packets are in its queue; release of A by the kernel
-# handler of PE 0): the image of those runs
+# handler of PE 0); with -DUCX_ISR_NESTING (above), the image of those runs
 weird_a_data: incl ucx.pack
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/weird_a.o app/weird_a.c
 	@$(MAKE) --no-print-directory link
@@ -190,12 +200,10 @@ $(GEN_APPS): incl
 # periods, rttools/bench_t/multirate.py): the kernel calls the tick hook of
 # the application before each scheduler run (UCX_APP_TICK, kernel/sched.c),
 # and the NoC driver keeps the latest packet of each source without waking
-# the receiver (UCX_NOC_LATEST, lib/noc.c); the interrupt handlers leave
-# interrupts disabled until the return of _isr (UCX_ISR_NO_NESTING,
-# kernel/sched.c and lib/noc.c). Example: make car_full
+# the receiver (UCX_NOC_LATEST, lib/noc.c). Example: make car_full
 # ARCH=riscv/hf-riscv-e
 GEN_TT_APPS = car_full
-TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST -DUCX_ISR_NO_NESTING
+TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST
 
 $(GEN_TT_APPS): incl
 	@$(MAKE) --no-print-directory clean

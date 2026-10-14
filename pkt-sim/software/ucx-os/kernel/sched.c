@@ -154,25 +154,34 @@ void dispatch(void)
 		// printf("priority:     0x%x   rt->period:   0x%x\n", kcb_p->tcb_p->priority, kcb_p->tcb_p->rt->period);
 		// printf("rt->capacity: 0x%x   rt->deadline: 0x%x\n", kcb_p->tcb_p->rt->capacity, kcb_p->tcb_p->rt->deadline);
 		
-#ifndef UCX_ISR_NO_NESTING
+#ifdef UCX_ISR_NESTING
 		_interrupt_tick();
 #endif
-		/* with -DUCX_ISR_NO_NESTING interrupts stay disabled: a task
-		 * resumed inside dispatch() enables them in the return of _isr,
-		 * a task resumed inside yield() enables them itself (the
-		 * time-triggered applications of rttools.ucxgen, lib/noc.c) */
+		/* interrupts stay disabled until the next task resumes: a task
+		 * preempted inside dispatch() resumes through the return of _isr
+		 * (crt0.s), which enables them; a task resumed inside yield()
+		 * restores the interrupt state of its call (yield below); a task
+		 * that starts enters through _task_start (hal.c), which enables
+		 * them. _isr returns through a5, which it does not save, so an
+		 * interrupt taken inside the return of another one corrupts the
+		 * return (pkt-sim/tests/rtl/tb_cpu_irq.vhd); the handlers do not
+		 * enable interrupts before that return. -DUCX_ISR_NESTING builds
+		 * the previous kernel (_interrupt_tick() here, _ei() in the
+		 * handlers), the image of the runs up to r11 */
 		longjmp(kcb_p->tcb_p->context, 1);
 	}
 }
 
 void yield(void)
 {
-#ifdef UCX_TICK_RELEASE
-	/* release by tick (lib/tick_release.c): the switch runs with interrupts
-	 * disabled, so a task can test its phase and block without losing a
-	 * tick in between, and the task resumes with the interrupt state of its
-	 * call (the next task restores its own state, or returns through the
-	 * interrupt handler that preempted it) */
+#if defined(UCX_TICK_RELEASE) || !defined(UCX_ISR_NESTING)
+	/* the switch runs with interrupts disabled and the task resumes with
+	 * the interrupt state of its call (the next task restores its own
+	 * state, or returns through the interrupt handler that preempted it).
+	 * Release by tick (lib/tick_release.c): a task can test its phase and
+	 * block without losing a tick in between. Without UCX_ISR_NESTING,
+	 * dispatch() of the tick does not enable interrupts, so a task that
+	 * dispatch() resumes here enables them with the state of its call */
 	volatile int32_t ie = _di();
 #endif
 	if (!setjmp(kcb_p->tcb_p->context)) {
@@ -182,7 +191,7 @@ void yield(void)
 		krnl_schedule(1);
 		longjmp(kcb_p->tcb_p->context, 1);
 	}
-#ifdef UCX_TICK_RELEASE
+#if defined(UCX_TICK_RELEASE) || !defined(UCX_ISR_NESTING)
 	_interrupt_set(ie);
 #endif
 }
@@ -196,7 +205,9 @@ void yield(void)
 // without the macro, the preprocessed source is the one of run F.
 #ifndef UCX_APP_IRQ4
 void irq4_handler(void){
+#ifdef UCX_ISR_NESTING
   _di();
+#endif
   // task A must reside in node 0
   if(ucx_noc_cpu_id() == 0){
 
@@ -216,6 +227,8 @@ void irq4_handler(void){
   volatile int* irq_flag_down = (volatile int*)(0x2000004C);
   *irq_flag_down = !(*irq_flag_down);
 
+#ifdef UCX_ISR_NESTING
   _ei();
+#endif
 }
 #endif

@@ -75,7 +75,7 @@ static void setup(uint32_t x, uint32_t y, int tasks)
 static noc_packet_t *deliver(uint16_t src_node, uint16_t src_port, uint16_t port, uint32_t job)
 {
 	host_ddma_regs[8] = 4;                      /* 4 flits = 16 bytes */
-	irq2_handler();
+	host_isr(irq2_handler);
 	noc_packet_t *pkt = (noc_packet_t *)(uintptr_t)host_ddma_regs[6];
 	CHECK(pkt != NULL);
 	if (!pkt)
@@ -88,7 +88,7 @@ static noc_packet_t *deliver(uint16_t src_node, uint16_t src_port, uint16_t port
 	pkt->tag = 0;
 	memcpy(pkt->data, &job, 4);
 	host_ddma_regs[7] = host_ddma_regs[6];      /* RECV_ADDR_OUT */
-	irq3_handler();
+	host_isr(irq3_handler);
 	return pkt;
 }
 

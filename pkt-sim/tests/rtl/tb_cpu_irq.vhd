@@ -7,7 +7,8 @@
 -- arrives at every cycle offset of the return of the handler and of _isr;
 -- the next pair starts QUIET cycles after the acknowledge of the second. MODE (read at 0x20000038) = 1:
 -- the handler enables interrupts before it returns (_ei of the UCX-OS
--- handlers, _interrupt_tick of dispatch()); 0: it does not.
+-- handlers, _interrupt_tick of dispatch(), kernel built with -DUCX_ISR_NESTING);
+-- 0: it does not (default of the kernel).
 -- FAIL when the main loop stores to 0x20000030 (sp changed), stops storing
 -- its counter for STALL cycles, or fetches outside the program; PASS after
 -- COUNT interrupts.
