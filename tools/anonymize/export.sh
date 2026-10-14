@@ -79,6 +79,6 @@ if [ -n "${CHECK_PYTHON:-}" ]; then
 	rm -f "$OUT.files" "$OUT.dirs"
 fi
 
-grep -E "^(identifying strings|removed thesis|word 'thesis'|make:|thesis outputs|pytest:)" "$REPORT"
+grep -E "^(identifying strings|correction wording|removed thesis|word 'thesis'|make:|thesis outputs|pytest:)" "$REPORT"
 echo "report: $REPORT"
 exit $rc

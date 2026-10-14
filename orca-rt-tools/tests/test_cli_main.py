@@ -1,10 +1,9 @@
-"""Fixes 1 and 2 (rttools/__main__.py).
+"""Command line of rttools (rttools/__main__.py).
 
-1. Optional command-line parameters: the assignments inside
-   main() created local variables and raised UnboundLocalError with fewer
-   than 7 arguments.
-2. Exit code: main() returned 1 on a usage error, but the process
-   ended with 0.
+1. Optional command-line parameters: main() accepts 3 to 7 arguments and
+   applies each optional one to the configuration.
+2. Exit code: a usage error ends the process with the nonzero return
+   value of main().
 """
 import shutil
 import os

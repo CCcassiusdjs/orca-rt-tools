@@ -1,14 +1,12 @@
-// Fixes 21 and 22 (hw/ddma/ddma.sv, reception).
+// DDMA reception (hw/ddma/ddma.sv).
 //
-// 21. Reception timing without memory contention: same as the
-//     original version. Values measured in the original (commit 4c299fc) with
-//     P = 6: header +2, size +4, irq_size +4 (from arrival);
-//     payload[0] +4, last payload +P+3, irq_hshk +P+4 (from the
-//     CPU acknowledgment). The fix of the reception path with concurrent
-//     sending is tested in tb_ddma_send (scenario with reception).
-// 22. Destination check (TODO in ddma.sv:356): a packet with a destination
-//     different from ADDRESS is consumed without a memory write and without
-//     an interrupt; the next packet arrives normally.
+// 1. Reception timing without memory contention, with P = 6: header +2,
+//    size +4, irq_size +4 (from arrival); payload[0] +4, last payload
+//    +P+3, irq_hshk +P+4 (from the CPU acknowledgment). Reception with
+//    concurrent sending is tested in tb_ddma_send (scenario with reception).
+// 2. Destination check: a packet with a destination
+//    different from ADDRESS is consumed without a memory write and without
+//    an interrupt; the next packet arrives normally.
 `timescale 1ns/100ps
 module tb_ddma_recv;
   import orca_pkg::*;

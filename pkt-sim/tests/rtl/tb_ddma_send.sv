@@ -1,18 +1,17 @@
-// Fix 20 (hw/ddma/ddma.sv, header and size flit send).
+// DDMA send (hw/ddma/ddma.sv, header, size and payload flits).
 //
 // Hermes LOCAL port protocol: the router accepts a flit on the edge
-// where rx = 1 and credit_o = 1. The original DDMA advanced from
-// SENDING_HEADER and SENDING_SIZE looking only at credit_o, and in SENDING_SIZE and
-// SENDING_PAYLOAD_DELAYER lowered rx without confirming acceptance of the flit
-// presented. With the LOCAL buffer almost full, the header or the size flit
-// were lost and the router read the first payload as the size.
+// where rx = 1 and credit_o = 1. The DDMA keeps each flit on data_i with
+// rx = 1 until that edge and leaves SENDING_HEADER, SENDING_SIZE and
+// SENDING_PAYLOAD_DELAYER only on acceptance, so no flit is lost when the
+// LOCAL buffer is full.
 //
 // The router model below reproduces the Hermes credit
 // (credit_o = occupancy < 8) and drains the buffer following a
 // pseudorandom pattern. The scoreboard compares the accepted flits with
 // [destination, size, payload...]. The scenario without backpressure also
-// checks the timing measured in the original code (header accepted 2
-// cycles after the command, tail 10 cycles after the command with p = 6).
+// checks the timing: header accepted 2 cycles after the command, tail 10
+// cycles after the command with p = 6.
 `timescale 1ns/100ps
 module tb_ddma_send;
   import orca_pkg::*;

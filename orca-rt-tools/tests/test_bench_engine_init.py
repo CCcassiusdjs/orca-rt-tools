@@ -1,11 +1,12 @@
-"""Fix 9 (rttools/bench/engine.py, constructor; rttools/gff/orca.py).
+"""Engine constructor (rttools/bench/engine.py) and ORCA graph format
+(rttools/gff/orca.py).
 
-1. self._blocked.append(tlb) was outside the loop: only the last task
-   entered the simulation.
-2. TaskControlBlock(i, label, wcet, 0, 0) passed the WCET as the period and
-   capacity 0.
-3. The ORCA format had no way to specify period and deadline; the reader
-   now accepts `label wcet [period [deadline]]`.
+1. Every task of the graph enters the blocked list of the engine.
+2. The task control block takes the WCET as the capacity; a task without
+   a period is single-shot (period None).
+3. A node line of the ORCA format is `label wcet [period [deadline]]`; the
+   deadline defaults to the period, and export followed by import gives
+   the same nodes.
 """
 import os
 

@@ -42,7 +42,7 @@ HELP = """
 |---|---|
 | o | Open a trace (format detected; RTL options: raw unit, task map, X-Y swap) |
 | u | Cycle the display unit (raw, cycles, ns, µs, ms) |
-| U | Set the raw unit and clock (presets: 100 ps for 4c299fc, 1 ns) |
+| U | Set the raw unit and clock (presets: 100 ps for a PE without `` `timescale ``, 1 ns) |
 | g | Go to a time in the display unit |
 | c | Compare with a second trace (scale for B: 10 compares a 1 ns log with a 100 ps log) |
 | e | Export SVG, PNG or CSV (visible window or whole trace) |
@@ -53,7 +53,7 @@ The Lanes table gives busy time, utilization and time per label; Bursts lists th
 
 ## Units of RTL logs
 
-`manycore_pe.sv` of commit 4c299fc has no `` `timescale ``; ModelSim/Questa then prints `$time` of the PE in units of 100 ps (one cycle of the 500 MHz clock = 20 units). The fixed RTL declares `` `timescale 1ns/100ps ``. The parser reads the unit from a `$printtimescale` line when the log has one; otherwise it assumes 1 ns and marks the unit as assumed.
+Without `` `timescale ``, ModelSim/Questa prints `$time` of the PE in units of 100 ps (one cycle of the 500 MHz clock = 20 units). `manycore_pe.sv` declares `` `timescale 1ns/1fs `` and prints `$time` in ns. The parser reads the unit from a `$printtimescale` line when the log has one; otherwise it assumes 1 ns and marks the unit as assumed.
 
 ## Bench tab
 

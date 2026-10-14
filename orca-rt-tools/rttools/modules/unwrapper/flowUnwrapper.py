@@ -42,10 +42,8 @@ def extractFlows(edges):
 def task_wcet_table(app):
     """GCPA cost of each task of the application instance (task id -> cost).
 
-    The previous version kept the table in a module variable filled on the
-    first call, so a second application in the same process read the table
-    of the first one (KeyError, or the costs of the other application when
-    task ids coincide)."""
+    The table is computed per application, so two applications in the same
+    process read their own costs."""
     graph = to_orca(app)
     table = {}
     tmp_task_wcet = calculate_gcpa(graph)

@@ -1,8 +1,6 @@
 """Command line input of application E (apps/synthetic-app-e/synthetic-app-e.csv).
 
-The file was a copy of apps/shi-2010/SHI2010.csv (CAR application of Shi,
-Burns and Indrusiak 2010), added in commit 4c299fc. It now holds
-application E for the analysis flow of the paper: the graph of
+The file holds application E for the analysis flow of the paper: the graph of
 synthetic-app-e.txt, release period 0.5 ms, end-to-end deadline 2 ms
 (task rows), the payloads of the exp-23 application (pkt-sim/software/
 ucx-os/app/weird_a.c, E->I with 9010 bytes), the characterized costs

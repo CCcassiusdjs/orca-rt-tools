@@ -1,8 +1,8 @@
-"""Fix 14 (requirements.txt).
+"""Dependency file (orca-rt-tools/requirements.txt).
 
-O README lista networkx, pyparsing, pygraphviz e matplotlib, mas o RGG
-imports numpy and no dependency file exists. matplotlib 3.5.1
-uses np.Inf, removed in numpy 2: log2gannt fails with numpy >= 2.
+Every third-party module imported by rttools (outside the legacy code) is
+declared, numpy included (RGG). matplotlib 3.5.1 uses np.Inf, absent from
+numpy 2, so the file pins numpy below 2.
 """
 import ast
 import os

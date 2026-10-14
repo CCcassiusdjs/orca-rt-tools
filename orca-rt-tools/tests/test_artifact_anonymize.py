@@ -1,6 +1,7 @@
 """Anonymized export (tools/anonymize/export.sh) of HEAD: no identifying
-string, no thesis-comparison material, markers applied, and the
-verification detects a planted name."""
+string, no wording about changes to the code of the thesis, no
+thesis-comparison material, markers applied, and the verification detects
+a planted name and planted correction wording."""
 import json
 import os
 import shutil
@@ -33,6 +34,7 @@ def test_export_has_no_identifying_string(export):
     out, r = export
     assert r.returncode == 0, r.stdout + r.stderr
     assert "identifying strings: 0 unexpected" in r.stdout
+    assert "correction wording: 0 unexpected" in r.stdout
     assert "removed thesis-comparison material still present: 0" in r.stdout
     assert not (out / ".git").exists() and not (out / "tools" / "anonymize").exists()
 
@@ -73,3 +75,17 @@ def test_verify_detects_planted_name(export):
         p.unlink()
     assert r.returncode == 1
     assert "UNEXPECTED experiments/planted.txt:1" in r.stdout
+
+
+def test_verify_detects_correction_wording(export):
+    out, _ = export
+    p = out / "experiments" / "planted.c"
+    p.write_text("/* the fix of the original RTL */\n")
+    try:
+        r = subprocess.run([sys.executable, "-I", os.path.join(TOOL, "anonymize.py"), "verify", str(out),
+                            "--repo", REPO_ROOT], capture_output=True, text=True)
+    finally:
+        p.unlink()
+    assert r.returncode == 1
+    assert "correction wording: 1 unexpected" in r.stdout
+    assert "UNEXPECTED experiments/planted.c:1" in r.stdout

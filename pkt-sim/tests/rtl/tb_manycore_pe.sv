@@ -1,16 +1,13 @@
-// Fixes 25 to 27 (manycore_modelsim/manycore_pe.sv).
+// PE of the manycore (manycore_modelsim/manycore_pe.sv).
 //
-// 25. addr_x() read ADDRESS[3:0] (Y coordinate) and addr_y() read
-//     ADDRESS[11:8] (X coordinate), with a 4-bit mask; the format is
-//     X in [15:8] and Y in [7:0] (manycore_top.sv). The logs
-//     "X-Y scheduled" and the output-X-Y.txt files came out swapped.
-// 26. The register read (always_comb) used a non-blocking
-//     assignment and left cpu_if.data_in without a value in two branches
-//     (latch); the lint tool reports COMBDLY and LATCH (test in
-//     run.sh with verilator --lint-only).
-// 27. The reset cleared only cacc_reg and cacc_counter; cacc_counter_2 to _4
-//     kept the initial simulation value (X in ModelSim; random
-//     in Verilator with --x-initial unique).
+// 1. addr_x() reads ADDRESS[15:8] and addr_y() reads ADDRESS[7:0], the
+//    format of manycore_top.sv; the logs "X-Y scheduled" and the
+//    output-X-Y.txt files carry X first.
+// 2. The register read (always_comb) uses blocking assignments and assigns
+//    cpu_if.data_in in every branch; verilator --lint-only (run.sh) reports
+//    no COMBDLY and no LATCH.
+// 3. The reset clears cacc_reg and cacc_counter to cacc_counter_4 (no X in
+//    ModelSim, no random value in Verilator with --x-initial unique).
 //
 // Iteration marker (0x2000003C, device/cacc.h): cleared by the reset, read
 // back, and printed as `<t> <x-y> ITER begin|end <task> <k>`; the test in

@@ -327,7 +327,7 @@ def test_real_logs_unit_trigger_and_swap():
     # "Time scale of (manycore_top.pe_x[0].pe_y[0].pe_mod) is 100ps / 100ps"
     assert a.unit.name == "100 ps" and not a.unit.assumed
     assert d.unit.name == "1 ns" and not d.unit.assumed
-    # the fixed RTL prints X and Y in the other order
+    # run A prints Y-X labels and run D X-Y labels (manycore_pe.sv of this repository)
     assert a.meta["swap_xy"] is False and d.meta["swap_xy"] is True
     assert [s.label for s in a.lane_slices("0-1") if s.label != "IDLE"][:1] == ["C"]
     assert [s.label for s in d.lane_slices("0-1") if s.label != "IDLE"][:1] == ["C"]

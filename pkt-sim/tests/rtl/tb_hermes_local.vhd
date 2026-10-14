@@ -1,13 +1,13 @@
--- Fix 23 (hw/router/hermes/Hermes_crossbar.vhd).
+-- LOCAL to LOCAL route of the Hermes crossbar (hw/router/hermes/Hermes_crossbar.vhd).
 --
--- The LOCAL output of the crossbar had no case for the LOCAL input
--- (tab_out(LOCAL) = "100"): a packet from a node to itself received the
--- Switch Control port, but never left, and the LOCAL port stayed locked.
+-- The LOCAL output of the crossbar has a case for the LOCAL input
+-- (tab_out(LOCAL) = "100"): a packet from a node to itself leaves by the
+-- LOCAL port, which is then free for the next packet.
 --
 -- 3 x 3 mesh, ideal sink (credit_i = '1'). Case A: node 4 (1,1) to
--- itself, P = 4. Case B (regression): node 0 (0,0) to node 8 (2,2),
--- m = 4 hops; the latency measured in the original version, from header acceptance
--- at the source to consumption of the last flit at the destination, is 6(m + 1) + P + 1.
+-- itself, P = 4. Case B: node 0 (0,0) to node 8 (2,2), m = 4 hops; the
+-- latency from header acceptance at the source to consumption of the last
+-- flit at the destination is 6(m + 1) + P + 1.
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;

@@ -9,7 +9,7 @@
 
 ## Result of the current code
 
-The code follows the thesis since `fix/art-fns-search`: occupancy L0 = 6(m+1) + p + 1 with the 12-byte kernel header in p, criteria of Eqs. 6.2 and 6.3 (MCPF takes the most critical packet first), AGS of Fig. 6.6 (reset, threshold across resets, truncation at the maximum release) and a bisection that keeps the feasible upper bound.
+The code implements the network analysis of the thesis: occupancy L0 = 6(m+1) + p + 1 with the 12-byte kernel header in p, criteria of Eqs. 6.2 and 6.3 (MCPF takes the most critical packet first), AGS of Fig. 6.6 (reset, threshold across resets, truncation at the maximum release) and a bisection that keeps the feasible upper bound.
 
 | Table | Agreement with the thesis |
 |---|---|

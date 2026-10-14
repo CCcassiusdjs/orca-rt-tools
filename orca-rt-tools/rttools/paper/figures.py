@@ -337,8 +337,8 @@ TASK_COLORS = ["cA", "cB", "cC", "cE"]
 
 def pe_xy(pe):
     """Mesh coordinates (x, y) of a PE label of config.json (the labels
-    follow the log of commit 4c299fc, with X and Y swapped; the same rule
-    as rttools.paper.exp23.write_figure)."""
+    are Y-X, the order of the stored log A; the same rule as
+    rttools.paper.exp23.write_figure)."""
     a, b = pe.split("-")
     return int(b), int(a)
 

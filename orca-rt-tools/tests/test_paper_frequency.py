@@ -33,7 +33,7 @@ def test_network_frequency_is_set_by_flow_i_to_j():
     and J, G), the phase must hold the window of I->J (release 173 370,
     start of J 11 000 in the next phase, occupancy o = L0 + 20 (m + 1) =
     1 434 + 40 cycles for 5 670 bytes over 1 hop, the default occupancy).
-    F->G no longer sets it: G starts after J (s^(G) = 118 570), so F->G
+    F->G does not set it: G starts after J (s^(G) = 118 570), so F->G
     needs (181 930 - 118 570 + 1 717 + 60) / T."""
     with open(os.path.join(EXP, "reference_frequency.json")) as f:
         ref = json.load(f)

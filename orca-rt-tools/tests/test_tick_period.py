@@ -2,9 +2,10 @@
 (experiments/exp23/tick_period.py; pkt-sim/tests/rtl/tb_timer1.vhd).
 
 TIMER1 counts from 0 to TIMER1CTC inclusive, one step per 16 cycles:
-tick = 16 x (TIMER1CTC + 1). hal.c before this fix wrote
-F_CPU / F_TIMER / 16 = 15625 (tick of 250016 cycles against a release
-period of 250000); the fix writes 15624."""
+tick = 16 x (TIMER1CTC + 1). hal.c writes F_CPU / F_TIMER / 16 - 1 = 15624,
+so the tick equals the release period of 250000 cycles. TIMER1CTC =
+F_CPU / F_TIMER / 16 = 15625 gives a tick of 250016 cycles, the tick of the
+software of run F."""
 import json
 import os
 import re
@@ -75,7 +76,7 @@ def test_tick_at_the_clock_of_the_flow():
     assert rc == 1 and not out["pass"]
 
 
-def test_previous_hal_expression_gives_250016(tmp_path):
+def test_timer1ctc_without_minus_one_gives_250016(tmp_path):
     paths = copy_sources(tmp_path)
     edit(tmp_path / paths["hal_c"], r"TIMER1CTC = \(F_CPU / F_TIMER\) / 16 - 1;",
          "TIMER1CTC = (F_CPU / F_TIMER) / 16;")
@@ -141,16 +142,16 @@ def test_log_with_one_release_fails_without_error(tmp_path):
 
 
 @pytest.mark.skipif(shutil.which("ghdl") is None, reason="ghdl ausente")
-@pytest.mark.parametrize("variant", ["code", "previous"])
+@pytest.mark.parametrize("variant", ["code", "ctc_plus_one"])
 def test_rtl_timer1_period(variant, tmp_path):
     """GHDL on peripherals_minimal.vhd with the TIMER1CTC of hal.c: the
-    measured tick equals the release period T x F_CLK; with the previous
-    expression (TIMER1CTC + 1), it lasts 16 cycles more."""
+    measured tick equals the release period T x F_CLK; with TIMER1CTC + 1
+    (the expression without - 1), it lasts 16 cycles more."""
     _, out = run("code")
     v = out["code"]
     ctc = v["timer1ctc"] if variant == "code" else v["timer1ctc"] + 1
     expect = v["release_cycles"]
-    if variant == "previous":
+    if variant == "ctc_plus_one":
         expect += v["prescaler_cycles"]
     r = subprocess.run(["sh", RUN_SH, "tb_timer1"],
                        env={**os.environ, "OUT": str(tmp_path),

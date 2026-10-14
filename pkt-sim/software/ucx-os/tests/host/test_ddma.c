@@ -1,11 +1,12 @@
-/* Fix 15 (device/ddma.c): DDMA address conversions.
+/* DDMA address conversions (device/ddma.c).
  *
  * Linear node address: a = y * DIMX + x (the same one _ddma_atox uses,
- * a % DIMX). Defeitos:
- *   _ddma_node_addr: Y * DIMY + X  (correct: Y * DIMX + X)
- *   _ddma_atoy:      a / DIMY      (correct: a / DIMX)
- *   _ddma_xyta:      (x << 8) & y  (correct: (x << 8) | y)
- * In a square mesh (2x2) the first two do not show up; in 3x2 they do. */
+ * a % DIMX):
+ *   _ddma_node_addr: Y * DIMX + X
+ *   _ddma_atoy:      a / DIMX
+ *   _ddma_xyta:      (x << 8) | y
+ * The 3x2 mesh separates DIMX from DIMY; the 2x2 mesh gives the same
+ * addresses. */
 #include <ucx.h>
 #include "host_test.h"
 

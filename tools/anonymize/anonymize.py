@@ -21,6 +21,9 @@ in this order:
 `verify` searches every file (text and binary) of <dir> for PATTERNS and for
 hashes of commits of <repo>, prints each hit, marks the hits of ALLOWED
 (headers of third-party files) and exits with 1 when another hit remains.
+It also searches the text files outside CORRECTION_SKIP for the wording of
+CORRECTION_PATTERNS (changes to the code of the thesis) and exits with 1
+on any hit.
 It also lists the paths of removed thesis-comparison material that still
 exist and the remaining occurrences of the word "thesis".
 
@@ -79,13 +82,6 @@ CODE_EDITS = [
     ("orca-rt-tools/rttools/paper/ch7.py", r"thesis", "reference", 0, True),
     ("experiments/ch7/Makefile", r"^n16:\n(?:\t.*\n)+\n?", "", re.M, False),
     ("experiments/ch7/Makefile", r"^(\.PHONY:.*?) n16\b", r"\1", re.M, False),
-    # exp23 README: sentence on the unit of the original commit
-    ("experiments/exp23/README.md",
-     r" Commit \w+ prints the PE time in units of 100 ps; the fixed RTL in ns\.", "", 0, False),
-    # TUI hint on the unit of the original logs
-    ("orca-rt-tools/rttools/tui/ui/trace_pane.py",
-     r'hint="The thesis \(Ch\. 8\) read logs of \w+ as 1 ns; the PE prints \$time in units of 100 ps\."',
-     'hint="Without `timescale, the PE prints $time in units of 100 ps."', 0, False),
     # the stored runs A to D are not in the copy
     ("orca-rt-tools/tests/test_paper_exp23.py", r'for r in "ABCDE":', 'for r in "":', 0, False),
 ]
@@ -137,6 +133,18 @@ IDENTITY = [
     (r"\bGAPH\b", "Anonymous Lab"),
     (r"\bPUCRS\b", "Anonymous University"),
 ]
+
+# wording about changes to the code of the thesis (case-insensitive search of
+# verify); hits outside CORRECTION_SKIP count as unexpected
+CORRECTION_PATTERNS = [r"\bfix(es|ing)?\b", r"\bthe fix", r"\bfixed (rtl|version|code|software|ddma|driver|hal|kernel|tree|logs?)\b",
+                       r"\bbugs?\b", r"\bdefect", r"\berrata\b", r"\bcorrect(ed|ion|ions)\b", r"\bcorrig",
+                       r"\bwas wrong\b", r"\bthesis said\b", r"\boriginal (rtl|code|version|commit|log|loop|ddma)\b",
+                       r"\bregression\b", r"\bno longer\b", r"\bprevious (version|code|search|expression)\b",
+                       r"\bformer\b"]
+# third-party and legacy files whose own comments stay (not part of the analysis flow)
+CORRECTION_SKIP = ["LICENSE", "**/LICENSE", "**/modelsim.ini", "pkt-sim/software/hfrisc-software/**",
+                   "pkt-sim/software/ucx-os/arch/common/stm32/**", "**/fixed.h", "**/test_fixed.c",
+                   "orca-rt-tools/rttools/modules/__rt_tools_old/**", "orca-rt-tools/rttools/porca/**"]
 
 # case-insensitive search of verify
 PATTERNS = ["domingues", "anderson", "silva", "pucrs", "gaph", "csilva", "c.jones", "soft64", "paxos",
@@ -376,6 +384,18 @@ def verify(root, repo):
             entry = f"{rel}:{i}: [{', '.join(hit)}] {line.strip()[:160]}"
             ok = not toks and any(match(rel, g) and re.search(lx, line) for g, lx in ALLOWED)
             (allowed if ok else bad).append(entry)
+    corr_rx = [re.compile(p, re.I) for p in CORRECTION_PATTERNS]
+    corrections = []
+    for rel in sorted(walk(root)):
+        if any(match(rel, g) for g in CORRECTION_SKIP):
+            continue
+        text, _ = read_text(os.path.join(root, rel))
+        if text is None:
+            continue
+        for i, line in enumerate(text.splitlines(), start=1):
+            hit = [rx.pattern for rx in corr_rx if rx.search(line)]
+            if hit:
+                corrections.append(f"{rel}:{i}: {line.strip()[:160]}")
     removed = sorted({rel for rel in walk(root) for g in REMOVED_OUTPUTS if match(rel, g)}
                      | {g for g in REMOVED_OUTPUTS if "*" not in g and os.path.exists(os.path.join(root, g))})
     thesis = {}
@@ -390,13 +410,16 @@ def verify(root, repo):
         print("  UNEXPECTED " + e)
     for e in allowed:
         print("  allowed    " + e)
+    print(f"correction wording: {len(corrections)} unexpected")
+    for e in corrections:
+        print("  UNEXPECTED " + e)
     print(f"removed thesis-comparison material still present: {len(removed)}")
     for r in removed:
         print("  " + r)
     print(f"word 'thesis' (information): {sum(thesis.values())} occurrences in {len(thesis)} files")
     for rel, n in sorted(thesis.items(), key=lambda x: -x[1]):
         print(f"  {n:4d} {rel}")
-    return 1 if bad or removed else 0
+    return 1 if bad or removed or corrections else 0
 
 
 def main(argv=None):

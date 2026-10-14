@@ -189,7 +189,7 @@ def minizincExport(packets, nlinks, hp, mapping, arch, appname):
 
   zincres = sp.stdout.decode('utf-8')
 
-  #TODO: fix print
+  #TODO: format of the solver output
   debug(zincres)
 
   # leaves if unsatisfiable

@@ -1,5 +1,5 @@
-"""Comparison of two traces lane by lane (for example, the original RTL
-against the fixed RTL)."""
+"""Comparison of two traces lane by lane (for example, two runs of the same
+application on two versions of the RTL)."""
 from __future__ import annotations
 
 

@@ -35,8 +35,8 @@ def test_search_returns_problem_of_feasible_frequency(monkeypatch):
 
 
 def test_search_returns_lowest_feasible_attempt(monkeypatch):
-    # the previous search set upper = 2 * center after an infeasible
-    # attempt and returned 3082.03 Hz with 3000 Hz already feasible
+    # after an infeasible attempt the bisection keeps the feasible upper
+    # bound, so it returns 3000 Hz (feasible) and not a later attempt above it
     monkeypatch.setattr(search, "schedule_at", fake_schedule_at)
     res = search.search_minimum_frequency(None, None, None, "x", CFG)
     feasible = [f for (f, ok, _) in res["attempts"] if ok]
@@ -75,8 +75,8 @@ def test_relative_tolerance(monkeypatch):
 
 
 def test_undefined_hyperperiod_keeps_feasible_bound(monkeypatch):
-    # schedule_at returns None when the lcm of the periods fails; the
-    # previous search stopped there and returned the last feasible attempt
+    # schedule_at returns None when the lcm of the periods fails; the search
+    # counts that attempt as infeasible and continues the bisection
     def fake(app, noc, mapping, appname, frequency, cfg):
         if 2000 < frequency < 2900:
             return None

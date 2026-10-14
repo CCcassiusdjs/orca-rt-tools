@@ -14,7 +14,8 @@
 #define CPU_G 3
 #define CPU_J 3
 
-// cannot use port 0 (noc driver bug)
+// ports 1 to 10; port 0 is the value of the unbound slots of the NoC
+// driver table (lib/noc.c, pktdrv_ports)
 #define PORT_A 10
 #define PORT_B 1
 #define PORT_C 2

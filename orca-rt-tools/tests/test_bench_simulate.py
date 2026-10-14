@@ -1,17 +1,15 @@
-"""Fix 10 (rttools/bench/engine.py, simulate and schedule;
-rttools/bench/scheduling.py, RoundRobinSchedule).
+"""Simulation loop of the bench (rttools/bench/engine.py, simulate and
+schedule; rttools/bench/scheduling.py, RoundRobinSchedule).
 
-Defects of the original loop:
-1. self._queue.push(...): PrioQueue only has add (AttributeError).
-2. top_event._time + SystemEventType.SCHEDULER_IRQ added an Enum to the
-   time (TypeError); the correct operation is to add the quantum.
-3. top_event.type = ... created a new attribute; the event type stayed
-   unchanged.
-4. svg_append called svg_init (nonexistent) and wrote to a fixed path.
-5. get_next_release failed with an empty blocked list.
-6. RoundRobinSchedule rotated the queue after the engine had already put the preempted task
-   at the tail: the double rotation skipped tasks.
-7. The deadline was checked only at dispatch, not at completion.
+1. The loop inserts events with PrioQueue.add; the next scheduler event
+   is the current time plus the quantum, with the event type of the
+   scheduler.
+2. The loop handles an empty blocked list (no next release).
+3. The engine puts the preempted task at the tail of the ready queue and
+   RoundRobinSchedule takes the head, so each task runs once per round.
+4. A deadline miss is checked at completion and, for a job that has not
+   finished, at its deadline (reported once); a zero period raises
+   ValueError.
 
 The expected values below come from manual execution of the algorithms.
 """
@@ -66,14 +64,13 @@ def test_one_shot_jobs_finish_and_simulation_stops():
     assert end == 5          # with no pending events, the simulation ends
 
 
-# --- independent review: deadline misses of unfinished jobs and
-# --- zero period
+# --- deadline misses of unfinished jobs and zero period
 from rttools.bench.scheduling import RateMonotonicScheduling
 import pytest
 
 
 def test_starved_job_deadline_miss_reported():
-    # RM, quantum 1: A ocupa o processador; B nunca executa e perde o prazo 10
+    # RM, quantum 1: A holds the processor; B never runs and misses its deadline 10
     eng = SingleCoreEngine(graph(("A", 5, 5, 5), ("B", 1, 10, 10)),
                            RateMonotonicScheduling, quantum=1)
     eng.simulate(100, False)

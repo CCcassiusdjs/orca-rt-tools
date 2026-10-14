@@ -57,7 +57,7 @@ def parseTaskRowWcet(par):
     "label": par[2]
   }
 
-# old schema: Task,Period,Capacity|Data,Deadline,Acronym,Description;
+# periodic schema: Task,Period,Capacity|Data,Deadline,Acronym,Description;
 # the Capacity (or Data) column carries the WCET
 def parseTaskRowLegacy(par):
   return {
