@@ -208,7 +208,7 @@ class Spec:
     frequency (costs in cycles, periods in phases)."""
 
     def __init__(self, tasks, cost, ticks, phase_s, hyper_ticks, flows, node_of, orders, sigma, feedback,
-                 offsets=None, task_period_s=None):
+                 offsets=None, task_period_s=None, sigma_pe=None):
         self.tasks = list(tasks)
         self.cost = {t: int(cost[t]) for t in tasks}
         self.ticks = dict(ticks)
@@ -219,6 +219,9 @@ class Spec:
         self.node_of = dict(node_of)
         self.orders = {n: list(ts) for n, ts in orders.items()}
         self.sigma = int(sigma)
+        # scheduler cost of a PE when it differs from sigma (composition of
+        # applications with their own kernel costs, rttools/multiapp)
+        self.sigma_pe = {str(n): int(v) for n, v in (sigma_pe or {}).items()}
         self.feedback = [tuple(e) for e in feedback]
         self.task_period_s = task_period_s
 
@@ -287,7 +290,8 @@ def spec_from_graph(app, mapping, r=None):
     orders = _orders(tasks, [(u, v) for _, u, v, _ in flows], r["feedback"], mapping, settings)
     node_of = {t: n for n, ts in orders.items() for t in ts}
     return Spec(tasks, cost, r["ticks"], r["phase_s"], r["hyper_ticks"], flows, node_of, orders,
-                settings["scheduler_cycles"], r["feedback"], r.get("offsets"), r["task_period_s"])
+                settings["scheduler_cycles"], r["feedback"], r.get("offsets"), r["task_period_s"],
+                settings.get("scheduler_cycles_pe"))
 
 
 def spec_from_instance(instance, mapping):
@@ -301,7 +305,8 @@ def spec_from_instance(instance, mapping):
     orders = _orders(tasks, [(u, v) for _, u, v, _ in flows], r["feedback"], mapping, settings)
     node_of = {t: n for n, ts in orders.items() for t in ts}
     return Spec(tasks, cost, r["ticks"], r["phase_s"], r["hyper_ticks"], flows, node_of, orders,
-                settings.get("scheduler_cycles", 0), r["feedback"], r.get("offsets"), r["task_period_s"])
+                settings.get("scheduler_cycles", 0), r["feedback"], r.get("offsets"), r["task_period_s"],
+                settings.get("scheduler_cycles_pe"))
 
 
 # ------------------------------------------------------------ schedule
@@ -373,7 +378,8 @@ def schedule(spec, P, max_hyperperiods=32):
         for node, ts in spec.orders.items():
             tasks = [{"name": t, "cost": spec.cost[t], "period": spec.ticks[t], "offset": spec.offsets[t]}
                      for t in ts]
-            sim = ucx.simulate(tasks, P, (W + 1) * Ht, spec.sigma, tail=(W + 1) * Ht, boundary=Ht)
+            sigma = spec.sigma_pe.get(str(node), spec.sigma)
+            sim = ucx.simulate(tasks, P, (W + 1) * Ht, sigma, tail=(W + 1) * Ht, boundary=Ht)
             sims[node] = sim
             st = sim["states"]
             h0s[node] = next((h for h in range(W) if (h * Ht) in st and ((h + 1) * Ht) in st

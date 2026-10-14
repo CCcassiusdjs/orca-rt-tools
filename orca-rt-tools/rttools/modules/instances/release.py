@@ -67,6 +67,10 @@ def settings(app_graph_attrs):
         "sequences": {str(k): list(v) for k, v in sequences.items()} if sequences else None,
         "creation": {str(k): list(v) for k, v in creation.items()} if creation else None,
         "feedback": [tuple(e) for e in app_graph_attrs.get("feedback") or []],
+        # scheduler cost per PE (general phase model of a composition of
+        # applications, rttools/multiapp/compose.py union_graph)
+        "scheduler_cycles_pe": {str(k): int(v) for k, v in (app_graph_attrs.get("scheduler_cycles_pe") or {}).items()}
+                               or None,
     }
 
 
