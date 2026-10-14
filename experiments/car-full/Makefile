@@ -3,7 +3,7 @@
 # analysis flow (rttools/bench_t/multirate.py), and its UCX-OS application for
 # the 4x4 manycore (rttools.ucxgen, time-triggered tasks).
 #
-#   make          app + run + check + ucx-check (seconds)
+#   make          app + run + check + ucx-check + analyze + check-run of run CF (seconds)
 #   make app      compare apps/car-full/car-full.{csv,map} with the generator (fails when they differ)
 #   make generate write apps/car-full/car-full.{csv,map} from apps/shi-2010 and config.json
 #   make run      CPU test (ORT/BENCH over the hyperperiod), frequency search, network at the clock,
@@ -16,7 +16,16 @@
 #   make sim      RTL simulation at F_CLK (Questa and riscv64-elf; ENV_SETUP as in exp23):
 #                 F_CLK=$(F_CLK) RELEASE_NS=$(PHASE_NS) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) 4x4
 #   make analyze  analysis of $(LOG) against the general phase model (rttools.paper.rtlapp, which calls
-#                 rttools.paper.rtlmr): jobs, reads, CPU per phase, data age per chain, packets; into $(OUTDIR)
+#                 rttools.paper.rtlmr): jobs, progress, jobs per phase, reads, CPU per phase, data age per
+#                 chain, packets; into $(OUTDIR)
+#   make check-run  compare $(OUTDIR)/metrics.json with $(REF)
+#
+# LOG, REF and OUTDIR default to run CF (logs/CF.*, reference_CF.json): car_full of tag
+# r11-multirate-rc1 (48bb43a) at 432 MHz, 64 ms. In run CF five PEs (0-1, 0-2, 1-2, 2-0, 3-0) stop
+# (kernel halt or a task that does not finish its job): an interrupt inside the return of another one
+# (handlers that enable interrupts before they return, _isr returns through a5, which it does not save;
+# pkt-sim/tests/rtl/tb_cpu_irq.vhd); the build of this tree has -DUCX_ISR_NO_NESTING. After `make sim`:
+#   make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim
 #
 # F_CLK: f_CPU of the chosen candidate (432 MHz, reference.json chosen.cpu.f_cpu_hz); the phase of
 # 0.25 ms is then 108,000 cycles, a multiple of the 16-cycle step of TIMER1.
@@ -42,12 +51,13 @@ IN_FLIGHT ?= 2
 F_CLK   ?= 432000000
 PHASE_NS ?= 250000
 SIM_NS  ?= 64000000
-LOG     ?= $(BUILD)/sim/events.txt
-OUTDIR  ?= $(BUILD)/results_sim
+LOG     ?= logs/CF.events.txt
+REF     ?= reference_CF.json
+OUTDIR  ?= $(BUILD)/results_CF
 
-.PHONY: all app generate run check ucx ucx-check build sim analyze clean
+.PHONY: all app generate run check ucx ucx-check build sim analyze check-run clean
 
-all: app run check ucx-check
+all: app run check ucx-check analyze check-run
 
 app:
 	$(RUN) generate --config config.json --apps $(APPS) --check
@@ -82,6 +92,9 @@ sim:
 analyze:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json \
 		--csv $(CSV) --map $(MAP) --out $(OUTDIR)
+
+check-run:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(OUTDIR)/metrics.json $(REF)
 
 clean:
 	rm -rf $(BUILD)

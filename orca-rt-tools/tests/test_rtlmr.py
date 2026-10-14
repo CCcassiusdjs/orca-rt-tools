@@ -159,3 +159,38 @@ def test_rtlapp_command_line_routes_to_rtlmr(runs, capsys):
     assert rc == 0
     assert "34 of 34 chains measured, 0 above the bound" in capsys.readouterr().out
 
+
+# ---------------------------------------------------------------- stored run CF
+
+EXP = os.path.join(REPO_ROOT, "experiments", "car-full")
+
+
+@pytest.fixture(scope="module")
+def run_cf(tmp_path_factory):
+    out = tmp_path_factory.mktemp("cf")
+    m = rtlmr.analyze(os.path.join(EXP, "logs", "CF.events.txt"), os.path.join(APP_DIR, "car_full.json"), CSV, MAP,
+                      str(out))
+    return m, out
+
+
+def test_stored_run_cf_matches_reference(run_cf):
+    from rttools.paper import exp23
+    m, out = run_cf
+    assert exp23.check(os.path.join(out, "metrics.json"), os.path.join(EXP, "reference_CF.json")) == []
+    assert m["clock"]["clock_hz"] == 432_000_000 and m["releases"]["count"] == 244
+
+
+def test_stored_run_cf_anomalies_are_on_the_stopped_pes(run_cf):
+    """Run CF: five PEs stop (interrupt inside the return of another one);
+    the other eleven PEs follow the model."""
+    m, _ = run_cf
+    stopped = set(m["progress"]["stalled_pes"])
+    assert stopped == {"0-1", "0-2", "1-2", "2-0", "3-0"}
+    assert m["phases"]["jobs_begun_twice_in_a_phase"] == 0
+    assert m["jobs"]["deadline_misses"] == 0 and m["packets"]["after_deadline"] == 0
+    assert m["monitor"]["errors"] == 0 and m["markers"]["stray"] == 0
+    for pe, p in m["cpu_phases"]["pes"].items():
+        assert (p["phases_above_model"] > 0) <= (pe in stopped), pe
+    # the only chain with a complete walk passes STAC (PE 3-0, stopped)
+    measured = [r for r in m["data_age"]["rows"] if r["jobs"]]
+    assert [r["chain"] for r in measured] == ["SPES-STAC-TPRC"]
