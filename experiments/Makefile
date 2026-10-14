@@ -13,6 +13,8 @@ PYTHON ?= python3
 GHDL   ?= ghdl
 DIRS   := ch7 exp23 figures zll car-v car-full wcet
 DIRS   += ch6# anon:drop-line
+# multiapp: CAR-V and application E on one NoC (rttools.multiapp), about 20 s
+DIRS   += multiapp
 
 .PHONY: all clean $(DIRS)
 

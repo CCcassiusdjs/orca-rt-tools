@@ -19,6 +19,7 @@ TESTS = {
     "tb_release": "verilator",       # release generator in cycles, clock half period in fs
     "tb_cpu_cycles": "ghdl",         # cycles per instruction (bound of the instrumentation writes)
     "tb_release_mask": "verilator",  # release generator on the PEs of RELEASE_MASK (4x4 and 2x2)
+    "tb_release_mask_4x5": "verilator",  # the same on the 4x5 mesh of experiments/multiapp
 }
 
 

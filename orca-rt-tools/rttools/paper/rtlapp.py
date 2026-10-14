@@ -3,7 +3,7 @@
 model of the analysis flow.
 
     python -m rttools.paper.rtlapp analyze <log> --manifest <name>.json --csv <app.csv> --map <app.map>
-        --out <dir> [--run-info <RUN_INFO>] [--arch <arch.gml>]
+        --out <dir> [--run-info <RUN_INFO>] [--arch <arch.gml>] [--app <name> [--composition <file>]]
     python -m rttools.paper.exp23 check <dir>/metrics.json <reference.json>
 
 The module generalizes rttools.paper.exp23 (application E, hand-written
@@ -14,6 +14,18 @@ simulation (experiments/exp23/simulate.sh). No number of an application
 is in this file. The command line sends a time-triggered application
 (manifest "model": "time_triggered": several release periods or cycles)
 to rttools.paper.rtlmr.
+
+A run of a composition (rttools.ucxgen compose: several applications on
+disjoint PEs of one mesh, rttools.multiapp) holds the events of every
+application. With --app, the analysis takes the manifest of that
+application (rttools.ucxgen.model.app_manifest) and its CSV and .map: its
+tasks, PEs, flows and tags; the tags and the packets of the other
+applications are counted apart (tags.other_app_tags,
+network.other_app_packets) and listed as contenders by
+"<application>/f<flow>". The releases and their acknowledgments are those
+of the whole image (one release generator period). With --composition
+(the composition file of rttools.multiapp), the link schedule is the AGS
+schedule of the union of the packets of every application at F_CLK.
 
 Model (at the clock F_CLK of the run; P = T F_CLK cycles):
 
@@ -106,12 +118,23 @@ def task_deadlines(csv_path):
     return out
 
 
-def load_app(manifest_path, csv_path, map_path):
+def load_app(manifest_path, csv_path, map_path, app_name=None):
     """Application of a run: the manifest of rttools.ucxgen, the costs and
     period of the CSV and the mapping of the .map file. ValueError when the
-    manifest and the inputs disagree (tasks, flows, PEs)."""
+    manifest and the inputs disagree (tasks, flows, PEs). A manifest of a
+    composition needs `app_name` (the application to analyze)."""
     with open(manifest_path) as f:
         man = json.load(f)
+    other = None
+    if man.get("apps"):
+        from rttools.ucxgen import model as ucxmodel
+        if app_name is None:
+            raise ValueError("the manifest holds a composition (" + ", ".join(a["name"] for a in man["apps"])
+                             + "); give the application (--app)")
+        man = ucxmodel.app_manifest(man, app_name)
+        other = {int(k): v for k, v in man["composition"]["other_flows"].items()}
+    elif app_name is not None:
+        raise ValueError("--app: the manifest holds one application")
     g, _ = appparser.loadFromFile(csv_path)
     entries = mapfile.read(map_path)
     tasks = [t["name"] for t in man["tasks"]]
@@ -141,7 +164,7 @@ def load_app(manifest_path, csv_path, map_path):
     if rel["model"] != release.PHASE:
         raise ValueError("the application does not use the phase model (release_model)")
     deadlines = task_deadlines(csv_path)
-    return {
+    out = {
         "manifest": man, "graph": g, "entries": entries, "tasks": tasks, "wcet": wcet,
         "flows": by_id, "period_s": period_s, "release": rel, "deadlines": deadlines,
         "label": {t["name"]: t["pe_label"] for t in man["tasks"]},
@@ -152,6 +175,12 @@ def load_app(manifest_path, csv_path, map_path):
                    "csv_matches_manifest": sha256(csv_path) == man["inputs"]["csv"]["sha256"],
                    "map_matches_manifest": sha256(map_path) == man["inputs"]["map"]["sha256"]},
     }
+    if other is not None:
+        out["app_name"] = app_name
+        out["other_flows"] = other
+        out["inputs"]["composition"] = man["composition"]["name"]
+        out["inputs"]["app"] = app_name
+    return out
 
 
 # ------------------------------------------------------------ model
@@ -206,11 +235,16 @@ def model(app, f_clk):
     }
 
 
-def link_schedule(app, arch_path, f_clk):
+def link_schedule(app, arch_path, f_clk, composition=None):
     """Link schedule of the analysis flow at F_CLK (AGS backend,
     search.schedule_at, link occupancy o_i): start of the packet of each
     flow between PEs, cycles from the start of the phase of its source;
-    {"feasible", "starts": {flow id: start}}."""
+    {"feasible", "starts": {flow id: start}}. With `composition` (file of
+    rttools.multiapp), the schedule of the union of the packets of every
+    application of the composition (compose.schedule_union); the
+    composition must place this application on the PEs of its .map file."""
+    if composition is not None:
+        return union_link_schedule(app, f_clk, composition)
     from rttools.modules.frequency import search
     from rttools.modules.io import nocparser
     from rttools.paper.frequency import search_config
@@ -229,6 +263,32 @@ def link_schedule(app, arch_path, f_clk):
         if fid is not None and vals:
             starts[fid] = min(vals)
     return {"feasible": True, "skipped": len(a["skipped"]), "starts": starts}
+
+
+def union_link_schedule(app, f_clk, composition):
+    from rttools.multiapp import compose
+    from rttools.paper.frequency import search_config
+    from rttools.tui.model import network as tnet
+    with tnet.quiet():
+        comp = compose.load(compose.read_spec(composition))
+    me = next((a for a in comp["apps"] if a["name"] == app.get("app_name")), None)
+    if me is None:
+        raise ValueError(f"application {app.get('app_name')} not in the composition {composition}")
+    if mapfile.to_text(me["entries"]) != mapfile.to_text(app["entries"]):
+        raise ValueError(f"the composition places {me['name']} on other PEs than its .map file")
+    with tnet.quiet():
+        a = compose.schedule_union(comp["apps"], comp["noc"], f_clk, search_config(f_clk))
+    if a is None or a["schedule"] is None:
+        return {"feasible": False, "starts": {}}
+    by_label = {compose.qualify(me["name"], "f" + str(fl["csv_id"])): fid for fid, fl in app["flows"].items()}
+    starts = {}
+    for j, p in enumerate(a["problem"]["packets"]):
+        vals = [row[j] for row in a["schedule"] if row[j] is not None]
+        fid = by_label.get(p["flow"])
+        if fid is not None and vals:
+            starts[fid] = min(vals)
+    return {"feasible": True, "skipped": len(a["skipped"]), "starts": starts, "union": True,
+            "apps": [x["name"] for x in comp["apps"]]}
 
 
 # ------------------------------------------------------------ log
@@ -293,7 +353,8 @@ def tag_events(tr, app):
     mod = man["tag_mod"]
     flows = app["flows"]
     ev = {fid: {"send": [], "recv": []} for fid in flows}
-    unknown = lane_errors = 0
+    unknown = lane_errors = other_app = 0
+    other = app.get("other_flows") or {}
     for lane in tr.lanes:
         for mk in tr.lane_marks(lane):
             if mk.kind not in ("send", "recv") or not mk.label.startswith("TAG "):
@@ -301,7 +362,10 @@ def tag_events(tr, app):
             tag = int(mk.label.split()[1])
             fid = tag // mod
             if fid not in flows:
-                unknown += 1
+                if fid in other:
+                    other_app += 1
+                else:
+                    unknown += 1
                 continue
             fl = flows[fid]
             want = fl["src_label"] if mk.kind == "send" else fl["dst_label"]
@@ -322,8 +386,11 @@ def tag_events(tr, app):
                 mismatch += k != pos
             o[kind] = ks
         out[fid] = o
-    return out, {"unknown_tags": unknown, "lane_errors": lane_errors, "repeated": repeated,
-                 "fifo_mismatch": mismatch}
+    counts = {"unknown_tags": unknown, "lane_errors": lane_errors, "repeated": repeated,
+              "fifo_mismatch": mismatch}
+    if "other_flows" in app:
+        counts["other_app_tags"] = other_app
+    return out, counts
 
 
 def iteration_marks(tr, app):
@@ -610,6 +677,7 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
         t = lst.pop(0)
         fid, km = t["tag"] // mod, t["tag"] % mod
         fl = app["flows"].get(fid)
+        oth = (app.get("other_flows") or {}).get(fid)
         m = exp23._hops(t["src"], t["dst"])
         p = t["size"]
         hop = router.getRoutingTime() * (m + 1)
@@ -626,7 +694,7 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
                    "stall": r.get("stall"), "gap": r.get("gap"), "tx_block": t.get("block"), "tx_gap": t.get("gap"),
                    "identity_ok": (r["last"] - r["head"] == p + 1 + r.get("stall", 0) + r.get("gap", 0)
                                    and t["last"] - t["head"] == p + 1 + t.get("block", 0) + t.get("gap", 0)),
-                   "links": xy_links(t["src"], t["dst"])})
+                   "links": xy_links(t["src"], t["dst"]), "other": oth})
     unpaired_tx = sum(len(v) for v in q.values())
     # iteration of each packet (unwrap per flow in order of the header)
     for x in pk:
@@ -639,6 +707,7 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
     # path while the header of this one waits
     for x in pk:
         x["contenders"] = []
+        x["contenders_other"] = []
         if x["header_minus_model"] <= 0:
             continue
         links = set(x["links"])
@@ -647,6 +716,8 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
                 continue
             if links & set(y["links"]):
                 x["contenders"].append(y["flow"])
+                if y["other"] is not None:
+                    x["contenders_other"].append(y["other"])
     # software latency (TAG lines) against the network latency
     for x in pk:
         sw = None
@@ -676,23 +747,32 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
                "header_waits_above_bound": sum(1 for x in xs if x["header_minus_model"] > w_h * (m + 1)),
                "above_occupancy": sum(1 for x in xs if x["latency_minus_occupancy"] > 0),
                "contender_flows": sorted({c for x in xs for c in x["contenders"] if c is not None})}
+        if "other_flows" in app:
+            row["contender_other_apps"] = sorted({c for x in xs for c in x["contenders_other"]})
         for k in ("latency", "latency_minus_L0", "header_minus_model", "stall", "gap", "tx_block",
                   "software_latency", "driver"):
             vals = [x[k] for x in xs if x[k] is not None]
             row[k + "_min"], row[k + "_max"] = (min(vals), max(vals)) if vals else (None, None)
         flows.append(row)
-    return {
+    # the packets of the other applications of a composition stay out of
+    # the counts (they appear as contenders only)
+    own = [x for x in pk if x["other"] is None]
+    out = {
         "model": "L0 = 6 (m + 1) + p + 1; header 6 (m + 1); o_i = L0 + w_h (m + 1)",
         "header_wait_cycles": w_h,
-        "tx": len(tx), "rx": len(rx), "packets": len(pk), "unpaired_tx": unpaired_tx, "unpaired_rx": unpaired_rx,
-        "outside_flows": sum(1 for x in pk if x["flow"] is None),
-        "identity_errors": sum(1 for x in pk if not x["identity_ok"]),
-        "header_waits": sum(1 for x in pk if x["header_minus_model"] > 0),
-        "header_waits_above_bound": sum(1 for x in pk if x["header_minus_model"] > w_h * (x["hops"] + 1)),
-        "above_occupancy": sum(1 for x in pk if x["latency_minus_occupancy"] > 0),
+        "tx": len(tx), "rx": len(rx), "packets": len(own), "unpaired_tx": unpaired_tx, "unpaired_rx": unpaired_rx,
+        "outside_flows": sum(1 for x in own if x["flow"] is None),
+        "identity_errors": sum(1 for x in own if not x["identity_ok"]),
+        "header_waits": sum(1 for x in own if x["header_minus_model"] > 0),
+        "header_waits_above_bound": sum(1 for x in own if x["header_minus_model"] > w_h * (x["hops"] + 1)),
+        "above_occupancy": sum(1 for x in own if x["latency_minus_occupancy"] > 0),
         "flows": flows,
-        "per_packet": pk,
+        "per_packet": own,
     }
+    if "other_flows" in app:
+        out["other_app_packets"] = len(pk) - len(own)
+        out["header_waits_with_other_app_contender"] = sum(1 for x in own if x["contenders_other"])
+    return out
 
 
 # ------------------------------------------------------------ outputs
@@ -705,8 +785,9 @@ def _csv(path, rows, cols):
             w.writerow([r.get(c) for c in cols])
 
 
-def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None):
-    app = load_app(manifest_path, csv_path, map_path)
+def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None,
+            app_name=None, composition=None):
+    app = load_app(manifest_path, csv_path, map_path, app_name)
     tr, clk, clock = load_log(log_path, app, f_clk, run_info)
     if tr.meta.get("swap_xy"):
         raise ValueError("the PE labels of the log are swapped against the manifest")
@@ -721,7 +802,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
     win = cpu_windows(tr, app, mdl, clk, releases)
     att = cpu_attributed(mdl, its)
     pkts = packets(app, mdl, clk, releases, ev)
-    sched = link_schedule(app, arch, clock["clock_hz"]) if arch else None
+    sched = link_schedule(app, arch, clock["clock_hz"], composition) if (arch or composition) else None
     if sched:
         for f in pkts["flows"]:
             f["schedule_start"] = sched["starts"].get(f["flow"])
@@ -795,7 +876,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
           "max_iterations_per_run", "same_run"])
     if net:
         _csv(os.path.join(out_dir, "network.csv"), net["flows"], list(net["flows"][0]) if net["flows"] else [])
-        cols = [c for c in per_packet[0] if c != "links"] if per_packet else []
+        cols = [c for c in per_packet[0] if c not in ("links", "other", "contenders_other")] if per_packet else []
         _csv(os.path.join(out_dir, "network_packets.csv"), per_packet, cols)
     return m
 
@@ -844,16 +925,24 @@ def main(argv=None):
     a.add_argument("--f-clk", type=int, default=None, help="F_CLK (Hz) when the log has no RUN_INFO")
     a.add_argument("--arch", default=None,
                    help="architecture (.gml) for the link schedule of the analysis flow at F_CLK (AGS)")
+    a.add_argument("--app", default=None,
+                   help="application of a composition (manifest of rttools.ucxgen compose)")
+    a.add_argument("--composition", default=None,
+                   help="composition file (rttools.multiapp): link schedule of the union of the packets")
     args = p.parse_args(argv)
     with open(args.manifest) as f:
         time_triggered = json.load(f).get("model") == "time_triggered"
     if time_triggered:
         # several release periods or cycles: general phase model (rttools/paper/rtlmr.py)
+        if args.app is not None or args.composition is not None:
+            p.error("--app and --composition take a composition of applications with one release "
+                    "period (rttools.ucxgen compose); the manifest is a time-triggered application")
         from rttools.paper import rtlmr
         m = rtlmr.analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk)
         lines = rtlmr.summary_lines(m)
     else:
-        m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch)
+        m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch,
+                    args.app, args.composition)
         lines = summary_lines(m)
     for line in lines:
         print(line)
