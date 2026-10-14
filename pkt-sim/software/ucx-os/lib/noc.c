@@ -35,6 +35,31 @@ void enable_receiver(uint16_t task_id){
   p->state = TASK_READY;
 }
 
+#ifdef UCX_NOC_LATEST
+// Latest-value delivery, for the time-triggered applications of
+// rttools.ucxgen (built with -DUCX_NOC_LATEST): the queue of a task keeps
+// at most one packet per source (node and port). A new packet from the
+// same source takes the place of the queued one (a queued packet from
+// another PE is freed; a packet of this PE is the buffer of its sender),
+// and the arrival does not wake the task, which reads its queue when its
+// job starts. Without the macro, the driver keeps every packet in FIFO
+// order and wakes the receiver (blocking receive).
+static int32_t pktdrv_put_latest(struct queue_s *q, noc_packet_t *pkt)
+{
+  for (int32_t i = 0; i < q->elem; i++) {
+    int32_t k = (q->head + i) & q->mask;
+    noc_packet_t *old = (noc_packet_t *) q->pdata[k];
+    if (old->source_node == pkt->source_node && old->source_port == pkt->source_port) {
+      if (old != pkt && old->source_node != ucx_noc_cpu_id())
+        ucx_free(old);
+      q->pdata[k] = pkt;
+      return 0;
+    }
+  }
+  return ucx_queue_enqueue(q, pkt);
+}
+#endif
+
 // Implementation of the irq1_handler, intercepts 
 // sending interruptions. While sending, the ddma 
 // will interrupt the cpu to acknowledge the sending
@@ -109,7 +134,11 @@ void irq3_handler(void){
       ucx_free(pkt);
     }
     // check whether the task has room for more packets in that queue
+#ifdef UCX_NOC_LATEST
+    else if (pktdrv_put_latest(pktdrv_tqueue[k], pkt) != 0)
+#else
     else if (ucx_queue_enqueue(pktdrv_tqueue[k], pkt) != 0)
+#endif
     {
       printf("noc_driver_isr(): task (on port %d) cannot receive more packets, dropping...\n", 
         pkt->target_port);
@@ -120,7 +149,9 @@ void irq3_handler(void){
 #ifndef UCX_NO_INSTRUMENTATION
       set_counter_4(pkt->tag);
 #endif
+#ifndef UCX_NOC_LATEST
       enable_receiver(k);
+#endif
     }
   }
   _ddma_recv_ack();
@@ -380,12 +411,20 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
     }
 
     // wake the receiver only when the packet entered its queue
+#ifdef UCX_NOC_LATEST
+    _di();
+    int32_t res = pktdrv_put_latest(pktdrv_tqueue[target_task], pkt);
+    _ei();
+#else
     int32_t res = ucx_queue_enqueue(pktdrv_tqueue[target_task], pkt);
+#endif
     if (res == 0) {
 #ifndef UCX_NO_INSTRUMENTATION
       set_counter_4(pkt->tag);
 #endif
+#ifndef UCX_NOC_LATEST
       enable_receiver(target_task);
+#endif
     }
     return res;
   }

@@ -130,9 +130,18 @@ void ucx_task_yield()
 	_yield();
 }
 
+#ifdef UCX_APP_TICK
+/* tick hook of a time-triggered application (rttools.ucxgen): releases
+ * the jobs of the tick before the scheduler runs */
+void ucx_app_tick(void);
+#endif
+
 void dispatch(void)
 {
 	if (!setjmp(kcb_p->tcb_p->context)) {
+#ifdef UCX_APP_TICK
+		ucx_app_tick();
+#endif
 		krnl_delay_update();
 		krnl_stack_check();
 
