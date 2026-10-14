@@ -29,12 +29,21 @@
 #                  TH; into $(BUILD)/r11c (metrics.json, values.tex with the macro names of
 #                  $(BUILD)/values.tex)
 #   make check-r11c  $(BUILD)/r11c/metrics.json against reference_r11c.json
+#   make analyze-r11e  the same analysis on the runs of tag r11-rc5 (crt0.s with the return test of
+#                  _isr and the read back of _interrupt_set(0), crt0=guard_readback; config_r11e.json):
+#                  E on run UH (../exp23/logs/UH.*), CAR-V on run UCV (../car-v-rtl/logs/UCV.*),
+#                  WCET-E on run W3 (logs/W3.*), flow of E with the static costs of the image of UH;
+#                  into $(BUILD)/r11e (metrics.json, values.tex with the macro names of $(BUILD)/values.tex)
+#   make check-r11e  $(BUILD)/r11e/metrics.json against reference_r11e.json
 #
 # Run W1 (logs/W1.*): wcet_e of tag r11-wcet-rc1 (git archive), Questa 2025.3, riscv64-elf-gcc 12.2.0,
 # 10 ms at 500 MHz (make sim); W1.image.elf and W1.image.lst are the image of the run.
 # Run W2 (logs/W2.*, reference_W2.json): wcet_e of tag r11-rc3 (release by tick, kernel without
 # nested interrupts), same tools, clock and duration: make run-analyze check-run LOG=logs/W2.events.txt
-# REF=reference_W2.json (`make check` runs W1, W2 and check-r11c).
+# REF=reference_W2.json.
+# Run W3 (logs/W3.*, reference_W3.json): wcet_e of tag r11-rc5 (as W2, crt0=guard_readback), same tools,
+# clock and duration: make run-analyze check-run LOG=logs/W3.events.txt REF=reference_W3.json
+# (`make check` runs W1, W2, W3, check-r11c and check-r11e).
 #
 # SIM_NS: release delay 3 ms + 14 releases of 0.5 ms (rtlapp cpu_windows takes windows of
 # n(J) + 1 = 4 releases from the release of iteration 4) = 10 ms.
@@ -63,7 +72,7 @@ CC_BODIES ?= riscv64-elf-gcc
 RTL     := ../../pkt-sim/tests/rtl
 UCX_IMG := pkt-sim/software/ucx-os/build/target
 
-.PHONY: all analyze check app csv images bodies trace sim run-analyze check-run analyze-r11c check-r11c clean
+.PHONY: all analyze check app csv images bodies trace sim run-analyze check-run analyze-r11c check-r11c analyze-r11e check-r11e clean
 
 all: analyze check
 
@@ -75,7 +84,9 @@ check:
 	$(GEN) check $(GENARGS)
 	$(MAKE) run-analyze check-run
 	$(MAKE) run-analyze check-run LOG=logs/W2.events.txt REF=reference_W2.json
+	$(MAKE) run-analyze check-run LOG=logs/W3.events.txt REF=reference_W3.json
 	$(MAKE) analyze-r11c check-r11c
+	$(MAKE) analyze-r11e check-r11e
 
 app:
 	$(GEN) generate $(GENARGS)
@@ -113,6 +124,12 @@ analyze-r11c:
 
 check-r11c:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/r11c/metrics.json reference_r11c.json
+
+analyze-r11e:
+	$(RUN) analyze --config config_r11e.json --out $(BUILD)/r11e
+
+check-r11e:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/r11e/metrics.json reference_r11e.json
 
 clean:
 	rm -rf $(BUILD)
