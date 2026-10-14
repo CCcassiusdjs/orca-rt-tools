@@ -54,6 +54,18 @@ ghdl_cpu() { # cycles per instruction of the HF-RISC core (tb_cpu_cycles.vhd)
 		--stop-time=1ms 2>&1) | grep -E "^(CPI|PASS|FAIL)" || true
 }
 
+ghdl_trace() { # cycle trace of wcet_bodies.hex (tb_cpu_trace.vhd): MARK and DONE lines
+	W="$OUT/ghdl_trace"
+	mkdir -p "$W"
+	for f in bshifter alu reg_bank control int_control datapath cpu; do
+		ghdl -a --workdir="$W" -fsynopsys -fexplicit "$HW/cpu/core_rv32e/$f.vhd" 2>/dev/null
+	done
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_cpu_trace.vhd"
+	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_cpu_trace
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_trace -gHEX="${TRACE_HEX:-$T/wcet_bodies.hex}" \
+		--stop-time=20ms 2>&1) | grep -E "^(MARK|DONE|TIMEOUT)" || true
+}
+
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
 	$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/ddma/ddma.sv"
 
@@ -95,6 +107,7 @@ for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb
 		# (default: hal.c at 500 MHz and F_TICK = 2000, 250000 cycles)
 		ghdl_timer1 "${TB_TIMER1_CTC:-15624}" "${TB_TIMER1_EXPECT:-250000}" ;;
 	tb_cpu_cycles) ghdl_cpu ;;
+	tb_cpu_trace) ghdl_trace ;;
 	*) echo "unknown test: $t"; exit 2 ;;
 	esac
 done
