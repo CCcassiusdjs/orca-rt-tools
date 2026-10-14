@@ -89,9 +89,17 @@ void host_tasks_init(int n)
 		tcbs[i].tcb_next = &tcbs[(i + 1) % n];
 	}
 	kcb.tcb_p = &tcbs[0];
+	kcb.tcb_first = &tcbs[0];
 }
 
 uint8_t host_task_state(int id) { return tcbs[id].state; }
+
+/* task `id` runs: ucx_task_id() and kcb_p->tcb_p */
+void host_set_current(int id)
+{
+	host_current_task = id;
+	kcb.tcb_p = &tcbs[id];
+}
 
 /* DDMA registers (0x20000000 + 4*i) */
 uint32_t host_ddma_regs[16];

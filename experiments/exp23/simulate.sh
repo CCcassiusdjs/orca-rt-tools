@@ -14,8 +14,12 @@
 #           (vsim -g).
 # <mesh>:   WxH of manycore_top (NOC_DIM_X x NOC_DIM_Y); default MESH of
 #           app/<app>.sim, otherwise 2x2.
-# With the defaults (weird_a, 2x2, no app/weird_a.sim) the vsim command is
-# the one of run F (tag exp23-F): no -g option.
+# app/weird_a.sim (release by tick: RELEASE_MASK=15) gives the default
+# application its mask; the application of runs A to H is weird_a_data
+# (no setup file: 2x2, no -g option at 500 MHz, the vsim command of run F,
+# tag exp23-F). TICK_RELEASE=1 in app/<app>.sim marks an application with
+# the release by tick (pkt-sim/software/ucx-os/lib/tick_release.c);
+# RUN_INFO then has release=tick, otherwise release=data.
 # The script copies pkt-sim to <out_dir>/pkt-sim, builds the software there
 # (build_sw.sh: riscv64-elf toolchain, ARCH=riscv/hf-riscv-e), adds the packet monitor
 # (rtl/pe_checker.sv, rtl/chk_binds.sv) and runs vsim in batch mode.
@@ -73,6 +77,8 @@
 # and the clock of the run (read by rttools.paper.exp23):
 #   f_clk_hz, f_tick_hz, clock_half_period_fs, clock_hz_exact,
 #   release_cycles, warmup_cycles
+# and the release rule of the tasks (rttools.paper.phasecheck):
+#   release      tick (TICK_RELEASE=1 in app/<app>.sim) or data
 set -euo pipefail
 
 OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]}
@@ -202,6 +208,7 @@ fi
 	echo "clock_hz_exact=$F_EXACT"
 	echo "release_cycles=$RELEASE_CYCLES"
 	echo "warmup_cycles=$WARMUP_CYCLES"
+	if [ "$(setup TICK_RELEASE)" = 1 ]; then echo "release=tick"; else echo "release=data"; fi
 } >> "$OUT/RUN_INFO"
 
 if command -v /usr/bin/time > /dev/null; then

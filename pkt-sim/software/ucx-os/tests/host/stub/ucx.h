@@ -16,6 +16,7 @@ struct tcb_s {
 
 struct kcb_s {
 	struct tcb_s *tcb_p;
+	struct tcb_s *tcb_first;
 };
 
 extern struct kcb_s *kcb_p;
@@ -24,4 +25,5 @@ uint16_t ucx_task_id(void);
 #include <device/ddma.h>
 #include <device/cacc.h>   /* set_iter_mark and the ITER_* macros */
 #include <lib/noc.h>
+#include <lib/tick_release.h>
 #endif

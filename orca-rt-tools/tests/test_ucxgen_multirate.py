@@ -119,8 +119,9 @@ def test_build_car_full_and_weird_a(tmp_path):
         m = json.load(f)
     rows = memory.report(m, memory.heap_size(str(target / "image.map")), 2, (1,))
     assert rows[0]["fits"], rows
-    # weird_a after car_full: kernel and driver without the macros
+    # weird_a after car_full: driver without UCX_NOC_LATEST; the tick hook is the one of the
+    # release by tick (lib/tick_release.c)
     assert build(ucx, "weird_a", path) == weird_a
     syms = subprocess.run(["riscv64-elf-nm", str(target / "image.elf")], capture_output=True, text=True,
                           env=env).stdout
-    assert "ucx_app_tick" not in syms and "pktdrv_put_latest" not in syms
+    assert "pktdrv_put_latest" not in syms and re.search(r" T ucx_phase_wait$", syms, re.M)

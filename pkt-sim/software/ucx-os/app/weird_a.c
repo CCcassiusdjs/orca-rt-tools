@@ -90,6 +90,31 @@ void sleep_forever()
 
 #define ITERATIONS 99999
 
+// Release by tick (built with -DUCX_TICK_RELEASE, Makefile rule weird_a;
+// lib/tick_release.c): task v waits for the tick of phase j + N_v before
+// it reads the input of iteration j, so it runs at most once per phase and
+// serves iteration j from the tick of phase j + n(v), as the phase model
+// of the analysis (n(v) of rttools/bench_t/estimate.py, phases, for the
+// dispatch order of the model: ABDF A B D F, C, EHI E H I, GJ J G). The
+// release generator fires on the four PEs (app/weird_a.sim). Without the
+// macro (rule weird_a_data) the code is the one of runs A to H: a task
+// serves every iteration whose packets are in its queue.
+#define N_A 0
+#define N_B 0
+#define N_C 1
+#define N_D 0
+#define N_E 2
+#define N_F 0
+#define N_G 1
+#define N_H 2
+#define N_I 2
+#define N_J 3
+#ifdef UCX_TICK_RELEASE
+#define PHASE_WAIT(n, j) ucx_phase_wait((j) + (n))
+#else
+#define PHASE_WAIT(n, j)
+#endif
+
 // Iteration markers (include/device/cacc.h): each task writes
 // ITER_BEGIN(task, k) after it has the input of iteration k and
 // ITER_END(task, k) after its last send of iteration k. The packets carry
@@ -109,9 +134,14 @@ void task_a()
   uint32_t k = 0;
 
   do {
+#ifdef UCX_TICK_RELEASE
+    // release of iteration k + 1: the tick of its phase
+    PHASE_WAIT(N_A, k + 1);
+#else
     // voluntary sleep
     kcb_p->tcb_p->state = TASK_BLOCKED;
     ucx_task_yield();
+#endif
     ITER_BEGIN('A', ++k);
 
     // simulate processing
@@ -140,6 +170,7 @@ void task_b()
   uint32_t k = 0;
   
   do {
+    PHASE_WAIT(N_B, k + 1);
     recv_and_print();
     ITER_BEGIN('B', ++k);
   
@@ -169,6 +200,7 @@ void task_c()
   uint32_t k = 0;
 
   do {
+    PHASE_WAIT(N_C, k + 1);
     recv_and_print();
     ITER_BEGIN('C', ++k);
 
@@ -195,6 +227,7 @@ void task_d()
   uint32_t k = 0;
 
   do {
+    PHASE_WAIT(N_D, k + 1);
     recv_and_print();
     ITER_BEGIN('D', ++k);
     
@@ -223,6 +256,7 @@ void task_e()
 
   do 
   {
+    PHASE_WAIT(N_E, k + 1);
     recv_and_print();
     ITER_BEGIN('E', ++k);
 
@@ -254,6 +288,7 @@ void task_f()
 
   do 
   {
+    PHASE_WAIT(N_F, k + 1);
     recv_and_print();
     ITER_BEGIN('F', ++k);
 
@@ -281,6 +316,7 @@ void task_g()
 
   do
   {
+    PHASE_WAIT(N_G, k + 1);
     recv_and_print();
     ITER_BEGIN('G', ++k);
 
@@ -308,6 +344,7 @@ void task_h()
 
   do
   {
+    PHASE_WAIT(N_H, k + 1);
     recv_and_print();
     ITER_BEGIN('H', ++k);
 
@@ -336,6 +373,7 @@ void task_i()
 
   do
   {
+    PHASE_WAIT(N_I, k + 1);
     recv_and_print();
     ITER_BEGIN('I', ++k);
 
@@ -400,6 +438,7 @@ void task_j()
 
   do
   {
+    PHASE_WAIT(N_J, done + 1);
     // wait for the packet of iteration done + 1 from each input
     while (received[0] <= done || received[1] <= done || received[2] <= done) {
       uint16_t port = recv_source_port();
@@ -425,6 +464,10 @@ void task_j()
 
 void idle_task_p(void)
 {
+#ifdef UCX_TICK_RELEASE
+  // a yield can enter the idle task with interrupts disabled (kernel/sched.c)
+  _ei();
+#endif
   // ucx_sleep(-1);
   for (;;)
     ;

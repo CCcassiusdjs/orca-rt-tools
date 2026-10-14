@@ -76,7 +76,7 @@ pipe.o: $(SRC_DIR)/kernel/pipe.c
 event.o: $(SRC_DIR)/kernel/event.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/event.c
 
-libs.pack: libc.o dump.o malloc.o list.o queue.o noc.o
+libs.pack: libc.o dump.o malloc.o list.o queue.o noc.o tick_release.o
 	@echo null > libs.pack
 
 queue.o: $(SRC_DIR)/lib/queue.c
@@ -91,6 +91,8 @@ libc.o: $(SRC_DIR)/lib/libc.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/lib/libc.c
 noc.o: $(SRC_DIR)/lib/noc.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/lib/noc.c
+tick_release.o: $(SRC_DIR)/lib/tick_release.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/lib/tick_release.c
 
 devices.pack: ddma.o cacc.o
 	@echo null > devices.pack
@@ -132,7 +134,28 @@ hello: incl ucx.pack
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/hello.o app/hello.c
 	@$(MAKE) --no-print-directory link
 
-weird_a: incl ucx.pack
+# Release by tick (lib/tick_release.c): the release interrupt on every PE
+# with a task counts the phases, the tick hook of the kernel (UCX_APP_TICK,
+# kernel/sched.c) wakes the tasks whose phase has come, and each task of
+# application E or of a generated application waits for the tick of its
+# phase j + n(v) before it serves iteration j. Kernel and application are
+# built with TR_DEFS. Example: make weird_a ARCH=riscv/hf-riscv-e
+TR_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_TICK_RELEASE
+
+# application E with the release by tick (app/weird_a.sim: RELEASE_MASK of
+# the four PEs)
+weird_a: incl
+	@$(MAKE) --no-print-directory clean
+	@$(MAKE) --no-print-directory ucx.pack UCX_DEFS="$(TR_DEFS)"
+	$(CC) $(CFLAGS) $(TR_DEFS) -o $(BUILD_APP_DIR)/weird_a.o app/weird_a.c
+	@$(MAKE) --no-print-directory link
+	@find '$(SRC_DIR)' -maxdepth 1 -type f \( -name '*.pack' -o -name '*.o' \) -delete
+	@find '$(BUILD_APP_DIR)' -type f -name '*.o' -delete
+
+# application E of runs A to H (data-driven release: a task serves every
+# iteration whose packets are in its queue; release of A by the kernel
+# handler of PE 0): the image of those runs
+weird_a_data: incl ucx.pack
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/weird_a.o app/weird_a.c
 	@$(MAKE) --no-print-directory link
 

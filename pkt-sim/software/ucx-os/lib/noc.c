@@ -25,6 +25,12 @@ uint32_t ucx_noc_cpu_id(void)
 
 
 void enable_receiver(uint16_t task_id){
+#ifdef UCX_TICK_RELEASE
+  // release by tick (lib/tick_release.c): a task that waits for the tick
+  // of its phase stays blocked; the tick hook wakes it
+  if (ucx_phase_waiting(task_id))
+    return;
+#endif
   // locate receiver tasks and remove blocked state
   struct tcb_s* p = kcb_p->tcb_p;
   

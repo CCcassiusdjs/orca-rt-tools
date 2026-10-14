@@ -12,6 +12,7 @@ extern int host_iter_nmarks;
 void host_arena_init(void);
 void host_tasks_init(int n);
 uint8_t host_task_state(int id);
+void host_set_current(int id);
 void host_ddma_map(uint32_t dimx, uint32_t dimy, uint32_t x, uint32_t y);
 
 static int host_failures = 0;

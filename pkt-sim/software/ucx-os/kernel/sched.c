@@ -161,6 +161,14 @@ void dispatch(void)
 
 void yield(void)
 {
+#ifdef UCX_TICK_RELEASE
+	/* release by tick (lib/tick_release.c): the switch runs with interrupts
+	 * disabled, so a task can test its phase and block without losing a
+	 * tick in between, and the task resumes with the interrupt state of its
+	 * call (the next task restores its own state, or returns through the
+	 * interrupt handler that preempted it) */
+	volatile int32_t ie = _di();
+#endif
 	if (!setjmp(kcb_p->tcb_p->context)) {
 		/* TODO: check if we need to run a delay update on yields. maybe only on a non-preemtive execution? */ 
 		krnl_delay_update();
@@ -168,6 +176,9 @@ void yield(void)
 		krnl_schedule(1);
 		longjmp(kcb_p->tcb_p->context, 1);
 	}
+#ifdef UCX_TICK_RELEASE
+	_interrupt_set(ie);
+#endif
 }
 
 

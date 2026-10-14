@@ -13,3 +13,4 @@
 #include <device/ddma.h>
 #include <device/cacc.h>
 #include <lib/noc.h>
+#include <lib/tick_release.h>
