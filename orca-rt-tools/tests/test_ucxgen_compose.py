@@ -1,5 +1,7 @@
 """One UCX-OS image for several applications (rttools.ucxgen compose,
-pkt-sim/software/ucx-os/app/carv_e.*, experiments/multiapp)."""
+pkt-sim/software/ucx-os/app/carv_e.*, experiments/multiapp) and the
+analysis of a run of a composition per application (rttools.paper.rtlapp
+--app)."""
 import json
 import os
 import re
@@ -10,6 +12,7 @@ import pytest
 
 from tests.conftest import REPO_ROOT, run_module
 from tests.test_ucxgen_carv import build as build_image, toolchain
+from rttools.paper import exp23, rtlapp
 from rttools.ucxgen import memory, model
 
 APPS = os.path.join(REPO_ROOT, "apps")
@@ -20,6 +23,7 @@ CARV_MAP4 = os.path.join(APPS, "car-v", "car-v-ONTO-hermes4x4.map")
 EXP = os.path.join(REPO_ROOT, "experiments", "multiapp")
 UCX = os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os")
 APP_DIR = os.path.join(UCX, "app")
+CV2 = os.path.join(REPO_ROOT, "experiments", "car-v-rtl")
 PARTS = [("CARV", CARV_CSV, os.path.join(EXP, "maps", "CARV.map")),
          ("E", E_CSV, os.path.join(EXP, "maps", "E.map"))]
 
@@ -89,6 +93,60 @@ def test_composition_heap_model():
     assert two[9]["in_packets"] == 2 * ins and one[9]["in_packets"] == ins
     assert max(one.values(), key=lambda d: d["bytes"]) == one[13] and one[13]["bytes"] == 36224
     assert two[9]["bytes"] == 50808
+
+
+def test_app_manifest_and_cv2_through_a_composition(tmp_path):
+    """A composition with CAR-V on the nodes of its 4x4 mapping (labels x-y
+    of the 4x5 mesh equal those of the 4x4 for y < 4) and E on row 4: the
+    analysis of the stored run CV2 with --app CARV gives reference_CV2.json,
+    except the manifest name and the number of PEs of the release mask (E
+    adds PE 16)."""
+    e_row = tmp_path / "e_row4.map"
+    e_row.write_text("16:A,B,D,F\n17:C\n18:E,H,I\n19:G,J\n")
+    m = model.compose([("CARV", CARV_CSV, CARV_MAP4), ("E", E_CSV, str(e_row))], "cv2e", mesh="4x5")
+    man = tmp_path / "cv2e.json"
+    man.write_text(json.dumps(m))
+    sub = model.app_manifest(m, "CARV")
+    ref = model.build(CARV_CSV, CARV_MAP4, "car_v", mesh="4x4")
+    assert [t["name"] for t in sub["tasks"]] == [t["name"] for t in ref["tasks"]]
+    assert [(f["id"], f["tag_base"]) for f in sub["flows"]] == [(f["id"], f["tag_base"]) for f in ref["flows"]]
+    assert sub["composition"]["other_flows"]["24"] == "E/f1"
+    with pytest.raises(model.GenError):
+        model.app_manifest(m, "X")
+    with pytest.raises(ValueError, match="give the application"):
+        rtlapp.load_app(str(man), CARV_CSV, CARV_MAP4)
+    out = tmp_path / "res"
+    rtlapp.analyze(os.path.join(CV2, "logs", "CV2.events.txt"), str(man), CARV_CSV, CARV_MAP4, str(out),
+                   arch=os.path.join(REPO_ROOT, "arch", "hermes-4x5.gml"), app_name="CARV")
+    diffs = exp23.check(str(out / "metrics.json"), os.path.join(CV2, "reference_CV2.json"))
+    assert sorted(d.split(":")[0] for d in diffs) == ["inputs.manifest", "releases.acks.pes_expected"]
+    got = json.load(open(out / "metrics.json"))
+    assert got["tags"]["other_app_tags"] == 0 and got["network"]["other_app_packets"] == 0
+    # model of E at the clock of the composition run (R_bound of run H)
+    app = rtlapp.load_app(str(man), E_CSV, str(e_row), "E")
+    mdl = rtlapp.model(app, 434_912_000)
+    assert mdl["response_bound"]["cycles"] == 759_938 and mdl["dispatch_matches_manifest"]
+
+
+def test_composition_tags_of_the_other_application(tmp_path):
+    """Tags of E in a log analyzed for CAR-V count as other_app_tags, not
+    as unknown tags; packets of E on the NoC are contenders of CAR-V."""
+    e_row = tmp_path / "e_row4.map"
+    e_row.write_text("16:A,B,D,F\n17:C\n18:E,H,I\n19:G,J\n")
+    m = model.compose([("CARV", CARV_CSV, CARV_MAP4), ("E", E_CSV, str(e_row))], "cv2e", mesh="4x5")
+    man = tmp_path / "cv2e.json"
+    man.write_text(json.dumps(m))
+    src = open(os.path.join(CV2, "logs", "CV2.events.txt")).read().splitlines()
+    log = tmp_path / "CV2E.events.txt"
+    # E: flow 24 (A -> C, 1230 bytes) from 0-4 to 1-4, iteration 1, in the middle of the run
+    tag = 24 * 1024 + 1
+    extra = [f"# 5000000 0-4 -> TAG {tag}", f"# 5000400 1-4 <- TAG {tag}"]
+    end = next(i for i, l in enumerate(src) if " -> TAG " in l and int(l.split()[1]) > 5000000)
+    log.write_text("\n".join(src[:end] + extra + src[end:]) + "\n")
+    shutil.copy(os.path.join(CV2, "logs", "CV2.RUN_INFO"), tmp_path / "CV2E.RUN_INFO")
+    out = tmp_path / "res"
+    got = rtlapp.analyze(str(log), str(man), CARV_CSV, CARV_MAP4, str(out), app_name="CARV")
+    assert got["tags"]["other_app_tags"] == 2 and got["tags"]["unknown_tags"] == 0
 
 
 def test_build_composition(tmp_path):
