@@ -57,7 +57,8 @@ def test_carv_source():
     # PE 4 creates FBU3 before VOD1 (dispatch order of the model)
     case4 = src[src.index("  case 4:"):src.index("  case 5:")]
     assert case4.index("task_FBU3") < case4.index("task_VOD1")
-    assert sim.endswith("MESH=4x4\nRELEASE_MASK=2494\n")
+    # release by tick: the release generator on the 16 PEs (2494 = PEs of the sources, --release data)
+    assert sim.endswith("MESH=4x4\nRELEASE_MASK=65535\nTICK_RELEASE=1\n")
 
 
 # ---------------------------------------------------------------- memory

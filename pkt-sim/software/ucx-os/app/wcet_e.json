@@ -28,7 +28,21 @@
   "pe_labels": [
    "0-0"
   ],
-  "mask": 1
+  "mask": 1,
+  "rule": "tick",
+  "tick_pes": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "tick_pe_labels": [
+   "0-0",
+   "1-0",
+   "0-1",
+   "1-1"
+  ],
+  "tick_mask": 15
  },
  "pe_tasks": {
   "0-0": [
@@ -93,7 +107,8 @@
    ],
    "source": true,
    "body": "search",
-   "repeat": 1
+   "repeat": 1,
+   "phase": 0
   },
   {
    "name": "B",
@@ -114,7 +129,8 @@
    ],
    "source": false,
    "body": "sort",
-   "repeat": 1
+   "repeat": 1,
+   "phase": 0
   },
   {
    "name": "C",
@@ -135,7 +151,8 @@
    ],
    "source": false,
    "body": "count",
-   "repeat": 4
+   "repeat": 4,
+   "phase": 1
   },
   {
    "name": "D",
@@ -156,7 +173,8 @@
    ],
    "source": false,
    "body": "search",
-   "repeat": 2
+   "repeat": 2,
+   "phase": 0
   },
   {
    "name": "E",
@@ -178,7 +196,8 @@
    ],
    "source": false,
    "body": "sort",
-   "repeat": 1
+   "repeat": 1,
+   "phase": 2
   },
   {
    "name": "F",
@@ -199,7 +218,8 @@
    ],
    "source": false,
    "body": "count",
-   "repeat": 2
+   "repeat": 2,
+   "phase": 0
   },
   {
    "name": "G",
@@ -220,7 +240,8 @@
    ],
    "source": false,
    "body": "sort",
-   "repeat": 2
+   "repeat": 2,
+   "phase": 1
   },
   {
    "name": "H",
@@ -241,7 +262,8 @@
    ],
    "source": false,
    "body": "search",
-   "repeat": 4
+   "repeat": 4,
+   "phase": 2
   },
   {
    "name": "I",
@@ -262,7 +284,8 @@
    ],
    "source": false,
    "body": "count",
-   "repeat": 2
+   "repeat": 2,
+   "phase": 2
   },
   {
    "name": "J",
@@ -283,7 +306,8 @@
    "outputs": [],
    "source": false,
    "body": "sort",
-   "repeat": 1
+   "repeat": 1,
+   "phase": 3
   }
  ],
  "flows": [

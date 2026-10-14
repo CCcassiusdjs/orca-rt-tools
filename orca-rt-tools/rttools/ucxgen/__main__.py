@@ -2,17 +2,22 @@
 
     python -m rttools.ucxgen generate <csv> <map> --name N [--mesh WxH] --out DIR
            [--cycles-per-count C] [--reserve R] [--payload-divisor D] [--tag-mod M] [--delay-ns NS]
-           [--bodies BODIES.json]
+           [--bodies BODIES.json] [--release tick|data]
     python -m rttools.ucxgen check <csv> <map> --name N ... --out DIR
            (exit 1 when DIR/N.{c,json,sim} differ from a new generation)
     python -m rttools.ucxgen compose --app A:<csv>:<map> --app B:<csv>:<map> ... --name N [--mesh WxH]
            --out DIR [--cycles-per-count C] [--payload-divisor D] [--tag-mod M] [--delay-ns NS]
+           [--release tick|data]
            (one image for several applications on disjoint PEs, rttools.multiapp; model.compose)
     python -m rttools.ucxgen compose-check --app ... --name N ... --out DIR
            (exit 1 when DIR/N.{c,json,sim} differ from a new composition)
     python -m rttools.ucxgen memory DIR/N.json [--image-map image.map | --heap BYTES]
            [--in-flight K] [--divisors 1,2,4] [--json OUT]
            (exit 1 when the worst PE does not fit with the payload divisor 1 of the manifest)
+
+--release: tick (default) writes the release by tick (lib/tick_release.c,
+-DUCX_TICK_RELEASE) with the data-driven code under #ifndef; data writes the
+files of the generator before the release by tick (runs CV, CV2 and MA).
 """
 from __future__ import annotations
 
@@ -43,13 +48,20 @@ def add_gen_args(p):
     p.add_argument("--delay-ns", type=int, default=model.DEFAULT_DELAY_NS)
     p.add_argument("--bodies", default=None,
                    help="JSON file with the body of each task (sleep, sort, search, count); default: sleep")
+    add_release_arg(p)
+
+
+def add_release_arg(p):
+    p.add_argument("--release", choices=model.RELEASE_RULES, default=model.TICK,
+                   help="release rule of the tasks: tick (default; wait for the tick of the phase k + n(v)) "
+                        "or data (the code of the runs CV, CV2 and MA)")
 
 
 def build(a):
     cpc = int(a.cycles_per_count) if float(a.cycles_per_count).is_integer() else a.cycles_per_count
     return model.build(a.csv, a.map, a.name, mesh=a.mesh, cycles_per_count=cpc, reserve=a.reserve,
                        payload_divisor=a.payload_divisor, tag_mod=a.tag_mod, delay_ns=a.delay_ns,
-                       bodies=a.bodies)
+                       bodies=a.bodies, release_rule=a.release)
 
 
 def cmd_generate(a):
@@ -63,7 +75,8 @@ def cmd_generate(a):
     r = m["release"]
     print(f"{m['name']}: {len(m['tasks'])} tasks, {len(m['flows'])} flows "
           f"({sum(not f['local'] for f in m['flows'])} between PEs), mesh {a.mesh}, "
-          f"release mask {r['mask']} (PEs {', '.join(map(str, r['pes']))}) -> {a.out}")
+          f"release mask {r.get('tick_mask', r['mask'])} "
+          f"(PEs {', '.join(map(str, r.get('tick_pes', r['pes'])))}, release {r.get('rule', model.DATA)}) -> {a.out}")
     return 0
 
 
@@ -91,6 +104,7 @@ def add_compose_args(p):
     p.add_argument("--payload-divisor", type=int, default=1)
     p.add_argument("--tag-mod", type=int, default=model.TAG_MOD)
     p.add_argument("--delay-ns", type=int, default=model.DEFAULT_DELAY_NS)
+    add_release_arg(p)
 
 
 def build_composition(a):
@@ -103,7 +117,7 @@ def build_composition(a):
         parts.append((name, csv_path, map_path))
     cpc = int(a.cycles_per_count) if float(a.cycles_per_count).is_integer() else a.cycles_per_count
     return model.compose(parts, a.name, mesh=a.mesh, cycles_per_count=cpc, payload_divisor=a.payload_divisor,
-                         tag_mod=a.tag_mod, delay_ns=a.delay_ns)
+                         tag_mod=a.tag_mod, delay_ns=a.delay_ns, release_rule=a.release)
 
 
 def cmd_compose(a):
@@ -120,7 +134,8 @@ def cmd_compose(a):
               f"PEs {', '.join(map(str, x['pes']))}, sources on PEs {', '.join(map(str, x['release_pes']))}")
     print(f"{m['name']}: {len(m['tasks'])} tasks, {len(m['flows'])} flows "
           f"({sum(not f['local'] for f in m['flows'])} between PEs), mesh {a.mesh}, "
-          f"release mask {r['mask']} (PEs {', '.join(map(str, r['pes']))}) -> {a.out}")
+          f"release mask {r.get('tick_mask', r['mask'])} "
+          f"(PEs {', '.join(map(str, r.get('tick_pes', r['pes'])))}, release {r.get('rule', model.DATA)}) -> {a.out}")
     return 0
 
 

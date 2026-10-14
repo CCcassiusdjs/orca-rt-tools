@@ -543,6 +543,78 @@ def task_row(t, flows, tasks_by_name, max_in, max_out):
 def c_source(m):
     if m.get("model") == "time_triggered":
         return tt_source(m)
+    text = data_source(m)
+    if m["release"].get("rule") == "tick":
+        text = tick_release(text, m)
+    return text
+
+
+TICK_HEADER = """\
+ *
+ * Release by tick (built with -DUCX_TICK_RELEASE: the Makefile rule of the
+ * generated applications, TR_DEFS; lib/tick_release.c): the release
+ * generator fires on every PE with a task (app/{name}.sim), the release
+ * interrupt counts the phases, and the tick hook of the kernel wakes the
+ * tasks whose phase has come. Task v waits for the tick of phase
+ * k + n(v) (TASK_PHASE: phase index of the model of the analysis flow,
+ * field "phase" of the manifest) before it reads the input of iteration k
+ * (FIFO), so it runs at most once per phase and serves iteration k from
+ * the tick of phase k + n(v). Without the macro, the code is the pattern
+ * above (data-driven release of the runs CV, CV2 and MA: a run serves
+ * every iteration whose packets are in the queue).
+ */
+"""
+
+# code of the data-driven release that the release by tick replaces or
+# keeps under #ifndef UCX_TICK_RELEASE (BODY and WORK_BODY)
+_DATA_RELEASE_START = "/* ------------------------------ release */\n"
+_DATA_RELEASE_END = "  _ei();\n}\n"
+_DATA_WAIT = ("  do {\n    if (t->n_in == 0) {\n      /* voluntary sleep until the release */\n"
+              "      kcb_p->tcb_p->state = TASK_BLOCKED;\n      ucx_task_yield();\n")
+_TICK_WAIT = ("  do {\n#ifdef UCX_TICK_RELEASE\n"
+              "    /* iteration done + 1 from the tick of phase done + 1 + n(v) */\n"
+              "    ucx_phase_wait(done + 1 + TASK_PHASE[t - TASKS]);\n#endif\n"
+              "    if (t->n_in == 0) {\n#ifndef UCX_TICK_RELEASE\n      /* voluntary sleep until the release */\n"
+              "      kcb_p->tcb_p->state = TASK_BLOCKED;\n      ucx_task_yield();\n#endif\n")
+_DATA_ADD = ("  if (t->n_in == 0 && n_release < MAX_RELEASE)\n"
+             "    release_tcb[n_release++] = kcb_p->tcb_p;   /* tcb of the task just added */\n")
+_DATA_IDLE = "void idle_task_p(void)\n{\n  for (;;)\n"
+_TICK_IDLE = ("void idle_task_p(void)\n{\n#ifdef UCX_TICK_RELEASE\n"
+              "  /* a yield can enter the idle task with interrupts disabled (kernel/sched.c) */\n"
+              "  _ei();\n#endif\n  for (;;)\n")
+
+
+def _replace_once(text, old, new):
+    if text.count(old) != 1:
+        raise ValueError(f"release by tick: {text.count(old)} occurrences of {old[:40]!r} in the generated code")
+    return text.replace(old, new)
+
+
+def tick_release(text, m):
+    """Code with the release by tick (manifest release rule "tick") from the
+    code of the data-driven release: the phase table and the wait for the
+    tick of the phase under #ifdef UCX_TICK_RELEASE, the release of the
+    source tasks by irq4_handler under #ifndef. Without the macro the
+    preprocessed code is the data-driven code."""
+    end = text.index(" */\n")                  # end of the header comment
+    text = text[:end] + TICK_HEADER.format(name=m["name"]) + text[end + len(" */\n"):]
+    a = text.index(_DATA_RELEASE_START)
+    b = text.index(_DATA_RELEASE_END, a) + len(_DATA_RELEASE_END)
+    if text.count(_DATA_RELEASE_START) != 1 or "void irq4_handler(void)" not in text[a:b]:
+        raise ValueError("release by tick: no release section in the generated code")
+    phases = ", ".join(str(t["phase"]) for t in m["tasks"])
+    table = ("#ifdef UCX_TICK_RELEASE\n"
+             "/* phase index n(v) of each task (order of TASKS) */\n"
+             f"static const uint8_t TASK_PHASE[N_TASKS] = {{{phases}}};\n"
+             "#else\n")
+    text = text[:a] + table + text[a:b] + "#endif\n" + text[b:]
+    text = _replace_once(text, _DATA_WAIT, _TICK_WAIT)
+    text = _replace_once(text, _DATA_ADD, "#ifndef UCX_TICK_RELEASE\n" + _DATA_ADD + "#endif\n")
+    text = _replace_once(text, _DATA_IDLE, _TICK_IDLE)
+    return text
+
+
+def data_source(m):
     flows = m["flows"]
     tasks = m["tasks"]
     by_name = {t["name"]: t for t in tasks}
@@ -644,6 +716,15 @@ def composition_header(m):
 def sim_setup(m):
     w, h = m["mesh"]
     r = m["release"]
+    if r.get("rule") == "tick":
+        return ("# Setup of manycore_top for app/{0}.c (rttools.ucxgen, release by tick); read by\n"
+                "# experiments/exp23/simulate.sh. RELEASE_MASK: bit k = PE with node index k\n"
+                "# (PEs {1}): every PE with a task counts the phases\n"
+                "# (lib/tick_release.c); source tasks on PEs {2}. Release period {3} ns,\n"
+                "# first release at {4} ns: the defaults of the release generator (manycore_pe.sv).\n"
+                "MESH={5}x{6}\nRELEASE_MASK={7}\nTICK_RELEASE=1\n").format(
+            m["name"], ", ".join(str(n) for n in r["tick_pes"]), ", ".join(str(n) for n in r["pes"]),
+            r["period_ns"], r["delay_ns"], w, h, r["tick_mask"])
     if m.get("model") == "time_triggered":
         return ("# Setup of manycore_top for app/{0}.c (rttools.ucxgen, time-triggered); read by\n"
                 "# experiments/exp23/simulate.sh. RELEASE_MASK: bit k = PE with node index k\n"

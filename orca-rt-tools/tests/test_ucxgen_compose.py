@@ -79,7 +79,8 @@ def test_stored_composition_matches_generator():
     assert src.count("add_task(task_") == 33 and "void irq4_handler(void)" in src
     case9 = src[src.index("  case 9:"):src.index("  case 10:")]
     assert case9.index("task_E_J") < case9.index("task_E_G")
-    assert open(os.path.join(APP_DIR, "carv_e.sim")).read().endswith("MESH=4x5\nRELEASE_MASK=88462\n")
+    # release by tick: the release generator on the 20 PEs (88462 = PEs of the sources, --release data)
+    assert open(os.path.join(APP_DIR, "carv_e.sim")).read().endswith("MESH=4x5\nRELEASE_MASK=1048575\nTICK_RELEASE=1\n")
     mk = open(os.path.join(UCX, "Makefile")).read()
     assert re.search(r"^GEN_APPS \+= carv_e$", mk, re.M)
 
@@ -196,7 +197,7 @@ def test_simulate_composition_4x5(tmp_path):
                        env={**env, "F_CLK": "434912000"})
     assert r.returncode == 0, r.stdout + r.stderr
     g = "-gCLOCK_HALF_PERIOD_FS=1149657 -gRELEASE_CYCLES=217456 -gWARMUP_CYCLES=1304736 " \
-        "-gNOC_DIM_X=4 -gNOC_DIM_Y=5 -gRELEASE_MASK=88462"
+        "-gNOC_DIM_X=4 -gNOC_DIM_Y=5 -gRELEASE_MASK=1048575"
     assert f"vsim -c work.manycore_top work.chk_binds +RUN_NS=11500000 {g}\n" in run_do(tmp_path / "o")
     assert "-s carv_e" in log.read_text()
     assert f"app=carv_e mesh=4x5 generics={g}\n" in (tmp_path / "o" / "RUN_INFO").read_text()

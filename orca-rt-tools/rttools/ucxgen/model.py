@@ -11,6 +11,7 @@ import hashlib
 import os
 import re
 
+from rttools.bench_t import estimate
 from rttools.modules.instances import release
 from rttools.modules.io import appparser
 from rttools.modules.mapping import mapfile
@@ -36,6 +37,15 @@ ITER_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 # release generator of manycore_pe.sv (wake_up_alarm, wake_up_delay)
 RTL_PERIOD_NS = 500_000
 RTL_DELAY_NS = 3_000_000
+# release rule of the tasks of an application with one release period:
+# TICK (default) waits for the tick of the phase k + n(v) of the model
+# before iteration k (lib/tick_release.c, -DUCX_TICK_RELEASE); DATA is the
+# code of the runs CV, CV2 and MA (a task serves every iteration whose
+# packets are in its queue), the output of the generator before the release
+# by tick
+TICK = "tick"
+DATA = "data"
+RELEASE_RULES = (TICK, DATA)
 
 
 class GenError(ValueError):
@@ -181,7 +191,9 @@ def read_bodies(path, labels):
 
 
 def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUNT, reserve=None,
-          payload_divisor=1, tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS, bodies=None):
+          payload_divisor=1, tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS, bodies=None, release_rule=TICK):
+    if release_rule not in RELEASE_RULES:
+        raise GenError(f"release rule must be one of {', '.join(RELEASE_RULES)}, got {release_rule!r}")
     if not re.fullmatch(r"[A-Za-z_]\w*", name):
         raise GenError(f"name must be a C identifier, got {name!r}")
     width, height = parse_mesh(mesh)
@@ -314,7 +326,26 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
             if b["kind"] != "sleep":
                 # the body does not use ucx_sleep: the code does not depend on c(v)
                 t["workload"] = 0
+    if release_rule == TICK:
+        set_tick_release(out, [(f["source"], f["target"]) for f in flows], node_of, width)
     return out
+
+
+def set_tick_release(out, edges, node_of, width):
+    """Fields of the release by tick (lib/tick_release.c): the phase index
+    n(v) of each task in the phase model (estimate.phases with the dispatch
+    order of the model, the values of rttools.paper.rtlapp.model) and the
+    release generator on every PE with a task (tick_pes, tick_mask: the
+    release interrupt counts the phases on each PE). "pes" and "mask" keep
+    the PEs of the source tasks."""
+    seqs = {int(k.split("-")[1]) * width + int(k.split("-")[0]): v for k, v in out["pe_dispatch"].items()}
+    phi = estimate.phases(edges, node_of, release.sequence_positions(seqs))
+    for t in out["tasks"]:
+        t["phase"] = phi[t["name"]]
+    pes = sorted({t["pe"] for t in out["tasks"]})
+    out["release"].update({"rule": TICK, "tick_pes": pes,
+                           "tick_pe_labels": [f"{n % width}-{n // width}" for n in pes],
+                           "tick_mask": sum(1 << n for n in pes)})
 
 
 # Time-triggered application (several release periods or a cycle): the
@@ -424,7 +455,7 @@ def build_time_triggered(csv_path, map_path, name, tasks, flows, params, rates, 
 # ------------------------------------------------------------ composition
 
 def compose(parts, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUNT, payload_divisor=1,
-            tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS):
+            tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS, release_rule=TICK):
     """One UCX-OS image for several applications on disjoint PEs of one
     mesh (rttools.multiapp): `parts` is a list of (application name, csv,
     map), the .map files with node indices of the mesh.
@@ -449,7 +480,7 @@ def compose(parts, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUNT, payload_
     if len(set(app_names)) != len(app_names):
         raise GenError("repeated application name")
     ms = [build(c, m, name, mesh=mesh, cycles_per_count=cycles_per_count, payload_divisor=payload_divisor,
-                tag_mod=tag_mod, delay_ns=delay_ns) for _, c, m in parts]
+                tag_mod=tag_mod, delay_ns=delay_ns, release_rule=release_rule) for _, c, m in parts]
     tt = [a for a, m in zip(app_names, ms) if m.get("model") == "time_triggered"]
     if tt:
         raise GenError("applications " + ", ".join(tt) + " follow the general phase model (several release "
@@ -511,6 +542,13 @@ def compose(parts, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUNT, payload_
         "flows": flows,
         "warnings": sorted({w for m in ms for w in m["warnings"]}),
     })
+    if release_rule == TICK:
+        # phase index of each task in the model of its application (build);
+        # release generator on every PE with a task of the image
+        pes = sorted({t["pe"] for t in tasks})
+        out["release"].update({"rule": TICK, "tick_pes": pes,
+                               "tick_pe_labels": [f"{n % width}-{n // width}" for n in pes],
+                               "tick_mask": sum(1 << n for n in pes)})
     return out
 
 

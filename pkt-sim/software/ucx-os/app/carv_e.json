@@ -59,7 +59,53 @@
    "2-3",
    "0-4"
   ],
-  "mask": 88462
+  "mask": 88462,
+  "rule": "tick",
+  "tick_pes": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "tick_pe_labels": [
+   "0-0",
+   "1-0",
+   "2-0",
+   "3-0",
+   "0-1",
+   "1-1",
+   "2-1",
+   "3-1",
+   "0-2",
+   "1-2",
+   "2-2",
+   "3-2",
+   "0-3",
+   "1-3",
+   "2-3",
+   "3-3",
+   "0-4",
+   "1-4",
+   "2-4",
+   "3-4"
+  ],
+  "tick_mask": 1048575
  },
  "pe_tasks": {
   "0-0": [
@@ -390,6 +436,7 @@
     5
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -408,6 +455,7 @@
     6
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -427,6 +475,7 @@
     7
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -445,6 +494,7 @@
     8
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -463,6 +513,7 @@
     9
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -481,6 +532,7 @@
     10
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -499,6 +551,7 @@
     11
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -518,6 +571,7 @@
     12
    ],
    "source": true,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -537,6 +591,7 @@
    ],
    "outputs": [],
    "source": false,
+   "phase": 1,
    "app": "CARV"
   },
   {
@@ -557,6 +612,7 @@
     13
    ],
    "source": false,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -577,6 +633,7 @@
     14
    ],
    "source": false,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -597,6 +654,7 @@
     15
    ],
    "source": false,
+   "phase": 1,
    "app": "CARV"
   },
   {
@@ -617,6 +675,7 @@
     16
    ],
    "source": false,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -637,6 +696,7 @@
     17
    ],
    "source": false,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -657,6 +717,7 @@
     18
    ],
    "source": false,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -677,6 +738,7 @@
     19
    ],
    "source": false,
+   "phase": 1,
    "app": "CARV"
   },
   {
@@ -697,6 +759,7 @@
     20
    ],
    "source": false,
+   "phase": 1,
    "app": "CARV"
   },
   {
@@ -720,6 +783,7 @@
     21
    ],
    "source": false,
+   "phase": 2,
    "app": "CARV"
   },
   {
@@ -743,6 +807,7 @@
     22
    ],
    "source": false,
+   "phase": 2,
    "app": "CARV"
   },
   {
@@ -764,6 +829,7 @@
     23
    ],
    "source": false,
+   "phase": 3,
    "app": "CARV"
   },
   {
@@ -784,6 +850,7 @@
     3
    ],
    "source": false,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -804,6 +871,7 @@
     4
    ],
    "source": false,
+   "phase": 0,
    "app": "CARV"
   },
   {
@@ -822,6 +890,7 @@
    ],
    "outputs": [],
    "source": false,
+   "phase": 4,
    "app": "CARV"
   },
   {
@@ -841,6 +910,7 @@
     25
    ],
    "source": true,
+   "phase": 0,
    "app": "E"
   },
   {
@@ -861,6 +931,7 @@
     26
    ],
    "source": false,
+   "phase": 0,
    "app": "E"
   },
   {
@@ -881,6 +952,7 @@
     27
    ],
    "source": false,
+   "phase": 1,
    "app": "E"
   },
   {
@@ -901,6 +973,7 @@
     28
    ],
    "source": false,
+   "phase": 0,
    "app": "E"
   },
   {
@@ -922,6 +995,7 @@
     31
    ],
    "source": false,
+   "phase": 2,
    "app": "E"
   },
   {
@@ -942,6 +1016,7 @@
     29
    ],
    "source": false,
+   "phase": 0,
    "app": "E"
   },
   {
@@ -962,6 +1037,7 @@
     34
    ],
    "source": false,
+   "phase": 1,
    "app": "E"
   },
   {
@@ -982,6 +1058,7 @@
     33
    ],
    "source": false,
+   "phase": 2,
    "app": "E"
   },
   {
@@ -1002,6 +1079,7 @@
     32
    ],
    "source": false,
+   "phase": 2,
    "app": "E"
   },
   {
@@ -1022,6 +1100,7 @@
    ],
    "outputs": [],
    "source": false,
+   "phase": 3,
    "app": "E"
   }
  ],

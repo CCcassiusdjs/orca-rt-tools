@@ -44,6 +44,18 @@
  * COUNT_MAX = 256). The first words of the array go into the
  * payload of every output packet. WCET_LOOP_BOUND and WCET_LOOP_TOTAL
  * (include/lib/wcet.h) give the loop bounds to rttools.wcet.
+ *
+ * Release by tick (built with -DUCX_TICK_RELEASE: the Makefile rule of the
+ * generated applications, TR_DEFS; lib/tick_release.c): the release
+ * generator fires on every PE with a task (app/wcet_e.sim), the release
+ * interrupt counts the phases, and the tick hook of the kernel wakes the
+ * tasks whose phase has come. Task v waits for the tick of phase
+ * k + n(v) (TASK_PHASE: phase index of the model of the analysis flow,
+ * field "phase" of the manifest) before it reads the input of iteration k
+ * (FIFO), so it runs at most once per phase and serves iteration k from
+ * the tick of phase k + n(v). Without the macro, the code is the pattern
+ * above (data-driven release of the runs CV, CV2 and MA: a run serves
+ * every iteration whose packets are in the queue).
  */
 #include <ucx.h>
 #include <lib/wcet.h>
@@ -106,6 +118,10 @@ static const struct task_s TASKS[N_TASKS] = {
   {"J", 'J', 10, 0, 3, 0, BODY_SORT, 1, {9, 8, 7}, {{0, 0, 0, 0}}},
 };
 
+#ifdef UCX_TICK_RELEASE
+/* phase index n(v) of each task (order of TASKS) */
+static const uint8_t TASK_PHASE[N_TASKS] = {0, 0, 1, 0, 2, 0, 1, 2, 2, 3};
+#else
 /* ------------------------------ release */
 static struct tcb_s *release_tcb[MAX_RELEASE];
 static int n_release = 0;
@@ -123,6 +139,7 @@ void irq4_handler(void)
   *irq_flag_down = !(*irq_flag_down);
   _ei();
 }
+#endif
 
 /* ------------------------------ work */
 /* input of a source task: xorshift32 from the iteration and the port */
@@ -292,10 +309,16 @@ static void run_task(const struct task_s *t)
     work[i] = 0;
 
   do {
+#ifdef UCX_TICK_RELEASE
+    /* iteration done + 1 from the tick of phase done + 1 + n(v) */
+    ucx_phase_wait(done + 1 + TASK_PHASE[t - TASKS]);
+#endif
     if (t->n_in == 0) {
+#ifndef UCX_TICK_RELEASE
       /* voluntary sleep until the release */
       kcb_p->tcb_p->state = TASK_BLOCKED;
       ucx_task_yield();
+#endif
       fill(work, done + 1, t->port);
     } else {
       /* wait for the packet of iteration done + 1 of each input edge */
@@ -333,6 +356,10 @@ static void task_J(void) { run_task(&TASKS[9]); }
 
 void idle_task_p(void)
 {
+#ifdef UCX_TICK_RELEASE
+  /* a yield can enter the idle task with interrupts disabled (kernel/sched.c) */
+  _ei();
+#endif
   for (;;)
     ;
 }
@@ -340,8 +367,10 @@ void idle_task_p(void)
 static void add_task(void (*fn)(void), const struct task_s *t)
 {
   ucx_task_add(fn, (char *)t->name, DEFAULT_STACK_SIZE, 0, 0, 0);
+#ifndef UCX_TICK_RELEASE
   if (t->n_in == 0 && n_release < MAX_RELEASE)
     release_tcb[n_release++] = kcb_p->tcb_p;   /* tcb of the task just added */
+#endif
 }
 
 int32_t app_main(void)

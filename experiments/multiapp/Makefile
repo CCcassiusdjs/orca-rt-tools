@@ -43,9 +43,10 @@ E_CSV   := ../../apps/synthetic-app-e/synthetic-app-e.csv
 APPS     = --app CARV:$(CARV_CSV):maps/CARV.map --app E:$(E_CSV):maps/E.map
 F_CLK   ?= 434912000
 SIM_NS  ?= 11500000
-# _heap_size of the image of carv_e built with riscv64-unknown-elf-gcc 13.2
-# (make build reads the value of the toolchain in use)
-HEAP    ?= 49924
+# _heap_size of the image of carv_e built with riscv64-unknown-elf-gcc 13.2,
+# release by tick (TR_DEFS; 49924 for the image of run MA); make build
+# reads the value of the toolchain in use
+HEAP    ?= 48836
 # received packets in flight per input edge between PEs in the heap model
 # (rttools/ucxgen/memory.py). With 2 (the value of experiments/car-v-rtl),
 # PE 9 (G and J of application E: inputs F->G, H->J, I->J, 21,370 bytes of
