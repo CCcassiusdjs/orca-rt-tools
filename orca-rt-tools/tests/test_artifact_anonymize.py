@@ -45,14 +45,18 @@ def test_export_content(export):
     assert not (e / "ch6").exists()
     assert sorted(os.listdir(e / "exp23" / "logs")) == ["F.RUN_INFO", "F.events.txt", "F.image.lst",
                                                          "F.noinstr.lst", "F.software.txt", "F.time.txt"] + [
-        f"{r}.{x}" for r in "GH" for x in ("RUN_INFO", "events.txt", "image.lst", "noinstr.lst", "time.txt")]
+        f"{r}.{x}" for r in "GH" for x in ("RUN_INFO", "events.txt", "image.lst", "noinstr.lst", "time.txt")] + [
+        "TG.RUN_INFO", "TG.events.txt", "TG.image.lst", "TG.noinstr.lst", "TG.time.txt",
+        "TH.RUN_INFO", "TH.events.txt", "TH.image.elf", "TH.image.lst", "TH.noinstr.lst", "TH.time.txt"]
     assert (e / "exp23" / "reference_G.json").exists() and (e / "exp23" / "reference_H.json").exists()
     assert not (e / "exp23" / "reference_D.json").exists() and not (e / "exp23" / "reference_E.json").exists()
     assert sorted(os.listdir(e / "car-v-rtl" / "logs")) == [
-        f"{r}.{x}" for r in ("CV", "CV2") for x in ("RUN_INFO", "events.txt", "time.txt")]
+        f"{r}.{x}" for r in ("CV", "CV2") for x in ("RUN_INFO", "events.txt", "time.txt")] + [
+        f"TCV.{x}" for x in ("RUN_INFO", "events.txt", "image.elf", "time.txt")]
     assert (e / "car-v-rtl" / "reference_CV.json").exists() and (e / "car-v-rtl" / "reference_CV2.json").exists()
     assert sorted(os.listdir(e / "multiapp" / "logs")) == [
-        f"MA.{x}" for x in ("RUN_INFO", "events.txt", "output-0-1.txt", "time.txt")]
+        f"MA.{x}" for x in ("RUN_INFO", "events.txt", "output-0-1.txt", "time.txt")] + [
+        f"TMA.{x}" for x in ("RUN_INFO", "events.txt", "time.txt")]
     assert all((e / "multiapp" / f"reference_MA_{a}.json").exists() for a in ("CARV", "E"))
     assert "thesis" not in json.loads((e / "exp23" / "config.json").read_text())
     assert "reference_rows" in json.loads((e / "ch7" / "config.json").read_text())
