@@ -8,7 +8,7 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 |---|---|
 | `pkt-sim/hw` | RTL: Hermes router and NoC (VHDL), RV32E core, DDMA, PE (SystemVerilog) |
 | `pkt-sim/manycore_modelsim` | Top level and the Questa/ModelSim script of the 2x2 manycore |
-| `pkt-sim/software/ucx-os` | UCX-OS kernel; application E in `app/weird_a.c` |
+| `pkt-sim/software/ucx-os` | UCX-OS kernel; application E in `app/weird_a.c`; release by tick of the phase model in `lib/tick_release.c` |
 | `orca-rt-tools/rttools` | ORCA RT-Tools; `rttools/paper` holds the pipelines |
 | `apps` | Task graphs, mappings and platforms (application E in `apps/synthetic-app-e`, CAR in `apps/shi-2010`) |
 | `experiments/ch7` | Contraction criteria on the random graphs (ORT/GCM, ORT/GDE); clustering of CAR and application E |
@@ -112,6 +112,10 @@ make -C experiments/exp23 paper REQUIRE_CLEAN=1 ENV_SETUP="<commands that load Q
 ```
 
 With `REQUIRE_CLEAN=1`, `simulate.sh` stops before the build when the tree has changes or no tag. A simulation server without access to the repository receives `git archive --prefix=orca/ -o orca.tar <tag>`; the archive carries the commit hash in `experiments/exp23/VERSION`, and `RUN_INFO` records `repo_state=archive`.
+
+## Release by tick
+
+Release by tick (`lib/tick_release.c`, kernel and application built with `-DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_TICK_RELEASE`): the release generator fires on every PE with a task (`app/<app>.sim`: `RELEASE_MASK`, `TICK_RELEASE=1`), the release interrupt counts the phases, and the tick hook of the kernel wakes the tasks whose phase has come. Each task of `weird_a.c` and of the applications of `rttools.ucxgen` waits for the tick of phase j + n(v) before it reads the input of iteration j, so it runs at most once per phase, as the phase model assumes. The stored runs A to H, CV, CV2 and MA come from the data-driven release (a task serves every iteration whose packets are in its queue): `weird_a_data` (Makefile of UCX-OS) and `rttools.ucxgen --release data` give that code, and the analyses of those logs take `--release data`. `python -m rttools.paper.phasecheck <metrics.json>` (`make phase-check` in `exp23`, `car-v-rtl` and `multiapp`) checks the executions per phase and the CPU per phase of a run against the model.
 
 <!-- anon:drop-begin -->
 ## Anonymized copy for double-anonymous review

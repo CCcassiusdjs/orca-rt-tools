@@ -31,6 +31,14 @@
 # markers, the car_v.c of this tree), same clock and duration:
 #   make analyze check-run LOG=logs/CV2.events.txt REF=reference_CV2.json OUTDIR=build/results_CV2
 # After `make sim`, use LOG=$(BUILD)/sim/events.txt (RUN_INFO next to it).
+#
+#   make phase-check  conformance of $(OUTDIR)/metrics.json with the phase model (rttools.paper.
+#                phasecheck; exit 1 when a task runs twice in a phase, an execution precedes phase
+#                j + n(v) or the CPU of a phase exceeds t(V_k))
+# Release rule (RELEASE, --release of rtlapp): car_v.c of this tree has the release by tick
+# (app/car_v.sim: TICK_RELEASE=1, RELEASE_MASK of the 16 PEs); runs CV and CV2 are of the
+# data-driven release (car_v.c of r10-rc1 and r10-rc2 = `rttools.ucxgen generate --release data`),
+# RELEASE=data in `make check`; auto (default) reads the line `release` of the RUN_INFO.
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
@@ -59,8 +67,9 @@ LOG     ?= logs/CV.events.txt
 REF     ?= reference_CV.json
 OUTDIR  ?= $(BUILD)/results_CV
 ANALYZE  = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp
+RELEASE ?= auto
 
-.PHONY: all app check analyze check-run build sim flow-clock sim-flow clean
+.PHONY: all app check analyze check-run build sim flow-clock sim-flow clean phase-check
 
 all: check
 
@@ -70,15 +79,19 @@ app:
 check:
 	$(GEN) check $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR) $(GENFLAGS)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
-	$(MAKE) analyze check-run
-	$(MAKE) analyze check-run LOG=logs/CV2.events.txt REF=reference_CV2.json OUTDIR=$(BUILD)/results_CV2
+	$(MAKE) analyze check-run RELEASE=data
+	$(MAKE) analyze check-run LOG=logs/CV2.events.txt REF=reference_CV2.json OUTDIR=$(BUILD)/results_CV2 \
+		RELEASE=data
 
 analyze:
 	$(ANALYZE) analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json --csv $(CSV) --map $(MAP) --arch $(ARCH) \
-		--out $(OUTDIR)
+		--out $(OUTDIR) --release $(RELEASE)
 
 check-run:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(OUTDIR)/metrics.json $(REF)
+
+phase-check:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.phasecheck $(OUTDIR)/metrics.json --rows 5
 
 build:
 	rm -rf $(BUILD)/pkt-sim

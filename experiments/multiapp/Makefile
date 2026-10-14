@@ -23,6 +23,13 @@
 #   make analyze   analysis of $(LOG) for each application (rttools.paper.rtlapp --app, link
 #                  schedule of the union with --composition) into $(OUTDIR)/CARV and $(OUTDIR)/E
 #   make check-run compare $(OUTDIR)/<app>/metrics.json with reference_$(RUN)_<app>.json
+#   make phase-check  conformance of $(OUTDIR)/<app>/metrics.json with the phase model
+#                  (rttools.paper.phasecheck; exit 1 otherwise)
+#
+# Release rule (RELEASE, --release of rtlapp): carv_e.c of this tree has the release by tick
+# (app/carv_e.sim: TICK_RELEASE=1, RELEASE_MASK of the 20 PEs); run MA is of the data-driven
+# release (carv_e.c of r11-multiapp-rc1 = `rttools.ucxgen compose --release data`): analyze it
+# with RELEASE=data. auto (default) reads the line `release` of the RUN_INFO.
 #
 # F_CLK: the clock of the platform from the flow, 434.9 MHz (f_CPU of E), on
 # the grid of 32 kHz of the release period (exp23.flow_clock): 434.912 MHz,
@@ -63,8 +70,9 @@ CHECK    = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check
 LOG     ?= $(BUILD)/sim/events.txt
 OUTDIR  ?= $(BUILD)/results_sim
 RUN_ID  ?= MA
+RELEASE ?= auto
 
-.PHONY: all run check maps maps-check app app-check build sim analyze check-run clean
+.PHONY: all run check maps maps-check app app-check build sim analyze check-run clean phase-check
 
 all: run check maps-check app-check
 
@@ -100,13 +108,17 @@ sim:
 
 analyze:
 	$(ANALYZE) analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json --app CARV --csv $(CARV_CSV) \
-		--map maps/CARV.map --arch $(ARCH) --composition composition.json --out $(OUTDIR)/CARV
+		--map maps/CARV.map --arch $(ARCH) --composition composition.json --out $(OUTDIR)/CARV --release $(RELEASE)
 	$(ANALYZE) analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json --app E --csv $(E_CSV) \
-		--map maps/E.map --arch $(ARCH) --composition composition.json --out $(OUTDIR)/E
+		--map maps/E.map --arch $(ARCH) --composition composition.json --out $(OUTDIR)/E --release $(RELEASE)
 
 check-run:
 	$(CHECK) $(OUTDIR)/CARV/metrics.json reference_$(RUN_ID)_CARV.json
 	$(CHECK) $(OUTDIR)/E/metrics.json reference_$(RUN_ID)_E.json
+
+phase-check:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.phasecheck $(OUTDIR)/CARV/metrics.json \
+		$(OUTDIR)/E/metrics.json --rows 5
 
 clean:
 	rm -rf $(BUILD)

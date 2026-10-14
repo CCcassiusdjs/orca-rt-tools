@@ -51,6 +51,7 @@ Measurement (log of the run):
 | CPU per PE | Non-IDLE time of the PE in windows of phi(v_last) + 1 releases from r_{phi(v_last) + 1} (every phase holds an iteration), divided by phi(v_last) + 1; and, per task, the CPU time of its runs up to the end of its last complete iteration divided by the number of iterations |
 | Packet against [r, d] | Send and receive (TAG lines) in cycles from r_k + phi(u) P |
 | Network latency | FLIT lines of the packet monitor (rtl/pe_checker.sv): RX.last - TX.head; header = RX.head - TX.head against 6 (m + 1); TX and RX pair by source, destination and tag |
+| Phase conformance | Executions (ITER begin markers) of each task per phase [r_k, r_k+1) and CPU of each PE per phase against t(V_k) (rttools/paper/phasecheck.py); release rule of the run from the RUN_INFO line `release` (release by tick: the release acknowledgments come from every PE of tick_pes of the manifest) |
 """
 from __future__ import annotations
 
@@ -305,11 +306,12 @@ def load_log(log_path, app, f_clk=None, run_info="auto"):
     return tr, clk, clock
 
 
-def release_acks(log_path, app):
+def release_acks(log_path, app, rule=None):
     """Acknowledgment of each release by the PEs of the mask (TRIGGER line
     of the lowest PE, TRIGGER-PE lines of the others): PEs per release
-    against the PEs of the release mask of the manifest, and the spread of
-    the acknowledgment instants (ns of the log)."""
+    against the PEs of the release mask of the manifest (tick_pes for a run
+    with the release by tick, rule "tick"), and the spread of the
+    acknowledgment instants (ns of the log)."""
     acks, trig = [], []
     with open(log_path, errors="replace") as f:
         for line in f:
@@ -326,7 +328,9 @@ def release_acks(log_path, app):
             per[min(range(len(trig)), key=lambda j: abs(trig[j] - a))].append(a)
     counts = [len(x) for x in per]
     spread = [max(x) - min(x) for x in per]
-    return {"releases": len(trig), "pes_expected": len(app["manifest"]["release"]["pes"]),
+    rel = app["manifest"]["release"]
+    pes = rel["tick_pes"] if rule == "tick" and "tick_pes" in rel else rel["pes"]
+    return {"releases": len(trig), "pes_expected": len(pes),
             "pes_min": min(counts) if counts else None, "pes_max": max(counts) if counts else None,
             "spread_ns_max": max(spread) if spread else None}
 
@@ -786,9 +790,12 @@ def _csv(path, rows, cols):
 
 
 def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None,
-            app_name=None, composition=None):
+            app_name=None, composition=None, release_rule=None):
+    from rttools.paper import phasecheck
     app = load_app(manifest_path, csv_path, map_path, app_name)
     tr, clk, clock = load_log(log_path, app, f_clk, run_info)
+    info_path = exp23.run_info_path(log_path) if run_info == "auto" else run_info
+    rel_rule = phasecheck.release_rule(exp23.read_run_info(info_path) if info_path else {}, release_rule)
     if tr.meta.get("swap_xy"):
         raise ValueError("the PE labels of the log are swapped against the manifest")
     mdl = model(app, clock["clock_hz"])
@@ -834,7 +841,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
                      if len(releases) > 1 else None,
                      "release_to_first_dispatch_min_cycles": min(r2d) if r2d else None,
                      "release_to_first_dispatch_max_cycles": max(r2d) if r2d else None,
-                     "acks": release_acks(log_path, app)},
+                     "acks": release_acks(log_path, app, rel_rule)},
         "tags": tagc,
         "markers": len(tr.meta.get("iterations") or []),
         "iteration_source": {v: d["source"] for v, d in its.items()},
@@ -846,6 +853,10 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
         "network": net,
         "link_schedule": None if sched is None else {k: v for k, v in sched.items()},
         "monitor": exp23.monitor_summary(log_path),
+        "phase_conformance": phasecheck.conformance(
+            tr, clk, releases, {v: {k: mk["begin"] for k, mk in ks.items()} for v, ks in marks.items()},
+            lambda v, j: j - 1 + mdl["tasks"][v]["phase"], {t["name"]: t["pe_label"] for t in app["manifest"]["tasks"]},
+            lambda pe, p: mdl["demand_cycles"][pe], rel_rule) if marks else None,
     }
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
@@ -909,6 +920,10 @@ def summary_lines(m):
     out.append("  monitor: " + ("no CHKSUM lines" if mon is None else
                                 f"{mon['errors']} errors, {mon['send_pkts']} sent, {mon['recv_pkts']} received "
                                 f"({mon['nodes']} PEs)"))
+    pc = m.get("phase_conformance")
+    if pc is not None:
+        from rttools.paper import phasecheck
+        out.append("  phase conformance: " + phasecheck.summary(pc)[0][2:])
     return out
 
 
@@ -929,6 +944,9 @@ def main(argv=None):
                    help="application of a composition (manifest of rttools.ucxgen compose)")
     a.add_argument("--composition", default=None,
                    help="composition file (rttools.multiapp): link schedule of the union of the packets")
+    a.add_argument("--release", choices=["auto", "tick", "data"], default="auto",
+                   help="release rule of the run (default: the line `release` of the RUN_INFO; data without "
+                        "it, the runs before the release by tick)")
     args = p.parse_args(argv)
     with open(args.manifest) as f:
         time_triggered = json.load(f).get("model") == "time_triggered"
@@ -942,7 +960,7 @@ def main(argv=None):
         lines = rtlmr.summary_lines(m)
     else:
         m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch,
-                    args.app, args.composition)
+                    args.app, args.composition, args.release)
         lines = summary_lines(m)
     for line in lines:
         print(line)

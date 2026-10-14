@@ -26,9 +26,9 @@ The Makefile and the tests take `apps/car-v/car-v.csv` and `apps/car-v/car-v-ONT
 
 | File | Content |
 |---|---|
-| `car_v.c` | One task per vertex (weird_a.c pattern): source tasks wait for the release interrupt; joins wait for the k-th packet of each input edge; `ucx_sleep((c(v) - 11,000) / 10)`; one `ucx_noc_send` per edge with tag = flow x 1024 + (k mod 1024); iteration markers `ITER_BEGIN(letter, k)` when the task has the input of iteration k and `ITER_END(letter, k)` after its last send (after the work for a task without output edge); creation order of each PE (`ucx_task_add`) = creation order of the model (sequence row, else creation row, else the `.map` line); the kernel dispatches it in the order of the model |
+| `car_v.c` | One task per vertex (weird_a.c pattern; release by tick with `-DUCX_TICK_RELEASE`, the Makefile rule: every task waits for the tick of phase k + n(v) before iteration k, `TASK_PHASE`; without the macro, the code of runs CV and CV2): source tasks wait for the release interrupt; joins wait for the k-th packet of each input edge; `ucx_sleep((c(v) - 11,000) / 10)`; one `ucx_noc_send` per edge with tag = flow x 1024 + (k mod 1024); iteration markers `ITER_BEGIN(letter, k)` when the task has the input of iteration k and `ITER_END(letter, k)` after its last send (after the work for a task without output edge); creation order of each PE (`ucx_task_add`) = creation order of the model (sequence row, else creation row, else the `.map` line); the kernel dispatches it in the order of the model |
 | `car_v.json` | Manifest: PE, port, kernel id, letter of the iteration markers (`iter_letter`, A to W in CSV order), workload and edges of each task; flows with source and target PE, payload, tag base; release mask; `pe_tasks` in the format of `experiments/exp23/config.json` (IDLE and the creation order); `pe_dispatch` (dispatch order of the model) |
-| `car_v.sim` | `MESH` and `RELEASE_MASK` for `simulate.sh` (period 0.5 ms and first release at 3 ms: defaults of the release generator) |
+| `car_v.sim` | `MESH`, `RELEASE_MASK` (the 16 PEs, release by tick; runs CV and CV2: 2494, the PEs of the sources) and `TICK_RELEASE=1` for `simulate.sh` (period 0.5 ms and first release at 3 ms: defaults of the release generator) |
 
 ## Log of a run
 

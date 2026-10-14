@@ -29,6 +29,7 @@ Measurement (log of the run):
 | Data age of a chain v_0 ... v_n | for each job of v_n, the reads backwards along the chain give the job of v_0; age = end of the job of v_n minus r_p of the release phase of that job of v_0, against the bound of the chain (largest model value) |
 | Read against the model | the job of the source that a job read, against the job of the model (multirate.read_index): older reads break the assumption of the bound |
 | Packet against its deadline | arrival (TAG receive line on the target PE) minus r_0, against the deadline of the model packet (S of the reading job) from the tick of phase 0 |
+| Phase conformance | executions (begin markers) of each task per phase [r_p, r_{p+1}): at most one, none before the release phase o_v + (j - 1) k_v of the job; CPU of each PE per phase against the busy time of the model in that phase (rttools/paper/phasecheck.py) |
 
 Times measured from r_p include the delay from the release interrupt to
 the tick of the PE, so they are not smaller than the times of the model
@@ -298,6 +299,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
         "packets": {"remote_received": pk_n, "after_deadline": pk_late,
                     "min_slack_cycles": min(slack) if slack else None, "tags": tagc},
         "monitor": exp23.monitor_summary(log_path),
+        "phase_conformance": phase_conformance(tr, clk, rel, jobs, man, spec, mdl, sched),
     }
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
@@ -318,6 +320,25 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
     return m
 
 
+def phase_conformance(tr, clk, rel, jobs, man, spec, mdl, sched):
+    """Executions per phase of each task and CPU per phase of each PE
+    against the busy time of the model in that phase of the hyperperiod
+    (from phase h0 H_t, where the schedule is periodic); the jobs of a
+    time-triggered application are released by the tick hook (rule
+    "tick")."""
+    from rttools.paper import phasecheck
+    begins = {}
+    for (v, j), row in jobs.items():
+        begins.setdefault(v, {})[j] = row["begin"]
+    Ht = spec.hyper_ticks
+    first = sched.h0 * Ht
+    busy = mdl["busy_per_phase"]
+    return phasecheck.conformance(
+        tr, clk, rel, begins, lambda v, j: spec.offsets[v] + (j - 1) * spec.ticks[v],
+        {t["name"]: t["pe_label"] for t in man["tasks"]},
+        lambda pe, p: busy[pe][p % Ht] if p >= first else None, "tick")
+
+
 def summary_lines(m):
     mdl = m["model"]
     d = m["data_age"]
@@ -331,4 +352,8 @@ def summary_lines(m):
            f"smallest margin {d['margin_min_cycles']} cycles",
            f"  packets: {m['packets']['remote_received']} received between PEs, "
            f"{m['packets']['after_deadline']} after the deadline"]
+    pc = m.get("phase_conformance")
+    if pc is not None:
+        from rttools.paper import phasecheck
+        out.append("  phase conformance: " + phasecheck.summary(pc)[0][2:])
     return out

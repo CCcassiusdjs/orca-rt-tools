@@ -19,6 +19,7 @@ cycles and milliseconds:
 | (metrics.json) cpu, response_bound | CPU demand per PE, f_CPU and the response bound R^ of the estimate |
 | (metrics.json) sequences | Dispatch order of each cluster: kernel rule on the creation order of the application CSV (config `application`) |
 | (metrics.json) instrumentation | With --listing and --listing-without (objdump listings of the image with and without the instrumentation writes, experiments/exp23/build_sw.sh): upper bound of the instrumentation cycles in the measured CPU time per cluster (rttools/paper/instrumentation.py) |
+| (metrics.json) phase_conformance | With ITER lines: executions of each task per phase and CPU of each PE per phase against t(V_k), the conformance with the phase model (rttools/paper/phasecheck.py; release rule of the run from the RUN_INFO line `release`, or --release) |
 | (metrics.json) per_iteration; packets_per_iteration.csv | Send and arrival of each packet against the phase of its own iteration; with ITER lines, also the response of each iteration to the end of J for it (iterations_markers.csv) and the iterations that a task runs in the run of the previous one |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
 | network.tex, network.csv, network_packets.csv | Network latency per flow and per packet from the FLIT lines of the packet monitor (only when the log has them) |
@@ -1158,12 +1159,35 @@ def mhz_text(hz):
     return f"{hz / 1e6:.6f}".rstrip("0").rstrip(".")
 
 
-def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None):
+def phase_conformance(tr, cfg, clk, rule):
+    """Executions per phase of each task (ITER begin markers) and CPU per
+    phase of each PE against t(V_k) (estimates), with n(v) of
+    response_bound (rttools/paper/phasecheck.py); None without ITER lines."""
+    from rttools.paper import phasecheck
+    marks = iteration_marks(tr)
+    if not marks:
+        return None
+    phi = response_bound(cfg)["phases"]
+    est = estimates(cfg)
+    pe_of = {t: pe for pe, ts in cfg["pe_tasks"].items() for t in ts if t != "IDLE"}
+    begins = {t: {k: it["begin"] for k, it in its.items()} for t, its in marks.items() if t in pe_of}
+    return phasecheck.conformance(
+        tr, clk, release_times(tr, cfg, clk), begins, lambda v, j: j - 1 + phi[v], pe_of,
+        lambda pe, p: est[cfg["clusters"][pe]], rule)
+
+
+def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None,
+            release_rule=None):
     """Every output of the module for one log; run_info: RUN_INFO path,
     "auto" (next to the log) or None (config clock_hz); listing and
     listing_without: objdump listings of the image with and without the
-    instrumentation writes (bound of their cycles; None: no bound)."""
+    instrumentation writes (bound of their cycles; None: no bound);
+    release_rule: release rule of the run for phase_conformance ("tick",
+    "data"; None: the RUN_INFO line `release`, "data" without it)."""
+    from rttools.paper import phasecheck
     tr, cfg, clk, clock = load_run(log_path, cfg, unit, run_info)
+    info_path = run_info_path(log_path) if run_info == "auto" else run_info
+    rel_rule = phasecheck.release_rule(read_run_info(info_path) if info_path else {}, release_rule)
     windows = hyperperiods(tr, cfg, clk)
     if not windows:
         raise ValueError("the log has no complete hyperperiod after first_hyperperiod_s")
@@ -1216,6 +1240,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
         "monitor": monitor_summary(log_path),
         "per_iteration": per_iteration(tr, cfg, clk),
         "network": net,
+        "phase_conformance": phase_conformance(tr, cfg, clk, rel_rule),
     }
     if listing or listing_without:
         if not (listing and listing_without):
@@ -1347,6 +1372,9 @@ def main(argv=None):
     a.add_argument("--run-info", default="auto",
                    help="RUN_INFO of the simulation (clock of the run); default: next to the log; "
                         "`none`: config clock_hz")
+    a.add_argument("--release", choices=["auto", "tick", "data"], default="auto",
+                   help="release rule of the run for phase_conformance (default: the line `release` of the "
+                        "RUN_INFO; data without it, the runs before the release by tick)")
     k = sub.add_parser("clock", help="clock of a run at the minimum frequency of the flow")
     k.add_argument("frequency", help="metrics.json of rttools.paper.frequency run")
     k.add_argument("--config", required=True)
@@ -1368,7 +1396,8 @@ def main(argv=None):
             from rttools.tui.model.timeunit import RTL_PRESETS
             unit = RTL_PRESETS[args.unit]
         run_info = None if args.run_info == "none" else args.run_info
-        m = analyze(args.log, cfg, args.out, unit, args.join, run_info, args.listing, args.listing_without)
+        m = analyze(args.log, cfg, args.out, unit, args.join, run_info, args.listing, args.listing_without,
+                    args.release)
         ck = m["clock"]
         print(f"{m['log']}: unit {m['unit']['name']} (detected {m['unit']['detected']}), "
               f"{m['parameters']['hyperperiods']} hyperperiods, join rule {m['join_rule']}")
@@ -1402,6 +1431,10 @@ def main(argv=None):
             for c, v in ins["clusters"].items():
                 print(f"  {c:5s} instrumentation at most {cycles_text(round(v['max_cycles'], 1)):>6} cycles "
                       f"per iteration = {v['max_percent']:.2f}% of the measured CPU time")
+        pc = m["phase_conformance"]
+        if pc is not None:
+            from rttools.paper import phasecheck
+            print("  phase conformance: " + phasecheck.summary(pc)[0][2:])
         net = m["network"]
         if net is None:
             print("  flit times: no FLIT lines")

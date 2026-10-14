@@ -33,6 +33,16 @@
 #   make runs      analyze the eight stored runs (logs/A..H) into build/runs and check G and H  (anon:drop-line)
 #                  against reference_G.json and reference_H.json  (anon:drop-line)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
+#   make phase-check  conformance of $(OUTDIR)/metrics.json with the phase model (after analyze):
+#                  no task twice in a phase, no execution before phase j + n(v), CPU per phase at
+#                  most t(V_k) (rttools.paper.phasecheck; exit 1 otherwise). The stored runs A to H
+#                  are of weird_a_data (release rule data: RELEASE=data) and do not conform (run H:
+#                  32 of 33 phases with a task twice)
+#
+# Release rule (RELEASE, --release of the analysis): auto takes the line `release` of the
+# RUN_INFO (simulate.sh writes release=tick for weird_a, the application with the release by
+# tick, app/weird_a.sim; release=data for weird_a_data); the stored logs have no such line and
+# are of the release rule data, the code of weird_a_data (pkt-sim/software/ucx-os/Makefile).
 #
 # The run that a paper reports: make paper REQUIRE_CLEAN=1 from a clean
 # checkout at a tag (or from `git archive <tag>`); simulate.sh stops
@@ -75,6 +85,8 @@ OLD_APP_LOGS := $(foreach r,A B C D E,logs/$(r).events.txt)
 JOIN    ?= $(if $(filter $(OLD_APP_LOGS),$(LOG)),any3,per_producer)
 OUTDIR  ?= $(BUILD)/results
 RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23
+# release rule of LOG (auto: RUN_INFO line `release`; data for the stored logs)
+RELEASE ?= $(if $(filter logs/%,$(LOG)),data,auto)
 APP_E   := ../../apps/synthetic-app-e
 ARCH    := ../../arch/hermes-2x2.gml
 # first frequency of the search of the flow (rttools CLI), not the clock of the simulation
@@ -97,7 +109,7 @@ INSTR_ARGS = $(if $(LISTING),--listing $(LISTING) --listing-without $(LISTING_WI
 
 .PHONY: all sim analyze check frequency tick tick-log frequency-l0 paper flow-clock paper-flow software
 .PHONY: software-without
-.PHONY: instrumentation info clean
+.PHONY: instrumentation info clean phase-check
 
 all: analyze check frequency frequency-l0 tick
 
@@ -105,7 +117,7 @@ sim:
 	F_CLK=$(F_CLK) ./simulate.sh $(SIMDIR) $(SIM_NS)
 
 analyze:
-	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR) $(INSTR_ARGS)
+	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR) $(INSTR_ARGS) --release $(RELEASE)
 
 check:
 	$(RUN) check $(OUTDIR)/metrics.json $(REF)
@@ -143,6 +155,9 @@ paper-flow: flow-clock
 	$(MAKE) analyze check LOG=$(BUILD)/sim-flow/events.txt OUTDIR=$(BUILD)/results-flow REF=reference_flow.json \
 		LISTING=$(BUILD)/sim-flow/$(UCX_IMG)/image.lst LISTING_WITHOUT=$(BUILD)/sw-flow/without/$(UCX_IMG)/image.lst
 
+phase-check:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.phasecheck $(OUTDIR)/metrics.json --rows 5
+
 software: software-without
 	F_CLK=$(F_CLK) F_TICK=$(F_TICK) ./build_sw.sh $(SW)/with
 
@@ -156,9 +171,11 @@ instrumentation: software
 # anon:drop-begin
 .PHONY: runs
 runs:
-	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --join any3 --out $(BUILD)/runs/$$r || exit 1; done
+	for r in A B C D E; do $(RUN) analyze logs/$$r.events.txt --config config.json --join any3 --out $(BUILD)/runs/$$r \
+		--release data || exit 1; done
 	for r in F G H; do $(RUN) analyze logs/$$r.events.txt --config config.json --join per_producer \
-		--out $(BUILD)/runs/$$r --listing logs/$$r.image.lst --listing-without logs/$$r.noinstr.lst || exit 1; done
+		--out $(BUILD)/runs/$$r --listing logs/$$r.image.lst --listing-without logs/$$r.noinstr.lst \
+		--release data || exit 1; done
 	$(RUN) check $(BUILD)/runs/G/metrics.json reference_G.json
 	$(RUN) check $(BUILD)/runs/H/metrics.json reference_H.json
 # anon:drop-end
