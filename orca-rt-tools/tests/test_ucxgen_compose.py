@@ -122,6 +122,22 @@ def test_app_manifest_and_cv2_through_a_composition(tmp_path):
     assert sorted(d.split(":")[0] for d in diffs) == ["inputs.manifest", "releases.acks.pes_expected"]
     got = json.load(open(out / "metrics.json"))
     assert got["tags"]["other_app_tags"] == 0 and got["network"]["other_app_packets"] == 0
+    # link schedule of the union (E on row 4 shares no link with CAR-V: the starts of CAR-V alone)
+    comp = tmp_path / "composition.json"
+    comp.write_text(json.dumps({"arch": os.path.join(REPO_ROOT, "arch", "hermes-4x5.gml"),
+                                "apps": [{"name": "CARV", "csv": CARV_CSV, "map": CARV_MAP4},
+                                         {"name": "E", "csv": E_CSV, "map": str(e_row)}]}))
+    union = rtlapp.analyze(os.path.join(CV2, "logs", "CV2.events.txt"), str(man), CARV_CSV, CARV_MAP4,
+                           str(tmp_path / "res_union"), app_name="CARV", composition=str(comp))
+    assert union["link_schedule"]["union"] and union["link_schedule"]["apps"] == ["CARV", "E"]
+    assert {str(k): v for k, v in union["link_schedule"]["starts"].items()} == got["link_schedule"]["starts"]
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps({"arch": os.path.join(REPO_ROOT, "arch", "hermes-4x5.gml"),
+                               "apps": [{"name": "CARV", "csv": CARV_CSV, "map": "spiral", "pes": 16},
+                                        {"name": "E", "csv": E_CSV, "map": str(e_row)}]}))
+    with pytest.raises(ValueError, match="other PEs than its .map file"):
+        rtlapp.analyze(os.path.join(CV2, "logs", "CV2.events.txt"), str(man), CARV_CSV, CARV_MAP4,
+                       str(tmp_path / "res_bad"), app_name="CARV", composition=str(bad))
     # model of E at the clock of the composition run (R_bound of run H)
     app = rtlapp.load_app(str(man), E_CSV, str(e_row), "E")
     mdl = rtlapp.model(app, 434_912_000)
