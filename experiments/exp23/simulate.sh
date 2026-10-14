@@ -51,6 +51,13 @@
 #               overrides the value of app/<app>.sim (release generator of
 #               manycore_pe.sv: bit k of the mask, decimal, = PE with node
 #               index k = y * W + x)
+#   RUN_DO      optional .do file that vsim runs after it loads the design,
+#               in place of `run -all` (diagnostic runs that stop at chosen
+#               instants and examine signals, e.g.
+#               experiments/multiapp/diag_pe.do); RUN_INFO records it
+#   VSIM_OPTS   extra options of the vsim command (e.g. -voptargs=+acc,
+#               which keeps the internal signals that a RUN_DO examines);
+#               RUN_INFO records them
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -143,6 +150,14 @@ APP_GENERICS=""
 [ "$DIM_Y" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_Y=$DIM_Y"
 [ -n "$R_MASK" ] && [ "$R_MASK" != 1 ] && APP_GENERICS="$APP_GENERICS -gRELEASE_MASK=$R_MASK"
 
+RUN_CMD="run -all"
+VSIM_EXTRA=${VSIM_OPTS:+ $VSIM_OPTS}
+if [ -n "${RUN_DO:-}" ]; then
+	[ -f "$RUN_DO" ] || { echo "RUN_DO: no file $RUN_DO" >&2; exit 2; }
+	RUN_DO=$(cd "$(dirname "$RUN_DO")" && pwd)/$(basename "$RUN_DO")
+	RUN_CMD="do $RUN_DO"
+fi
+
 if [ -n "${ENV_SETUP:-}" ]; then
 	set +u
 	eval "$ENV_SETUP" > /dev/null 2>&1
@@ -179,15 +194,15 @@ if [ "$MONITOR" = 1 ]; then
 	cat >> run.do <<EOD
 vlog -mixedsvvh -sv -work work $HERE/rtl/pe_checker.sv
 vlog -mixedsvvh -sv -work work $HERE/rtl/chk_binds.sv
-vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$GENERICS$APP_GENERICS
+vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$GENERICS$APP_GENERICS$VSIM_EXTRA
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
-run -all
+$RUN_CMD
 quit -f
 EOD
 else
 	cat >> run.do <<EOD
-vsim -c work.manycore_top$GENERICS$APP_GENERICS
+vsim -c work.manycore_top$GENERICS$APP_GENERICS$VSIM_EXTRA
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run ${SIM_NS}ns
@@ -199,6 +214,8 @@ fi
 	echo "sim_ns=$SIM_NS monitor=$MONITOR"
 	ALL_GENERICS="$GENERICS$APP_GENERICS"
 	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${ALL_GENERICS# }"
+	if [ -n "${RUN_DO:-}" ]; then echo "run_do=$RUN_DO"; fi
+	if [ -n "${VSIM_OPTS:-}" ]; then echo "vsim_opts=$VSIM_OPTS"; fi
 	echo "vsim=$(vsim -version 2>/dev/null | head -1)"
 	echo "gcc=$(riscv64-elf-gcc --version | head -1)"
 	echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"

@@ -173,6 +173,8 @@ hello_p: incl ucx.pack
 GEN_APPS = car_v wcet_e
 # composition of CAR-V and application E on the 4x5 mesh (rttools.ucxgen compose, experiments/multiapp)
 GEN_APPS += carv_e
+# application E alone, generated (control run of experiments/multiapp: make sim-e)
+GEN_APPS += e_ucx
 
 $(GEN_APPS): incl
 	@$(MAKE) --no-print-directory clean
