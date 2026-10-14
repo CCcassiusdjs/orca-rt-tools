@@ -40,7 +40,14 @@ not a term. The image of a run up to r11 (kernel with UCX_ISR_NESTING)
 has _ei in irq2_handler, irq3_handler and irq4_handler and
 _interrupt_tick in dispatch; the analysis reads the code of the image in
 both cases (experiments/wcet/images/tick: previous kernel;
-experiments/wcet/images/isr: this kernel).
+experiments/wcet/images/isr: this kernel with the crt0.s of tag
+r11-rc3). The crt0.s of this tree (experiments/wcet/images/guard) adds
+the return test to _isr, in every interrupt term, and the read back of
+IRQ_STATUS to _interrupt_set(0), in the terms that disable interrupts
+(dispatch; the _di at the entry of irq2_handler and irq3_handler in
+receive); the read back repeats only after
+an interrupt taken in its wait (bound 1 in wcet/ucx-os.json), and that
+pass, 16 cycles per such interrupt, is not in the terms.
 
 The flow composes t(v) before the mapping (step 1 clusters with t(v)), so
 the terms do not depend on the mapping: every edge counts as an edge

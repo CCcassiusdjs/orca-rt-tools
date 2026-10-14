@@ -2,3 +2,4 @@ riscv64-unknown-elf-gcc (13.2.0-11ubuntu1+12) 13.2.0 (container; the shim riscv6
 weird_a: F_CLK=434912000 APP=weird_a experiments/exp23/build_sw.sh (release by tick, TR_DEFS)
 weird_a_data: F_CLK=434912000 APP=weird_a_data experiments/exp23/build_sw.sh (data-driven release, the code of runs A to H)
 car_v: F_CLK=380000000 APP=car_v experiments/exp23/build_sw.sh (release by tick, TR_DEFS; ../car_v.elf is the data-driven image)
+with this tree: ISR_NESTING=1 (UCX_ISR_NESTING and CRT0=plain) rebuilds these images

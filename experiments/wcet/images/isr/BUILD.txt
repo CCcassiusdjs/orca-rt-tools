@@ -1,5 +1,5 @@
 riscv64-unknown-elf-gcc (13.2.0-11ubuntu1+12) 13.2.0 (container; the shim riscv64-elf-* -> riscv64-unknown-elf-* runs build_sw.sh)
-kernel without UCX_ISR_NESTING (handlers leave interrupts disabled until the return of _isr; integ/r11c)
+kernel without UCX_ISR_NESTING (handlers leave interrupts disabled until the return of _isr; tag r11-rc3) and the crt0.s of r11-rc3 (CRT0=plain of build_sw.sh rebuilds the same .text and .data)
 weird_a: F_CLK=434912000 APP=weird_a experiments/exp23/build_sw.sh (release by tick, TR_DEFS)
 weird_a_data: F_CLK=434912000 APP=weird_a_data experiments/exp23/build_sw.sh (data-driven release)
 car_v: F_CLK=380000000 APP=car_v experiments/exp23/build_sw.sh (release by tick, TR_DEFS)
