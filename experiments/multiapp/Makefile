@@ -28,6 +28,16 @@
 #                  2x2, the .map of apps/synthetic-app-e) at F_CLK for SIM_NS, in $(BUILD)/sim-e;
 #                  make analyze-e analyzes it into $(BUILD)/results_e (separates the effect of
 #                  the generator on E from the effect of the composition)
+#   make diag      diagnostic run of PE $(DIAG_X)-$(DIAG_Y) (default 0-1, task BFE3 of CAR-V): the
+#                  simulation of run MA (carv_e, F_CLK, vsim -voptargs=+acc) stops at 6.3 ms;
+#                  diag_pe.do writes $(BUILD)/diag/out/diag.txt (PC, pipeline and interrupt
+#                  signals per cycle in 1,800-cycle windows from 5,699,500 ns and 6,199,500 ns,
+#                  registers and 400 cycles at 6,210,000 ns and 6,300,000 ns) and the memory of
+#                  the PE at both instants (pe0-1.<t>ns.mem); about 11 min of vsim
+#   make diag-check  events of the diagnostic run up to 6,300,000 ns against logs/MA.events.txt
+#                  (same simulation); bash, awk and cmp only
+# sim, sim-e, diag and diag-check use no Python (simulate.sh: bash, make,
+# Questa and riscv64-elf).
 #
 # LOG, OUTDIR and RUN_ID default to the stored run MA (logs/MA.*: tag
 # r11-multiapp-rc1, 434.912 MHz, 11.5 ms; reference_MA_CARV.json,
@@ -76,7 +86,7 @@ LOG     ?= logs/MA.events.txt
 OUTDIR  ?= $(BUILD)/results_MA
 RUN_ID  ?= MA
 
-.PHONY: all run check maps maps-check app app-check build sim analyze check-run app-e sim-e analyze-e clean
+.PHONY: all run check maps maps-check app app-check build sim analyze check-run app-e sim-e analyze-e diag diag-check clean
 
 all: run check maps-check app-check analyze check-run
 
@@ -130,6 +140,21 @@ sim-e:
 analyze-e:
 	$(ANALYZE) analyze $(BUILD)/sim-e/events.txt --manifest $(APP_DIR)/e_ucx.json --csv $(E_CSV) \
 		--map $(E_MAP2) --arch ../../arch/hermes-2x2.gml --out $(BUILD)/results_e
+
+DIAG_X  ?= 0
+DIAG_Y  ?= 1
+DIAG_NS ?= 6400000
+DIAG_UNTIL_NS ?= 6300000
+
+diag:
+	DIAG_DIR=$(abspath $(BUILD)/diag/out) DIAG_X=$(DIAG_X) DIAG_Y=$(DIAG_Y) RUN_DO=$(abspath diag_pe.do) \
+		VSIM_OPTS=-voptargs=+acc F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/diag $(DIAG_NS) $(NAME)
+
+diag-check:
+	awk '$$1 == "#" && $$2 ~ /^[0-9]+$$/ && $$2 < $(DIAG_UNTIL_NS)' logs/MA.events.txt > $(BUILD)/diag/ma.until
+	awk '$$1 == "#" && $$2 ~ /^[0-9]+$$/ && $$2 < $(DIAG_UNTIL_NS)' $(BUILD)/diag/events.txt > $(BUILD)/diag/diag.until
+	cmp $(BUILD)/diag/ma.until $(BUILD)/diag/diag.until && \
+		echo "diag: $$(wc -l < $(BUILD)/diag/diag.until) event lines up to $(DIAG_UNTIL_NS) ns equal to run MA"
 
 clean:
 	rm -rf $(BUILD)

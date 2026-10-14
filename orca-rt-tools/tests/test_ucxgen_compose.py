@@ -223,3 +223,25 @@ def test_control_application_e(tmp_path):
     build_image(ucx, "e_ucx", path)
     rows = memory.report(alone, memory.heap_size(str(ucx / "build" / "target" / "image.map")), 1, (1,))
     assert rows[0]["fits"], rows
+
+
+def test_simulate_diagnostic_run(tmp_path):
+    """experiments/multiapp `make diag`: simulate.sh runs RUN_DO in place of
+    `run -all` and adds VSIM_OPTS to vsim; RUN_INFO records both."""
+    from tests.test_simulate_options import run_do, stub_repo
+    repo, env, log = stub_repo(tmp_path)
+    shutil.copy2(os.path.join(APP_DIR, "carv_e.sim"),
+                 repo / "pkt-sim" / "software" / "ucx-os" / "app" / "carv_e.sim")
+    do = os.path.join(EXP, "diag_pe.do")
+    sh = str(repo / "experiments" / "exp23" / "simulate.sh")
+    r = subprocess.run(["bash", sh, str(tmp_path / "o"), "6400000", "carv_e"], capture_output=True, text=True,
+                       env={**env, "F_CLK": "434912000", "RUN_DO": do, "VSIM_OPTS": "-voptargs=+acc"})
+    assert r.returncode == 0, r.stdout + r.stderr
+    text = run_do(tmp_path / "o")
+    assert "+RUN_NS=6400000 -gCLOCK_HALF_PERIOD_FS=1149657" in text and text.count(" -voptargs=+acc\n") == 1
+    assert f"\ndo {do}\nquit -f\n" in text and "run -all" not in text
+    info = (tmp_path / "o" / "RUN_INFO").read_text()
+    assert f"run_do={do}\n" in info and "vsim_opts=-voptargs=+acc\n" in info
+    r = subprocess.run(["bash", sh, str(tmp_path / "o2"), "1000", "carv_e"], capture_output=True, text=True,
+                       env={**env, "RUN_DO": str(tmp_path / "none.do")})
+    assert r.returncode == 2 and "RUN_DO: no file" in r.stderr
