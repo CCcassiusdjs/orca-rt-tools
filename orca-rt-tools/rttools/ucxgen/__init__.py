@@ -18,6 +18,14 @@ file of the flow (node index y * width + x of arch/hermes-*.gml).
 | Join of J: k-th packet of each producer | The same rule for every task with more than one input edge (source port of the packet) |
 | ucx_task_add per PE in app_main | Creation order of each PE as the model reads it (rttools/modules/instances/release.py, pe_sequences): sequence row of the CSV, otherwise creation row, otherwise the order of the .map line; the kernel dispatches it by the rule of rttools/bench_t/estimate.py (dispatch_order) |
 
+The generator has three patterns, chosen by the inputs: one release
+period (the pattern of weird_a.c above; --bodies replaces ucx_sleep with
+the bodies of rttools.wcet), time-triggered tasks for an application of
+the general phase model (several periods or a cycle; manifest "model":
+"time_triggered") and the composition of applications with one release
+period on disjoint PEs (compose). --bodies and compose take applications
+of the first pattern only and stop with a message otherwise.
+
 Outputs in <dir>: <name>.c (application), <name>.json (manifest: tasks,
 flows, PE of each task, ports, tags, release mask; the input of the
 analysis of a run), <name>.sim (MESH and RELEASE_MASK for
