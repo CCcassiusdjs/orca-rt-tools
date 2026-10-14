@@ -275,3 +275,31 @@ def test_pipeline_matches_reference(tmp_path):
 def test_stored_maps_match_the_placement():
     r = run_module("rttools.paper.multiapp", "maps", "--config", os.path.join(EXP, "config.json"), "--check")
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+# ---------------------------------------------------------------- run MA (RTL)
+
+
+@pytest.mark.parametrize("app,csv", [("CARV", CARV_CSV), ("E", E_CSV)])
+def test_run_ma_matches_reference(tmp_path, app, csv):
+    """make -C experiments/multiapp analyze check-run: the stored run MA
+    (carv_e, 4x5, 434.912 MHz) analyzed per application."""
+    from rttools.paper import exp23, rtlapp
+    out = tmp_path / app
+    m = rtlapp.analyze(os.path.join(EXP, "logs", "MA.events.txt"),
+                       os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os", "app", "carv_e.json"), csv,
+                       os.path.join(EXP, "maps", app + ".map"), str(out), app_name=app,
+                       composition=os.path.join(EXP, "composition.json"))
+    assert exp23.check(str(out / "metrics.json"), os.path.join(EXP, f"reference_MA_{app}.json")) == []
+    r = m["responses"]
+    assert m["releases"]["count"] == 17 and m["tags"]["unknown_tags"] == 0 and m["tags"]["other_app_tags"] > 0
+    assert m["network"]["header_waits_with_other_app_contender"] == 0
+    if app == "CARV":
+        # BFE3 stops after iteration 6: iterations 1 to 6, all below R_bound
+        assert (r["complete"], r["above_bound"], r["margin_bound_all_cycles"]) == (6, 0, 9047)
+        assert m["tasks"]["BFE3"]["iterations"] == 6 and m["packets"]["late"] == 0
+    else:
+        # two runs of C, E, H, I in one phase: every response above R_bound, below the deadline
+        assert (r["complete"], r["above_bound"], r["above_deadline"]) == (14, 14, 0)
+        assert r["max_cycles"] == 854855 and m["model"]["response_bound"]["cycles"] == 759938
+        assert {t for t, d in m["tasks"].items() if d["max_iterations_per_run"] == 2} == {"C", "E", "H", "I"}

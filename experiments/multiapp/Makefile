@@ -3,7 +3,8 @@
 # routers and links. The flow builds one link schedule for the union of the
 # packets of both applications and one clock for the platform.
 #
-#   make           run + check + maps-check + app-check (default; about 20 s)
+#   make           run + check + maps-check + app-check + analyze + check-run of the stored
+#                  run MA (default; about 40 s)
 #   make run       analysis flow on composition.json (f_CPU per application, f_NoC of the union,
 #                  frequency of the platform, R_bound per application, shared links, collisions of
 #                  the schedules of each application alone), the other order (composition-e-first.json),
@@ -22,14 +23,21 @@
 #                  (mesh 4x5 and RELEASE_MASK from app/$(NAME).sim)
 #   make analyze   analysis of $(LOG) for each application (rttools.paper.rtlapp --app, link
 #                  schedule of the union with --composition) into $(OUTDIR)/CARV and $(OUTDIR)/E
-#   make check-run compare $(OUTDIR)/<app>/metrics.json with reference_$(RUN)_<app>.json
+#   make check-run compare $(OUTDIR)/<app>/metrics.json with reference_$(RUN_ID)_<app>.json
+#
+# LOG, OUTDIR and RUN_ID default to the stored run MA (logs/MA.*: tag
+# r11-multiapp-rc1, 434.912 MHz, 11.5 ms; reference_MA_CARV.json,
+# reference_MA_E.json). In run MA, task BFE3 of CAR-V (PE 4, 0-1) stops
+# after iteration 6 and PE 4 halts at 8.2 ms (heap exhausted by the queued
+# packets, logs/MA.output-0-1.txt): the responses of CAR-V cover
+# iterations 1 to 6 (PR-403-multiapp-noc.md).
 #
 # F_CLK: the clock of the platform from the flow, 434.9 MHz (f_CPU of E), on
 # the grid of 32 kHz of the release period (exp23.flow_clock): 434.912 MHz,
 # metrics.json rtl.clock. SIM_NS: 3 ms + (n(v_last) of CAR-V = 4 + 8 measured
 # iterations - 1) T + R_bound of CAR-V (2.218 ms) + T = 11.22 ms (metrics.json
 # rtl.sim_ns_min), rounded up to 11.5 ms, the duration of the CAR-V runs.
-# After `make sim`: make analyze LOG=$(BUILD)/sim/events.txt.
+# After `make sim`: make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim.
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
@@ -59,13 +67,13 @@ RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.multiapp
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 ANALYZE  = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp
 CHECK    = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check
-LOG     ?= $(BUILD)/sim/events.txt
-OUTDIR  ?= $(BUILD)/results_sim
+LOG     ?= logs/MA.events.txt
+OUTDIR  ?= $(BUILD)/results_MA
 RUN_ID  ?= MA
 
 .PHONY: all run check maps maps-check app app-check build sim analyze check-run clean
 
-all: run check maps-check app-check
+all: run check maps-check app-check analyze check-run
 
 run:
 	$(RUN) run --config config.json --out $(BUILD)
