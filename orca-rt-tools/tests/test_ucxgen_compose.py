@@ -200,3 +200,26 @@ def test_simulate_composition_4x5(tmp_path):
     assert f"vsim -c work.manycore_top work.chk_binds +RUN_NS=11500000 {g}\n" in run_do(tmp_path / "o")
     assert "-s carv_e" in log.read_text()
     assert f"app=carv_e mesh=4x5 generics={g}\n" in (tmp_path / "o" / "RUN_INFO").read_text()
+
+
+def test_control_application_e(tmp_path):
+    """app/e_ucx.*: application E alone, generated, on the 2x2 mesh (control
+    run of experiments/multiapp, make sim-e): the same tasks, PEs, workloads
+    and creation order as E inside carv_e."""
+    r = run_module("rttools.ucxgen", "check", E_CSV, E_MAP2, "--name", "e_ucx", "--mesh", "2x2", "--out", APP_DIR)
+    assert r.returncode == 0, r.stdout + r.stderr
+    alone = json.load(open(os.path.join(APP_DIR, "e_ucx.json")))
+    comp = json.load(open(os.path.join(APP_DIR, "carv_e.json")))
+    e = [t for t in comp["tasks"] if t["app"] == "E"]
+    assert [(t["name"], t["workload"], t["order"]) for t in alone["tasks"]] == \
+        [(t["name"], t["workload"], t["order"]) for t in e]
+    assert alone["release"]["mask"] == 1
+    assert re.search(r"^GEN_APPS \+= e_ucx$", open(os.path.join(UCX, "Makefile")).read(), re.M)
+    path = toolchain(tmp_path)
+    if path is None:
+        pytest.skip("riscv64-elf toolchain ausente")
+    ucx = tmp_path / "ucx-os"
+    shutil.copytree(UCX, ucx, ignore=shutil.ignore_patterns("*.o", "*.pack", "image.*", "code.txt"))
+    build_image(ucx, "e_ucx", path)
+    rows = memory.report(alone, memory.heap_size(str(ucx / "build" / "target" / "image.map")), 1, (1,))
+    assert rows[0]["fits"], rows
