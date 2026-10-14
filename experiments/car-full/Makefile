@@ -25,7 +25,11 @@
 # (kernel halt or a task that does not finish its job): an interrupt inside the return of another one
 # (handlers that enable interrupts before they return, _isr returns through a5, which it does not save;
 # pkt-sim/tests/rtl/tb_cpu_irq.vhd); the kernel of this tree leaves interrupts disabled in every handler
-# (the image of CF is the kernel with -DUCX_ISR_NESTING; RUN_INFO without the line isr). After `make sim`:
+# (the image of CF is the kernel with -DUCX_ISR_NESTING; RUN_INFO without the line isr). In run CF2 (tag
+# r11-rc3) six tasks (TPMS, VIBS, DIRC, BFE3, FDF1, OBMG; the same as in CF) loop on the jalr of the
+# return of _isr: yield() resumes a task that the tick preempted, through that return with interrupts
+# disabled, and an interrupt pending then comes before the jump; the build of this tree assembles crt0.s
+# of car_full with UCX_ISR_RETURN_GUARD (pkt-sim/software/ucx-os/Makefile, TT_ASDEFS). After `make sim`:
 #   make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim
 #
 # F_CLK: f_CPU of the chosen candidate (432 MHz, reference.json chosen.cpu.f_cpu_hz); the phase of
@@ -47,7 +51,7 @@ MAP     ?= ../../apps/car-full/car-full-ONTO-hermes4x4.map
 MESH    ?= 4x4
 # _heap_size of the image of car_full built with riscv64-unknown-elf-gcc 13.2
 # (make build reads the value of the toolchain in use)
-HEAP    ?= 48232
+HEAP    ?= 48216
 IN_FLIGHT ?= 2
 F_CLK   ?= 432000000
 PHASE_NS ?= 250000

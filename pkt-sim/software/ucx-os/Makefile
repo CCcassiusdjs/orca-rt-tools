@@ -200,14 +200,21 @@ $(GEN_APPS): incl
 # periods, rttools/bench_t/multirate.py): the kernel calls the tick hook of
 # the application before each scheduler run (UCX_APP_TICK, kernel/sched.c),
 # and the NoC driver keeps the latest packet of each source without waking
-# the receiver (UCX_NOC_LATEST, lib/noc.c). Example: make car_full
+# the receiver (UCX_NOC_LATEST, lib/noc.c). The jobs of these tasks span
+# several ticks, so yield() often resumes a task that the tick preempted,
+# through the return of _isr with interrupts disabled; an interrupt pending
+# then (the send interrupt of the task that yields) comes between the sb and
+# the jump of that return, and _isr of crt0.s built with
+# UCX_ISR_RETURN_GUARD returns it to the address of the interrupted return
+# (pkt-sim/tests/rtl/tb_cpu_irq.vhd, mode 2). Example: make car_full
 # ARCH=riscv/hf-riscv-e
 GEN_TT_APPS = car_full
 TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST
+TT_ASDEFS = --defsym UCX_ISR_RETURN_GUARD=1
 
 $(GEN_TT_APPS): incl
 	@$(MAKE) --no-print-directory clean
-	@$(MAKE) --no-print-directory ucx.pack UCX_DEFS="$(TT_DEFS)"
+	@$(MAKE) --no-print-directory ucx.pack UCX_DEFS="$(TT_DEFS)" UCX_ASDEFS="$(TT_ASDEFS)"
 	$(CC) $(CFLAGS) $(TT_DEFS) -o $(BUILD_APP_DIR)/$@.o app/$@.c
 	@$(MAKE) --no-print-directory link
 	@find '$(SRC_DIR)' -maxdepth 1 -type f \( -name '*.pack' -o -name '*.o' \) -delete

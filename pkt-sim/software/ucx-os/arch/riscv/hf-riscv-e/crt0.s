@@ -59,6 +59,22 @@ _isr:
 	li	a5, 0xf0000040		# read IRQ_EPC
 	lw	a5, 0(a5)
 	addi	a5, a5, -4		# rollback, last opcode (at EPC) was not commited
+.ifdef UCX_ISR_RETURN_GUARD
+	# EPC at _isr_resume or at the jalr after it: the interrupt came after
+	# the sb of the return below enabled interrupts and before its jump
+	# (an interrupt pending when yield() resumes a task that the tick
+	# preempted, kernel/sched.c). The address of that return is still at
+	# 36(sp) (the frame below sp of the return), and this interrupt
+	# returns there; without the test, it returns to the jalr with a5 =
+	# the address of the jalr, and the task loops on the jalr
+	# (pkt-sim/tests/rtl/tb_cpu_irq.vhd, mode 2). a0 is saved above.
+	la	a0, _isr_resume
+	sub	a0, a5, a0
+	sltiu	a0, a0, 8
+	beq	a0, zero, 1f
+	lw	a5, 36(sp)
+1:
+.endif
 	sw	a5, 36(sp)
 	
 	lui	a1, 0xf0000
@@ -83,6 +99,7 @@ _isr:
 	ori	a5, a5, 0x1
 	addi	sp, sp, 40
 	sb	a5, 0(a5)
+_isr_resume:
 	lw	a5, -4(sp)		# 36(sp)
 
 	jalr	zero, a5		# context restored, continue

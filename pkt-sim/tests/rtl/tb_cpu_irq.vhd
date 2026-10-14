@@ -8,7 +8,11 @@
 -- the next pair starts QUIET cycles after the acknowledge of the second. MODE (read at 0x20000038) = 1:
 -- the handler enables interrupts before it returns (_ei of the UCX-OS
 -- handlers, _interrupt_tick of dispatch(), kernel built with -DUCX_ISR_NESTING);
--- 0: it does not (default of the kernel).
+-- 0: it does not (default of the kernel); 2: as 0, and the main loop also
+-- returns through the return of _isr with interrupts disabled and the
+-- interrupts of the testbench pending (yield() of UCX-OS that resumes a task
+-- preempted by the tick). HEX: cpu_irq.hex (_isr of crt0.s) or
+-- cpu_irq_guard.hex (_isr of crt0.s with UCX_ISR_RETURN_GUARD).
 -- FAIL when the main loop stores to 0x20000030 (sp changed), stops storing
 -- its counter for STALL cycles, or fetches outside the program; PASS after
 -- COUNT interrupts.

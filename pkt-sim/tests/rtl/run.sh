@@ -81,6 +81,16 @@ ghdl_cpu_irq() { # interrupt return of _isr of crt0.s on the HF-RISC core (tb_cp
 	# the second interrupt of a pair corrupts the return; printed as NESTED
 	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=1 \
 		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/^FAIL/NESTED/; s/^PASS/NESTED-NOT-REPRODUCED/' || true
+	# MODE 2: the return of _isr with interrupts disabled and an interrupt pending (yield() that
+	# resumes a task preempted by the tick): the interrupt comes between the sb and the jump of the
+	# return, and the main loop stops on the jalr; printed as RESUME
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=2 \
+		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/^FAIL/RESUME/; s/^PASS/RESUME-NOT-REPRODUCED/' || true
+	# _isr with UCX_ISR_RETURN_GUARD (crt0.s of the time-triggered applications): MODE 0, 1 and 2 pass
+	for m in 0 1 2; do
+		(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq_guard.hex" -gMODE=$m \
+			-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/MODE=/GUARD MODE=/' || true
+	done
 }
 
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
