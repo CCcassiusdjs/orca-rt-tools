@@ -154,7 +154,13 @@ void dispatch(void)
 		// printf("priority:     0x%x   rt->period:   0x%x\n", kcb_p->tcb_p->priority, kcb_p->tcb_p->rt->period);
 		// printf("rt->capacity: 0x%x   rt->deadline: 0x%x\n", kcb_p->tcb_p->rt->capacity, kcb_p->tcb_p->rt->deadline);
 		
+#ifndef UCX_ISR_NO_NESTING
 		_interrupt_tick();
+#endif
+		/* with -DUCX_ISR_NO_NESTING interrupts stay disabled: a task
+		 * resumed inside dispatch() enables them in the return of _isr,
+		 * a task resumed inside yield() enables them itself (the
+		 * time-triggered applications of rttools.ucxgen, lib/noc.c) */
 		longjmp(kcb_p->tcb_p->context, 1);
 	}
 }

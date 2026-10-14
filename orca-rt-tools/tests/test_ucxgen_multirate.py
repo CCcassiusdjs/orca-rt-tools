@@ -56,7 +56,7 @@ def test_stored_files_match():
 def test_heap_per_pe():
     with open(os.path.join(APP_DIR, "car_full.json")) as f:
         m = json.load(f)
-    rows = memory.report(m, 48296, 2, (1, 2))
+    rows = memory.report(m, 48280, 2, (1, 2))
     assert rows[0]["worst_pe"] == 9 and rows[0]["fits"] and rows[0]["bytes"] == 39212
 
 

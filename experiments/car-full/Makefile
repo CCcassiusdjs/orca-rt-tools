@@ -37,7 +37,7 @@ MAP     ?= ../../apps/car-full/car-full-ONTO-hermes4x4.map
 MESH    ?= 4x4
 # _heap_size of the image of car_full built with riscv64-unknown-elf-gcc 13.2
 # (make build reads the value of the toolchain in use)
-HEAP    ?= 48296
+HEAP    ?= 48280
 IN_FLIGHT ?= 2
 F_CLK   ?= 432000000
 PHASE_NS ?= 250000

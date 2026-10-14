@@ -259,7 +259,7 @@
    "data_age_max_ms_at_minimum": 35.99705882352941,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 69164,
-   "memory_free_bytes": -20884,
+   "memory_free_bytes": -20900,
    "memory_fits": false
   },
   "k3_q16": {
@@ -279,7 +279,7 @@
    "data_age_max_ms_at_minimum": 35.99705882352941,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 39212,
-   "memory_free_bytes": 9068,
+   "memory_free_bytes": 9052,
    "memory_fits": true
   },
   "k4_q8": {
@@ -299,7 +299,7 @@
    "data_age_max_ms_at_minimum": 36.0,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 69164,
-   "memory_free_bytes": -20884,
+   "memory_free_bytes": -20900,
    "memory_fits": false
   },
   "k4_q16": {
@@ -319,7 +319,7 @@
    "data_age_max_ms_at_minimum": 36.0,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 39212,
-   "memory_free_bytes": 9068,
+   "memory_free_bytes": 9052,
    "memory_fits": true
   },
   "k5_q8": {
@@ -339,7 +339,7 @@
    "data_age_max_ms_at_minimum": 35.999996192912725,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 69164,
-   "memory_free_bytes": -20884,
+   "memory_free_bytes": -20900,
    "memory_fits": false
   },
   "k5_q16": {
@@ -359,7 +359,7 @@
    "data_age_max_ms_at_minimum": 35.999996192912725,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 39212,
-   "memory_free_bytes": 9068,
+   "memory_free_bytes": 9052,
    "memory_fits": true
   },
   "k6_q8": {
@@ -379,7 +379,7 @@
    "data_age_max_ms_at_minimum": 35.999998383624174,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 69164,
-   "memory_free_bytes": -20884,
+   "memory_free_bytes": -20900,
    "memory_fits": false
   },
   "k6_q16": {
@@ -399,7 +399,7 @@
    "data_age_max_ms_at_minimum": 35.999998383624174,
    "memory_worst_pe": "9",
    "memory_worst_bytes": 39212,
-   "memory_free_bytes": 9068,
+   "memory_free_bytes": 9052,
    "memory_fits": true
   }
  },
@@ -2072,12 +2072,12 @@
   "packets_per_hyperperiod": 347,
   "local_flows": 18,
   "memory": {
-   "heap_bytes": 48296,
-   "usable_bytes": 48280,
+   "heap_bytes": 48280,
+   "usable_bytes": 48264,
    "ram_bytes": 65536,
    "worst_pe": "9",
    "worst_bytes": 39212,
-   "free_bytes": 9068,
+   "free_bytes": 9052,
    "fits": true,
    "largest_payload": 9600,
    "payload_fits": true,

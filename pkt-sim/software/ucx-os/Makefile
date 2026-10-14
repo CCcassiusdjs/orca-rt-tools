@@ -161,10 +161,12 @@ $(GEN_APPS): incl
 # periods, rttools/bench_t/multirate.py): the kernel calls the tick hook of
 # the application before each scheduler run (UCX_APP_TICK, kernel/sched.c),
 # and the NoC driver keeps the latest packet of each source without waking
-# the receiver (UCX_NOC_LATEST, lib/noc.c). Example: make car_full
+# the receiver (UCX_NOC_LATEST, lib/noc.c); the interrupt handlers leave
+# interrupts disabled until the return of _isr (UCX_ISR_NO_NESTING,
+# kernel/sched.c and lib/noc.c). Example: make car_full
 # ARCH=riscv/hf-riscv-e
 GEN_TT_APPS = car_full
-TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST
+TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST -DUCX_ISR_NO_NESTING
 
 $(GEN_TT_APPS): incl
 	@$(MAKE) --no-print-directory clean
