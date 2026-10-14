@@ -15,7 +15,18 @@ runs at the tick):
 | send_isr | IRQ_ENTRY + _isr with irq_handler -> irq1_handler (end of a DDMA send) | out-degree of v |
 | receive_isr | 2 IRQ_ENTRY + _isr with irq2_handler (size flit: ucx_malloc) + _isr with irq3_handler (end of the packet: queue, enable_receiver) | in-degree of v |
 | tick | IRQ_ENTRY + _isr with irq_handler -> irq0_handler -> timer1ctc_handler -> krnl_dispatcher -> dispatch, where dispatch costs its save path up to longjmp plus the resume of the preempted context (the idle task) | 1 |
-| release | IRQ_ENTRY + _isr with irq_handler -> irq4_handler (release of a source task) | 1 for a task without input edge |
+| release | IRQ_ENTRY + _isr with irq_handler -> irq4_handler (release of a source task) | 1 for a task without input edge; 1 for every task of an image with the release by tick |
+
+Release by tick (image with ucx_phase_wait, pkt-sim/software/ucx-os/lib/
+tick_release.c): the release generator fires on every PE with a task and
+irq4_handler counts the phase, so the release term enters every t(v) (one
+handler per phase and PE, charged to each task of the PE as the tick);
+the tick term includes the tick hook ucx_app_tick that dispatch calls, the
+dispatch term the interrupt state that yield keeps, and the job the wait
+for the tick of the phase (ucx_phase_wait) up to the call of
+ucx_task_yield. The number of dispatches per phase does not change: the
+tick readies the task that the release of the data-driven code readied,
+and a packet arrival does not wake a task that waits for its phase.
 
 The flow composes t(v) before the mapping (step 1 clusters with t(v)), so
 the terms do not depend on the mapping: every edge counts as an edge
@@ -173,12 +184,19 @@ def analyze(img, annotations, tasks, edges, functions, params=None, task_args=No
         outs[u] += 1
         ins[v] += 1
     sources = [t for t in tasks if ins[t] == 0]
-    kernel = kernel_terms(an, source_tasks=bool(sources))
+    tick_release = tick_release_image(img)
+    kernel = kernel_terms(an, source_tasks=bool(sources) or tick_release)
     out = {}
     for t in tasks:
-        out[t] = task_cost(an, functions[t], ins[t], outs[t], kernel, source=ins[t] == 0,
+        out[t] = task_cost(an, functions[t], ins[t], outs[t], kernel, source=ins[t] == 0 or tick_release,
                            args=(task_args or {}).get(t), iteration_calls=iteration_calls)
-    return {"kernel": kernel, "tasks": out, "params": an.params}
+    return {"kernel": kernel, "tasks": out, "params": an.params, "release_rule": "tick" if tick_release else "data"}
+
+
+def tick_release_image(img):
+    """True for an image built with the release by tick (lib/tick_release.c:
+    ucx_phase_wait)."""
+    return img.has_function("ucx_phase_wait")
 
 
 def write_csv(path, result):
