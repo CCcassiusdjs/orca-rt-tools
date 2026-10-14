@@ -25,12 +25,16 @@ F_CLK = 500_000_000            # 2 ns per cycle
 R0_NS = 3_000_000
 
 
-def model_log(path, hyperperiods=5, late=None, old_read=None):
+def model_log(path, hyperperiods=5, late=None, old_read=None, early=None, stop=None):
     """Log of a run that follows the model at F_CLK: TRIGGER lines at the
     ticks, scheduled lines of the ORT/BENCH slices, ITER and read markers
     at the start and the finish of each job, TAG lines of the packets.
     `late` = (task, job, cycles) delays the end marker of one job;
-    `old_read` = (task, job, source) makes one read one job older."""
+    `old_read` = (task, job, source) makes one read one job older;
+    `early` = (task, job) writes the begin marker of one job one cycle
+    after the begin of the previous job (two begins in one phase);
+    `stop` = (task, job) drops the markers of that job and of the later
+    jobs of the task."""
     from rttools.modules.io import appparser
     from rttools.modules.mapping import mapfile
     from rttools.tui.model import network
@@ -64,8 +68,14 @@ def model_log(path, hyperperiods=5, late=None, old_read=None):
     m_of = {(u, v): mm for _, u, v, mm in spec.flows}
     for v in spec.tasks:
         n = s.per_h(v) * hyperperiods
+        prev_S = None
         for j in range(n):
             rel, S, F = s.job(v, j)
+            if stop and stop[0] == v and j + 1 >= stop[1]:
+                break
+            if early == (v, j + 1):
+                S = prev_S + 1
+            prev_S = S
             reads = []
             for i in t[v]["inputs"]:
                 fl = m["flows"][i - 1]
@@ -98,7 +108,8 @@ def runs(tmp_path_factory):
     d = tmp_path_factory.mktemp("rtlmr")
     out = {}
     for name, kw in (("ok", {}), ("late", {"late": ("DIRC", 30, 10_000_000)}),
-                     ("old", {"old_read": ("NAVC", 20, "SPES")})):
+                     ("old", {"old_read": ("NAVC", 20, "SPES")}), ("early", {"early": ("SPES", 7)}),
+                     ("stop", {"stop": ("OBMG", 3)})):
         log = d / f"{name}.events.txt"
         model_log(log, **kw)
         m = rtlmr.analyze(str(log), os.path.join(APP_DIR, "car_full.json"), CSV, MAP, str(d / name),
@@ -115,6 +126,7 @@ def test_analysis_of_a_log_of_the_model(runs):
     assert m["jobs"]["begin_after_release_min_cycles"] == 11000
     assert m["reads"]["older_than_model"] == 0 and m["reads"]["newer_than_model"] == 0
     assert m["markers"]["stray"] == 0
+    assert m["phases"]["jobs_begun_twice_in_a_phase"] == 0 and m["progress"]["stalled_tasks"] == []
     assert m["cpu_phases"]["phases_above_model"] == 0
     d = m["data_age"]
     assert d["chains"] == 34 and d["measured_chains"] == 34 and d["above_bound"] == 0
@@ -129,9 +141,21 @@ def test_analysis_detects_late_end_and_old_read(runs):
     assert old["reads"]["older_than_model"] == 1
 
 
+def test_analysis_detects_two_jobs_in_a_phase_and_a_stalled_task(runs):
+    early, stop = runs[0]["early"], runs[0]["stop"]
+    assert early["phases"]["rows"] == [{"task": "SPES", "phase": early["phases"]["rows"][0]["phase"], "jobs": 2}]
+    assert early["progress"]["stalled_tasks"] == []
+    assert stop["progress"]["stalled_tasks"] == ["OBMG"]
+    obmg = stop["progress"]["tasks"]["OBMG"]
+    assert obmg["ended"] == 2 and obmg["released"] > 4
+    assert stop["progress"]["stalled_pes"] == [obmg["pe"]]
+    assert stop["phases"]["jobs_begun_twice_in_a_phase"] == 0
+
+
 def test_rtlapp_command_line_routes_to_rtlmr(runs, capsys):
     d = runs[1]
     rc = rtlapp.main(["analyze", str(d / "ok.events.txt"), "--manifest", os.path.join(APP_DIR, "car_full.json"),
                       "--csv", CSV, "--map", MAP, "--out", str(d / "cli"), "--f-clk", str(F_CLK)])
     assert rc == 0
     assert "34 of 34 chains measured, 0 above the bound" in capsys.readouterr().out
+

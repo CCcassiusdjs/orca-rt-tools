@@ -23,9 +23,11 @@ Measurement (log of the run):
 | r_p | p-th `TRIGGER: workflow iteration` line (release interrupt of phase p, PE with the lowest index of the mask); the jobs of phase p start at the next tick of each PE |
 | Job j of v (from 1) | ITER begin and ITER end markers of the letter of v with iteration j |
 | Read of a job | the read markers after the begin marker of the job on its PE (iteration 0x800000 + i, letter of the source): job i of the source (0: no packet) |
-| CPU per phase | non-IDLE time of each PE in [r_p, r_{p+1}) against the busy time of the PE in phase p of the model (periodic hyperperiod) |
+| CPU per phase | non-IDLE time of each PE in [r_p, r_{p+1}) against the busy time of the PE in phase p of the model (periodic hyperperiod), above it by more than BUSY_TOLERANCE cycles |
 | Job end against the model | end of job j minus r_p of its release phase, against F - r of the model job; a deadline miss is an end after r of the next release of the task |
 | Begin after the release | begin marker of a job minus r_p of its release phase: the smallest value bounds the delay from the release interrupt to the tick plus the dispatch |
+| Jobs per phase | begin markers of each task in each interval [r_p, r_{p+1}); more than one is a job that waited past its next release |
+| Progress | a task stalls when it ends fewer jobs than it has releases up to two of its periods before the end of the log |
 | Data age of a chain v_0 ... v_n | for each job of v_n, the reads backwards along the chain give the job of v_0; age = end of the job of v_n minus r_p of the release phase of that job of v_0, against the bound of the chain (largest model value) |
 | Read against the model | the job of the source that a job read, against the job of the model (multirate.read_index): older reads break the assumption of the bound |
 | Packet against its deadline | arrival (TAG receive line on the target PE) minus r_0, against the deadline of the model packet (S of the reading job) from the tick of phase 0 |
@@ -49,6 +51,9 @@ from rttools.tui.model import network as tnet
 
 exact = exp23.exact
 READ_BIT = 0x800000
+# busy time of a phase from the `scheduled` lines: each edge of a slice is
+# a time in ns rounded to the clock, at most one cycle per edge of the phase
+BUSY_TOLERANCE = 2
 
 
 def load_app(manifest_path, csv_path, map_path):
@@ -183,6 +188,32 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
         if nxt is not None and row["end"] > nxt:
             misses += 1
 
+    # ---------------------------------------------------------- jobs per phase and progress
+    # a task begins at most one job per phase (one release per k_v
+    # phases; a second begin in a phase is a job that waited for the CPU
+    # past its next release); a task whose jobs stop before the end of the
+    # log while releases go on does not progress
+    twice = []
+    progress = {}
+    n_rel = len(rel)
+    for v in spec.tasks:
+        begins = sorted(row["begin"] for (t, _), row in jobs.items() if t == v and row["begin"] is not None)
+        per_phase = {}
+        for b in begins:
+            p = max(i for i in range(n_rel) if rel[i] <= b) if b >= rel[0] else -1
+            per_phase[p] = per_phase.get(p, 0) + 1
+        twice += [{"task": v, "phase": p, "jobs": c} for p, c in sorted(per_phase.items()) if c > 1]
+        ends = [row["end"] for (t, _), row in jobs.items() if t == v and row["end"] is not None]
+        released = (n_rel - 1 - spec.offsets[v]) // ticks[v] + 1 if n_rel > spec.offsets[v] else 0
+        # jobs released at least two periods of the task before the end of the log
+        due = max(0, released - 2)
+        progress[v] = {"pe": exp_label(spec.node_of[v], man["mesh"][0]), "released": released,
+                       "begun": len(begins), "ended": len(ends),
+                       "last_end_ms": clk.ms(max(ends)) if ends else None,
+                       "stalled": len(ends) < due}
+    stalled = sorted(v for v, d in progress.items() if d["stalled"])
+    stalled_pes = sorted({progress[v]["pe"] for v in stalled})
+
     # ---------------------------------------------------------- reads
     m_of = {(u, v): m for _, u, v, m in spec.flows}
     older = newer = equal = 0
@@ -214,7 +245,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
             b = cyc(tmetrics.lane_stats(tr, pe, rel[p], rel[p + 1]).busy)
             m = row[p % Ht]
             meas.append(b)
-            above += b > m
+            above += b > m + BUSY_TOLERANCE
         pes[pe] = {"tasks": man["pe_dispatch"][pe], "model_busy_max": max(row), "model_busy_hyperperiod": sum(row),
                    "measured_busy_max": max(meas) if meas else None, "phases": len(meas),
                    "phases_above_model": above}
@@ -289,6 +320,8 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
                  # the tick of the PE plus the dispatch (the model counts from the tick)
                  "begin_after_release_min_cycles": min(begin_off) if begin_off else None,
                  "begin_after_release_max_cycles": max(begin_off) if begin_off else None},
+        "phases": {"jobs_begun_twice_in_a_phase": len(twice), "rows": twice},
+        "progress": {"stalled_tasks": stalled, "stalled_pes": stalled_pes, "tasks": progress},
         "reads": {"older_than_model": older, "newer_than_model": newer, "equal_to_model": equal},
         "cpu_phases": {"first_phase": first, "pes": pes,
                        "phases_above_model": sum(p["phases_above_model"] for p in pes.values())},
@@ -325,6 +358,9 @@ def summary_lines(m):
            f"P {mdl['phase_cycles']:,} cycles, {m['releases']['count']} releases, {m['markers']['jobs']} jobs",
            f"  jobs: {m['jobs']['complete']} complete, {m['jobs']['end_after_model_finish']} after the model finish, "
            f"{m['jobs']['deadline_misses']} deadline misses",
+           f"  progress: {len(m['progress']['stalled_tasks'])} tasks stop before the end of the log "
+           f"(PEs {', '.join(m['progress']['stalled_pes']) or '-'}); "
+           f"{m['phases']['jobs_begun_twice_in_a_phase']} task phases with two job begins",
            f"  reads: {m['reads']['older_than_model']} older than the model, {m['reads']['newer_than_model']} newer",
            f"  CPU: {m['cpu_phases']['phases_above_model']} phases above the model busy time",
            f"  data age: {d['measured_chains']} of {d['chains']} chains measured, {d['above_bound']} above the bound, "
