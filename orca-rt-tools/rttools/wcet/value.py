@@ -18,7 +18,7 @@ forgets the slots at offsets >= d: C code reaches an object of the frame
 (an array, a struct) from its address with non-negative offsets. A call
 forgets the registers that the ABI lets the callee change
 (rttools.wcet.decode, CALLER_SAVED). A callee whose return value the
-query fixes (`returns`, e.g. setjmp returns 0 on the path that saves a
+query sets (`returns`, e.g. setjmp returns 0 on the path that saves a
 context) sets a0.
 
 Assumption: a store through an address that the analysis does not relate

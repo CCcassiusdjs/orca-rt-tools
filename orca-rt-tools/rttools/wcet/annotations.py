@@ -19,7 +19,7 @@ function and selector wins):
 | Key | Meaning |
 |---|---|
 | params | names that bound expressions may use (the analysis query may override them) |
-| exclude_calls | functions whose call sites the worst-case path does not take (error paths that print and halt); the analysis fixes the count of each such call block at 0 |
+| exclude_calls | functions whose call sites the worst-case path does not take (error paths that print and halt); the analysis sets the count of each such call block to 0 |
 | loops | `select`: "all" (every loop of the function), "rest" (the loops without another bound: no other selector, no WCET_LOOP_BOUND, no counted loop), {"header": "+0x34" or "0x40000234" or a symbol}, {"contains_call": "f"} (the innermost loops with a call to f), {"index": k} (k-th loop by header address); `bound`: integer or expression (rttools.wcet.loopbound.evaluate, with the params); `scope`: "loop" (default: header executions per entry into the loop) or "function" (per call of the function) |
 | indirect_jumps | `at`: "all" or the address of the jalr; `targets` (addresses in the function), `return: true` (the jump leaves the function) or `indices` (entries of the jump table of an ELF image); `max`: {target or index: n}, the jumps to that target per call of the function |
 | indirect_calls | `at`: "all" or the address of the jalr; `targets`: function names; `max_count`: calls per call of the function |

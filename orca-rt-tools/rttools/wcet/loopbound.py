@@ -7,7 +7,7 @@ the function (scope "function").
 
 | Pattern (detected) | Condition | Bound |
 |---|---|---|
-| counted loop | one definition `addi r, r, c` (c != 0) of the induction register r in the loop, in a block of this loop (not of an inner loop) that dominates every latch; an exit branch that compares r with a limit whose value at the branch is the same in every iteration (a constant of the fixpoint of rttools.wcet.value, e.g. a field of a const descriptor that the loop loads again in each pass), in a block of this loop that dominates every latch; known r at the entry | first iteration at which the exit branch leaves the loop (the value of r at the branch follows from the position of the update before or after it), at most MAX_COUNT |
+| counted loop | one definition `addi r, r, c` (c != 0) of the induction register r in the loop, in a block of this loop (not of an inner loop) that dominates every latch; an exit branch that compares r with a limit whose value at the branch is the same in every iteration (a constant in the converged state of rttools.wcet.value, e.g. a field of a const descriptor that the loop loads again in each pass), in a block of this loop that dominates every latch; known r at the entry | first iteration at which the exit branch leaves the loop (the value of r at the branch follows from the position of the update before or after it), at most MAX_COUNT |
 | shift loop | one definition `srli r, r, c` or `srai r, r, c` and an exit when r = 0 (beq r, zero out of the loop or bne r, zero into it), same dominance conditions | ceil(32 / c) + 1 |
 
 An expression bound (annotation) may use the arguments a0 to a5 at the
@@ -78,7 +78,7 @@ def counted(blocks, loop, inner_bodies, dom, values, entry_state):
             if up.op == "addi" and up.rs1 == ind and up.imm != 0:
                 if not isinstance(init, int):
                     continue
-                # the fixpoint state at the branch holds for every iteration
+                # the converged state at the branch holds for every iteration
                 lim = values.before(b, br.addr).get(lim_reg) if b in values.inp else None
                 if not isinstance(lim, int):
                     continue
