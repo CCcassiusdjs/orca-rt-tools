@@ -16,9 +16,15 @@
 #   make trace     GHDL run of tb_cpu_trace.vhd on wcet_bodies.hex into logs/bodies.trace.txt
 #   make sim       RTL simulation of wcet_e (Questa and riscv64-elf; ENV_SETUP as in exp23) at F_CLK:
 #                  F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) wcet_e 2x2
-#   make run-analyze  static costs of the image of that run against its log ($(LOG), default
-#                  $(BUILD)/sim/events.txt): CPU per PE and per task (rttools.paper.wcet run-log)
-#                  into $(BUILD)/run, and the phase-model analysis of rtlapp into $(BUILD)/run-rtlapp
+#   make run-analyze  static costs of the image of a run against its log ($(LOG), default the stored
+#                  run W1, logs/W1.events.txt with logs/W1.image.elf; after `make sim`,
+#                  LOG=$(BUILD)/sim/events.txt and the image of build/sim): CPU per PE and per task,
+#                  and the phase-model analysis of rtlapp with the static t(v) of that image
+#                  (rttools.paper.wcet run-log) into $(OUTDIR)
+#   make check-run compare $(OUTDIR)/metrics.json with $(REF) (default reference_W1.json)
+#
+# Run W1 (logs/W1.*): wcet_e of tag r11-wcet-rc1 (git archive), Questa 2025.3, riscv64-elf-gcc 12.2.0,
+# 10 ms at 500 MHz (make sim); W1.image.elf and W1.image.lst are the image of the run.
 #
 # SIM_NS: release delay 3 ms + 14 releases of 0.5 ms (rtlapp cpu_windows takes windows of
 # n(J) + 1 = 4 releases from the release of iteration 4) = 10 ms.
@@ -38,13 +44,16 @@ MESH    := 2x2
 GENARGS  = $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --bodies $(BODIES) --out $(APP_DIR)
 F_CLK   ?= 500000000
 SIM_NS  ?= 10000000
-LOG     ?= $(BUILD)/sim/events.txt
-IMAGE   ?= $(dir $(LOG))pkt-sim/software/ucx-os/build/target/image.elf
+LOG     ?= logs/W1.events.txt
+REF     ?= reference_W1.json
+OUTDIR  ?= $(BUILD)/run_$(firstword $(subst ., ,$(notdir $(LOG))))
+# image of the run: logs/<run>.image.elf next to a stored log, else the build of simulate.sh
+IMAGE   ?= $(if $(filter logs/%.events.txt,$(LOG)),$(patsubst %.events.txt,%.image.elf,$(LOG)),$(dir $(LOG))pkt-sim/software/ucx-os/build/target/image.elf)
 CC_BODIES ?= riscv64-elf-gcc
 RTL     := ../../pkt-sim/tests/rtl
 UCX_IMG := pkt-sim/software/ucx-os/build/target
 
-.PHONY: all analyze check app csv images bodies trace sim run-analyze clean
+.PHONY: all analyze check app csv images bodies trace sim run-analyze check-run clean
 
 all: analyze check
 
@@ -54,6 +63,7 @@ analyze:
 check:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/metrics.json reference.json
 	$(GEN) check $(GENARGS)
+	$(MAKE) run-analyze check-run
 
 app:
 	$(GEN) generate $(GENARGS)
@@ -81,9 +91,10 @@ sim:
 
 run-analyze:
 	$(RUN) run-log $(LOG) --spec specs/wcet_e.json --image $(IMAGE) --manifest $(APP_DIR)/$(NAME).json \
-		--csv $(CSV) --map $(MAP) --out $(BUILD)/run
-	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json \
-		--csv $(CSV) --map $(MAP) --arch ../../arch/hermes-2x2.gml --out $(BUILD)/run-rtlapp
+		--csv $(CSV) --map $(MAP) --arch ../../arch/hermes-2x2.gml --out $(OUTDIR)
+
+check-run:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(OUTDIR)/metrics.json $(REF)
 
 clean:
 	rm -rf $(BUILD)

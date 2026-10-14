@@ -39,7 +39,7 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | `make -C experiments/car-v-rtl sim F_CLK=380000000 ENV_SETUP="..."` | New RTL simulation of CAR-V (4x4, 11.5 ms) in `experiments/car-v-rtl/build/sim`; `make -C experiments/car-v-rtl analyze check-run LOG=build/sim/events.txt` analyzes it | about 14.5 min of simulation |
 | `make -C experiments/exp23 instrumentation ENV_SETUP="..."` | `experiments/exp23/build/sw/{with,without}` (images with and without the instrumentation writes, `build_sw.sh`), then the bound of the writes in the measured CPU time of run F against `reference_head.json` | 4 s (container) |
 | `make -C experiments/wcet PYTHON=<python>` | `experiments/wcet/build`: t(v) of E (image of run H), CAR-V and WCET-E from the static analysis, against the CPU time per iteration of runs H and CV2 and the GHDL cycles of the bodies of WCET-E; flow of E with the static costs; checked against `reference.json` | about 1 min |
-| `make -C experiments/wcet sim run-analyze F_CLK=500000000 ENV_SETUP="..."` | RTL simulation of WCET-E (`build/sim`) and its CPU time per PE against the static t(V_k) of its image | simulation of 10 ms |
+| `make -C experiments/wcet sim F_CLK=500000000 ENV_SETUP="..."`, then `make -C experiments/wcet run-analyze LOG=build/sim/events.txt` | RTL simulation of WCET-E (`build/sim`) and its CPU time per PE against the static t(V_k) of its image; without LOG, the stored run W1 (`logs/W1.*`, checked against `reference_W1.json` by `make -C experiments/wcet check`) | `vsim` 2 min 36 s for 10 ms (run W1, `logs/W1.time.txt`) |
 | `cd orca-rt-tools && python -m pytest -q` | Python, C host and RTL tests (the RTL tests skip without Verilator or GHDL) | about 1 min |
 
 ## Measured times
