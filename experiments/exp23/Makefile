@@ -44,6 +44,10 @@
 # tick, app/weird_a.sim; release=data for weird_a_data); the stored logs have no such line and
 # are of the release rule data, the code of weird_a_data (pkt-sim/software/ucx-os/Makefile).
 #
+# Interrupt rule (clock.isr of metrics.json, line isr of the RUN_INFO): the stored logs are of the
+# kernel whose handlers enable interrupts before the return of _isr (nesting; ISR_NESTING=1 in
+# simulate.sh builds it); the kernel of this tree leaves them disabled (no_nesting).
+#
 # The run that a paper reports: make paper REQUIRE_CLEAN=1 from a clean
 # checkout at a tag (or from `git archive <tag>`); simulate.sh stops
 # otherwise. RUN_INFO then holds repo_commit, repo_state, repo_tag and

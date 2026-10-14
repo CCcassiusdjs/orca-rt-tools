@@ -11,7 +11,8 @@
   "clock_hz": 380000000,
   "half_period_fs": 1315789,
   "source": "RUN_INFO",
-  "edges_snapped": true
+  "edges_snapped": true,
+  "isr": "nesting"
  },
  "model": {
   "period_cycles": 190000,

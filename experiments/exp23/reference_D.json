@@ -1,6 +1,9 @@
 {
  "_doc": "Expected results of logs/D.events.txt: RTL of 6a049b5 with timescale 1ns/100ps, software of commit 4c299fc, Questa 2025.3, 20 ms. In cycles, run D equals run A (RTL of 4c299fc, 100 ps units) event by event.",
  "_dispatch_order": "Dispatch order of the kernel rule on the creation rows of apps/synthetic-app-e/synthetic-app-e.csv (E, H, I on EHI and J, G on GJ, before E, I, H and G, J): tab82 F2 deadline 261000 -> 368570 (G starts after J, s^(G) = 118570), F4 release 128070 -> 173370 and deadline 370880 -> 261000 (I last on EHI; J first on GJ, s^(J) = 11000), F5 release 173370 -> 98000 and deadline 370880 -> 261000. CPU demand, f_CPU and the measured values do not change.",
+ "clock": {
+  "isr": "nesting"
+ },
  "unit": {
   "name": "1 ns"
  },

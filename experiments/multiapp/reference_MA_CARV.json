@@ -15,7 +15,8 @@
   "half_period_fs": 1149657,
   "source": "RUN_INFO",
   "run_info": "MA.RUN_INFO",
-  "edges_snapped": true
+  "edges_snapped": true,
+  "isr": "nesting"
  },
  "model": {
   "clock_hz": 434912000,

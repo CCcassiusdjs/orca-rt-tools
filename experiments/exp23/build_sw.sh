@@ -14,6 +14,10 @@
 #               writes to the instrumentation registers (device/cacc.h);
 #               `make software` builds both variants for the bound of the
 #               instrumentation cost (rttools/paper/instrumentation.py)
+#   ISR_NESTING 1 adds -DUCX_ISR_NESTING to UCX_CFLAGS: the kernel of the
+#               runs up to r11, whose handlers enable interrupts before the
+#               return of _isr (kernel/sched.c); 0 (default) builds the
+#               kernel that leaves them disabled in every handler
 #   APP         application of pkt-sim/software/ucx-os (Makefile target and
 #               app/<APP>.c; default weird_a, application E of run F)
 #   F_CLK, F_TICK
@@ -49,6 +53,11 @@ rm -rf "$OUT/pkt-sim"
 cp -a "$REPO/pkt-sim" "$OUT/pkt-sim"
 mkdir -p "$OUT/pkt-sim/logs"
 
+case ${ISR_NESTING:-0} in
+	0) ;;
+	1) UCX_CFLAGS="${UCX_CFLAGS:-} -DUCX_ISR_NESTING" ;;
+	*) echo "ISR_NESTING must be 0 or 1: $ISR_NESTING" >&2; exit 2 ;;
+esac
 if [ -n "${UCX_CFLAGS:-}" ]; then
 	set -- CC="riscv64-elf-gcc $UCX_CFLAGS"
 else

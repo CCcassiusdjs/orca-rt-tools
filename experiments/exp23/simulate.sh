@@ -58,6 +58,12 @@
 #   VSIM_OPTS   extra options of the vsim command (e.g. -voptargs=+acc,
 #               which keeps the internal signals that a RUN_DO examines);
 #               RUN_INFO records them
+#   ISR_NESTING 1 builds the kernel with -DUCX_ISR_NESTING (build_sw.sh):
+#               the handlers enable interrupts before the return of _isr,
+#               the image of the runs up to r11; 0 (default) the kernel that
+#               leaves them disabled in every handler. RUN_INFO has
+#               isr=nesting or isr=no_nesting (a RUN_INFO without the line
+#               is of the runs up to r11, isr=nesting)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -226,6 +232,7 @@ fi
 	echo "release_cycles=$RELEASE_CYCLES"
 	echo "warmup_cycles=$WARMUP_CYCLES"
 	if [ "$(setup TICK_RELEASE)" = 1 ]; then echo "release=tick"; else echo "release=data"; fi
+	if [ "${ISR_NESTING:-0}" = 1 ]; then echo "isr=nesting"; else echo "isr=no_nesting"; fi
 } >> "$OUT/RUN_INFO"
 
 if command -v /usr/bin/time > /dev/null; then

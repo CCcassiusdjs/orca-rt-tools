@@ -95,6 +95,23 @@ def read_run_info(path):
     return out
 
 
+ISR_RULES = ("no_nesting", "nesting")
+
+
+def isr_rule(info):
+    """Interrupt rule of the image of a run: the RUN_INFO line `isr`
+    (simulate.sh: no_nesting, the kernel default, every handler leaves
+    interrupts disabled until the return of _isr; nesting with
+    ISR_NESTING=1, -DUCX_ISR_NESTING). A RUN_INFO without the line (the
+    runs up to r11: A to H, CV, CV2, MA, W1, CF) or no RUN_INFO gives
+    nesting, the kernel whose handlers enable interrupts before that
+    return (previous version of the image)."""
+    rule = (info or {}).get("isr", "nesting")
+    if rule not in ISR_RULES:
+        raise ValueError(f"RUN_INFO isr={rule!r}: expected one of {', '.join(ISR_RULES)}")
+    return rule
+
+
 def half_period_fs(f_clk_hz, precision_fs=TIMESCALE_PRECISION_FS):
     """Half period of the simulator clock for F_CLK: the largest multiple
     of the timescale precision at or below 1e15 / (2 F_CLK) fs, so the
@@ -293,6 +310,7 @@ def load_run(log_path, cfg, unit=None, run_info="auto"):
     info = read_run_info(path) if path else None
     clock = simulation_clock(cfg, info)
     clock["run_info"] = os.path.basename(path) if path else None
+    clock["isr"] = isr_rule(info)
     run_cfg = dict(cfg, clock_hz=clock["clock_hz"])
     tr = load(log_path, run_cfg, unit, clock)
     clock["edges_snapped"] = tr.meta["edges_snapped"]
