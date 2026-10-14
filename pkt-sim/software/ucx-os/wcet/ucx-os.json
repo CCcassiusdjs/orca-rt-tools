@@ -26,6 +26,8 @@
     "__udivsi3": {"_doc": "arch/common/muldiv.c (__udivmodsi4): the loop that shifts the divisor left until bit 31 is set runs at most 32 times; the loop over qbit is a shift loop", "loops": [{"select": "rest", "bound": 32}]},
     "__umodsi3": {"_doc": "as __udivsi3", "loops": [{"select": "rest", "bound": 32}]},
     "__udivmodsi4": {"_doc": "as __udivsi3", "loops": [{"select": "rest", "bound": 32}]},
+    "_interrupt_set": {"_doc": "arch/riscv/hf-riscv-e/crt0.s (a0 = 0, without UCX_ISR_NO_DI_READBACK): the read back of IRQ_STATUS after the wait runs once; it repeats only after an interrupt taken in the wait, whose handler has its own term (one more pass, 16 cycles, per such interrupt)",
+                       "loops": [{"select": "all", "bound": 1}]},
     "_isr": {"_doc": "arch/riscv/hf-riscv-e/crt0.s: jalr zero, 0(a5) returns to the interrupted code (address of IRQ_EPC)",
              "indirect_jumps": [{"at": "all", "return": true}]}
   }

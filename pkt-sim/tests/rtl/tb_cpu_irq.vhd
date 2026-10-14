@@ -11,11 +11,16 @@
 -- 0: it does not (default of the kernel); 2: as 0, and the main loop also
 -- returns through the return of _isr with interrupts disabled and the
 -- interrupts of the testbench pending (yield() of UCX-OS that resumes a task
--- preempted by the tick). HEX: cpu_irq.hex (_isr of crt0.s) or
--- cpu_irq_guard.hex (_isr of crt0.s with UCX_ISR_RETURN_GUARD).
--- FAIL when the main loop stores to 0x20000030 (sp changed), stops storing
--- its counter for STALL cycles, or fetches outside the program; PASS after
--- COUNT interrupts.
+-- preempted by the tick); 3: as 0, and the main loop calls _interrupt_set(0)
+-- after a wait of (counter mod 64) iterations and checks IRQ_STATUS about 20
+-- cycles later. HEX: cpu_irq.hex (_isr and _interrupt_set
+-- of crt0.s up to tag r11-rc3) or cpu_irq_guard.hex (crt0.s of this tree).
+-- FAIL when the main loop stores to 0x20000030 (sp changed) or to 0x20000034
+-- (mode 3: interrupts enabled after _interrupt_set(0)), stops storing
+-- its counter for STALL cycles, a raised interrupt waits STALL cycles, the
+-- program stores below PROGRAM (the code; mode 1: the sb of the return of
+-- _isr with a5 of a nested interrupt) or fetches outside the program; PASS
+-- after COUNT interrupts.
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -23,7 +28,8 @@ use std.textio.all;
 
 entity tb_cpu_irq is
 	generic (HEX: string := "cpu_irq.hex"; MODE: integer := 1; COUNT: integer := 2000;
-		SPAN: integer := 96; QUIET: integer := 300; STALL: integer := 3000);
+		SPAN: integer := 96; QUIET: integer := 300; STALL: integer := 3000;
+		PROGRAM: integer := 4096);
 end tb_cpu_irq;
 
 architecture tb of tb_cpu_irq is
@@ -76,6 +82,7 @@ begin
 		variable wait_left: integer := -1;
 		variable last_progress: integer := 0;
 		variable delay: integer := 0;
+		variable pending: integer := 0;
 		procedure finish(ok: boolean; msg: string) is
 		begin
 			if ok then
@@ -116,6 +123,12 @@ begin
 			if addr = x"20000030" and we /= "0000" then
 				finish(false, "sp changed in the main loop");
 			end if;
+			if addr = x"20000034" and we /= "0000" then
+				finish(false, "interrupts enabled after _interrupt_set(0)");
+			end if;
+			if we /= "0000" and unsigned(addr) < PROGRAM then
+				finish(false, "store into the program");
+			end if;
 			if addr = x"20000040" and we /= "0000" then
 				extio_in(0) <= '0';
 				acks := acks + 1;
@@ -135,6 +148,14 @@ begin
 				wait_left := -1;
 			elsif wait_left > 0 then
 				wait_left := wait_left - 1;
+			end if;
+			if extio_in(0) = '1' then
+				pending := pending + 1;
+			else
+				pending := 0;
+			end if;
+			if pending > STALL then
+				finish(false, "interrupt not taken");
 			end if;
 			if started and cycle - last_progress > STALL then
 				finish(false, "main loop stalled");

@@ -37,7 +37,7 @@
  },
  "memory": {
   "_doc": "Heap model of rttools/ucxgen/memory.py (pe_demand) with in_flight received packets per input edge between PEs. heap_bytes: _heap_size of the car_full image (make car_full, ARCH=riscv/hf-riscv-e, riscv64-unknown-elf-gcc 13.2, build/target/image.map); ram_bytes: RAM of a PE (manycore_top.sv RAM_MSIZE)",
-  "heap_bytes": 48216,
+  "heap_bytes": 48168,
   "ram_bytes": 65536,
   "in_flight": 2,
   "max_payload_bytes": 65532,

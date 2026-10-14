@@ -112,6 +112,29 @@ def isr_rule(info):
     return rule
 
 
+CRT0_RULES = ("guard_readback", "guard", "plain")
+
+
+def crt0_rule(info):
+    """crt0.s of the image of a run (_isr and _interrupt_set of
+    arch/riscv/hf-riscv-e): the RUN_INFO line `crt0` (simulate.sh, CRT0:
+    guard_readback, the default, with the return test of _isr and the read
+    back of IRQ_STATUS in _interrupt_set(0); guard, the return test only;
+    plain, neither). A RUN_INFO without the line is of a run up to tag
+    r11-rc4: guard for car_full of r11-rc4 (run CF3, return test in the
+    build rule of car_full), plain otherwise (the runs up to r11 and TG, TH,
+    TCV, TMA, W2, CF2 of r11-rc3); no RUN_INFO gives plain."""
+    info = info or {}
+    if "crt0" in info:
+        rule = info["crt0"]
+        if rule not in CRT0_RULES:
+            raise ValueError(f"RUN_INFO crt0={rule!r}: expected one of {', '.join(CRT0_RULES)}")
+        return rule
+    if info.get("repo_tag") == "r11-rc4" and info.get("app") == "car_full":
+        return "guard"
+    return "plain"
+
+
 def half_period_fs(f_clk_hz, precision_fs=TIMESCALE_PRECISION_FS):
     """Half period of the simulator clock for F_CLK: the largest multiple
     of the timescale precision at or below 1e15 / (2 F_CLK) fs, so the
@@ -311,6 +334,7 @@ def load_run(log_path, cfg, unit=None, run_info="auto"):
     clock = simulation_clock(cfg, info)
     clock["run_info"] = os.path.basename(path) if path else None
     clock["isr"] = isr_rule(info)
+    clock["crt0"] = crt0_rule(info)
     run_cfg = dict(cfg, clock_hz=clock["clock_hz"])
     tr = load(log_path, run_cfg, unit, clock)
     clock["edges_snapped"] = tr.meta["edges_snapped"]

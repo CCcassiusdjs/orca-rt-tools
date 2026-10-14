@@ -33,9 +33,12 @@ LDFLAGS_STRIP = --gc-sections
 # extra definitions for every object (empty by default; the generated
 # applications of the Makefile pass UCX_DEFS=-DUCX_APP_IRQ4)
 UCX_DEFS ?=
-# extra assembler definitions for crt0.s (empty by default; the
-# time-triggered applications of the Makefile pass
-# UCX_ASDEFS="--defsym UCX_ISR_RETURN_GUARD=1")
+# extra assembler definitions for crt0.s (empty by default: _isr with the
+# test of an interrupt inside its return and _interrupt_set with the read
+# back of IRQ_STATUS. The crt0.s of the images up to tag r11-rc3:
+# UCX_ASDEFS="--defsym UCX_ISR_NO_RETURN_GUARD=1 --defsym
+# UCX_ISR_NO_DI_READBACK=1"; car_full of tag r11-rc4 (run CF3):
+# UCX_ASDEFS="--defsym UCX_ISR_NO_DI_READBACK=1")
 UCX_ASDEFS ?=
 
 # this is stuff used everywhere - compiler and flags should be declared (ASFLAGS, CFLAGS, LDFLAGS, LD_SCRIPT, CC, AS, LD, DUMP, READ, OBJ and SIZE).

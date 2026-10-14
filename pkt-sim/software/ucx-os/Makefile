@@ -131,7 +131,19 @@ endif
 # MA, W1, CF) enable interrupts inside the handlers: build them with
 # -DUCX_ISR_NESTING, e.g. make weird_a_data CC="riscv64-elf-gcc
 # -DUCX_ISR_NESTING" or UCX_CFLAGS=-DUCX_ISR_NESTING
-# experiments/exp23/build_sw.sh (ISR_NESTING=1 in simulate.sh)
+# experiments/exp23/build_sw.sh (ISR_NESTING=1 in simulate.sh).
+# Return of _isr (every image, crt0.s): an interrupt taken between the sb
+# that enables interrupts and the jump of the return (an interrupt pending
+# when yield() resumes a task that the tick preempted) returns to the
+# address of the interrupted return, and _interrupt_set(0) reads
+# IRQ_STATUS back until it is 0 (an interrupt raised before the store is
+# taken after it); pkt-sim/tests/rtl/tb_cpu_irq.vhd, modes 2 and 3. The
+# images up to tag r11-rc3 (the runs above and TG, TH, TCV, TMA, W2, CF2)
+# assemble crt0.s with UCX_ASDEFS="--defsym UCX_ISR_NO_RETURN_GUARD=1
+# --defsym UCX_ISR_NO_DI_READBACK=1" (CRT0=plain in
+# experiments/exp23/build_sw.sh and simulate.sh, the default with
+# ISR_NESTING=1); car_full of tag r11-rc4 (CF3) with
+# UCX_ASDEFS="--defsym UCX_ISR_NO_DI_READBACK=1" (CRT0=guard)
 delay: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/delay.o app/delay.c
 	@$(MAKE) --no-print-directory link
@@ -202,19 +214,14 @@ $(GEN_APPS): incl
 # and the NoC driver keeps the latest packet of each source without waking
 # the receiver (UCX_NOC_LATEST, lib/noc.c). The jobs of these tasks span
 # several ticks, so yield() often resumes a task that the tick preempted,
-# through the return of _isr with interrupts disabled; an interrupt pending
-# then (the send interrupt of the task that yields) comes between the sb and
-# the jump of that return, and _isr of crt0.s built with
-# UCX_ISR_RETURN_GUARD returns it to the address of the interrupted return
-# (pkt-sim/tests/rtl/tb_cpu_irq.vhd, mode 2). Example: make car_full
+# through the return of _isr (above, return of _isr). Example: make car_full
 # ARCH=riscv/hf-riscv-e
 GEN_TT_APPS = car_full
 TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST
-TT_ASDEFS = --defsym UCX_ISR_RETURN_GUARD=1
 
 $(GEN_TT_APPS): incl
 	@$(MAKE) --no-print-directory clean
-	@$(MAKE) --no-print-directory ucx.pack UCX_DEFS="$(TT_DEFS)" UCX_ASDEFS="$(TT_ASDEFS)"
+	@$(MAKE) --no-print-directory ucx.pack UCX_DEFS="$(TT_DEFS)"
 	$(CC) $(CFLAGS) $(TT_DEFS) -o $(BUILD_APP_DIR)/$@.o app/$@.c
 	@$(MAKE) --no-print-directory link
 	@find '$(SRC_DIR)' -maxdepth 1 -type f \( -name '*.pack' -o -name '*.o' \) -delete

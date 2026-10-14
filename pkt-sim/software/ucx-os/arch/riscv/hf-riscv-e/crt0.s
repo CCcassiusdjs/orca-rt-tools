@@ -59,8 +59,8 @@ _isr:
 	li	a5, 0xf0000040		# read IRQ_EPC
 	lw	a5, 0(a5)
 	addi	a5, a5, -4		# rollback, last opcode (at EPC) was not commited
-.ifdef UCX_ISR_RETURN_GUARD
-	# EPC at _isr_resume or at the jalr after it: the interrupt came after
+.ifndef UCX_ISR_NO_RETURN_GUARD
+	# EPC at .Lisr_resume or at the jalr after it: the interrupt came after
 	# the sb of the return below enabled interrupts and before its jump
 	# (an interrupt pending when yield() resumes a task that the tick
 	# preempted, kernel/sched.c). The address of that return is still at
@@ -68,7 +68,9 @@ _isr:
 	# returns there; without the test, it returns to the jalr with a5 =
 	# the address of the jalr, and the task loops on the jalr
 	# (pkt-sim/tests/rtl/tb_cpu_irq.vhd, mode 2). a0 is saved above.
-	la	a0, _isr_resume
+	# --defsym UCX_ISR_NO_RETURN_GUARD=1 assembles the _isr of the images
+	# up to tag r11-rc3 (Makefile, UCX_ASDEFS).
+	la	a0, .Lisr_resume
 	sub	a0, a5, a0
 	sltiu	a0, a0, 8
 	beq	a0, zero, 1f
@@ -99,7 +101,7 @@ _isr:
 	ori	a5, a5, 0x1
 	addi	sp, sp, 40
 	sb	a5, 0(a5)
-_isr_resume:
+.Lisr_resume:			# local label: _isr stays one function in the symbol table (rttools.wcet)
 	lw	a5, -4(sp)		# 36(sp)
 
 	jalr	zero, a5		# context restored, continue
@@ -109,6 +111,28 @@ _interrupt_set:
 	li	a1, 0xf0000030
 	lw	a2, 0(a1)
 	sw	a0, 0(a1)
+.ifndef UCX_ISR_NO_DI_READBACK
+	# a0 = 0: an interrupt that the controller (int_control.vhd) accepted
+	# in irq_idle before the store raises irq two cycles later, the core
+	# takes it after the store, and the return of _isr enables interrupts
+	# again. The six nops let that interrupt enter before the read; then
+	# IRQ_STATUS reads 1 and the store repeats, otherwise it reads 0 and no
+	# interrupt can enter (tb_cpu_irq.vhd, mode 3: 0 to 6 nops pass). a3 is
+	# a caller-saved register. --defsym UCX_ISR_NO_DI_READBACK=1 assembles
+	# the _interrupt_set of the images up to tag r11-rc4.
+	bne	a0, zero, 2f
+1:	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	lw	a3, 0(a1)
+	beq	a3, zero, 2f
+	sw	zero, 0(a1)
+	j	1b
+2:
+.endif
 	addi	a0, a2, 0
 	ret
 

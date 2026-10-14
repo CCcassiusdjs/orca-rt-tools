@@ -8,7 +8,8 @@
   "half_period_fs": 1000000,
   "source": "RUN_INFO",
   "edges_snapped": false,
-  "isr": "nesting"
+  "isr": "nesting",
+  "crt0": "plain"
  },
  "parameters": {
   "release_period_ms": 0.5,

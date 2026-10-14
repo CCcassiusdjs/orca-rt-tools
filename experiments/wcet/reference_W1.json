@@ -335,7 +335,8 @@
    "source": "RUN_INFO",
    "run_info": "W1.RUN_INFO",
    "edges_snapped": false,
-   "isr": "nesting"
+   "isr": "nesting",
+   "crt0": "plain"
   },
   "model": {
    "clock_hz": 500000000,

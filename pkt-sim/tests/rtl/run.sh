@@ -66,7 +66,7 @@ ghdl_trace() { # cycle trace of wcet_bodies.hex (tb_cpu_trace.vhd): MARK and DON
 		--stop-time=20ms 2>&1) | grep -E "^(MARK|DONE|TIMEOUT)" || true
 }
 
-ghdl_cpu_irq() { # interrupt return of _isr of crt0.s on the HF-RISC core (tb_cpu_irq.vhd)
+ghdl_cpu_irq() { # interrupt return of _isr and _interrupt_set of crt0.s on the HF-RISC core (tb_cpu_irq.vhd)
 	W="$OUT/ghdl_cpu_irq"
 	mkdir -p "$W"
 	for f in bshifter alu reg_bank control int_control datapath cpu; do
@@ -74,22 +74,28 @@ ghdl_cpu_irq() { # interrupt return of _isr of crt0.s on the HF-RISC core (tb_cp
 	done
 	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_cpu_irq.vhd"
 	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq
+	irq() { # irq <hex> <mode>
+		(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/$1" -gMODE=$2 \
+			-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" || true
+	}
+	# cpu_irq.hex: _isr and _interrupt_set of crt0.s up to tag r11-rc3 (CRT0=plain)
 	# MODE 0: handlers leave interrupts disabled (default of the UCX-OS kernel): must pass
-	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=0 \
-		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" || true
+	irq cpu_irq.hex 0
 	# MODE 1: handlers enable interrupts before they return (_ei, _interrupt_tick; -DUCX_ISR_NESTING):
 	# the second interrupt of a pair corrupts the return; printed as NESTED
-	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=1 \
-		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/^FAIL/NESTED/; s/^PASS/NESTED-NOT-REPRODUCED/' || true
+	irq cpu_irq.hex 1 | sed 's/^FAIL/NESTED/; s/^PASS/NESTED-NOT-REPRODUCED/'
 	# MODE 2: the return of _isr with interrupts disabled and an interrupt pending (yield() that
 	# resumes a task preempted by the tick): the interrupt comes between the sb and the jump of the
 	# return, and the main loop stops on the jalr; printed as RESUME
-	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=2 \
-		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/^FAIL/RESUME/; s/^PASS/RESUME-NOT-REPRODUCED/' || true
-	# _isr with UCX_ISR_RETURN_GUARD (crt0.s of the time-triggered applications): MODE 0, 1 and 2 pass
-	for m in 0 1 2; do
-		(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq_guard.hex" -gMODE=$m \
-			-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/MODE=/GUARD MODE=/' || true
+	irq cpu_irq.hex 2 | sed 's/^FAIL/RESUME/; s/^PASS/RESUME-NOT-REPRODUCED/'
+	# MODE 3: an interrupt raised before the store of _interrupt_set(0) is taken after it, and the
+	# return of _isr enables interrupts again; printed as DISABLE
+	irq cpu_irq.hex 3 | sed 's/^FAIL/DISABLE/; s/^PASS/DISABLE-NOT-REPRODUCED/'
+	# cpu_irq_guard.hex: crt0.s of this tree (return test of _isr, read back of IRQ_STATUS in
+	# _interrupt_set(0)): MODE 0, 2 and 3 pass. MODE 1 (nested interrupts) is the kernel up to r11,
+	# with the crt0.s of cpu_irq.hex
+	for m in 0 2 3; do
+		irq cpu_irq_guard.hex $m | sed 's/MODE=/GUARD MODE=/'
 	done
 }
 

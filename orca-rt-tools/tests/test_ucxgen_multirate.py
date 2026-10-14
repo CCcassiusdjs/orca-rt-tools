@@ -56,7 +56,7 @@ def test_stored_files_match():
 def test_heap_per_pe():
     with open(os.path.join(APP_DIR, "car_full.json")) as f:
         m = json.load(f)
-    rows = memory.report(m, 48216, 2, (1, 2))
+    rows = memory.report(m, 48168, 2, (1, 2))
     assert rows[0]["worst_pe"] == 9 and rows[0]["fits"] and rows[0]["bytes"] == 39212
 
 
@@ -126,8 +126,8 @@ def test_build_car_full_and_weird_a(tmp_path):
         m = json.load(f)
     rows = memory.report(m, memory.heap_size(str(target / "image.map")), 2, (1,))
     assert rows[0]["fits"], rows
-    # _isr of crt0.s with UCX_ISR_RETURN_GUARD: an interrupt inside the
-    # return of _isr returns to the address of that return (36(sp))
+    # _isr of crt0.s (every image): an interrupt inside the return of _isr
+    # returns to the address of that return (36(sp))
     assert "lw\ta5,36(sp)" in isr_code(target, env)
     # weird_a after car_full: driver without UCX_NOC_LATEST; the tick hook is the one of the
     # release by tick (lib/tick_release.c)
@@ -135,4 +135,4 @@ def test_build_car_full_and_weird_a(tmp_path):
     syms = subprocess.run(["riscv64-elf-nm", str(target / "image.elf")], capture_output=True, text=True,
                           env=env).stdout
     assert "pktdrv_put_latest" not in syms and re.search(r" T ucx_phase_wait$", syms, re.M)
-    assert "lw\ta5,36(sp)" not in isr_code(target, env)
+    assert "lw\ta5,36(sp)" in isr_code(target, env)

@@ -16,7 +16,8 @@
   "source": "RUN_INFO",
   "run_info": "MA.RUN_INFO",
   "edges_snapped": true,
-  "isr": "nesting"
+  "isr": "nesting",
+  "crt0": "plain"
  },
  "model": {
   "clock_hz": 434912000,

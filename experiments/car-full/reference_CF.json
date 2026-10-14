@@ -15,7 +15,8 @@
   "source": "RUN_INFO",
   "run_info": "CF.RUN_INFO",
   "edges_snapped": true,
-  "isr": "nesting"
+  "isr": "nesting",
+  "crt0": "plain"
  },
  "model": {
   "clock_hz": 432000000,

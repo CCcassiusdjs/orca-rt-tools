@@ -19,6 +19,8 @@ UCX = os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os")
 APP_DIR = os.path.join(UCX, "app")
 EXP = os.path.join(REPO_ROOT, "experiments")
 GENERATED = ["car_v", "wcet_e", "carv_e", "e_ucx"]
+# UCX_ASDEFS of the crt0.s up to tag r11-rc3 (experiments/exp23/build_sw.sh, CRT0=plain)
+PLAIN_ASDEFS = "--defsym UCX_ISR_NO_RETURN_GUARD=1 --defsym UCX_ISR_NO_DI_READBACK=1"
 
 
 def read(*p):
@@ -38,7 +40,7 @@ def test_kernel_sources():
     assert "ctx_p[CONTEXT_RA] = (uint32_t)_task_start;" in hal
     mk = read("Makefile")
     assert "TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST\n" in mk
-    assert "UCX_ISR_NO_NESTING" not in mk
+    assert "UCX_ISR_NO_NESTING" not in mk and "TT_ASDEFS" not in mk
 
 
 @pytest.mark.parametrize("name", GENERATED + ["car_full"])
@@ -191,9 +193,9 @@ def calls(funcs, fname, target):
     return sum(1 for ln in funcs.get(fname, []) if re.search(rf"\bjal\b.*<{target}>", ln))
 
 
-def make(ucx, path, target, cc=None):
+def make(ucx, path, target, cc=None, asdefs=None):
     env = {**os.environ, "PATH": path}
-    extra = [f"CC={cc}"] if cc else []
+    extra = ([f"CC={cc}"] if cc else []) + ([f"UCX_ASDEFS={asdefs}"] if asdefs else [])
     for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", "clean"],
                  ["make", "-s", *extra, target, "F_CLK=434912000"]):
         r = subprocess.run(args, cwd=ucx, env=env, capture_output=True, text=True, timeout=600)
@@ -205,8 +207,8 @@ def test_build_default_and_nesting(tmp_path):
     """Default image: no _interrupt_tick in dispatch, one interrupt write
     (_di) in irq2_handler and irq3_handler and none in the release handler,
     yield saves and restores the state, tasks start through _task_start.
-    With -DUCX_ISR_NESTING: the handlers and dispatch of the kernel up to
-    r11; weird_a_data is then the stored image of the data-driven code
+    With -DUCX_ISR_NESTING and the crt0.s up to r11-rc3: the handlers and
+    dispatch of the kernel up to r11; weird_a_data is then the stored image of the data-driven code
     (experiments/wcet/images/tick/weird_a_data.elf) when the compiler is
     the one of that image."""
     from tests.test_ucxgen_carv import toolchain
@@ -225,7 +227,8 @@ def test_build_default_and_nesting(tmp_path):
         assert calls(f, "irq4_handler", "_interrupt_set") == 0
         assert calls(f, "yield", "_interrupt_set") >= 2       # _di at the entry, restore at the return
     cc = "riscv64-elf-gcc -DUCX_ISR_NESTING"
-    elf = make(ucx, path, "weird_a_data", cc)
+    # crt0.s up to tag r11-rc3 (CRT0=plain of build_sw.sh, the default with ISR_NESTING=1)
+    elf = make(ucx, path, "weird_a_data", cc, PLAIN_ASDEFS)
     f = disassembly(path, elf)
     assert "_task_start" not in f and calls(f, "dispatch", "_interrupt_tick") == 1
     assert calls(f, "irq2_handler", "_interrupt_set") == 2 and calls(f, "irq3_handler", "_interrupt_set") == 2

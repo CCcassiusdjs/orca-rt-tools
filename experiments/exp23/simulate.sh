@@ -64,6 +64,12 @@
 #               leaves them disabled in every handler. RUN_INFO has
 #               isr=nesting or isr=no_nesting (a RUN_INFO without the line
 #               is of the runs up to r11, isr=nesting)
+#   CRT0        _isr and _interrupt_set of crt0.s (build_sw.sh):
+#               guard_readback (default, the crt0.s of this tree), guard
+#               (car_full of tag r11-rc4, run CF3) or plain (the crt0.s up
+#               to tag r11-rc3; default with ISR_NESTING=1). RUN_INFO has
+#               crt0=<value> (a RUN_INFO without the line is of a run up to
+#               tag r11-rc4: plain, or guard for car_full of r11-rc4)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -92,6 +98,8 @@
 #   release_cycles, warmup_cycles
 # and the release rule of the tasks (rttools.paper.phasecheck):
 #   release      tick (TICK_RELEASE=1 in app/<app>.sim) or data
+# and the crt0.s of the image (rttools.paper.exp23.crt0_rule):
+#   crt0         guard_readback, guard or plain (CRT0 above)
 set -euo pipefail
 
 OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]}
@@ -104,6 +112,11 @@ REPO=$(cd "$HERE/../.." && pwd)
 F_CLK=${F_CLK:-500000000}
 RELEASE_NS=${RELEASE_NS:-500000}
 WARMUP_NS=${WARMUP_NS:-3000000}
+if [ "${ISR_NESTING:-0}" = 1 ]; then CRT0=${CRT0:-plain}; else CRT0=${CRT0:-guard_readback}; fi
+case $CRT0 in
+	guard_readback|guard|plain) export CRT0 ;;
+	*) echo "CRT0 must be guard_readback, guard or plain: $CRT0" >&2; exit 2 ;;
+esac
 
 # clock of the run (before any tool check, so a wrong value stops at once)
 for v in F_CLK RELEASE_NS WARMUP_NS; do
@@ -232,6 +245,7 @@ fi
 	echo "release_cycles=$RELEASE_CYCLES"
 	echo "warmup_cycles=$WARMUP_CYCLES"
 	if [ "${ISR_NESTING:-0}" = 1 ]; then echo "isr=nesting"; else echo "isr=no_nesting"; fi
+	echo "crt0=$CRT0"
 	if [ "$(setup TICK_RELEASE)" = 1 ]; then echo "release=tick"; else echo "release=data"; fi
 } >> "$OUT/RUN_INFO"
 

@@ -62,9 +62,10 @@ FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \
 	m = json.load(open('$(CARV_METRICS)')); \
 	print(exp23.flow_clock(m['chosen']['search']['frequency_hz'], m['scale']['period_s'])['f_clk_hz'])"
 # _heap_size of the image of car_v built with riscv64-unknown-elf-gcc 13.2,
-# release by tick (TR_DEFS; 50676 for the image of runs CV and CV2); make
-# build reads the value of the toolchain in use
-HEAP    ?= 49764
+# release by tick (TR_DEFS), crt0.s of this tree (49764 for the image of run
+# TCV, crt0 plain; 50676 for the image of runs CV and CV2); make build reads
+# the value of the toolchain in use
+HEAP    ?= 49700
 IN_FLIGHT ?= 2
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 ARCH    := ../../arch/hermes-4x4.gml

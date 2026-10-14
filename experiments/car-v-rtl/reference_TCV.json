@@ -12,7 +12,8 @@
   "half_period_fs": 1315789,
   "source": "RUN_INFO",
   "edges_snapped": true,
-  "isr": "no_nesting"
+  "isr": "no_nesting",
+  "crt0": "plain"
  },
  "model": {
   "period_cycles": 190000,
