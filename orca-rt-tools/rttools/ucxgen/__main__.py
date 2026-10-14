@@ -4,6 +4,11 @@
            [--cycles-per-count C] [--reserve R] [--payload-divisor D] [--tag-mod M] [--delay-ns NS]
     python -m rttools.ucxgen check <csv> <map> --name N ... --out DIR
            (exit 1 when DIR/N.{c,json,sim} differ from a new generation)
+    python -m rttools.ucxgen compose --app A:<csv>:<map> --app B:<csv>:<map> ... --name N [--mesh WxH]
+           --out DIR [--cycles-per-count C] [--payload-divisor D] [--tag-mod M] [--delay-ns NS]
+           (one image for several applications on disjoint PEs, rttools.multiapp; model.compose)
+    python -m rttools.ucxgen compose-check --app ... --name N ... --out DIR
+           (exit 1 when DIR/N.{c,json,sim} differ from a new composition)
     python -m rttools.ucxgen memory DIR/N.json [--image-map image.map | --heap BYTES]
            [--in-flight K] [--divisors 1,2,4] [--json OUT]
            (exit 1 when the worst PE does not fit with the payload divisor 1 of the manifest)
@@ -72,6 +77,60 @@ def cmd_check(a):
     return 1 if diff else 0
 
 
+def add_compose_args(p):
+    p.add_argument("--app", action="append", required=True, metavar="NAME:CSV:MAP",
+                   help="application of the composition (repeat; the order numbers ports, flows and letters)")
+    p.add_argument("--name", required=True)
+    p.add_argument("--mesh", default="4x4")
+    p.add_argument("--out", required=True)
+    p.add_argument("--cycles-per-count", type=float, default=model.CYCLES_PER_COUNT)
+    p.add_argument("--payload-divisor", type=int, default=1)
+    p.add_argument("--tag-mod", type=int, default=model.TAG_MOD)
+    p.add_argument("--delay-ns", type=int, default=model.DEFAULT_DELAY_NS)
+
+
+def build_composition(a):
+    parts = []
+    for spec in a.app:
+        name, sep, rest = spec.partition(":")
+        csv_path, sep2, map_path = rest.rpartition(":")
+        if not (sep and sep2 and name and csv_path and map_path):
+            raise model.GenError(f"--app NAME:CSV:MAP expected, got {spec!r}")
+        parts.append((name, csv_path, map_path))
+    cpc = int(a.cycles_per_count) if float(a.cycles_per_count).is_integer() else a.cycles_per_count
+    return model.compose(parts, a.name, mesh=a.mesh, cycles_per_count=cpc, payload_divisor=a.payload_divisor,
+                         tag_mod=a.tag_mod, delay_ns=a.delay_ns)
+
+
+def cmd_compose(a):
+    m = build_composition(a)
+    os.makedirs(a.out, exist_ok=True)
+    for name, text in outputs(m).items():
+        with open(os.path.join(a.out, name), "w") as f:
+            f.write(text)
+    for w in m["warnings"]:
+        print("warning: " + w, file=sys.stderr)
+    r = m["release"]
+    for x in m["apps"]:
+        print(f"{x['name']}: {len(x['tasks'])} tasks, flows {x['flows'][0]} to {x['flows'][-1]}, "
+              f"PEs {', '.join(map(str, x['pes']))}, sources on PEs {', '.join(map(str, x['release_pes']))}")
+    print(f"{m['name']}: {len(m['tasks'])} tasks, {len(m['flows'])} flows "
+          f"({sum(not f['local'] for f in m['flows'])} between PEs), mesh {a.mesh}, "
+          f"release mask {r['mask']} (PEs {', '.join(map(str, r['pes']))}) -> {a.out}")
+    return 0
+
+
+def cmd_compose_check(a):
+    m = build_composition(a)
+    diff = [os.path.join(a.out, n) for n, text in outputs(m).items()
+            if not os.path.exists(os.path.join(a.out, n)) or open(os.path.join(a.out, n)).read() != text]
+    for p in diff:
+        print("differs from the generator: " + p)
+    if not diff:
+        print(f"{m['name']}: generated files match ({a.out})")
+    return 1 if diff else 0
+
+
 def cmd_memory(a):
     m = json.load(open(a.manifest))
     heap = a.heap if a.heap is not None else (memory.heap_size(a.image_map) if a.image_map else None)
@@ -102,6 +161,8 @@ def main(argv=None):
     sub = ap.add_subparsers(dest="cmd", required=True)
     add_gen_args(sub.add_parser("generate"))
     add_gen_args(sub.add_parser("check"))
+    add_compose_args(sub.add_parser("compose"))
+    add_compose_args(sub.add_parser("compose-check"))
     p = sub.add_parser("memory")
     p.add_argument("manifest")
     p.add_argument("--image-map")
@@ -111,7 +172,8 @@ def main(argv=None):
     p.add_argument("--json")
     a = ap.parse_args(argv)
     try:
-        return {"generate": cmd_generate, "check": cmd_check, "memory": cmd_memory}[a.cmd](a)
+        return {"generate": cmd_generate, "check": cmd_check, "memory": cmd_memory, "compose": cmd_compose,
+                "compose-check": cmd_compose_check}[a.cmd](a)
     except ValueError as e:      # model.GenError, mapfile.MappingError
         print("error: " + str(e), file=sys.stderr)
         return 2

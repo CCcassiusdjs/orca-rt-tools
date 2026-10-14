@@ -242,3 +242,123 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
                         f"manycore_pe.sv fires every {RTL_PERIOD_NS} ns from {RTL_DELAY_NS} ns"]
                        if (period_ns, delay_ns) != (RTL_PERIOD_NS, RTL_DELAY_NS) else []),
     }
+
+
+# ------------------------------------------------------------ composition
+
+def compose(parts, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUNT, payload_divisor=1,
+            tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS):
+    """One UCX-OS image for several applications on disjoint PEs of one
+    mesh (rttools.multiapp): `parts` is a list of (application name, csv,
+    map), the .map files with node indices of the mesh.
+
+    Each application is built as by `build` (its reserve is the
+    scheduler_cycles of its CSV). The composition numbers the ports, the
+    flows (so the tags) and the marker letters across the applications in
+    the order of `parts`, so a PE, a tag or a letter of the log belongs to
+    one application. Requirements: one release period for all the
+    applications (one kernel tick and one release generator period in the
+    image and in manycore_pe.sv), no PE with tasks of two applications,
+    and distinct task labels (the kernel name and the manifest identify a
+    task by its label). The manifest keeps the fields of `build` and adds
+    "apps" (name, tasks, flow ids, PEs, source PEs and inputs of each
+    application); app_manifest gives the manifest of one application for
+    rttools.paper.rtlapp."""
+    if not re.fullmatch(r"[A-Za-z_]\w*", name):
+        raise GenError(f"name must be a C identifier, got {name!r}")
+    if not parts:
+        raise GenError("no application")
+    app_names = [p[0] for p in parts]
+    if len(set(app_names)) != len(app_names):
+        raise GenError("repeated application name")
+    ms = [build(c, m, name, mesh=mesh, cycles_per_count=cycles_per_count, payload_divisor=payload_divisor,
+                tag_mod=tag_mod, delay_ns=delay_ns) for _, c, m in parts]
+    periods = {m["release"]["period_ns"] for m in ms}
+    if len(periods) != 1:
+        raise GenError("the applications need one release period (one kernel tick and one release generator "
+                       "period), got " + ", ".join(f"{a}: {m['release']['period_ns']} ns"
+                                                    for a, m in zip(app_names, ms)))
+    owner, label_app = {}, {}
+    problems = []
+    for a, m in zip(app_names, ms):
+        for t in m["tasks"]:
+            if t["name"] in label_app:
+                problems.append(f"task {t['name']} in applications {label_app[t['name']]} and {a}")
+            label_app[t["name"]] = a
+            if owner.setdefault(t["pe"], a) != a:
+                problems.append(f"PE {t['pe']} is mapped by applications {owner[t['pe']]} and {a}")
+    if problems:
+        raise GenError("; ".join(sorted(set(problems))))
+    n_tasks = sum(len(m["tasks"]) for m in ms)
+    if n_tasks > len(ITER_LETTERS):
+        raise GenError(f"{n_tasks} tasks: the iteration markers have {len(ITER_LETTERS)} letters")
+    n_flows = sum(len(m["flows"]) for m in ms)
+    if n_flows * tag_mod + tag_mod - 1 > MAX_TAG:
+        raise GenError(f"{n_flows} flows with tag_mod {tag_mod} exceed the 16-bit tag")
+
+    tasks, flows, apps, used = [], [], [], set()
+    port_off = flow_off = 0
+    for a, (_, csv_path, map_path), m in zip(app_names, parts, ms):
+        for f in m["flows"]:
+            flows.append(dict(f, id=f["id"] + flow_off, tag_base=(f["id"] + flow_off) * tag_mod, app=a))
+        for t in m["tasks"]:
+            tasks.append(dict(t, app=a, port=t["port"] + port_off, ident=c_ident(f"{a}_{t['name']}", used),
+                              iter_letter=ITER_LETTERS[len(tasks)],
+                              inputs=[i + flow_off for i in t["inputs"]],
+                              outputs=[i + flow_off for i in t["outputs"]]))
+        apps.append({"name": a, "tasks": [t["name"] for t in m["tasks"]],
+                     "flows": [f["id"] + flow_off for f in m["flows"]],
+                     "pes": sorted({t["pe"] for t in m["tasks"]}), "release_pes": m["release"]["pes"],
+                     "reserve_cycles": m["reserve_cycles"], "inputs": m["inputs"]})
+        port_off += len(m["tasks"])
+        flow_off += len(m["flows"])
+    width, height = ms[0]["mesh"]
+    sources = sorted({n for m in ms for n in m["release"]["pes"]})
+    out = {k: ms[0][k] for k in ("generator", "mesh", "cycles_per_count", "payload_divisor", "tag_mod")}
+    out.update({
+        "name": name,
+        "inputs": {a: m["inputs"] for a, m in zip(app_names, ms)},
+        "reserve_cycles": {a: m["reserve_cycles"] for a, m in zip(app_names, ms)},
+        "release": {"period_ns": ms[0]["release"]["period_ns"], "delay_ns": delay_ns, "pes": sources,
+                    "pe_labels": [f"{n % width}-{n // width}" for n in sources],
+                    "mask": sum(1 << n for n in sources)},
+        "pe_tasks": dict(sorted((k, v) for m in ms for k, v in m["pe_tasks"].items())),
+        "pe_dispatch": dict(sorted((k, v) for m in ms for k, v in m["pe_dispatch"].items())),
+        "apps": apps,
+        "tasks": tasks,
+        "flows": flows,
+        "warnings": sorted({w for m in ms for w in m["warnings"]}),
+    })
+    return out
+
+
+def app_manifest(m, app):
+    """Manifest of application `app` of a composition (compose), in the
+    format of `build`: its tasks and flows with the ports, flow ids, tags
+    and letters of the composition, and its inputs. "release" and
+    "pe_tasks" stay those of the composition (the log holds the release
+    acknowledgments and the dispatches of every PE); "composition" gives
+    the name of the image, the application and the flows of the other
+    applications ({flow id: "<application>/f<csv id>"}), so the analysis of
+    the log can tell their tags and packets apart."""
+    names = [a["name"] for a in m.get("apps", [])]
+    if app not in names:
+        raise GenError(f"application {app!r} not in the composition ({', '.join(names)})")
+    a = next(x for x in m["apps"] if x["name"] == app)
+    keep = {k: m[k] for k in ("generator", "mesh", "cycles_per_count", "payload_divisor", "tag_mod",
+                              "release", "pe_tasks")}
+    keep.update({
+        "name": m["name"],
+        "inputs": a["inputs"],
+        "reserve_cycles": a["reserve_cycles"],
+        "pe_dispatch": {k: v for k, v in m["pe_dispatch"].items()
+                        if int(k.split("-")[1]) * m["mesh"][0] + int(k.split("-")[0]) in a["pes"]},
+        "tasks": [t for t in m["tasks"] if t["app"] == app],
+        "flows": [f for f in m["flows"] if f["app"] == app],
+        "warnings": m["warnings"],
+        "composition": {"name": m["name"], "app": app, "apps": names,
+                        "release_pes": a["release_pes"],
+                        "other_flows": {str(f["id"]): f"{f['app']}/f{f['csv_id']}" for f in m["flows"]
+                                        if f["app"] != app}},
+    })
+    return keep
