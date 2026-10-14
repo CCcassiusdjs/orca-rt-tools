@@ -189,11 +189,34 @@ def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
     "final_search", "frequency_hz"}: final_check is the evaluation at f_CPU
     (None when f_CPU <= f* or unknown), final_search the result of the
     search above f_CPU (None when not needed); a value is None when its
-    part has no result."""
+    part has no result.
+
+    General phase model (cpu["model"] == "multirate", several periods or a
+    cycle, rttools/bench_t/multirate.py): the packet windows come from the
+    ORT/BENCH sequences over the hyperperiod, which exist only at f >=
+    f_CPU. The network is evaluated at f_CPU first (final_check); when it
+    is not feasible there, the search runs above f_CPU (final_search).
+    f_star_hz is then the lowest frequency at or above f_CPU with a
+    feasible link schedule (f_CPU itself when final_check is feasible) and
+    network is None."""
     cpu = cpu_check(app, mapping)
     f_cpu = cpu["f_cpu_hz"] if cpu is not None else None
     if f_cpu is not None:
         info("CPU test: f_CPU = " + str(f_cpu) + "Hz (largest CPU demand per release period)")
+    if cpu is not None and cpu.get("model") == "multirate":
+        info("Network check at f_CPU = " + str(f_cpu) + "Hz (general phase model)")
+        check = network_check(app, noc, mapping, appname, f_cpu, cfg)
+        above = None
+        if check["feasible"]:
+            final = f_cpu
+        else:
+            warn("No schedule at f_CPU; searching above f_CPU")
+            up = dict(cfg)
+            up["frequency"] = 2 * f_cpu
+            above = search_minimum_frequency(app, noc, mapping, appname, up, on_attempt, floor=f_cpu)
+            final = above["frequency"] if above is not None else None
+        return {"cpu": cpu, "network": None, "f_star_hz": final, "f_cpu_hz": f_cpu, "final_check": check,
+                "final_search": above, "frequency_hz": final}
     net = search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt)
     f_star = net["frequency"] if net is not None else None
     check = None

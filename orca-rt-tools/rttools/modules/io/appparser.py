@@ -27,6 +27,12 @@ def loadFromFile(app_csv):
     # optional #parameters section (release model of the flows)
     graph.graph.update(readParameters(app_csv))
 
+    # release period of each task (Period column of the task rows), for
+    # the phase model with several periods (rttools/bench_t/multirate.py)
+    periods = readTaskPeriods(app_csv)
+    if periods:
+      graph.graph["task_periods"] = periods
+
     # for n in graph.nodes(data=True):
     #   print(n)
 
@@ -141,6 +147,9 @@ def exportGmlFlows(tasks, flows):
 #                                 the same tasks on another node takes it too)
 #   sequence,<node>,<task>,...   (dispatch order on one PE, for a kernel with another
 #                                 rule; wins over the creation row)
+#   feedback,<source>,<target>   (an edge that delivers the data of the previous job of
+#                                 its source: out of n(v) and of the dispatch order;
+#                                 rttools/bench_t/multirate.py; one row per edge)
 def readParameters(filename):
   params = {}
   mode = 0
@@ -165,9 +174,42 @@ def readParameters(filename):
           params[key] = int(values[0].replace(',', ''))
         elif key == "release_model":
           params[key] = values[0]
+        elif key == "feedback":
+          if len(values) != 2:
+            raise ValueError("feedback row needs a source and a target task: " + ",".join(row))
+          params.setdefault("feedback", []).append((values[0], values[1]))
         else:
           raise ValueError("unknown parameter '" + key + "' in " + filename)
   return params
+
+# Release period of each task (s) from the Period column of the task rows
+# of the old schema (Task,Period,Capacity,Deadline,Acronym,...), by task
+# label; rows with period 0 and the wcet schema give no value.
+def readTaskPeriods(filename):
+  out = {}
+  mode = 0
+  legacy = False
+  with open(filename) as csvfile:
+    for row in csv.reader(csvfile):
+      if not row:
+        continue
+      head = row[0].strip()
+      if mode == 0:
+        if head == "#tasks":
+          mode = 1
+      elif mode == 1:
+        legacy = selectTaskRowParser(row) is parseTaskRowLegacy
+        mode = 2
+      elif head.startswith("#"):
+        break
+      elif legacy:
+        try:
+          period = float(row[1].replace(',', ''))
+        except ValueError:
+          continue
+        if period > 0:
+          out[row[4].strip()] = row[1].strip()
+  return out
 
 # Exports a graph to a png file. By design, dot generates
 # plot layout (requires graphviz)

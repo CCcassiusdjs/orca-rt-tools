@@ -83,6 +83,8 @@ def releaseWindows(flows, app, mapping):
 # generates packets for a given list of flows. packets
 # are generated for the whole hyperperiod hp
 def getPacketsFromFlows(flows, hp, tasks, app, mapping=None):
+    if app.get("rates") is not None:
+        return multirateFlows(flows, app, mapping)
     packets = []
     windows = releaseWindows(flows, app, mapping)
     for f in flows:
@@ -103,6 +105,31 @@ def getPacketsFromFlows(flows, hp, tasks, app, mapping=None):
             min_start = min_start + f["period"]
             i = i + 1
 
+    return packets
+
+
+# packets of one periodic hyperperiod of the general phase model
+# (rttools/bench_t/multirate.py): one packet per job of the source that
+# sends on the flow; release = finish of the job, deadline = start of the
+# job of the target that reads it. Raises MultirateError when the CPU
+# schedule of the frequency of the instance misses a deadline.
+def multirateFlows(flows, app, mapping):
+    from rttools.bench_t import multirate
+    spec = multirate.spec_from_instance(app, mapping)
+    sched = multirate.schedule(spec, app["rates"]["phase_cycles"])
+    windows = multirate.packet_windows(spec, sched)
+    packets = []
+    for f in flows:
+        for i, (_, rel, dl, _) in enumerate(windows[f["name"]]):
+            packets.append({
+                "name": f["name"] + ":" + str(i),
+                "flow": f["name"],
+                "source": f["source"],
+                "target": f["target"],
+                "min_start": rel,
+                "abs_deadline": dl,
+                "datasize": f["datasize"],
+            })
     return packets
 
 
@@ -131,6 +158,9 @@ def unwrap(app, arch, mapping):
         periods.append(f["period"])
 
     hp = lcm(periods)
+    # general phase model: the hyperperiod of the task periods
+    if app.get("rates") is not None:
+        hp = app["rates"]["hyper_cycles"]
     if hp != 0:
         info("Hyperperiod for the entered flow set is " + str(hp) + " cycles")
     else:
@@ -142,7 +172,14 @@ def unwrap(app, arch, mapping):
         return None, 0, None
 
     # get packets from flows
-    packets = getPacketsFromFlows(flows, hp, app["tasks"], app, mapping)
+    try:
+        packets = getPacketsFromFlows(flows, hp, app["tasks"], app, mapping)
+    except ValueError as e:
+        # general phase model: no CPU schedule at this frequency
+        if app.get("rates") is None:
+            raise
+        error("No packet instance: " + str(e))
+        return None, 0, None
     info(
         "Extracted " + str(len(packets)) + " packets from " + str(len(flows)) + " flows"
     )

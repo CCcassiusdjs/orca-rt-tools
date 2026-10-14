@@ -132,9 +132,11 @@ def report_frequency(freq):
         return "none" if v is None else str(v) + "Hz (" + format(v / 1e6, ".1f") + " MHz)"
     info("Network frequency f* = " + hz(freq["f_star_hz"]))
     if freq["cpu"] is not None:
+        # general phase model (several periods or a cycle): demand per hyperperiod
+        span = freq["cpu"].get("hyper_s", freq["cpu"]["period_s"])
         for node, d in sorted(freq["cpu"]["demand"].items(), key=lambda kv: str(kv[0])):
             info("CPU demand of node " + str(node) + ": " + str(d) + " cycles per "
-                 + str(freq["cpu"]["period_s"]) + " s")
+                 + str(span) + " s")
     info("CPU frequency f_CPU = " + hz(freq["f_cpu_hz"]))
     chk = freq.get("final_check")
     if chk is not None:
