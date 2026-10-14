@@ -81,8 +81,12 @@ def run_cycles(r):
 def task_runs(tr, clk, lane, task, begins, t0, t1):
     """Runs of `task` on `lane` (slices from a dispatch to the next one)
     inside [t0, t1): cycles of each run and the ITER begin markers in it.
-    Returns {"single_max", "single_min", "single_runs", "per_iteration"}."""
+    Returns {"single_max", "single_min", "single_runs", "per_iteration",
+    "single": [[cycles, receptions], ...]}; receptions = `<- TAG` events of
+    the PE inside the run (packets of any task of the PE: the handlers
+    irq2 and irq3 run inside the slice of the task on the CPU)."""
     runs = exp23.closed_runs(tr, lane, task)
+    recv = sorted(m.time for m in tr.lane_marks(lane) if m.kind == "recv")
     single = []
     busy = 0.0
     n = 0
@@ -95,11 +99,13 @@ def task_runs(tr, clk, lane, task, begins, t0, t1):
             busy += cyc
             n += k
         if k == 1:
-            single.append(cyc)
-    return {"single_max": exp23.exact(max(single)) if single else None,
-            "single_min": exp23.exact(min(single)) if single else None,
+            single.append([exp23.exact(cyc), sum(1 for x in recv if a <= x <= b)])
+    cycles = [c for c, _ in single]
+    return {"single_max": max(cycles) if single else None,
+            "single_min": min(cycles) if single else None,
             "single_runs": len(single),
-            "per_iteration": exp23.exact(busy / n) if n else None}
+            "per_iteration": exp23.exact(busy / n) if n else None,
+            "single": single}
 
 
 def phase_busy_max(tr, clk, lane, starts, period_raw):
@@ -206,24 +212,36 @@ def static(spec_path, out_dir, image=None):
     return res
 
 
-def task_row(r, m):
+def task_row(r, m, receive_isr=None):
     """Static run of a task against its longest one-iteration run; for a
     task whose runs all serve two iterations (C, E, H, I and J in run H),
-    against its CPU time per iteration."""
+    against its CPU time per iteration. With receive_isr (kernel term of
+    one received packet), also each one-iteration run against the static
+    run plus receive_isr per packet received inside the run: the handlers
+    of a packet run in the slice of whichever task holds the CPU, and t(v)
+    charges them to the receiving task (receive term)."""
     run = run_cycles(r)
     ref = m.get("single_max") if m.get("single_max") is not None else m.get("per_iteration")
-    return {"t_static": r["t"], "run_static": run, "terms": r["terms"],
-            "measured_run_max": m.get("single_max"), "measured_run_min": m.get("single_min"),
-            "measured_per_iteration": m.get("per_iteration"), "single_runs": m.get("single_runs"),
-            "run_margin_percent": pct(run, m.get("single_max")),
-            "per_iteration_margin_percent": pct(run, m.get("per_iteration")),
-            "run_sound": None if ref is None else run >= ref}
+    row = {"t_static": r["t"], "run_static": run, "terms": r["terms"],
+           "measured_run_max": m.get("single_max"), "measured_run_min": m.get("single_min"),
+           "measured_per_iteration": m.get("per_iteration"), "single_runs": m.get("single_runs"),
+           "run_margin_percent": pct(run, m.get("single_max")),
+           "per_iteration_margin_percent": pct(run, m.get("per_iteration")),
+           "run_sound": None if ref is None else run >= ref}
+    single = m.get("single") or []
+    if receive_isr is not None and single:
+        row["runs_with_receptions"] = sum(1 for _, k in single if k)
+        row["receptions_per_run_max"] = max(k for _, k in single)
+        row["runs_above_run_static"] = sum(1 for c, _ in single if c > run)
+        row["run_with_receptions_margin_percent"] = min(pct(run + k * receive_isr, c) for c, k in single)
+        row["run_with_receptions_sound"] = all(c <= run + k * receive_isr for c, k in single)
+    return row
 
 
 def compare_e(res, meas):
     tasks = {}
     for t, r in res["tasks"].items():
-        tasks[t] = task_row(r, meas["tasks"].get(t, {}))
+        tasks[t] = task_row(r, meas["tasks"].get(t, {}), res["kernel"]["receive_isr"])
     clusters = {}
     for cl, d in meas["clusters"].items():
         members = [t for t, c in meas["cluster_of"].items() if c == cl]
@@ -239,7 +257,7 @@ def compare_e(res, meas):
 def compare_app(res, meas):
     tasks = {}
     for t, r in res["tasks"].items():
-        tasks[t] = task_row(r, meas["tasks"].get(t, {}))
+        tasks[t] = task_row(r, meas["tasks"].get(t, {}), res["kernel"]["receive_isr"])
     pes = {}
     for pe, d in meas["pes"].items():
         s = sum(res["tasks"][t]["t"] for t in d["tasks"])
@@ -315,8 +333,10 @@ def analyze(cfg_path, out_dir):
                 "static_margin_percent": summary(g, "static_margin_percent"),
                 "input_margin_percent": summary(g, "input_margin_percent"),
                 "run_margin_percent": summary(ts, "run_margin_percent"),
+                "run_with_receptions_margin_percent": summary(ts, "run_with_receptions_margin_percent"),
                 "all_groups_sound": all(x["sound"] for x in g),
-                "all_runs_sound": all(x["run_sound"] is not False for x in ts)}
+                "all_runs_sound": all(x["run_sound"] is not False for x in ts),
+                "all_runs_with_receptions_sound": all(x.get("run_with_receptions_sound") is not False for x in ts)}
         m["apps"][name] = entry
     if "bodies" in cfg:
         m["bodies"] = bodies(cfg["bodies"]["elf"], cfg["bodies"]["trace"])
@@ -393,7 +413,10 @@ def write_values(path, m):
             add((tag, "group", g, "margin"), _r(r["static_margin_percent"]))
         if "summary" in e:
             s = e["summary"]
-            for key in ("static_margin_percent", "input_margin_percent", "run_margin_percent"):
+            for key in ("static_margin_percent", "input_margin_percent", "run_margin_percent",
+                        "run_with_receptions_margin_percent"):
+                if s.get(key) is None or (key == "run_with_receptions_margin_percent" and s[key]["min"] is None):
+                    continue
                 for stat in ("min", "max", "mean"):
                     add((tag, key.replace("_percent", "").replace("_", " "), stat), _r(s[key][stat]))
     for b, r in m.get("bodies", {}).items():
@@ -429,11 +452,15 @@ def run_log(log, spec, image, manifest, csv_path, map_path, out_dir, arch=None):
          "kernel": res["kernel"], "tasks": tasks, "groups": pes,
          "summary": {"static_margin_percent": summary(list(pes.values()), "static_margin_percent"),
                      "run_margin_percent": summary(list(tasks.values()), "run_margin_percent"),
+                     "run_with_receptions_margin_percent": summary(list(tasks.values()),
+                                                                   "run_with_receptions_margin_percent"),
                      "per_iteration_margin_percent": summary(list(tasks.values()), "per_iteration_margin_percent"),
                      "all_groups_sound": all(x["sound"] for x in pes.values()),
-                     "all_runs_sound": all(x["run_sound"] is not False for x in tasks.values())},
+                     "all_runs_sound": all(x["run_sound"] is not False for x in tasks.values()),
+                     "all_runs_with_receptions_sound": all(x.get("run_with_receptions_sound") is not False
+                                                           for x in tasks.values())},
          "rtlapp": {k: rt[k] for k in ("clock", "model", "releases", "markers", "responses", "cpu_windows",
-                                       "cpu_attributed", "packets", "network", "monitor") if k in rt}}
+                                       "cpu_attributed", "packets", "network", "monitor", "phase_conformance") if k in rt}}
     mdl = rt["model"]
     pk = rt["packets"]
     mon = rt.get("monitor") or {}
@@ -443,7 +470,8 @@ def run_log(log, spec, image, manifest, csv_path, map_path, out_dir, arch=None):
         "responses": resp["complete"], "response_max_cycles": resp["max_cycles"],
         "above_bound": resp["above_bound"], "above_deadline": resp["above_deadline"],
         "packets_late": pk["late"], "min_slack_remote_cycles": pk["min_slack_remote_cycles"],
-        "monitor_errors": mon.get("errors")}
+        "monitor_errors": mon.get("errors"),
+        "phase_conformance": (rt.get("phase_conformance") or {}).get("conforms")}
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
         json.dump(m, f, indent=1)
         f.write("\n")
@@ -488,7 +516,14 @@ def print_summary(m):
         if "summary" in e:
             s = e["summary"]["run_margin_percent"]
             print(f"  runs: static job + dispatch over the longest one-iteration run: {_r(s['min'])}% to {_r(s['max'])}%"
-                  f", all sound: {e['summary']['all_runs_sound']}")
+                  f", all sound: {e['summary']['all_runs_sound']}; with receive_isr per packet received inside the "
+                  f"run: all sound: {e['summary'].get('all_runs_with_receptions_sound')}")
+            for t, r in e.get("tasks", {}).items():
+                if r.get("run_sound") is False:
+                    print(f"    {t}: {r.get('runs_above_run_static')} of {r['single_runs']} runs above job + dispatch "
+                          f"({r['run_static']}; longest {r['measured_run_max']}); runs with a packet received inside: "
+                          f"{r.get('runs_with_receptions')}; smallest margin with receive_isr per received packet: "
+                          f"{_r(r.get('run_with_receptions_margin_percent'))}%")
         if "csv_equals_static" in e:
             print(f"  t(v) of the CSV equals the static costs: {e['csv_equals_static']}")
     for b, r in m.get("bodies", {}).items():
