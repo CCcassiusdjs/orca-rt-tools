@@ -20,6 +20,7 @@ TESTS = {
     "tb_cpu_cycles": "ghdl",         # cycles per instruction (bound of the instrumentation writes)
     "tb_release_mask": "verilator",  # release generator on the PEs of RELEASE_MASK (4x4 and 2x2)
     "tb_release_mask_4x5": "verilator",  # the same on the 4x5 mesh of experiments/multiapp
+    "tb_cpu_irq": "ghdl",            # interrupt return of _isr with and without nested interrupts
 }
 
 
@@ -35,6 +36,10 @@ def test_rtl(name, tmp_path):
     assert r.returncode == 0, out[-4000:]
     assert ("PASS " + name) in r.stdout, out[-4000:]
     assert "FAIL" not in r.stdout, out[-4000:]
+    if name == "tb_cpu_irq":
+        # a handler that enables interrupts before it returns lets a second
+        # interrupt corrupt the return of _isr (UCX_ISR_NO_NESTING avoids it)
+        assert "NESTED tb_cpu_irq MODE=1" in r.stdout, out[-4000:]
     if name == "tb_manycore_pe":
         # the printed iteration markers have the format of the trace parser
         from rttools.tui.model import parsers

@@ -66,6 +66,23 @@ ghdl_trace() { # cycle trace of wcet_bodies.hex (tb_cpu_trace.vhd): MARK and DON
 		--stop-time=20ms 2>&1) | grep -E "^(MARK|DONE|TIMEOUT)" || true
 }
 
+ghdl_cpu_irq() { # interrupt return of _isr of crt0.s on the HF-RISC core (tb_cpu_irq.vhd)
+	W="$OUT/ghdl_cpu_irq"
+	mkdir -p "$W"
+	for f in bshifter alu reg_bank control int_control datapath cpu; do
+		ghdl -a --workdir="$W" -fsynopsys -fexplicit "$HW/cpu/core_rv32e/$f.vhd" 2>/dev/null
+	done
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_cpu_irq.vhd"
+	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq
+	# MODE 0: handlers leave interrupts disabled (UCX_ISR_NO_NESTING): must pass
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=0 \
+		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" || true
+	# MODE 1: handlers enable interrupts before they return (_ei, _interrupt_tick):
+	# the second interrupt of a pair corrupts the return; printed as NESTED
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_cpu_irq -gHEX="$T/cpu_irq.hex" -gMODE=1 \
+		-gCOUNT=400 --stop-time=20ms 2>&1) | grep -E "^(PASS|FAIL)" | sed 's/^FAIL/NESTED/; s/^PASS/NESTED-NOT-REPRODUCED/' || true
+}
+
 DDMA_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddma.sv \
 	$HW/memory/interface_memory.sv $HW/memory/dual_port_ram.sv $HW/ddma/ddma.sv"
 
@@ -75,7 +92,7 @@ PE_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddm
 	$HW/peripherals/interface_peripherals.sv $HW/tcd/interface_tcd.sv $HW/interface_pe.sv \
 	$T/pe_stubs.sv $MC/manycore_pe.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release tb_cpu_cycles tb_release_mask tb_release_mask_4x5}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release tb_cpu_cycles tb_release_mask tb_release_mask_4x5 tb_cpu_irq}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
 	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
@@ -112,6 +129,7 @@ for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb
 		ghdl_timer1 "${TB_TIMER1_CTC:-15624}" "${TB_TIMER1_EXPECT:-250000}" ;;
 	tb_cpu_cycles) ghdl_cpu ;;
 	tb_cpu_trace) ghdl_trace ;;
+	tb_cpu_irq) ghdl_cpu_irq ;;
 	*) echo "unknown test: $t"; exit 2 ;;
 	esac
 done
