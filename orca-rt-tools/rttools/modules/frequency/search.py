@@ -58,7 +58,7 @@ def _converged(lower, upper, cfg):
     return rel is not None and width <= rel * upper
 
 
-def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None, floor=0):
+def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None, floor=0, schedule=None):
     """Lowest frequency at which the AGS backend schedules every packet,
     within the tolerance of _converged.
 
@@ -81,6 +81,9 @@ def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None, f
     network is not feasible at f_CPU).
 
     `on_attempt(attempt, ok)` receives each attempt with a hyperperiod.
+    `schedule` replaces schedule_at (same arguments and result); the
+    composition of several applications (rttools/multiapp) passes the
+    schedule of the union of their packets.
     Returns None when no attempt is feasible; otherwise the attempt at
     `upper` (keys of schedule_at) plus "attempts" (list of (frequency, ok,
     number of skipped packets or None)), "steps" (number of attempts),
@@ -92,7 +95,7 @@ def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None, f
 
     def attempt_at(frequency):
         info("Tentative frequency is " + str(frequency) + "Hz")
-        attempt = schedule_at(app, noc, mapping, appname, frequency, cfg)
+        attempt = (schedule or schedule_at)(app, noc, mapping, appname, frequency, cfg)
         if attempt is None:
             error("No hyperperiod at " + str(frequency) + "Hz; the attempt counts as not feasible.")
             attempts.append((frequency, False, None))
@@ -158,12 +161,13 @@ def cpu_check(app, mapping):
         return None
 
 
-def network_check(app, noc, mapping, appname, frequency, cfg):
+def network_check(app, noc, mapping, appname, frequency, cfg, schedule=None):
     """One evaluation of the network at `frequency` (instantiation with the
     release model of the application, unwrapping and AGS): {"frequency_hz",
     "feasible", "hyperperiod", "packets", "skipped"}; hyperperiod, packets
-    and skipped are None when the hyperperiod is undefined."""
-    attempt = schedule_at(app, noc, mapping, appname, frequency, cfg)
+    and skipped are None when the hyperperiod is undefined. `schedule`
+    replaces schedule_at (search_minimum_frequency)."""
+    attempt = (schedule or schedule_at)(app, noc, mapping, appname, frequency, cfg)
     if attempt is None:
         return {"frequency_hz": frequency, "feasible": False, "hyperperiod": None, "packets": None,
                 "skipped": None}
