@@ -150,7 +150,69 @@ def test_graph_pane_cluster():
     run(body())
 
 
-def test_network_pane_example_and_search():
+def dct_expected_search(header_wait):
+    """Minimum frequency and number of attempts of the bisection of
+    rttools.modules.frequency.search for the str2rts-dct-verify example with
+    the settings of the network pane (start 2 MHz, PF 500, 500 tries, MBCF,
+    tolerance 5 kHz) and the link occupancy o_i = L0 + w_h (m + 1) of
+    router.occupancy for the given header wait w_h. The pane runs the same
+    search in a child process (rttools.tui.worker)."""
+    from rttools.modules.frequency import search
+    from rttools.modules.routing import router
+    from rttools.tui.model import network
+    from tests.test_tui_model import dct_case
+    case = dct_case()
+    cfg = {"frequency": 2000000, "pruning_factor": 500, "fail_threshold": 500,
+           "heuristic": network.HEURISTICS["mbcf"], "scaling_tolerance": 5000}
+    attempts = []
+    prev = router.set_header_wait(header_wait)
+    try:
+        res = search.search_minimum_frequency(case["app"], case["noc"], case["mapping"], case["appname"],
+                                              cfg, on_attempt=lambda a, ok: attempts.append(ok))
+    finally:
+        router.set_header_wait(prev)
+    return res["frequency"], len(attempts)
+
+
+def ch6_dct_reference_hz():
+    """run_hz of dct_verify in experiments/ch6/reference.json (all criteria
+    and pruning factors give the same value), computed with o_i = L0."""
+    import json
+    with open(os.path.join(REPO_ROOT, "experiments", "ch6", "reference.json")) as f:
+        ref = json.load(f)
+
+    def rows(node):
+        if isinstance(node, dict):
+            if node.get("app") == "dct_verify" and "run_hz" in node:
+                yield node["run_hz"]
+            for v in node.values():
+                yield from rows(v)
+        elif isinstance(node, list):
+            for v in node:
+                yield from rows(v)
+    values = set(rows(ref))
+    assert len(values) == 1
+    return values.pop()
+
+
+@pytest.mark.parametrize("header_wait", [None, "off"])
+def test_network_pane_example_and_search(monkeypatch, header_wait):
+    """The pane reports the minimum of the in-process search with the same
+    settings and the same link occupancy. The bisection halves 2 MHz down
+    to 62.5 kHz (infeasible) and then bisects [62.5, 125] kHz until the
+    interval is below the 5 kHz tolerance. With the default header wait
+    (w_h = 20 cycles per router, o_i = L0 + 20 (m + 1)) 78.125 kHz is
+    infeasible and the search ends at 82.03125 kHz after 10 attempts; with
+    w_h = 0 (o_i = L0, RTTOOLS_HEADER_WAIT=off) 78.125 kHz is feasible and
+    the search ends there, the value of Table 6.7 in
+    experiments/ch6/reference.json."""
+    from rttools.modules.routing import router
+    if header_wait is not None:
+        monkeypatch.setenv(router.HEADER_WAIT_ENV, header_wait)   # read by the child process
+    expected_hz, expected_attempts = dct_expected_search(header_wait)
+    if header_wait == "off":
+        assert expected_hz == pytest.approx(ch6_dct_reference_hz())
+
     async def body():
         app = RTToolsApp(tab="network")
         async with app.run_test(size=SIZE) as pilot:
@@ -167,10 +229,9 @@ def test_network_pane_example_and_search():
             while npn.result is None and time.time() - t0 < 120:
                 await pilot.pause(0.2)
             assert npn.result is not None
-            # same minimum as the command line tool (see test_frequency_search)
-            assert npn.result["frequency"] == pytest.approx(78125.0)
+            assert npn.result["frequency"] == pytest.approx(expected_hz)
             assert "valid" in str(npn.query_one("#n-val").render())
-            assert npn.query_one("#n-att").row_count == 10
+            assert npn.query_one("#n-att").row_count == expected_attempts
     run(body())
 
 
