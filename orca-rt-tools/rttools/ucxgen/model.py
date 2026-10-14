@@ -124,6 +124,22 @@ def parse_mesh(text):
     return int(m[1]), int(m[2])
 
 
+def multirate_rates(csv_path, params):
+    """Rates of the general phase model (rttools/bench_t/multirate.py) of
+    an application of the phase model with several periods or a cycle;
+    None otherwise (one period: the pattern of weird_a.c)."""
+    if str(params.get("release_model", "")).strip().lower() != release.PHASE:
+        return None
+    from rttools.bench_t import multirate
+    from rttools.tui.model import network
+    with network.quiet():
+        g, _ = appparser.loadFromFile(csv_path)
+    try:
+        return multirate.graph_rates(g)
+    except multirate.MultirateError as e:
+        raise GenError(str(e)) from None
+
+
 def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUNT, reserve=None,
           payload_divisor=1, tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS):
     if not re.fullmatch(r"[A-Za-z_]\w*", name):
@@ -149,6 +165,10 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
                 raise GenError(f"flow {f['id']}: unknown task {f[end]!r}")
     if reserve is None:
         reserve = int(params.get("scheduler_cycles", 0))
+    rates = multirate_rates(csv_path, params)
+    if rates is not None:
+        return build_time_triggered(csv_path, map_path, name, tasks, flows, params, rates, width, height,
+                                    cycles_per_count, reserve, payload_divisor, tag_mod, delay_ns)
     period_ns = release_period_ns(tasks, flows)
 
     entries = mapfile.read(map_path)
@@ -240,5 +260,109 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
                      for ns in clash]
                     + ([f"release every {period_ns} ns from {delay_ns} ns: the release generator of "
                         f"manycore_pe.sv fires every {RTL_PERIOD_NS} ns from {RTL_DELAY_NS} ns"]
+                       if (period_ns, delay_ns) != (RTL_PERIOD_NS, RTL_DELAY_NS) else []),
+    }
+
+
+# Time-triggered application (several release periods or a cycle): the
+# general phase model of rttools/bench_t/multirate.py
+MAX_PKT_QUEUE_SLOTS = 8     # include/lib/noc.h
+READ_MARK_BIT = 0x800000    # bit 23 of the iteration of a read marker (emit.py)
+
+
+def build_time_triggered(csv_path, map_path, name, tasks, flows, params, rates, width, height,
+                         cycles_per_count, reserve, payload_divisor, tag_mod, delay_ns):
+    """Manifest of a time-triggered application: every task is released
+    by the tick hook every k_v ticks of the phase P (release generator of
+    every PE with a task, period P), reads the latest packet of each input
+    edge when its job starts (no wait) and sends on edge e every m_e jobs.
+    The creation order of each PE is the dispatch order of the model on
+    the graph without the feedback edges (release.pe_sequences)."""
+    labels = [t["label"] for t in tasks]
+    known = set(labels)
+    P_ns = rates["phase_s"] * 10 ** 9
+    if P_ns.denominator != 1:
+        raise GenError(f"phase {rates['phase_s']} s is not a whole number of ns")
+    period_ns = int(P_ns)
+    entries = mapfile.read(map_path)
+    mapfile.check(entries, labels, nodes=range(width * height))
+    node_of = {t: int(e["node"]) for e in entries for t in e["tasks"] if t in known}
+    fb = {tuple(e) for e in rates["feedback"]}
+    edges = [(f["source"], f["target"]) for f in flows]
+    seqs = release.pe_sequences(labels, [e for e in edges if e not in fb], entries,
+                                params.get("sequences"), params.get("creation"))
+    order = {int(n): list(ts) for n, ts in seqs.items()}
+    for n, ts in order.items():
+        if len(ts) > MAX_TASKS_PER_PE:
+            raise GenError(f"PE {n}: {len(ts)} tasks (at most {MAX_TASKS_PER_PE}, MAX_TASKS of noc.h)")
+
+    def label(node):
+        return f"{node % width}-{node // width}"
+
+    if len(flows) * tag_mod + tag_mod - 1 > MAX_TAG:
+        raise GenError(f"{len(flows)} flows with tag_mod {tag_mod} exceed the 16-bit tag")
+    out_flows = []
+    for i, f in enumerate(flows, 1):
+        raw = int(number(f["datasize"], f"flow {f['id']} data"))
+        b = raw // payload_divisor
+        if b > MAX_PAYLOAD:
+            raise GenError(f"flow {f['id']} ({f['source']}->{f['target']}): payload {b} bytes "
+                           f"> {MAX_PAYLOAD} (uint16_t payload_size); raise the payload divisor")
+        if b < 4:
+            raise GenError(f"flow {f['id']}: payload {b} bytes; the job index of the source needs 4 bytes")
+        s, d = node_of[f["source"]], node_of[f["target"]]
+        out_flows.append({"id": i, "csv_id": f["id"], "source": f["source"], "target": f["target"],
+                          "src_pe": s, "dst_pe": d, "src_label": label(s), "dst_label": label(d),
+                          "local": s == d, "csv_bytes": raw, "bytes": b, "tag_base": i * tag_mod,
+                          "every": rates["flow_jobs"][f"f{i}"],
+                          "feedback": (f["source"], f["target"]) in fb})
+    used = set()
+    out_tasks = []
+    for port, t in enumerate(tasks, 1):
+        v = t["label"]
+        wcet = int(number(t["wcet"], f"task {v} capacity"))
+        node = node_of[v]
+        ins = [f["id"] for f in out_flows if f["target"] == v]
+        outs = [f["id"] for f in out_flows if f["source"] == v]
+        if len(ins) >= MAX_PKT_QUEUE_SLOTS:
+            raise GenError(f"task {v}: {len(ins)} input edges (at most {MAX_PKT_QUEUE_SLOTS - 1}, "
+                           "one queued packet per source)")
+        out_tasks.append({"name": v, "ident": c_ident(v, used), "port": port, "pe": node,
+                          "pe_label": label(node), "order": order[node].index(v),
+                          "kernel_id": order[node].index(v) + 1, "iter_letter": ITER_LETTERS[port - 1],
+                          "wcet": wcet, "workload": max(0, round((wcet - reserve) / cycles_per_count)),
+                          "period_ticks": rates["ticks"][v], "offset_ticks": rates["offsets"].get(v, 0),
+                          "period_ns": rates["ticks"][v] * period_ns,
+                          "inputs": ins, "outputs": outs, "source": not ins})
+    pes = sorted(order)
+    names = {}
+    for t in out_tasks:
+        names.setdefault((t["pe"], t["name"][:MAX_NAME]), []).append(t["name"])
+    clash = [ns for ns in names.values() if len(ns) > 1]
+    return {
+        "name": name,
+        "generator": "rttools.ucxgen",
+        "model": "time_triggered",
+        "inputs": {"csv": {"file": os.path.basename(csv_path), "sha256": sha256(csv_path)},
+                   "map": {"file": os.path.basename(map_path), "sha256": sha256(map_path)}},
+        "mesh": [width, height],
+        "cycles_per_count": cycles_per_count,
+        "reserve_cycles": reserve,
+        "payload_divisor": payload_divisor,
+        "tag_mod": tag_mod,
+        "read_mark_bit": READ_MARK_BIT,
+        "phase_ns": period_ns,
+        "hyper_ticks": rates["hyper_ticks"],
+        "feedback": [list(e) for e in rates["feedback"]],
+        "release": {"period_ns": period_ns, "delay_ns": delay_ns, "pes": pes,
+                    "pe_labels": [label(n) for n in pes], "mask": sum(1 << n for n in pes)},
+        "pe_tasks": {label(n): ["IDLE"] + order[n] for n in sorted(order)},
+        "pe_dispatch": {label(n): list(order[n]) for n in sorted(order)},
+        "tasks": out_tasks,
+        "flows": out_flows,
+        "warnings": [f"tasks {', '.join(ns)} share the kernel name {ns[0][:MAX_NAME]!r} on one PE"
+                     for ns in clash]
+                    + ([f"phase {period_ns} ns from {delay_ns} ns: the release generator of "
+                        f"manycore_pe.sv fires every {RTL_PERIOD_NS} ns from {RTL_DELAY_NS} ns (set RELEASE_NS)"]
                        if (period_ns, delay_ns) != (RTL_PERIOD_NS, RTL_DELAY_NS) else []),
     }
