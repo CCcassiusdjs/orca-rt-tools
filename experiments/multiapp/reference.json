@@ -1,0 +1,480 @@
+{
+ "_doc": "Reference of make (experiments/multiapp, python -m rttools.paper.multiapp run): CAR-V (16 PEs) and application E (4 PEs) on arch/hermes-4x5.gml with the Spiral Mapping in the order of composition.json; the other order (composition-e-first.json); 1,000 random placements of the 20 clusters (seed 1); each application alone through rttools.multiapp against search.minimum_frequency; link occupancy o_i = L0 + 20 (m + 1).",
+ "composition": "composition.json",
+ "f0_hz": 500000000,
+ "header_wait_cycles": 20,
+ "occupancy": "L0 + 20 (m + 1)",
+ "main": {
+  "mesh": "4x5",
+  "arch": "hermes-4x5.gml",
+  "f_cpu_hz": 434900000.0,
+  "f_star_hz": 359104156.4941406,
+  "f_star_lower_hz": 359100341.796875,
+  "attempts": 18,
+  "final_check": {
+   "frequency_hz": 434900000.0,
+   "feasible": true,
+   "hyperperiod": 217450,
+   "packets": 21,
+   "skipped": 0
+  },
+  "frequency_hz": 434900000.0,
+  "binding": "cpu",
+  "apps": {
+   "CARV": {
+    "csv": "car-v.csv",
+    "placement": "spiral",
+    "criterion": "MAX_PROC",
+    "pes": 16,
+    "nodes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     11,
+     12,
+     15,
+     16,
+     17,
+     18,
+     19
+    ],
+    "mapping": {
+     "0": [
+      "NAVC"
+     ],
+     "1": [
+      "FBU4",
+      "BFE4"
+     ],
+     "2": [
+      "FBU1",
+      "BFE1"
+     ],
+     "3": [
+      "FBU2",
+      "BFE2"
+     ],
+     "4": [
+      "BFE3"
+     ],
+     "5": [
+      "BFE7"
+     ],
+     "6": [
+      "BFE8"
+     ],
+     "7": [
+      "FBU5",
+      "BFE5"
+     ],
+     "8": [
+      "FBU8",
+      "VOD2"
+     ],
+     "11": [
+      "FBU6",
+      "BFE6"
+     ],
+     "12": [
+      "FBU3",
+      "VOD1"
+     ],
+     "15": [
+      "OBMG"
+     ],
+     "16": [
+      "FBU7"
+     ],
+     "17": [
+      "STPH"
+     ],
+     "18": [
+      "FDF2"
+     ],
+     "19": [
+      "FDF1"
+     ]
+    },
+    "sequences": {
+     "0": [
+      "NAVC"
+     ],
+     "1": [
+      "FBU4",
+      "BFE4"
+     ],
+     "2": [
+      "FBU1",
+      "BFE1"
+     ],
+     "3": [
+      "FBU2",
+      "BFE2"
+     ],
+     "4": [
+      "BFE3"
+     ],
+     "5": [
+      "BFE7"
+     ],
+     "6": [
+      "BFE8"
+     ],
+     "7": [
+      "FBU5",
+      "BFE5"
+     ],
+     "8": [
+      "FBU8",
+      "VOD2"
+     ],
+     "11": [
+      "FBU6",
+      "BFE6"
+     ],
+     "12": [
+      "FBU3",
+      "VOD1"
+     ],
+     "15": [
+      "OBMG"
+     ],
+     "16": [
+      "FBU7"
+     ],
+     "17": [
+      "STPH"
+     ],
+     "18": [
+      "FDF2"
+     ],
+     "19": [
+      "FDF1"
+     ]
+    },
+    "period_s": 0.0005,
+    "cpu_demand_cycles": {
+     "0": 95000,
+     "1": 161998,
+     "2": 190000,
+     "3": 190000,
+     "4": 95000,
+     "5": 95000,
+     "6": 95000,
+     "7": 190000,
+     "8": 190000,
+     "11": 190000,
+     "12": 190000,
+     "15": 95000,
+     "16": 95000,
+     "17": 95000,
+     "18": 95000,
+     "19": 95000
+    },
+    "f_cpu_hz": 380000000.0,
+    "utilization_at_f": 0.8737640836974017,
+    "f_star_alone_hz": 359104156.4941406,
+    "packets_per_hyperperiod": 16,
+    "packets_in_H": 16,
+    "response_bound": {
+     "v_last": "OBMG",
+     "phase": 4,
+     "finish_cycles": 95000,
+     "period_cycles": 217450,
+     "cycles": 964800,
+     "ms": 2.218441021,
+     "deadline_ms": 2.5,
+     "deadline_percent": 88.737641,
+     "meets_deadline": true
+    }
+   },
+   "E": {
+    "csv": "synthetic-app-e.csv",
+    "placement": "spiral",
+    "criterion": "MAX_PROC",
+    "pes": 4,
+    "nodes": [
+     9,
+     10,
+     13,
+     14
+    ],
+    "mapping": {
+     "9": [
+      "G",
+      "J"
+     ],
+     "10": [
+      "C"
+     ],
+     "13": [
+      "E",
+      "H",
+      "I"
+     ],
+     "14": [
+      "A",
+      "B",
+      "D",
+      "F"
+     ]
+    },
+    "sequences": {
+     "9": [
+      "J",
+      "G"
+     ],
+     "10": [
+      "C"
+     ],
+     "13": [
+      "E",
+      "H",
+      "I"
+     ],
+     "14": [
+      "A",
+      "B",
+      "D",
+      "F"
+     ]
+    },
+    "period_s": 0.0005,
+    "cpu_demand_cycles": {
+     "9": 217450,
+     "10": 96330,
+     "13": 173370,
+     "14": 181930
+    },
+    "f_cpu_hz": 434900000.0,
+    "utilization_at_f": 1.0,
+    "f_star_alone_hz": 327690124.51171875,
+    "packets_per_hyperperiod": 5,
+    "packets_in_H": 5,
+    "response_bound": {
+     "v_last": "J",
+     "phase": 3,
+     "finish_cycles": 107570,
+     "period_cycles": 217450,
+     "cycles": 759920,
+     "ms": 1.747344217,
+     "deadline_ms": 2.0,
+     "deadline_percent": 87.367211,
+     "meets_deadline": true
+    }
+   }
+  },
+  "union": {
+   "hyperperiod": 217450,
+   "packets": 21,
+   "skipped": 0,
+   "feasible": true,
+   "periodic_overlaps": {
+    "pairs": 0,
+    "links": []
+   }
+  },
+  "shared_links": {
+   "count": 1,
+   "links": [
+    "13-9"
+   ],
+   "packets": {
+    "13-9": {
+     "CARV": 1,
+     "E": 3
+    }
+   }
+  },
+  "isolated": {
+   "collision_pairs": 0,
+   "collision_links": [],
+   "colliding_packets": {
+    "CARV": 0,
+    "E": 0
+   },
+   "packets": {
+    "CARV": 16,
+    "E": 5
+   },
+   "feasible": {
+    "CARV": true,
+    "E": true
+   },
+   "periodic_overlaps": {
+    "CARV": {
+     "pairs": 0,
+     "links": []
+    },
+    "E": {
+     "pairs": 0,
+     "links": []
+    }
+   }
+  }
+ },
+ "alternatives": {
+  "efirst": {
+   "mesh": "4x5",
+   "f_cpu_hz": 434900000.0,
+   "f_star_hz": 362998962.40234375,
+   "frequency_hz": 434900000.0,
+   "binding": "cpu",
+   "union": {
+    "hyperperiod": 217450,
+    "packets": 21,
+    "skipped": 0,
+    "feasible": true,
+    "periodic_overlaps": {
+     "pairs": 0,
+     "links": []
+    }
+   },
+   "shared_links": {
+    "count": 0,
+    "links": [],
+    "packets": {}
+   },
+   "isolated": {
+    "collision_pairs": 0,
+    "collision_links": [],
+    "colliding_packets": {
+     "E": 0,
+     "CARV": 0
+    },
+    "packets": {
+     "E": 5,
+     "CARV": 16
+    },
+    "feasible": {
+     "E": true,
+     "CARV": true
+    },
+    "periodic_overlaps": {
+     "E": {
+      "pairs": 0,
+      "links": []
+     },
+     "CARV": {
+      "pairs": 0,
+      "links": []
+     }
+    }
+   },
+   "nodes": {
+    "E": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "CARV": [
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19
+    ]
+   },
+   "f_star_alone_hz": {
+    "E": 327690124.51171875,
+    "CARV": 362998962.40234375
+   }
+  }
+ },
+ "random": {
+  "placements": 1000,
+  "seed": 1,
+  "frequency_hz": 434900000.0,
+  "with_shared_links": 931,
+  "with_collisions": 188,
+  "with_collisions_percent": 18.8,
+  "colliding_packets_max": 4,
+  "collision_pairs_max": 5,
+  "shared_links_max": 11,
+  "isolated_infeasible": 0,
+  "union_feasible": 1000
+ },
+ "single": [
+  {
+   "app": "E",
+   "arch": "hermes-2x2.gml",
+   "map": "synthetic-app-e-ONTO-hermes2x2.map",
+   "mapping_equal": true,
+   "f_star_hz": 327690124.51171875,
+   "f_cpu_hz": 434900000.0,
+   "frequency_hz": 434900000.0,
+   "equal": true,
+   "attempts_equal": true
+  },
+  {
+   "app": "E",
+   "arch": "hermes-2x2.gml",
+   "map": "spiral",
+   "mapping_equal": true,
+   "f_star_hz": 327690124.51171875,
+   "f_cpu_hz": 434900000.0,
+   "frequency_hz": 434900000.0,
+   "equal": true,
+   "attempts_equal": true
+  },
+  {
+   "app": "CARV",
+   "arch": "hermes-4x4.gml",
+   "map": "car-v-ONTO-hermes4x4.map",
+   "mapping_equal": true,
+   "f_star_hz": 359001159.66796875,
+   "f_cpu_hz": 380000000.0,
+   "frequency_hz": 380000000.0,
+   "equal": true,
+   "attempts_equal": true
+  },
+  {
+   "app": "CARV",
+   "arch": "hermes-4x4.gml",
+   "map": "spiral",
+   "mapping_equal": true,
+   "f_star_hz": 359001159.66796875,
+   "f_cpu_hz": 380000000.0,
+   "frequency_hz": 380000000.0,
+   "equal": true,
+   "attempts_equal": true
+  }
+ ],
+ "rtl": {
+  "clock": {
+   "f_min_hz": 434900000.0,
+   "f_clk_hz": 434912000,
+   "grid_hz": 32000,
+   "half_period_fs": 1149657,
+   "period_fs": 2299314,
+   "clock_hz_exact": 434912326.0241968,
+   "release_cycles": 217456,
+   "tick_steps": 13591
+  },
+  "period_s": 0.0005,
+  "sim_ns_min": 11218442,
+  "rule": "3 ms + (max n(v_last) + 8 - 1) T + max R_bound + T"
+ },
+ "maps": {
+  "CARV": "0:NAVC\n1:FBU4,BFE4\n2:FBU1,BFE1\n3:FBU2,BFE2\n4:BFE3\n5:BFE7\n6:BFE8\n7:FBU5,BFE5\n8:FBU8,VOD2\n11:FBU6,BFE6\n12:FBU3,VOD1\n15:OBMG\n16:FBU7\n17:STPH\n18:FDF2\n19:FDF1\n",
+  "E": "9:G,J\n10:C\n13:E,H,I\n14:A,B,D,F\n"
+ }
+}

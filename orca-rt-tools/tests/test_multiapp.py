@@ -248,3 +248,30 @@ def test_shared_links_of_the_composition(tmp_path):
         pk, _, _, _ = compose.union_packets(rev["apps"], rev["noc"], 434_900_000)
     assert rev["apps"][0]["placement"]["nodes"] == [0, 1, 2, 3]
     assert compose.shared_links(pk) == []
+
+
+# ---------------------------------------------------------------- pipeline
+
+
+def test_pipeline_matches_reference(tmp_path):
+    """make -C experiments/multiapp run check, with 50 random placements
+    instead of 1,000 (the other values do not depend on them)."""
+    from rttools.paper import exp23, multiapp
+    cfg = multiapp.read_config(os.path.join(EXP, "config.json"))
+    cfg["random"] = {"placements": 50, "seed": 1}
+    m = multiapp.run(cfg, str(tmp_path))
+    ref = json.load(open(os.path.join(EXP, "reference.json")))
+    ref.pop("random")
+    (tmp_path / "ref.json").write_text(json.dumps(ref))
+    assert exp23.check(str(tmp_path / "metrics.json"), str(tmp_path / "ref.json")) == []
+    assert m["main"]["frequency_hz"] == 434_900_000 and m["main"]["binding"] == "cpu"
+    assert all(s["equal"] and s["mapping_equal"] for s in m["single"])
+    assert m["random"]["union_feasible"] == 50
+    tex = (tmp_path / "values.tex").read_text()
+    assert "\\newcommand{\\ExpMultiappMinimumMhz}{434.9}" in tex
+    assert "\\newcommand{\\ExpMultiappCarvResponseBoundMs}{2.218}" in tex
+
+
+def test_stored_maps_match_the_placement():
+    r = run_module("rttools.paper.multiapp", "maps", "--config", os.path.join(EXP, "config.json"), "--check")
+    assert r.returncode == 0, r.stdout + r.stderr

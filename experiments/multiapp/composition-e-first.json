@@ -1,0 +1,8 @@
+{
+ "_doc": "The applications of composition.json in the other order: E takes the first four nodes of the spiral (row 0), CAR-V the 4x4 block of rows 1 to 4. Each application occupies a rectangle, so every XY route stays inside the rectangle of its application and no link is shared.",
+ "arch": "../../arch/hermes-4x5.gml",
+ "apps": [
+  {"name": "E", "csv": "../../apps/synthetic-app-e/synthetic-app-e.csv", "map": "spiral", "pes": 4},
+  {"name": "CARV", "csv": "../../apps/car-v/car-v.csv", "map": "spiral", "pes": 16}
+ ]
+}

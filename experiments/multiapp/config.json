@@ -1,0 +1,18 @@
+{
+ "_doc": "make (experiments/multiapp, python -m rttools.paper.multiapp run): composition of the RTL run, the other order of the applications, 1,000 random placements of the 20 clusters, and each application alone through rttools.multiapp against the flow of one application. Paths relative to this file.",
+ "composition": "composition.json",
+ "alternatives": {"efirst": "composition-e-first.json"},
+ "maps": {"CARV": "maps/CARV.map", "E": "maps/E.map"},
+ "single": [
+  {"app": "E", "csv": "../../apps/synthetic-app-e/synthetic-app-e.csv", "arch": "../../arch/hermes-2x2.gml",
+   "map": "../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map"},
+  {"app": "E", "csv": "../../apps/synthetic-app-e/synthetic-app-e.csv", "arch": "../../arch/hermes-2x2.gml",
+   "map": "spiral", "pes": 4},
+  {"app": "CARV", "csv": "../../apps/car-v/car-v.csv", "arch": "../../arch/hermes-4x4.gml",
+   "map": "../../apps/car-v/car-v-ONTO-hermes4x4.map"},
+  {"app": "CARV", "csv": "../../apps/car-v/car-v.csv", "arch": "../../arch/hermes-4x4.gml",
+   "map": "spiral", "pes": 16}
+ ],
+ "random": {"placements": 1000, "seed": 1},
+ "f0_hz": 500000000
+}
