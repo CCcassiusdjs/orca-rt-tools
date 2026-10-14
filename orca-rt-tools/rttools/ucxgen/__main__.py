@@ -2,6 +2,7 @@
 
     python -m rttools.ucxgen generate <csv> <map> --name N [--mesh WxH] --out DIR
            [--cycles-per-count C] [--reserve R] [--payload-divisor D] [--tag-mod M] [--delay-ns NS]
+           [--bodies BODIES.json]
     python -m rttools.ucxgen check <csv> <map> --name N ... --out DIR
            (exit 1 when DIR/N.{c,json,sim} differ from a new generation)
     python -m rttools.ucxgen memory DIR/N.json [--image-map image.map | --heap BYTES]
@@ -35,12 +36,15 @@ def add_gen_args(p):
     p.add_argument("--payload-divisor", type=int, default=1)
     p.add_argument("--tag-mod", type=int, default=model.TAG_MOD)
     p.add_argument("--delay-ns", type=int, default=model.DEFAULT_DELAY_NS)
+    p.add_argument("--bodies", default=None,
+                   help="JSON file with the body of each task (sleep, sort, search, count); default: sleep")
 
 
 def build(a):
     cpc = int(a.cycles_per_count) if float(a.cycles_per_count).is_integer() else a.cycles_per_count
     return model.build(a.csv, a.map, a.name, mesh=a.mesh, cycles_per_count=cpc, reserve=a.reserve,
-                       payload_divisor=a.payload_divisor, tag_mod=a.tag_mod, delay_ns=a.delay_ns)
+                       payload_divisor=a.payload_divisor, tag_mod=a.tag_mod, delay_ns=a.delay_ns,
+                       bodies=a.bodies)
 
 
 def cmd_generate(a):

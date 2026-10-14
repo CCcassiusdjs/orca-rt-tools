@@ -9,3 +9,7 @@ numpy>=1.21,<2
 # terminal user interface (python -m rttools.tui); textual 8 needs Python 3.9+
 textual>=8.2,<9
 rich>=14.2
+# static WCET analysis (rttools.wcet): integer linear programs of IPET
+# (scipy.optimize.milp, scipy 1.9 or later) and the ELF reader
+scipy>=1.9
+pyelftools>=0.29

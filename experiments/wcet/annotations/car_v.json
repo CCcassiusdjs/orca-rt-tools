@@ -1,0 +1,7 @@
+{
+ "_doc": "Params of CAR-V (pkt-sim/software/ucx-os/app/car_v.c, rttools.ucxgen) for rttools.wcet, with ucx-os.json and ucxgen.json. tcb = 3: at most 2 tasks per PE plus the idle task. heap_blocks: blocks of the heap of the largest PE: 1 end block, 3 per task and for the idle task (tcb, rt, stack; kernel/ucx.c), 2 per comm (queue and slots; lib/queue.c), 1 per output packet (create_pkt) and 2 packets in flight per input edge between PEs (rttools.ucxgen memory, --in-flight): 18 on PE 2-3, bound 24.",
+ "params": {
+  "tcb": 3,
+  "heap_blocks": 24
+ }
+}

@@ -145,7 +145,7 @@ hello_p: incl ucx.pack
 # of its source tasks), so the rule rebuilds the kernel with
 # UCX_DEFS=-DUCX_APP_IRQ4, which removes the handler of application E
 # (kernel/sched.c). Example: make car_v ARCH=riscv/hf-riscv-e
-GEN_APPS = car_v
+GEN_APPS = car_v wcet_e
 
 $(GEN_APPS): incl
 	@$(MAKE) --no-print-directory clean

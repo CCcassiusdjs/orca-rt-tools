@@ -1,0 +1,31 @@
+{
+  "_doc": "Flow facts of the UCX-OS kernel (ARCH=riscv/hf-riscv-e) for rttools.wcet (format: rttools/wcet/annotations.py). The selectors name functions and calls, not addresses, so the file holds for any build of the kernel; an image whose jump tables cannot be read (objdump listing) adds the targets in a file of its own. Params: tcb = task control blocks on one PE (tasks of the PE plus the idle task), the length of the circular list that krnl_schedule, krnl_delay_update and enable_receiver walk; heap_blocks = blocks of the heap of one PE (allocations of app_main and of the driver plus the packets in flight), the length of the list that ucx_malloc walks; ddma_wait = passes of the loop of ucx_noc_send that waits for the DDMA to become idle (1: the DDMA finished the previous packet of the PE before the send); name_len = bytes of the name of a task (char name[5] of struct tcb_s).",
+  "params": {"tcb": 16, "heap_blocks": 64, "ddma_wait": 1, "name_len": 5},
+  "exclude_calls": ["ucx_printf", "tprintf", "ucx_hexdump", "ucx_vsprintf", "_putchar"],
+  "functions": {
+    "ucx_sleep": {"_doc": "kernel/ucx.c: while (cycles--); the header runs cycles + 1 times (the path with cycles < 0 prints and halts)",
+                  "loops": [{"select": "all", "bound": "a0 + 1"}]},
+    "krnl_delay_update": {"_doc": "kernel/sched.c: one pass over the circular list of TCBs", "loops": [{"select": "rest", "bound": "tcb"}]},
+    "krnl_schedule": {"_doc": "kernel/sched.c: search of the next ready task, at most one pass over the circular list", "loops": [{"select": "rest", "bound": "tcb"}]},
+    "enable_receiver": {"_doc": "lib/noc.c: search of the TCB of the receiver in the circular list", "loops": [{"select": "rest", "bound": "tcb"}]},
+    "ucx_noc_send": {"_doc": "lib/noc.c: wait for the idle DDMA (_ddma_send_status); enable_receiver inlined (local packet)",
+                     "loops": [{"select": {"contains_call": "_ddma_send_status"}, "bound": "ddma_wait"},
+                               {"select": "rest", "bound": "tcb"}]},
+    "irq3_handler": {"_doc": "lib/noc.c: enable_receiver inlined", "loops": [{"select": "rest", "bound": "tcb"}]},
+    "irq4_handler": {"_doc": "kernel/sched.c (handler of application E): search of the TCB of task A", "loops": [{"select": "rest", "bound": "tcb"}]},
+    "ucx_strcmp": {"_doc": "lib/libc.c: at most the length of the name plus the terminator", "loops": [{"select": "all", "bound": "name_len"}]},
+    "ucx_malloc": {"_doc": "lib/malloc.c: first fit; the three loops advance over the list of blocks, at most heap_blocks steps and one exit test per pass of the outer loop in each call",
+                   "loops": [{"select": "all", "bound": "2 * heap_blocks", "scope": "function"}]},
+    "irq_handler": {"_doc": "arch/riscv/hf-riscv-e/interrupt.c: one pass per bit of the 8-bit cause (int_control.vhd, irq_cause); the query of each interrupt sets the target of irq_vector[i]()",
+                    "loops": [{"select": "all", "bound": 8}]},
+    "irq0_handler": {"_doc": "interrupt.c: the tick path (TIMER1 CTC): the switch on S0CAUSE & k takes case 0 or case MASK_S0CAUSE_TIMER (4), the latter once (k = 4); timer_vector[i]() calls timer1ctc_handler (hal.c) once; the loop over the bits of the timer cause shifts a 32-bit word right by one per pass (at most 33 tests; the spill and reload of the word around the call hide the shift loop from the analysis); the loop over k is a counted loop (32)",
+                     "loops": [{"select": "rest", "bound": 33}],
+                     "indirect_jumps": [{"at": "all", "indices": [0, 4], "max": {"4": 1}}],
+                     "indirect_calls": [{"at": "all", "targets": ["timer1ctc_handler"], "max_count": 1}]},
+    "__udivsi3": {"_doc": "arch/common/muldiv.c (__udivmodsi4): the loop that shifts the divisor left until bit 31 is set runs at most 32 times; the loop over qbit is a shift loop", "loops": [{"select": "rest", "bound": 32}]},
+    "__umodsi3": {"_doc": "as __udivsi3", "loops": [{"select": "rest", "bound": 32}]},
+    "__udivmodsi4": {"_doc": "as __udivsi3", "loops": [{"select": "rest", "bound": 32}]},
+    "_isr": {"_doc": "arch/riscv/hf-riscv-e/crt0.s: jalr zero, 0(a5) returns to the interrupted code (address of IRQ_EPC)",
+             "indirect_jumps": [{"at": "all", "return": true}]}
+  }
+}

@@ -45,9 +45,13 @@ def requirements():
     return reqs
 
 
+# import name -> distribution name, when they differ
+DISTRIBUTIONS = {"elftools": "pyelftools"}
+
+
 def test_every_import_is_declared():
     reqs = requirements()
-    missing = sorted(m for m in third_party_imports() if m.lower() not in reqs)
+    missing = sorted(m for m in third_party_imports() if DISTRIBUTIONS.get(m, m).lower() not in reqs)
     assert missing == []
 
 

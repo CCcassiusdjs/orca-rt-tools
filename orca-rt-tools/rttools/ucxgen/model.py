@@ -140,8 +140,48 @@ def multirate_rates(csv_path, params):
         raise GenError(str(e)) from None
 
 
+# bodies of the tasks (option --bodies): the work of an iteration, with
+# paths that depend on the input data (rttools.wcet, experiments/wcet)
+BODY_KINDS = ("sleep", "sort", "search", "count")
+WORK_WORDS = 64
+COUNT_MAX = 256
+MAX_REPEAT = 255
+
+
+def read_bodies(path, labels):
+    """Bodies file (JSON): {"work_words": N, "count_max": M, "tasks":
+    {label: {"kind": sleep|sort|search|count, "repeat": r}}}; a task
+    without an entry keeps the sleep body. Returns the "bodies" section of
+    the manifest."""
+    import json
+    with open(path) as f:
+        d = json.load(f)
+    for k in d:
+        if k not in ("work_words", "count_max", "tasks") and not k.startswith("_"):
+            raise GenError(f"{path}: unknown key {k!r}")
+    n = int(d.get("work_words", WORK_WORDS))
+    m = int(d.get("count_max", COUNT_MAX))
+    if n < 2 or n > 1024 or n & (n - 1):
+        raise GenError(f"{path}: work_words must be a power of two from 2 to 1024")
+    if m < 1 or m > 1 << 16 or m & (m - 1):
+        raise GenError(f"{path}: count_max must be a power of two up to 65536")
+    tasks = {}
+    for label, b in d.get("tasks", {}).items():
+        if label not in labels:
+            raise GenError(f"{path}: unknown task {label!r}")
+        kind = b.get("kind", "sleep")
+        if kind not in BODY_KINDS:
+            raise GenError(f"{path}: task {label}: kind must be one of {', '.join(BODY_KINDS)}")
+        r = int(b.get("repeat", 1))
+        if not 1 <= r <= MAX_REPEAT:
+            raise GenError(f"{path}: task {label}: repeat must be from 1 to {MAX_REPEAT}")
+        tasks[label] = {"kind": kind, "repeat": r}
+    return {"file": os.path.basename(path), "sha256": sha256(path), "work_words": n, "count_max": m,
+            "tasks": {v: tasks.get(v, {"kind": "sleep", "repeat": 1}) for v in labels}}
+
+
 def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUNT, reserve=None,
-          payload_divisor=1, tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS):
+          payload_divisor=1, tag_mod=TAG_MOD, delay_ns=DEFAULT_DELAY_NS, bodies=None):
     if not re.fullmatch(r"[A-Za-z_]\w*", name):
         raise GenError(f"name must be a C identifier, got {name!r}")
     width, height = parse_mesh(mesh)
@@ -167,6 +207,9 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
         reserve = int(params.get("scheduler_cycles", 0))
     rates = multirate_rates(csv_path, params)
     if rates is not None:
+        if bodies is not None:
+            raise GenError("--bodies applies to applications with one release period and no cycle; "
+                           "the time-triggered pattern (several periods or a cycle) runs ucx_sleep(c(v))")
         return build_time_triggered(csv_path, map_path, name, tasks, flows, params, rates, width, height,
                                     cycles_per_count, reserve, payload_divisor, tag_mod, delay_ns)
     period_ns = release_period_ns(tasks, flows)
@@ -235,7 +278,7 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
         names.setdefault((t["pe"], t["name"][:MAX_NAME]), []).append(t["name"])
     clash = [ns for ns in names.values() if len(ns) > 1]
 
-    return {
+    out = {
         "name": name,
         "generator": "rttools.ucxgen",
         "inputs": {"csv": {"file": os.path.basename(csv_path), "sha256": sha256(csv_path)},
@@ -262,6 +305,16 @@ def build(csv_path, map_path, name, mesh="4x4", cycles_per_count=CYCLES_PER_COUN
                         f"manycore_pe.sv fires every {RTL_PERIOD_NS} ns from {RTL_DELAY_NS} ns"]
                        if (period_ns, delay_ns) != (RTL_PERIOD_NS, RTL_DELAY_NS) else []),
     }
+    if bodies is not None:
+        out["bodies"] = read_bodies(bodies, labels)
+        for t in out["tasks"]:
+            b = out["bodies"]["tasks"][t["name"]]
+            t["body"] = b["kind"]
+            t["repeat"] = b["repeat"]
+            if b["kind"] != "sleep":
+                # the body does not use ucx_sleep: the code does not depend on c(v)
+                t["workload"] = 0
+    return out
 
 
 # Time-triggered application (several release periods or a cycle): the

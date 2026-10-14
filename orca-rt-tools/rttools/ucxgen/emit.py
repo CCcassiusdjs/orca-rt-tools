@@ -208,6 +208,312 @@ int32_t app_main(void)
 """
 
 
+WORK_HEADER = """\
+ *
+ * Bodies ({bodies}, rttools.ucxgen --bodies): instead of ucx_sleep, the
+ * work of an iteration runs on an array of WORK_N = {work_n} words. A
+ * source task fills it from the iteration number (xorshift32); every other
+ * task XORs the payload words of each received packet into it (the count
+ * comes from the payload size of the packet). Then `repeat` passes of the
+ * body: sort (insertion sort, the shifts depend on the order of the
+ * words), search (linear search of a key taken from the data, stops at the
+ * first match) or count (a loop of (w[0] mod COUNT_MAX) + 1 passes,
+ * COUNT_MAX = {count_max}). The first words of the array go into the
+ * payload of every output packet. WCET_LOOP_BOUND and WCET_LOOP_TOTAL
+ * (include/lib/wcet.h) give the loop bounds to rttools.wcet.
+ */
+"""
+
+WORK_BODY = """\
+#include <ucx.h>
+#include <lib/wcet.h>
+
+#define N_TASKS     {n_tasks}
+#define MAX_IN      {max_in}
+#define MAX_OUT     {max_out}
+#define MAX_RELEASE {max_release}
+#define TAG_MOD     {tag_mod}
+#define TAG(flow, k) ((uint16_t)((flow) * TAG_MOD + ((k) % TAG_MOD)))
+#define ITERATIONS  99999
+#define WORK_N      {work_n}
+#define COUNT_MAX   {count_max}
+#define MAX_REPEAT  {max_repeat}
+
+#define BODY_SLEEP  0
+#define BODY_SORT   1
+#define BODY_SEARCH 2
+#define BODY_COUNT  3
+
+struct out_s {{
+  uint16_t cpu;    /* PE of the target task (node index) */
+  uint16_t port;   /* port of the target task */
+  uint16_t bytes;  /* payload */
+  uint16_t flow;   /* index of the edge (tag) */
+}};
+
+struct task_s {{
+  char name[5];
+  char letter;                    /* letter of the iteration markers */
+  uint16_t port;
+  int32_t workload;               /* counts of ucx_sleep (body sleep) */
+  uint8_t n_in, n_out;
+  uint8_t body;                   /* BODY_* */
+  uint8_t repeat;                 /* passes of the body per iteration */
+  uint16_t in_port[MAX_IN];       /* port of the source task of each input edge */
+  struct out_s out[MAX_OUT];
+}};
+
+static const struct task_s TASKS[N_TASKS] = {{
+{tasks}
+}};
+
+/* ------------------------------ release */
+static struct tcb_s *release_tcb[MAX_RELEASE];
+static int n_release = 0;
+
+/* release of the source tasks of this PE (manycore_pe.sv, wake-up
+ * generator; the kernel handler of application E marks task A of PE 0) */
+void irq4_handler(void)
+{{
+  _di();
+  for (int i = 0; i < n_release; i++)
+    release_tcb[i]->state = TASK_READY;
+
+  /* flag interruption down */
+  volatile int *irq_flag_down = (volatile int *)(0x2000004C);
+  *irq_flag_down = !(*irq_flag_down);
+  _ei();
+}}
+
+/* ------------------------------ work */
+/* input of a source task: xorshift32 from the iteration and the port */
+static void fill(uint32_t *w, uint32_t k, uint32_t port)
+{{
+  uint32_t x = (k << 8) ^ port ^ 0x9E3779B9u;
+
+  for (int i = 0; i < WORK_N; i++) {{
+    WCET_LOOP_BOUND(WORK_N);
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    w[i] = x;
+  }}
+}}
+
+/* XOR of the payload words of a packet into the work array; the count
+ * comes from the payload size of the packet */
+static void absorb(uint32_t *w, const noc_packet_t *pkt)
+{{
+  uint32_t n = pkt->payload_size / 4;
+  const uint32_t *d = (const uint32_t *)pkt->data;
+
+  if (n > WORK_N)
+    n = WORK_N;
+  for (uint32_t i = 0; i < n; i++) {{
+    WCET_LOOP_BOUND(WORK_N);
+    w[i] ^= d[i];
+  }}
+}}
+
+/* first words of the work array into the payload of a packet */
+static void emit(noc_packet_t *pkt, const uint32_t *w, uint32_t bytes)
+{{
+  uint32_t n = bytes / 4;
+  uint32_t *d = (uint32_t *)pkt->data;
+
+  if (n > WORK_N)
+    n = WORK_N;
+  for (uint32_t i = 0; i < n; i++) {{
+    WCET_LOOP_BOUND(WORK_N);
+    d[i] = w[i];
+  }}
+}}
+
+/* insertion sort: the shifts depend on the order of the words; the inner
+ * loop tests its condition at most i + 1 times for word i */
+static __attribute__((noinline)) void body_sort(uint32_t *w)
+{{
+  for (int i = 1; i < WORK_N; i++) {{
+    WCET_LOOP_BOUND(WORK_N);
+    uint32_t x = w[i];
+    int j = i;
+
+    while (j > 0 && w[j - 1] > x) {{
+      WCET_LOOP_TOTAL(WORK_N * (WORK_N - 1) / 2 + WORK_N - 1);
+      w[j] = w[j - 1];
+      j--;
+    }}
+    w[j] = x;
+  }}
+}}
+
+/* linear search of the low byte `key`; stops at the first match */
+static __attribute__((noinline)) int body_search(const uint32_t *w, uint32_t key)
+{{
+  for (int i = 0; i < WORK_N; i++) {{
+    WCET_LOOP_BOUND(WORK_N);
+    if ((w[i] & 0xFF) == key)
+      return i;
+  }}
+  return -1;
+}}
+
+/* loop with a count from the data: (w[0] mod COUNT_MAX) + 1 passes */
+static __attribute__((noinline)) void body_count(uint32_t *w)
+{{
+  uint32_t c = (w[0] & (COUNT_MAX - 1)) + 1;
+  uint32_t acc = w[1];
+
+  for (uint32_t i = 0; i < c; i++) {{
+    WCET_LOOP_BOUND(COUNT_MAX);
+    acc = (acc << 3) ^ (acc >> 5) ^ w[i & (WORK_N - 1)];
+  }}
+  w[1] = acc;
+}}
+
+static void run_body(const struct task_s *t, uint32_t *w, uint32_t k)
+{{
+  for (int r = 0; r < t->repeat; r++) {{
+    WCET_LOOP_BOUND(MAX_REPEAT);
+    if (t->body == BODY_SORT) {{
+      body_sort(w);
+      w[0] ^= k + r;
+    }} else if (t->body == BODY_SEARCH) {{
+      w[2] ^= (uint32_t)body_search(w, (w[0] >> 24) ^ r);
+    }} else if (t->body == BODY_COUNT) {{
+      body_count(w);
+    }} else {{
+      ucx_sleep(t->workload);
+    }}
+  }}
+}}
+
+/* ------------------------------ tasks */
+static noc_packet_t *create_pkt(uint32_t bytes)
+{{
+  noc_packet_t *pkt = ucx_noc_create_packet(bytes);
+
+  for (uint32_t i = 0; i < bytes; i++)
+    pkt->data[i] = i;
+
+  return pkt;
+}}
+
+static void sleep_forever(void)
+{{
+  kcb_p->tcb_p->state = TASK_STOPPED;
+  ucx_task_yield();
+}}
+
+/* blocking receive (recv_source_port of weird_a.c); counts the packet on
+ * its input edge, XORs its payload into the work array and checks the
+ * iteration of the tag of a packet from another PE (a local packet is the
+ * buffer of the sender) */
+static void receive_one(const struct task_s *t, uint32_t *received, uint32_t *w)
+{{
+  while (ucx_noc_probe() <= 0) {{
+    kcb_p->tcb_p->state = TASK_BLOCKED;
+    ucx_task_yield();
+  }}
+
+  noc_packet_t *pkt = ucx_noc_receive();
+  uint16_t port = pkt->source_port;
+  uint16_t tag = pkt->tag;
+  int remote = pkt->source_node != ucx_noc_cpu_id();
+
+  absorb(w, pkt);
+  if (remote)
+    ucx_free(pkt);
+
+  for (int i = 0; i < t->n_in; i++) {{
+    if (t->in_port[i] == port) {{
+      received[i]++;
+      if (remote && tag % TAG_MOD != received[i] % TAG_MOD)
+        printf("%s: tag %d on input %d, expected iteration %d\\n", t->name, tag, i, received[i]);
+      return;
+    }}
+  }}
+  printf("%s: packet from unknown port %d\\n", t->name, port);
+}}
+
+static void run_task(const struct task_s *t)
+{{
+  noc_packet_t *pkt[MAX_OUT];
+  uint32_t received[MAX_IN];
+  uint32_t work[WORK_N];
+  uint32_t done = 0;
+  int it = ITERATIONS;
+
+  ucx_noc_comm_create(t->port);
+  for (int o = 0; o < t->n_out; o++)
+    pkt[o] = create_pkt(t->out[o].bytes);
+  for (int i = 0; i < MAX_IN; i++)
+    received[i] = 0;
+  for (int i = 0; i < WORK_N; i++)
+    work[i] = 0;
+
+  do {{
+    if (t->n_in == 0) {{
+      /* voluntary sleep until the release */
+      kcb_p->tcb_p->state = TASK_BLOCKED;
+      ucx_task_yield();
+      fill(work, done + 1, t->port);
+    }} else {{
+      /* wait for the packet of iteration done + 1 of each input edge */
+      for (int i = 0; i < t->n_in; i++)
+        while (received[i] <= done)
+          receive_one(t, received, work);
+    }}
+    ITER_BEGIN(t->letter, done + 1);
+
+    run_body(t, work, done + 1);
+    done++;
+
+    for (int o = 0; o < t->n_out; o++) {{
+      emit(pkt[o], work, t->out[o].bytes);
+      ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+    }}
+    ITER_END(t->letter, done);
+  }} while (--it);
+
+  for (int o = 0; o < t->n_out; o++)
+    ucx_free(pkt[o]);
+  sleep_forever();
+}}
+
+{task_functions}
+
+void idle_task_p(void)
+{{
+  for (;;)
+    ;
+}}
+
+static void add_task(void (*fn)(void), const struct task_s *t)
+{{
+  ucx_task_add(fn, (char *)t->name, DEFAULT_STACK_SIZE, 0, 0, 0);
+  if (t->n_in == 0 && n_release < MAX_RELEASE)
+    release_tcb[n_release++] = kcb_p->tcb_p;   /* tcb of the task just added */
+}}
+
+int32_t app_main(void)
+{{
+  /* idle must be ID = 0 */
+  ucx_task_add(idle_task_p, "IDLE", DEFAULT_STACK_SIZE, 0, 0, 0);
+
+  switch (ucx_noc_cpu_id()) {{
+{cases}
+  default:
+    break;
+  }}
+
+  return 1;
+}}
+"""
+
+BODY_CODES = {"sleep": "BODY_SLEEP", "sort": "BODY_SORT", "search": "BODY_SEARCH", "count": "BODY_COUNT"}
+
+
 def c_string(s):
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
@@ -221,6 +527,12 @@ def task_row(t, flows, tasks_by_name, max_in, max_out):
     in_txt = "{" + ", ".join(str(p) for p in ins or [0]) + "}"
     out_txt = "{" + ", ".join(outs or ["{0, 0, 0, 0}"]) + "}"
     kname = t["name"][:4]
+    if "body" in t:
+        return (f"  /* {t['name']}: PE {t['pe']} ({t['pe_label']}), position {t['order']}, body {t['body']} "
+                f"x {t['repeat']}, marker {t['iter_letter']} */\n"
+                f"  {{{c_string(kname)}, '{t['iter_letter']}', {t['port']}, {t['workload']}, {len(ins)}, "
+                f"{len(t['outputs'])}, {BODY_CODES[t['body']]}, {t['repeat']}, "
+                f"{in_txt}, {out_txt}}},")
     return (f"  /* {t['name']}: PE {t['pe']} ({t['pe_label']}), position {t['order']}, c(v) = {t['wcet']}, "
             f"marker {t['iter_letter']} */\n"
             f"  {{{c_string(kname)}, '{t['iter_letter']}', {t['port']}, {t['workload']}, {len(ins)}, "
@@ -252,13 +564,26 @@ def c_source(m):
             cases.append(f"    add_task(task_{t['ident']}, &TASKS[{index[t['name']]}]);")
         cases.append("    break;")
     w, h = m["mesh"]
-    head = HEADER.format(
+    bodies = m.get("bodies")
+    header = HEADER
+    if bodies is not None:
+        header = HEADER.replace(" --delay-ns {delay}\n", " --delay-ns {delay} \\\n *     --bodies {bodies}\n")
+        header = header[:header.rindex(" */")] + WORK_HEADER.format(
+            bodies=bodies["file"], work_n=bodies["work_words"], count_max=bodies["count_max"])
+    head = header.format(
         name=m["name"], csv=m["inputs"]["csv"]["file"], map=m["inputs"]["map"]["file"],
         csv_sha=m["inputs"]["csv"]["sha256"], map_sha=m["inputs"]["map"]["sha256"],
         mesh=f"{w}x{h}", cpc=m["cycles_per_count"], reserve=m["reserve_cycles"],
         div=m["payload_divisor"], tag_mod=m["tag_mod"], delay=m["release"]["delay_ns"],
         n_tasks=len(tasks), n_flows=len(flows), n_remote=sum(not f["local"] for f in flows),
-        period=m["release"]["period_ns"], release_pes=", ".join(str(n) for n in m["release"]["pes"]))
+        period=m["release"]["period_ns"], release_pes=", ".join(str(n) for n in m["release"]["pes"]),
+        **({"bodies": bodies["file"]} if bodies is not None else {}))
+    if bodies is not None:
+        return head + WORK_BODY.format(
+            n_tasks=len(tasks), max_in=max_in, max_out=max_out, max_release=max_release, tag_mod=m["tag_mod"],
+            work_n=bodies["work_words"], count_max=bodies["count_max"],
+            max_repeat=max(t["repeat"] for t in tasks), tasks=rows, task_functions=funcs,
+            cases="\n".join(cases))
     return head + BODY.format(n_tasks=len(tasks), max_in=max_in, max_out=max_out,
                               max_release=max_release, tag_mod=m["tag_mod"], tasks=rows,
                               task_functions=funcs, cases="\n".join(cases))
