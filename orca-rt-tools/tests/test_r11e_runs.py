@@ -2,12 +2,13 @@
 interrupts, crt0.s with the return test of _isr and the read back of
 _interrupt_set(0), crt0=guard_readback): UG and UH (application E,
 experiments/exp23), UCV (CAR-V, experiments/car-v-rtl), UMA (carv_e,
-experiments/multiapp) and W3 (WCET-E, experiments/wcet), the runs TG, TH,
-TCV, TMA and W2 of tag r11-rc3 with the crt0.s of this tree. Each run
-conforms with the phase model (no task twice in a phase, no execution before
-phase j + n(v), no phase above t(V_k)), stays within R_bound and the
-deadline, has no late packet and no monitor error, and matches its
-reference."""
+experiments/multiapp), W3 (WCET-E, experiments/wcet) and CF4 (car_full,
+experiments/car-full), the runs TG, TH, TCV, TMA, W2 and CF2 of tag r11-rc3
+with the crt0.s of this tree. Each run of the release by tick conforms with
+the phase model (no task twice in a phase, no execution before phase
+j + n(v), no phase above t(V_k)), stays within R_bound and the deadline, has
+no late packet and no monitor error, and matches its reference; CF4
+completes every job within the general phase model."""
 import json
 import os
 
@@ -34,6 +35,7 @@ def conforms(pc):
     ("multiapp/logs/UMA.events.txt", "multiapp/reference_UMA_CARV.json"),
     ("multiapp/logs/UMA.events.txt", "multiapp/reference_UMA_E.json"),
     ("wcet/logs/W3.events.txt", "wcet/reference_W3.json"),
+    ("car-full/logs/CF4.events.txt", "car-full/reference_CF4.json"),
 ])
 def test_r11e_runs_are_of_this_kernel(log, ref):
     """The runs of tag r11-rc5 have isr=no_nesting and crt0=guard_readback in
@@ -135,3 +137,34 @@ def test_wcet_of_the_r11e_runs(tmp_path):
     e = m["apps"]["E"]["tasks"]
     assert sorted(t for t, r in e.items() if r["run_sound"] is False) == ["G", "I", "J"]
     assert all(e[t]["runs_with_receptions"] == e[t]["single_runs"] for t in ("G", "I", "J"))
+
+
+def test_run_cf4(tmp_path):
+    """make -C experiments/car-full check-cf4: run CF4 (car_full of tag
+    r11-rc5) against reference_CF4.json. Every job completes (CF2: six jobs
+    loop on the jalr of the return of _isr), no job begins twice in a phase,
+    no deadline miss, no read older than the model, no phase above the busy
+    time of the model, every chain has a measured data age within its bound,
+    no packet after its deadline, no monitor error."""
+    from rttools.paper import rtlmr
+    d = os.path.join(EXP, "car-full")
+    app = os.path.join(APPS, "car-full")
+    m = rtlmr.analyze(os.path.join(d, "logs", "CF4.events.txt"), os.path.join(APP_DIR, "car_full.json"),
+                      os.path.join(app, "car-full.csv"), os.path.join(app, "car-full-ONTO-hermes4x4.map"),
+                      str(tmp_path))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, "reference_CF4.json")) == []
+    assert (m["clock"]["isr"], m["clock"]["crt0"]) == ("no_nesting", "guard_readback")
+    assert m["releases"]["count"] == 244 and m["markers"]["jobs"] == m["jobs"]["complete"] == 2945
+    assert m["progress"]["stalled_tasks"] == [] and m["progress"]["stalled_pes"] == []
+    assert (m["jobs"]["end_after_model_finish"], m["jobs"]["deadline_misses"]) == (0, 0)
+    assert m["phases"]["jobs_begun_twice_in_a_phase"] == 0 and m["reads"]["older_than_model"] == 0
+    assert m["cpu_phases"]["phases_above_model"] == 0
+    a = m["data_age"]
+    assert (a["chains"], a["measured_chains"], a["above_bound"]) == (34, 34, 0) and a["margin_min_cycles"] > 0
+    assert m["packets"]["after_deadline"] == 0 and m["monitor"]["errors"] == 0
+    # phasecheck (no tolerance): no task twice, no early execution; the PEs
+    # busy through a whole phase exceed its 108,000 cycles by at most
+    # BUSY_TOLERANCE, the rounding of the phase boundaries
+    pc = m["phase_conformance"]
+    assert (pc["phases_with_a_task_twice"], pc["early_jobs"]) == (0, 0)
+    assert max(p["excess_max"] for p in pc["pes"].values()) <= rtlmr.BUSY_TOLERANCE
