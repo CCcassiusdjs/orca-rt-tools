@@ -1,9 +1,9 @@
-"""Fix 12 (rttools/rgg/__main__.py and rttools/modules/io/svg.py).
+"""Seeds of rttools/rgg/__main__.py and rttools/modules/io/svg.py.
 
-1. RGG used the global numpy.random and random, without a seed: the graphs of
-   Table 7.1 cannot be regenerated. It now accepts an optional seed.
-2. svg.py drew colors at random on each run: two SVGs of the same scale
-   differed byte by byte. The colors now use a generator with a fixed seed.
+1. RGG takes an optional seed for its own generators; the same seed gives
+   the same graph, and without a seed the command draws a new graph.
+2. svg.py draws the colors from a generator with a fixed seed: the same
+   input gives the same SVG byte by byte.
 """
 import os
 import shutil

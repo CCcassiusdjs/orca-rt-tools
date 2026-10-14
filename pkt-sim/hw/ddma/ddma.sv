@@ -154,9 +154,9 @@ module ddma #(parameter
   // on acceptance. Payload words come from memory (1-cycle read latency)
   // through a 2-entry prefetch queue, so the port sends one flit per
   // cycle while credit holds and the memory token stays with the send
-  // process. Without backpressure, the timing matches the previous
-  // version: header accepted 2 cycles after send_cmd_in, size on the
-  // next cycle, one idle cycle, then one payload flit per cycle.
+  // process. Without backpressure: header accepted 2 cycles after
+  // send_cmd_in, size on the next cycle, one idle cycle, then one payload
+  // flit per cycle.
   logic send_accept;
   assign send_accept = router_if.rx & router_if.credit_o;
 
@@ -281,15 +281,13 @@ module ddma #(parameter
 
   // ============================== RECEIVING ============================
   // The router releases the flit on data_o at the clock edge where tx = 1
-  // and credit_i = 1. Header and size flits keep the previous timing
-  // (registered credit). For the payload, credit_i and the memory write
+  // and credit_i = 1. Header and size flits use a registered credit. For
+  // the payload, credit_i and the memory write
   // enable are combinational and equal: a flit is written exactly when
   // the router releases it, and only while the receive process holds
-  // the memory token. Address and flit count advance on that event.
-  // The previous version granted credit one cycle ahead and rewound the
-  // address on every cycle without a flit; while the send process held
-  // the token, the address moved back up to INTERLEAVING_GRAIN words, and
-  // a write could reach the send address during the token switch.
+  // the memory token. Address and flit count advance on that event, so
+  // the write address only moves forward and stays inside the receive
+  // buffer while the send process holds the token.
   //
   // Destination check: a header whose XY field (bits 15:0) differs from
   // ADDRESS[15:0] marks the packet as foreign; the DDMA consumes its

@@ -115,7 +115,7 @@ def XY(source, target, graph):
     # hops one node towards target
     currentNode = nextNode
 
-  # fix missing local source and target nodes
+  # add the LOCAL links of the source and target nodes
   source = paths[0]['edge']['source']
   paths.insert(0, {
     'edge': {

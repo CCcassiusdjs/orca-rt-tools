@@ -958,8 +958,8 @@ def write_per_iteration(out_dir, pi):
 
 def write_figure(tr, cfg, out_dir, window):
     """Gantt of one hyperperiod; lanes named `PE x-y (cluster)` in the X-Y
-    order of the fixed RTL (the config uses the order of the original
-    log)."""
+    order of manycore_pe.sv (the config uses the Y-X order of the stored
+    log A)."""
     from rttools.tui.model.trace import Mark, Slice
     a, b = window
     lanes = [l for l in tr.lanes if l in cfg["clusters"]]

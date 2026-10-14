@@ -1,6 +1,6 @@
 // Packet integrity monitor of the PE (simulation only; does not change the
 // RTL). chk_binds.sv binds it to each manycore_pe. It uses only interface
-// signals of the DDMA, common to the original (4c299fc) and fixed versions.
+// signals of the DDMA, common to every version of the RTL in the stored runs.
 //
 // Send: on the rising edge of send_cmd_in, copies [destination, size,
 // payload] from memory (memory_mod.mem) and compares it with the flits the

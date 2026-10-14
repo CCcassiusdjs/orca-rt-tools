@@ -20,7 +20,7 @@ from rttools.tui.model.timeunit import (
 from rttools.tui.model.trace import Mark, Slice, Trace
 
 # default PE -> task map of rttools/log2gannt (application of Ch. 8),
-# keys in the X-Y order of the logs of the original RTL (4c299fc)
+# keys in the Y-X order of the versioned logs (pkt-sim/schedule*.txt)
 DEFAULT_RTL_NAMES = {
     "0-0": ["IDLE", "F", "D", "B", "A"],
     "0-1": ["IDLE", "C"],
@@ -117,8 +117,8 @@ def parse_rtl(lines, names=None, swap_xy=False, unit=None, name="rtl"):
 
     The raw unit is $time of manycore_pe. The parser reads it from a
     `$printtimescale` line when the log has one; otherwise it assumes
-    1 ns and flags the unit as assumed (the commit 4c299fc prints in units
-    of 100 ps, see the TUI unit presets). swap_xy "auto" swaps X and Y when
+    1 ns and flags the unit as assumed (a PE without `timescale prints in
+    units of 100 ps, see the TUI unit presets). swap_xy "auto" swaps X and Y when
     a task index falls outside the map and the swapped labels fit it."""
     names = DEFAULT_RTL_NAMES if names is None else names
     if swap_xy == "auto":

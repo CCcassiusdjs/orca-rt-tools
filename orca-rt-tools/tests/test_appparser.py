@@ -1,12 +1,11 @@
-"""Fixes 3 and 4 (rttools/modules/io/appparser.py).
+"""Application reader (rttools/modules/io/appparser.py).
 
-3. Task table schema: parseTaskRow read only the new schema
-   (id, wcet, label); the applications with the old schema (id, period,
-   capacity, deadline, label, description), como SyntheticA, SHI2010,
-   DCT-Verify and STR2RTS-CFAR, failed in getTaskIdByName. Labels with
-   spaces ("Task A") broke the GML without quotes.
-4. Temporary file: loadFromFile wrote `.__tmp` to the current
-   directory.
+1. Task table schemas: parseTaskRow reads the schema (id, wcet, label) and
+   the periodic schema (id, period, capacity, deadline, label,
+   description) of SyntheticA, SHI2010, DCT-Verify and STR2RTS-CFAR; in the
+   periodic schema the capacity is the WCET. Labels with spaces
+   ("Task A") are quoted in the GML.
+2. loadFromFile writes no temporary file to the current directory.
 """
 import os
 import shutil
@@ -48,9 +47,9 @@ def test_old_schema_uses_capacity_as_wcet():
 
 
 def test_no_tmp_file_in_cwd(tmp_path, monkeypatch):
-    """The current directory contains a `.__tmp` directory: the old code
-    fails to open that path for writing; the new code does not use the
-    current directory."""
+    """The current directory contains a `.__tmp` directory, a path that
+    cannot be opened for writing: loading succeeds and leaves the current
+    directory unchanged."""
     src = os.path.join(APPS, "sample-graph-a", "SAMPLE_GRAPH.csv")
     work = tmp_path / "cwd"
     work.mkdir()

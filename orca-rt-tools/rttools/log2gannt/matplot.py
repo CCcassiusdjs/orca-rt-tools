@@ -4,10 +4,9 @@ from sys import argv
 KERNEL_SCHED_TIME = 200
 
 # default map: application E (Ch. 8.3), PE -> tasks by index; the order
-# of the keys sets the order of the panels. The keys follow the
-# versioned logs (pkt-sim/schedule*.txt), generated before the fix of
-# addr_x()/addr_y() in manycore_pe.sv, with X and Y swapped. For logs from the
-# fixed RTL, use --swap-xy.
+# of the keys sets the order of the panels. The keys follow the Y-X order
+# of the versioned logs (pkt-sim/schedule*.txt). manycore_pe.sv prints X-Y
+# labels (addr_x() = ADDRESS[15:8]); for its logs, use --swap-xy.
 task_names = {
 	"0-0": ['IDLE', 'F', 'D', 'B', 'A'],
 	"0-1": ['IDLE', 'C'],
@@ -15,8 +14,7 @@ task_names = {
 	"1-0": ['IDLE', 'H', 'I', 'E']
 }
 
-# log time units per millisecond (old default: 10^6,
-# that is, $time in ns)
+# log time units per millisecond (default: 10^6, that is, $time in ns)
 DEFAULT_UNITS_PER_MS = 1000000
 DEFAULT_OUTPUT = "gannt2.png"
 

@@ -45,7 +45,7 @@ The output must show a couple of debugging information, followed by a section na
 
 | Tab | Content |
 |---|---|
-| Trace | Gantt of RTL logs (ModelSim/Questa transcript or extracted events), `rttools.bench` output, KProfiler `.sch` and CSV. Cursor and mark with the interval in raw units, cycles, ns, µs and ms; raw unit presets for the RTL (100 ps for commit 4c299fc, 1 ns); time per task and utilization per lane; bursts between passes through IDLE; latency of the packets (`->`/`<-` TAG lines); comparison of two runs with a time scale; export to SVG, PNG and CSV |
+| Trace | Gantt of RTL logs (ModelSim/Questa transcript or extracted events), `rttools.bench` output, KProfiler `.sch` and CSV. Cursor and mark with the interval in raw units, cycles, ns, µs and ms; raw unit presets for the RTL (100 ps for a PE without `` `timescale ``, 1 ns); time per task and utilization per lane; bursts between passes through IDLE; latency of the packets (`->`/`<-` TAG lines); comparison of two runs with a time scale; export to SVG, PNG and CSV |
 | Bench | Task set editor; ORT/BENCH simulation (RM, DM, EDF, RR) with configurable quantum; utilization, Liu-Layland, hyperbolic, response time (also with release jitter equal to the quantum) and EDF processor demand tests; observed response times |
 | Network | Application, mapping and NoC (or an example of `apps/`); flows at a frequency (hops, flits, network time); frequency search in a child process with live progress and cancel; link schedule, link utilization, packets with slack, independent validation of the schedule |
 | Graphs | Task graph in ORCA format: GDE metrics, GCPA cost and critical path, layers, GCM clustering (MAX_PROC with 4 clusters on `apps/sample-graph-b` gives ABDF, C, EHI and GJ) |
@@ -60,7 +60,7 @@ The Help tab (F1) lists the keys. Commands without the interface, for batch use:
 
 ## Tests
 
-The repository includes regression tests for the Python tools, the UCX-OS NoC driver and the RTL of the DDMA, the Hermes crossbar, the TCD and the manycore PE.
+The repository includes tests for the Python tools, the UCX-OS NoC driver and the RTL of the DDMA, the Hermes crossbar, the TCD and the manycore PE.
 
 | Part | Location | Tools |
 |---|---|---|
@@ -78,7 +78,7 @@ cd orca-rt-tools && python -m pytest -q
 The RTL tests skip when Verilator or GHDL is missing. `pkt-sim/software/ucx-os/tests/host/run.sh` and `pkt-sim/tests/rtl/run.sh` run the C and RTL tests without pytest.
 
 <!-- anon:drop-begin -->
-## Command-line options added by the fixes
+## Command-line options
 
 | Tool | Option |
 |---|---|
@@ -89,5 +89,5 @@ The RTL tests skip when Verilator or GHDL is missing. `pkt-sim/software/ucx-os/t
 
 ## Time unit of the RTL logs
 
-`pkt-sim/manycore_modelsim/manycore_pe.sv` declares `` `timescale 1ns/100ps ``, so the simulation logs (`scheduled`, `TAG`, `TRIGGER`) report time in ns. Commit 4c299fc ran without this directive; in that configuration the simulator assigns 100 ps to the PE, and the logs of that commit report time in units of 100 ps (`log2gannt --units-per-ms 10000000`). Logs produced before the fix of `addr_x()`/`addr_y()` print X and Y swapped (`log2gannt --swap-xy` reads logs of the fixed RTL with the default map).
+`pkt-sim/manycore_modelsim/manycore_pe.sv` declares `` `timescale 1ns/1fs ``, so the simulation logs (`scheduled`, `TAG`, `TRIGGER`) report time in ns. A PE without this directive takes the 100 ps unit of the simulator, and its logs report time in units of 100 ps (`log2gannt --units-per-ms 10000000`). `manycore_pe.sv` labels a PE as X-Y (`addr_x()` = `ADDRESS[15:8]`, `addr_y()` = `ADDRESS[7:0]`); the default map of `log2gannt` follows the Y-X order of the versioned logs `pkt-sim/schedule*.txt`, and `log2gannt --swap-xy` reads X-Y logs with it.
 <!-- anon:drop-end -->

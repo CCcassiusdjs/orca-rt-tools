@@ -61,13 +61,13 @@ def test_fig_8_2_from_table_8_1():
     assert placed == [2, 1, 3, 16, 4, 5, 6, 7, 8, 9, 10, 13, 15, 12, 14, 11]
 
 
-def car_edges(typo=False):
-    """Tasks and edges of apps/shi-2010/shi-2010.txt; typo=True restores
-    the edge FBU3->VOD2 of the file before the fix (SHI2010.csv and Shi et
-    al. give FBU8->VOD2)."""
+def car_edges(fbu3_vod2=False):
+    """Tasks and edges of apps/shi-2010/shi-2010.txt (edge FBU8->VOD2, as in
+    SHI2010.csv and Shi et al.); fbu3_vod2=True replaces that edge by
+    FBU3->VOD2."""
     tasks, edges = spiral.from_orca(import_graph(os.path.join(APPS, "shi-2010", "shi-2010.txt")))
     assert ("FBU8", "VOD2", 960000) in edges
-    if typo:
+    if fbu3_vod2:
         edges = [("FBU3", v, w) if (u, v) == ("FBU8", "VOD2") else (u, v, w) for u, v, w in edges]
     return tasks, edges
 
@@ -97,10 +97,10 @@ def test_car_clustered_by_gcm_and_mapped():
 
 
 def test_car_with_the_edge_fbu3_vod2_gives_the_clusters_of_table_8_1():
-    """With the edge FBU3->VOD2 (the file before the fix), MAX_PROC gives
-    the 16 clusters of Table 8.1; the volumes of 4 clusters exceed the
-    table, so the typo does not explain them."""
-    res = spiral.map_application(*car_edges(typo=True), 4, 4)
+    """With the edge FBU3->VOD2 in place of FBU8->VOD2, MAX_PROC gives the
+    16 clusters of Table 8.1; the volumes of 4 clusters exceed the table, so
+    the edge does not explain the volumes."""
+    res = spiral.map_application(*car_edges(fbu3_vod2=True), 4, 4)
     assert res["criterion"] == "MAX_PROC"
     by_set = {frozenset(c.split(":")): c for c in res["clusters"]}
     table = {frozenset(name.replace("NAVI", "NAVC").split(":")): vol for _, name, vol in TABLE_8_1}

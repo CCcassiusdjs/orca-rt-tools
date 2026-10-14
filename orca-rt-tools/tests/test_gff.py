@@ -1,9 +1,8 @@
-"""Fix 7 (rttools/gff/__main__.py).
+"""Graph format converter (rttools/gff/__main__.py).
 
-1. `raise error(...)`: `error` was not imported (NameError) and, even
-   if imported, returns None (TypeError).
-2. ORCA -> ORCA called orca_export(graph, ofile), but the signature is
-   export_graph(filename, graph).
+1. An unknown input or output format raises ValueError.
+2. ORCA -> ORCA calls export_graph(filename, graph) and the result reads
+   back as the same graph; ORCA -> DOT writes the graph in DOT.
 """
 import os
 

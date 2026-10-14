@@ -1,4 +1,6 @@
-"""Regression tests for the defects found in the review of the TUI."""
+"""TUI edge cases: tick generation at large times, CSV quoting, schedulability
+tests with equal priorities and truncated demand, burst windows, time scale
+detection, schedule validation, number parsing and Gantt interaction."""
 import asyncio
 import subprocess
 import sys

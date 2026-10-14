@@ -12,6 +12,7 @@
 | Identity | Names, e-mail addresses, user names, host names, site paths, laboratory and institution names of the authors (`IDENTITY` in `anonymize.py`) |
 | Commit hashes | Hashes of commits of this repository (7 to 40 hex digits) in documentation, data and code files become `xxxxxxx` |
 | Verification | Search of every file, text and binary, for the identifying strings and for commit hashes; hits in third-party headers (`ALLOWED`) are listed apart; exit code 1 on any other hit |
+| Correction wording | Search of the text files outside `CORRECTION_SKIP` (third-party and legacy files) for the wording of `CORRECTION_PATTERNS` (fix, bug, defect, errata, corrected, original or fixed RTL, regression, previous version, and similar); exit code 1 on any hit |
 
 | Variable | Effect |
 |---|---|

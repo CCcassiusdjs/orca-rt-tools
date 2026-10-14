@@ -1,7 +1,7 @@
-// Explicit time unit: $time counts ns. Without this directive (commit
-// 4c299fc), the simulator assigned the 100 ps unit to this module, and the
-// logs (scheduled, TAG, TRIGGER) came out in tenths of ns. Precision 1 fs,
-// as manycore_top.sv (clock half period in fs).
+// Explicit time unit: $time counts ns, so the logs (scheduled, TAG,
+// TRIGGER) report ns; without the directive, the simulator assigns its
+// 100 ps unit to this module. Precision 1 fs, as manycore_top.sv (clock
+// half period in fs).
 `timescale 1ns/1fs
 
 import orca_pkg::*;
@@ -169,7 +169,7 @@ module manycore_pe #(parameter
   // the controller sees it at the rising edge of that cycle. The count of
   // cycles keeps the release period at T F_CLK cycles at any clock; the
   // tick of the kernel also counts cycles (F_CPU / F_TIMER, hal.c). At
-  // 500 MHz it fires at the same edges as the former test
+  // 500 MHz it fires at the same edges as the test
   // $time >= 3_000_000 + k 500_000 ns (rising edge n at 2 n + 1 ns).
   logic   wake_up_irq;
   longint wake_up_cycle = 0;        // rising edges of clock before the current one

@@ -43,7 +43,7 @@ def test_run_d_matches_reference(runs):
     assert exp23.check(os.path.join(d, "metrics.json"), os.path.join(EXP, "reference_D.json")) == []
 
 
-def test_corrected_values_of_chapter_8(runs):
+def test_tab83_values_of_run_a(runs):
     m, _ = runs["A"]
     rows = {r["cluster"]: r for r in m["tab83"]["rows"]}
     assert {c: rows[c]["measured"] for c in rows} == {"ABDF": 143900, "C": 80929, "EHI": 119220, "GJ": 182977}
@@ -183,7 +183,7 @@ def test_run_f_matches_head_reference(run_f):
 
 
 def test_run_e_close_to_run_c(runs):
-    """E (this tree) against C (fixed RTL and software of b920605). The
+    """E (this tree) against C (RTL and software of b920605). The
     only change to the simulated software between them is the zero-size
     check of ddma.c (828835f)."""
     c, e = runs["C"][0], runs["E"][0]
@@ -511,7 +511,7 @@ def test_figures_at_another_clock_equal_run_f(tmp_path):
 
 def test_snap_to_edges_rejects_a_time_off_the_clock(tmp_path):
     """A time farther than half a unit from every rising edge stops the
-    analysis (wrong half period in RUN_INFO)."""
+    analysis (half period of RUN_INFO inconsistent with the log)."""
     log, c = synthetic_run(tmp_path)
     tr = exp23.load(log, dict(c, clock_hz=F_SYNTH), None, None)
     with pytest.raises(ValueError, match="rising edge"):

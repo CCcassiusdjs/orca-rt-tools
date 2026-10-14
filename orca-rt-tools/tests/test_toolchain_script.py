@@ -1,11 +1,9 @@
-"""Fix 28 (pkt-sim/software/toolchain/riscv64.sh).
+"""Toolchain script (pkt-sim/software/toolchain/riscv64.sh).
 
-1. Line 59 lacked a backslash: the binutils configure ran without
-   --with-arch, --with-sysroot, --disable-nls e --disable-werror, e a
-   line 60 became a nonexistent command.
-2. ${nproc} is an empty variable: make -j ran without a limit; the correct form is
-   $(nproc).
-3. Without 'set -e', the script continued after a failing step.
+1. The binutils configure receives --with-arch, --with-sysroot,
+   --disable-nls and --disable-werror on one continued command line.
+2. make -j takes the number of processors from $(nproc).
+3. The script runs with 'set -e' and stops at the first failing step.
 
 The test runs the script with wget, tar, make and nproc replaced by
 stubs (no network and no compilation) and checks the received arguments.

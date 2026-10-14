@@ -111,7 +111,7 @@ class TracePane(Widget):
         warn = ""
         if u.assumed:
             warn = ("  [b red]unit assumed[/]: the log has no $printtimescale line; "
-                    "press U to choose 100 ps (4c299fc) or 1 ns")
+                    "press U to choose 100 ps (PE without `timescale) or 1 ns")
         fmt = tr.meta.get("format", "?")
         self.query_one("#trace-head", Static).update(
             f"[b]{esc(tr.name)}[/b]  format {fmt}  lanes {len(tr.lanes)}  slices {len(tr.slices)}  "
@@ -204,7 +204,7 @@ class TracePane(Widget):
                    ("KProfiler .sch", "kprofiler"), ("CSV", "csv")]),
             Field("unit", "RTL raw unit", "auto", "select",
                   [("detect from $printtimescale, else 1 ns", "auto"),
-                   ("100 ps (manycore_pe without `timescale, 4c299fc)", "100ps"),
+                   ("100 ps (manycore_pe without `timescale)", "100ps"),
                    ("1 ns (manycore_pe with `timescale 1ns/100ps)", "1ns")]),
             Field("map", "RTL task map (JSON)", "", "path", placeholder="empty: map of rttools/log2gannt"),
             Field("swap", "RTL swap X and Y", False, "switch"),
@@ -267,12 +267,12 @@ class TracePane(Widget):
         self.app.push_screen(FormDialog("Raw time unit", [
             Field("preset", "Preset", "custom", "select",
                   [("custom (fields below)", "custom"),
-                   ("RTL 100 ps, clock 500 MHz (4c299fc)", "100ps"),
+                   ("RTL 100 ps, clock 500 MHz (PE without `timescale)", "100ps"),
                    ("RTL 1 ns, clock 500 MHz", "1ns")]),
             Field("custom", "Custom raw unit", u.name.replace(" ", ""), "text", placeholder="100ps, 1ns, 1us"),
             Field("clock", "Clock (Hz)", f"{u.clock_hz:g}" if u.clock_hz else "", "text",
                   placeholder="500M"),
-        ], hint="The thesis (Ch. 8) read logs of 4c299fc as 1 ns; the PE prints $time in units of 100 ps."),
+        ], hint="Without `timescale, the PE prints $time in units of 100 ps."),
             guarded(self.app, done))
 
     def action_goto(self):

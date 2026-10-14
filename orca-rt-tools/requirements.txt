@@ -4,7 +4,7 @@ pyparsing==2.4.7
 matplotlib==3.5.1
 # matplotlib 3.5.1 uses np.Inf, removed in numpy 2.0
 numpy>=1.21,<2
-# pygraphviz==1.9 is no longer required by the main flow
+# pygraphviz==1.9 is not required by the main flow
 # (only the legacy code in __rt_tools_old and porca uses it)
 # terminal user interface (python -m rttools.tui); textual 8 needs Python 3.9+
 textual>=8.2,<9

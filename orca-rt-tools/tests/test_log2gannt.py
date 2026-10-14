@@ -1,11 +1,10 @@
-"""Fix 13 (rttools/log2gannt/matplot.py and gantt-latex.py).
+"""Gantt of RTL logs (rttools/log2gannt/matplot.py and gantt-latex.py).
 
-1. f2na: (addr & 0xFF00) >> 16 always yields 0; the DDMA address is
-   (x << 8) | y, so x = (addr >> 8) & 0xFF.
-2. Task map per PE and time scale hardcoded (application E
-   at 1 GHz, "x / 1000000 ms"); fixed output gannt2.png in the current
-   directory. They are now parameters, with the old values as defaults.
-3. A PE without events in the log raised IndexError in bins[b][0].
+1. f2na: the DDMA address is (x << 8) | y, so x = (addr >> 8) & 0xFF.
+2. Task map per PE, time scale and output file are parameters (--map,
+   --units-per-ms, --out); the defaults are the map of application E, 10^6
+   log units per ms and gannt2.png in the current directory.
+3. A PE without events in the log gives an empty panel.
 """
 import importlib.util
 import json
@@ -63,8 +62,8 @@ def test_main_with_map_and_output(tmp_path):
     assert out.exists() and out.stat().st_size > 1000
 
 
-# --- independent review: logs from the fixed RTL carry X and Y in the correct
-# --- order; the default map follows the swapped order of the versioned logs
+# --- X-Y order: manycore_pe.sv prints X-Y; the default map follows the Y-X
+# --- order of the versioned logs (pkt-sim/schedule*.txt); --swap-xy reads X-Y logs
 def swap_line(line):
     parts = line.split(" ")
     for i, p in enumerate(parts):

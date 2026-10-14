@@ -235,7 +235,7 @@ def XY(source, target, graph):
         currentNode = nextNode
 
     if(len(paths) != 0):
-      # fix missing local source and target nodes
+      # add the LOCAL links of the source and target nodes
       source = paths[0]["edge"]["source"]
       paths.insert(
           0,

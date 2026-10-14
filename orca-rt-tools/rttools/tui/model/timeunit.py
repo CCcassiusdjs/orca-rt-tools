@@ -116,6 +116,6 @@ def format_value(value, mode, decimals=4):
 # presets offered by the TUI for logs of the manycore RTL (500 MHz clock)
 RTL_CLOCK_HZ = 500e6
 RTL_PRESETS = {
-    "100ps": unit_from_text(100, "ps", RTL_CLOCK_HZ),   # manycore_pe without `timescale (4c299fc)
+    "100ps": unit_from_text(100, "ps", RTL_CLOCK_HZ),   # manycore_pe without `timescale
     "1ns": unit_from_text(1, "ns", RTL_CLOCK_HZ),       # manycore_pe with `timescale 1ns/100ps
 }

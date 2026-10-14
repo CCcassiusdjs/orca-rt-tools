@@ -1,8 +1,8 @@
-"""Fix 6 (rttools/modules/io/svg2.py).
+"""Optional dependencies of rttools/modules/io/svg2.py.
 
-svg2 imported pygraphviz (unused) and matplotlib at the top; the path
-rttools -> minizinc -> svg2 required both libraries even in the
-AGS, which does not use them.
+svg2 does not import pygraphviz and imports matplotlib only where it draws,
+so the path rttools -> minizinc -> svg2 of the AGS runs without both
+libraries.
 """
 import os
 import shutil

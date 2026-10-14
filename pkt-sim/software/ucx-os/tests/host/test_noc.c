@@ -1,15 +1,14 @@
-/* Fixes 16 to 19 (lib/noc.c).
+/* Reception and ports of lib/noc.c.
  *
- * 16. irq3_handler: the port search did not handle k == MAX_TASKS and read
- *     pktdrv_tqueue[MAX_TASKS] (out of bounds); a port without a queue used a
- *     NULL queue.
- * 17. irq3_handler: with the queue full, it freed the packet and then read
- *     pkt->tag and woke the task (use after free).
- * 18. irq2_handler: did not check the return of ucx_malloc; with the heap
- *     exhausted, the DDMA received address 0 and wrote the packet there.
- * 19. ucx_noc_comm_create and ucx_noc_comm_destroy: error returns
- *     returned with interrupts disabled; destroy of a task without a queue
- *     dereferenced NULL. */
+ * 1. irq3_handler: a packet for a port without a queue (search ends at
+ *    k == MAX_TASKS) is dropped; no access beyond pktdrv_tqueue.
+ * 2. irq3_handler: with the queue full, the packet is freed and not read
+ *    again (the tag counter keeps the tag of the last queued packet).
+ * 3. irq2_handler: when ucx_malloc fails, the DDMA receives the address of
+ *    a discard buffer (never address 0) and irq3_handler drops the packet.
+ * 4. ucx_noc_comm_create and ucx_noc_comm_destroy: every return restores
+ *    the interrupts; destroy of a task without a queue returns
+ *    UCX_NOC_TASK_NOT_BOUND. */
 #include <ucx.h>
 #include "host_test.h"
 
@@ -68,7 +67,7 @@ static void test_wrong_node_dropped(void)
 	CHECK(host_irq_enabled == 1);
 }
 
-static void test_unbound_port_dropped(void)          /* 16 */
+static void test_unbound_port_dropped(void)          /* 1 */
 {
 	setup();
 	host_current_task = 1;
@@ -82,7 +81,7 @@ static void test_unbound_port_dropped(void)          /* 16 */
 	CHECK(host_irq_enabled == 1);
 }
 
-static void test_queue_full_no_use_after_free(void)  /* 17 */
+static void test_queue_full_no_use_after_free(void)  /* 2 */
 {
 	setup();
 	host_current_task = 1;
@@ -98,7 +97,7 @@ static void test_queue_full_no_use_after_free(void)  /* 17 */
 	CHECK(host_irq_enabled == 1);
 }
 
-static void test_irq2_malloc_failure(void)           /* 18 */
+static void test_irq2_malloc_failure(void)           /* 3 */
 {
 	setup();
 	host_current_task = 1;
@@ -124,7 +123,7 @@ static void test_irq2_malloc_failure(void)           /* 18 */
 	CHECK(host_irq_enabled == 1);
 }
 
-static void test_comm_create_errors_restore_irq(void)  /* 19 */
+static void test_comm_create_errors_restore_irq(void)  /* 4 */
 {
 	setup();
 	host_current_task = 1;
@@ -141,7 +140,7 @@ static void test_comm_create_errors_restore_irq(void)  /* 19 */
 	CHECK(host_irq_enabled == 1);
 }
 
-static void test_comm_destroy(void)                  /* 19 */
+static void test_comm_destroy(void)                  /* 4 */
 {
 	setup();
 	host_current_task = 3;
@@ -156,7 +155,7 @@ static void test_comm_destroy(void)                  /* 19 */
 	CHECK(ucx_noc_comm_create(5) == UCX_NOC_OK);  /* port released */
 }
 
-/* review: local send (same node) only considers ports with an open queue */
+/* local send (same node) only considers ports with an open queue */
 static void test_local_send_bound_port(void)
 {
 	setup();

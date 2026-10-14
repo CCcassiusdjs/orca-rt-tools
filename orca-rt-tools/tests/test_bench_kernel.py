@@ -1,9 +1,8 @@
-"""Fix 8 (rttools/bench/kernel.py).
+"""Events of the bench kernel (rttools/bench/kernel.py).
 
-1. SystemEvent.__lt__ devolvia self._time > target._time; a PrioQueue
-   (min-heap) removed the latest event first.
-2. SystemEvent.__eq__ read target.type (nonexistent attribute; the correct one
-   is target._type).
+1. SystemEvent orders by time (__lt__ compares self._time < target._time),
+   so a PrioQueue (min-heap) pops the earliest event first.
+2. SystemEvent.__eq__ compares time and event type (target._type).
 """
 from rttools.bench.kernel import SystemEvent, SystemEventType as T
 from rttools.bench.queue import PrioQueue

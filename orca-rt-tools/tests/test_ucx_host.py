@@ -1,5 +1,6 @@
 """Runs the UCX-OS host C tests (pkt-sim/software/ucx-os/tests/host)
-with gcc, AddressSanitizer and UBSan. Fixes 15 (ddma.c) and 16 to 19 (noc.c)."""
+with gcc, AddressSanitizer and UBSan: address conversions of device/ddma.c
+(test_ddma.c) and reception and port handling of lib/noc.c (test_noc.c)."""
 import os
 import shutil
 import subprocess

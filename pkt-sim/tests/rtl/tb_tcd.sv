@@ -1,9 +1,7 @@
-// Fix 24 (hw/tcd/tcd.sv, hyperperiod counter).
+// Hyperperiod counter of the TCD (hw/tcd/tcd.sv).
 //
-// `timer = (timer != HYPERPERIOD) ? timer++ : 0;` assigns to timer the value
-// before the increment: the counter stays at 0 and the prototype of the
-// TCNI only releases configurations with instant 0. The fix counts
-// 0, 1, ..., HYPERPERIOD - 1 e volta a 0.
+// The counter runs 0, 1, ..., HYPERPERIOD - 1 and returns to 0, so the
+// TCNI prototype releases each configuration at its instant.
 //
 // tcd uses the DDMA interface from 2023-03 (addr_in, nbytes_in, cmd_in,
 // status_out), absent from the current version. This test declares that

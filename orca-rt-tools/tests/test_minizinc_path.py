@@ -1,8 +1,7 @@
-"""Fix 5 (rttools/modules/backend/minizinc/minizinc.py).
+"""Path of the MiniZinc model (rttools/modules/backend/minizinc/minizinc.py).
 
-ZINC_MODEL pointed to './minizinc/CM/CM-v20220427.mzn', a path
-relative to the current directory and nonexistent in the repository. The model
-is in apps/CM-v20220427.mzn.
+ZINC_MODEL is the absolute path of apps/CM-v20220427.mzn, so the model is
+found from any current directory.
 """
 import os
 

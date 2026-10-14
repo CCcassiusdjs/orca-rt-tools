@@ -11,11 +11,11 @@ from tests.conftest import REPO_ROOT
 RTL = os.path.join(REPO_ROOT, "pkt-sim", "tests", "rtl")
 
 TESTS = {
-    "tb_ddma_send": "verilator",     # fix 20 (and 21, concurrent reception)
-    "tb_ddma_recv": "verilator",     # fixes 21 and 22
-    "tb_hermes_local": "ghdl",       # fix 23
-    "tb_tcd": "verilator",           # fix 24
-    "tb_manycore_pe": "verilator",   # fixes 25 to 27
+    "tb_ddma_send": "verilator",     # DDMA send handshake under backpressure, send with concurrent reception
+    "tb_ddma_recv": "verilator",     # DDMA reception timing and destination check
+    "tb_hermes_local": "ghdl",       # Hermes LOCAL to LOCAL route and zero-load latency
+    "tb_tcd": "verilator",           # TCD hyperperiod counter
+    "tb_manycore_pe": "verilator",   # PE address labels, register read, reset of the counters, ITER marker
     "tb_release": "verilator",       # release generator in cycles, clock half period in fs
     "tb_cpu_cycles": "ghdl",         # cycles per instruction (bound of the instrumentation writes)
     "tb_release_mask": "verilator",  # release generator on the PEs of RELEASE_MASK (4x4 and 2x2)

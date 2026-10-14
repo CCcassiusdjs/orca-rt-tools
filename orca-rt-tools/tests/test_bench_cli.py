@@ -1,10 +1,9 @@
-"""Fix 11 (rttools/bench/__main__.py and scheduling.py).
+"""Command line of the bench (rttools/bench/__main__.py and scheduling.py).
 
-1. The CLI only accepted "RR"; the other policies in scheduling.py were
-   unreachable.
-2. RateMonotonicScheduling sorted by ascending 1/deadline, that is,
-   picked the longest deadline; RM picks the shortest period.
-3. An algorithm or usage error ended with exit code 0.
+1. The CLI accepts the policies RR, RM, DM and EDF of scheduling.py.
+2. RateMonotonicScheduling orders the ready tasks by period, shortest
+   first.
+3. An unknown algorithm or a usage error ends with a nonzero exit code.
 """
 import os
 
