@@ -34,6 +34,13 @@ the dispatch order of a PE directly (a kernel with another rule) and
 wins over the creation row; the phase index then follows that order
 (estimate.phases: a target that runs before its source on the same PE
 gets one more phase).
+
+Several release periods, a flow period other than the period of its
+source, or a directed cycle select the general model of
+rttools/bench_t/multirate.py (one ORT/BENCH sequence per PE over the
+hyperperiod, latest-value reads, feedback edges): cpu_bound below,
+instantiator.createInstance (key "rates" of the instance) and
+flowUnwrapper (packet windows per job).
 """
 from __future__ import annotations
 
@@ -59,6 +66,7 @@ def settings(app_graph_attrs):
         "scheduler_cycles": int(app_graph_attrs.get("scheduler_cycles", 0)),
         "sequences": {str(k): list(v) for k, v in sequences.items()} if sequences else None,
         "creation": {str(k): list(v) for k, v in creation.items()} if creation else None,
+        "feedback": [tuple(e) for e in app_graph_attrs.get("feedback") or []],
     }
 
 
@@ -163,7 +171,26 @@ def cpu_bound(app, mapping, period_s=None):
     graph (task wcet = c^ in cycles) and the mapping, outside the
     frequency search: {"demand": {node: c^(V_k)}, "period_s": T,
     "f_cpu_hz": max_k c^(V_k) / T}. T defaults to the period of the
-    flows (all flows must share it)."""
+    flows (all flows must share it).
+
+    An application of the general model (multirate.graph_rates: several
+    periods or a cycle) takes the CPU test of multirate.cpu_test instead:
+    the result adds "phase_cycles", "model": "multirate" and the keys of
+    that test, with "period_s" = P, the phase length, and "demand" = the
+    cycles of the jobs of each PE in one hyperperiod."""
+    if period_s is None and settings(getattr(app, "graph", {}) or {})["model"] == PHASE:
+        from rttools.bench_t import multirate
+        r = multirate.graph_rates(app)
+        if r is not None:
+            spec = multirate.spec_from_graph(app, mapping, r)
+            test = multirate.cpu_test(spec)
+            members = pe_members(list(spec.tasks), mapping)
+            demand = {node: sum(spec.cost[t] * (spec.hyper_ticks // spec.ticks[t]) for t in ts)
+                      for node, ts in members.items()}
+            out = {k: v for k, v in test.items() if k != "schedule"}
+            out.update({"demand": demand, "period_s": float(r["phase_s"]), "model": "multirate",
+                        "hyper_s": float(r["hyper_s"])})
+            return out
     if period_s is None:
         periods = {float(d["period"]) for _, _, d in app.edges(data=True)}
         if len(periods) != 1:
