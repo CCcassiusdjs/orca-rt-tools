@@ -219,6 +219,13 @@ def unwrap(app, arch, mapping):
         nlinks.append((x, "L", {"label": str(x) + "-L"}))
         nlinks.append(("L", x, {"label": "L-" + str(x)}))
 
+    # network interface of each PE (router.ni_resources): one resource for
+    # the packets that the PE sends and receives
+    if router.ni_resources():
+        for n in arch.nodes(data=True):
+            x, y = n
+            nlinks.append(("NI", x, {"label": router.ni_label(x)}))
+
     for n in nlinks:
         debug(str(n))
 
@@ -245,6 +252,8 @@ def unwrap(app, arch, mapping):
         routing_time = (delta_m + 1) * router.getRoutingTime()
         payload = router.getPacketFlits(int(p["datasize"]))
         p["net_time"] = router.occupancy(delta_m, int(p["datasize"]))
+        if router.ni_resources() and source != target:
+            p["resources"] = [router.ni_label(source), router.ni_label(target)]
 
         debug(
             p["name"]

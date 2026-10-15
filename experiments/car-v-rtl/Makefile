@@ -17,6 +17,12 @@
 #   make flow-clock  F_CLK of a run at the minimum frequency of the CAR-V flow (make -C ../car-v run,
 #                chosen candidate): the first multiple of 32 kHz at or above it (exp23.flow_clock)
 #   make sim-flow  sim at that F_CLK in build/sim-flow
+#   make tt      write app/$(NAME)_tt.h: injection instants of the packets between PEs in the link
+#                schedule at TT_CLOCKS (rttools.ucxgen tt; model of the time-triggered injection)
+#   make tt-check  $(NAME)_tt.h equals a new generation (part of `make check`)
+# TT_CLOCKS: 419.68 MHz, the clock of the flow with the model of the time-triggered injection
+# (RTTOOLS_NI=tt make -C ../car-v run, exp23.flow_clock; 380 MHz has no link schedule with
+# w_NI), and 500 MHz, the default F_CLK.
 #
 # CSV and MAP: the files of the CAR-V analysis flow (apps/car-v, rttools.paper.carv)
 # when they exist, otherwise input/car-v.csv and input/car-v.map, provisional
@@ -61,15 +67,17 @@ BUILD   ?= build
 SIM_NS  ?= 11500000
 # clock of the simulation (Hz); default 500 MHz, the clock of run F
 F_CLK   ?= 500000000
+TT_CLOCKS ?= 419680000 500000000
 CARV_METRICS ?= ../car-v/build/metrics.json
 FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \
 	m = json.load(open('$(CARV_METRICS)')); \
 	print(exp23.flow_clock(m['chosen']['search']['frequency_hz'], m['scale']['period_s'])['f_clk_hz'])"
 # _heap_size of the image of car_v built with riscv64-unknown-elf-gcc 13.2,
-# release by tick (TR_DEFS), crt0.s of this tree (49764 for the image of run
-# TCV, crt0 plain; 50676 for the image of runs CV and CV2); make build reads
-# the value of the toolchain in use
-HEAP    ?= 49700
+# release by tick (TR_DEFS), crt0.s of this tree, time-triggered injection
+# (INJECTION=tt; 49700 with INJECTION=finish, 49764 for the image of run TCV,
+# crt0 plain; 50676 for the image of runs CV and CV2; 48176 for the image of
+# riscv64-elf-gcc 12.2.0); make build reads the value of the toolchain in use
+HEAP    ?= 48208
 IN_FLIGHT ?= 2
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 ARCH    := ../../arch/hermes-4x4.gml
@@ -79,14 +87,14 @@ OUTDIR  ?= $(BUILD)/results_CV
 ANALYZE  = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp
 RELEASE ?= auto
 
-.PHONY: all app check analyze check-run build sim flow-clock sim-flow clean phase-check
+.PHONY: all app check analyze check-run build sim flow-clock sim-flow clean phase-check tt tt-check
 
 all: check
 
 app:
 	$(GEN) generate $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR) $(GENFLAGS)
 
-check:
+check: tt-check
 	$(GEN) check $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR) $(GENFLAGS)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
 	$(MAKE) analyze check-run RELEASE=data
@@ -117,6 +125,12 @@ build:
 
 sim:
 	F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) $(MESH)
+
+tt:
+	$(GEN) tt $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
+
+tt-check:
+	$(GEN) tt-check $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
 
 flow-clock:
 	$(MAKE) -C ../car-v run PYTHON=$(PYTHON)

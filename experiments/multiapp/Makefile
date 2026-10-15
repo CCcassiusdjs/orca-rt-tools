@@ -13,8 +13,11 @@
 #   make check     compare $(BUILD)/metrics.json with reference.json
 #   make maps      write maps/CARV.map and maps/E.map from the placement of composition.json
 #   make maps-check  the stored maps equal the placement
-#   make app       write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} (rttools.ucxgen compose)
-#   make app-check the stored $(NAME).{c,json,sim} match a new composition; heap demand of each
+#   make app       write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} (rttools.ucxgen compose) and
+#                  $(NAME)_tt.h (rttools.ucxgen tt-compose at F_CLK: injection instants of the
+#                  time-triggered injection)
+#   make app-check the stored $(NAME).{c,json,sim} and $(NAME)_tt.h match a new composition (and
+#                  e_ucx.{c,json,sim} and e_ucx_tt.h a new generation); heap demand of each
 #                  PE (rttools.ucxgen.memory) against HEAP
 #   make build     build $(NAME) in $(BUILD)/pkt-sim (riscv64-elf toolchain); heap demand against
 #                  _heap_size of the image
@@ -82,11 +85,15 @@ E_MAP2  := ../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map
 APPS     = --app CARV:$(CARV_CSV):maps/CARV.map --app E:$(E_CSV):maps/E.map
 F_CLK   ?= 434912000
 SIM_NS  ?= 11500000
+# clocks of the injection tables carv_e_tt.h and e_ucx_tt.h: F_CLK and 500 MHz, the default clock of
+# a build (arch.mak)
+TT_CLOCKS ?= $(F_CLK) 500000000
 # _heap_size of the image of carv_e built with riscv64-unknown-elf-gcc 13.2,
-# release by tick (TR_DEFS), crt0.s of this tree (48836 for the image of run
-# TMA, crt0 plain; 49924 for the image of run MA); make build reads the value
-# of the toolchain in use
-HEAP    ?= 48756
+# release by tick (TR_DEFS), crt0.s of this tree, time-triggered injection
+# (INJECTION=tt; 48756 with INJECTION=finish, 48836 for the image of run TMA,
+# crt0 plain; 49924 for the image of run MA; 47200 for the image of
+# riscv64-elf-gcc 12.2.0); make build reads the value of the toolchain in use
+HEAP    ?= 47232
 # received packets in flight per input edge between PEs in the heap model
 # (rttools/ucxgen/memory.py). With 2 (the value of experiments/car-v-rtl),
 # PE 9 (G and J of application E: inputs F->G, H->J, I->J, 21,370 bytes of
@@ -123,10 +130,13 @@ maps-check:
 
 app:
 	$(GEN) compose $(APPS) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
+	$(GEN) tt-compose --composition composition.json --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
 
 app-check:
 	$(GEN) compose-check $(APPS) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
 	$(GEN) check $(E_CSV) $(E_MAP2) --name e_ucx --mesh 2x2 --out $(APP_DIR)
+	$(GEN) tt-compose-check --composition composition.json --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
+	$(GEN) tt-check $(E_CSV) $(E_MAP2) --arch ../../arch/hermes-2x2.gml --name e_ucx $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
 
 build:
@@ -162,6 +172,7 @@ check-uma:
 
 app-e:
 	$(GEN) generate $(E_CSV) $(E_MAP2) --name e_ucx --mesh 2x2 --out $(APP_DIR)
+	$(GEN) tt $(E_CSV) $(E_MAP2) --arch ../../arch/hermes-2x2.gml --name e_ucx $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
 
 sim-e:
 	F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/sim-e $(SIM_NS) e_ucx

@@ -15,6 +15,17 @@
            [--in-flight K] [--divisors 1,2,4] [--json OUT]
            (exit 1 when the worst PE does not fit with the payload divisor 1 of the manifest)
 
+    python -m rttools.ucxgen tt <csv> <map> --arch ARCH.gml --name N --clock HZ [--clock HZ ...] --out DIR
+           [--style named|array|jobs]
+           (table DIR/N_tt.h of the time-triggered injection, lib/noc_tt.c: the instant of each packet
+           between PEs in the link schedule at each clock; rttools.ucxgen.tt. Style: array, or jobs for a
+           time-triggered application, with the flows of DIR/N.json; named (TT_AT_<source>_<target>) with
+           the flows of the CSV, for application E, app/weird_a.c)
+    python -m rttools.ucxgen tt-check ... (exit 1 when DIR/N_tt.h differs from a new generation)
+    python -m rttools.ucxgen tt-compose --composition C.json --name N --clock HZ ... --out DIR
+           (the same for a composition: link schedule of the union of the packets, flows of DIR/N.json)
+    python -m rttools.ucxgen tt-compose-check ...
+
 --release: tick (default) writes the release by tick (lib/tick_release.c,
 -DUCX_TICK_RELEASE) with the data-driven code under #ifndef; data writes the
 files of the generator before the release by tick (runs CV, CV2 and MA).
@@ -174,6 +185,95 @@ def cmd_memory(a):
     return 1 if own["fits"] is False else 0
 
 
+def add_tt_args(p, composition=False):
+    if composition:
+        p.add_argument("--composition", required=True, help="composition file of rttools.multiapp")
+    else:
+        p.add_argument("csv")
+        p.add_argument("map")
+        p.add_argument("--arch", required=True, help="architecture (.gml) of the link schedule")
+        p.add_argument("--style", choices=("named", "array", "jobs"), default=None,
+                       help="named: TT_AT_<source>_<target> from the flows of the CSV (application E); "
+                            "default: array (one release period) or jobs (time-triggered application) with the "
+                            "flows of DIR/N.json")
+    p.add_argument("--name", required=True)
+    p.add_argument("--clock", type=int, action="append", required=True, help="clock F_CLK of a build (Hz); repeat")
+    p.add_argument("--out", required=True)
+    p.add_argument("--ni", default="tt",
+                   help="network-interface model of the link schedule (rttools/modules/routing/router.py, "
+                        "parse_ni; default tt: the resource and w_NI = NI_WAIT_CYCLES)")
+
+
+def tt_text(a, composition=False):
+    """Text of DIR/N_tt.h with the network-interface model --ni (default tt)."""
+    from rttools.modules.routing import router
+    prev = router.set_ni(a.ni)
+    try:
+        return _tt_text(a, composition)
+    finally:
+        router.set_ni(None if prev is None else prev)
+
+
+def _tt_text(a, composition=False):
+    from rttools.modules.io import appparser, mapparser, nocparser
+    from rttools.tui.model import network as tnet
+    from rttools.ucxgen import tt
+    rel = os.path.basename
+    if composition:
+        from rttools.multiapp import compose
+        spec = compose.read_spec(a.composition)
+        with tnet.quiet():
+            comp = compose.load(spec)
+        tables = [tt.union(comp, f) for f in sorted(set(a.clock))]
+        m = json.load(open(os.path.join(a.out, a.name + ".json")))
+        flows = m["flows"]
+        paths = [a.composition, spec["arch"]] + [x["csv"] for x in spec["apps"]] + [
+            x["map"] for x in spec["apps"] if x["map"] != compose.MAP_SPIRAL]
+        cmd = (f"tt-compose --composition {rel(a.composition)} --name {a.name} "
+               + " ".join(f"--clock {f}" for f in sorted(set(a.clock))) + (f" --ni {a.ni}" if a.ni != "tt" else ""))
+        style = "array"
+    else:
+        with tnet.quiet():
+            g, appname = appparser.loadFromFile(a.csv)
+            noc = nocparser.loadFromFile(a.arch)
+            entries = mapparser.loadFromFile(a.map)
+        tables = [tt.single(g, noc, entries, appname, f) for f in sorted(set(a.clock))]
+        style = a.style
+        if style == "named":
+            _, csv_flows, _ = model.read_csv(a.csv)
+            flows = [{"id": int(f["id"]), "csv_id": int(f["id"]), "source": f["source"], "target": f["target"]}
+                     for f in csv_flows]
+        else:
+            m = json.load(open(os.path.join(a.out, a.name + ".json")))
+            flows = m["flows"]
+            if style is None:
+                style = "jobs" if m.get("model") == "time_triggered" else "array"
+        paths = [a.csv, a.map, a.arch]
+        cmd = (f"tt {rel(a.csv)} {rel(a.map)} --arch {rel(a.arch)} --name {a.name} "
+               + " ".join(f"--clock {f}" for f in sorted(set(a.clock))) + (f" --style {a.style}" if a.style else "")
+               + (f" --ni {a.ni}" if a.ni != "tt" else ""))
+    return tt.header(a.name, cmd, tt.inputs_comment(paths), tables, flows, style)
+
+
+def cmd_tt(a, composition=False):
+    text = tt_text(a, composition)
+    path = os.path.join(a.out, a.name + "_tt.h")
+    with open(path, "w") as f:
+        f.write(text)
+    print(f"{a.name}: injection table for {', '.join(map(str, sorted(set(a.clock))))} Hz -> {path}")
+    return 0
+
+
+def cmd_tt_check(a, composition=False):
+    text = tt_text(a, composition)
+    path = os.path.join(a.out, a.name + "_tt.h")
+    if not os.path.exists(path) or open(path).read() != text:
+        print("differs from the generator: " + path)
+        return 1
+    print(f"{a.name}: injection table matches ({path})")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="python -m rttools.ucxgen", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -189,11 +289,17 @@ def main(argv=None):
     p.add_argument("--in-flight", type=int, default=2)
     p.add_argument("--divisors", default="1,2,4,8,16")
     p.add_argument("--json")
+    add_tt_args(sub.add_parser("tt"))
+    add_tt_args(sub.add_parser("tt-check"))
+    add_tt_args(sub.add_parser("tt-compose"), composition=True)
+    add_tt_args(sub.add_parser("tt-compose-check"), composition=True)
     a = ap.parse_args(argv)
     try:
         return {"generate": cmd_generate, "check": cmd_check, "memory": cmd_memory, "compose": cmd_compose,
-                "compose-check": cmd_compose_check}[a.cmd](a)
-    except ValueError as e:      # model.GenError, mapfile.MappingError
+                "compose-check": cmd_compose_check, "tt": cmd_tt, "tt-check": cmd_tt_check,
+                "tt-compose": lambda x: cmd_tt(x, True),
+                "tt-compose-check": lambda x: cmd_tt_check(x, True)}[a.cmd](a)
+    except ValueError as e:      # model.GenError, mapfile.MappingError, tt.TTError
         print("error: " + str(e), file=sys.stderr)
         return 2
 

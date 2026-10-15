@@ -10,8 +10,10 @@
 #                 data age of every chain, packets and heap per PE for every candidate of config.json;
 #                 outputs in $(BUILD)
 #   make check    compare $(BUILD)/metrics.json with reference.json
-#   make ucx      write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} (rttools.ucxgen)
-#   make ucx-check  the stored $(NAME).{c,json,sim} match a new generation; heap per PE against HEAP
+#   make ucx      write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} (rttools.ucxgen) and
+#                 $(NAME)_tt.h (rttools.ucxgen tt at F_CLK: injection instants of the time-triggered injection)
+#   make ucx-check  the stored $(NAME).{c,json,sim} and $(NAME)_tt.h match a new generation; heap per PE
+#                 against HEAP
 #   make build    build $(NAME) in $(BUILD)/pkt-sim (riscv64-elf toolchain); heap per PE against the image
 #   make sim      RTL simulation at F_CLK (Questa and riscv64-elf; ENV_SETUP as in exp23):
 #                 F_CLK=$(F_CLK) RELEASE_NS=$(PHASE_NS) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) 4x4
@@ -58,9 +60,11 @@ NAME    ?= car_full
 CSV     ?= ../../apps/car-full/car-full.csv
 MAP     ?= ../../apps/car-full/car-full-ONTO-hermes4x4.map
 MESH    ?= 4x4
-# _heap_size of the image of car_full built with riscv64-unknown-elf-gcc 13.2, crt0.s of this tree
-# (48216 for the image of run CF3, crt0 guard; make build reads the value of the toolchain in use)
-HEAP    ?= 48168
+# _heap_size of the image of car_full built with riscv64-unknown-elf-gcc 13.2, crt0.s of this tree,
+# time-triggered injection (INJECTION=tt; 48168 with INJECTION=finish, 48216 for the image of run
+# CF3, crt0 guard; 44720 for the image of riscv64-elf-gcc 12.2.0); make build reads the value of the
+# toolchain in use
+HEAP    ?= 44624
 IN_FLIGHT ?= 2
 F_CLK   ?= 432000000
 PHASE_NS ?= 250000
@@ -87,9 +91,11 @@ check:
 
 ucx:
 	$(GEN) generate $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
+	$(GEN) tt $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) --clock $(F_CLK) --out $(APP_DIR)
 
 ucx-check:
 	$(GEN) check $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
+	$(GEN) tt-check $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) --clock $(F_CLK) --out $(APP_DIR)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
 
 build:
@@ -105,7 +111,7 @@ sim:
 
 analyze:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json \
-		--csv $(CSV) --map $(MAP) --out $(OUTDIR)
+		--csv $(CSV) --map $(MAP) --arch $(ARCH) --out $(OUTDIR)
 
 check-run:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(OUTDIR)/metrics.json $(REF)

@@ -122,17 +122,122 @@ def header_wait():
     return parse_header_wait(os.environ.get(HEADER_WAIT_ENV))
 
 
-def occupancy(hops, datasize, wait=None):
+# Network interface of a PE (pkt-sim/hw/ddma/ddma.sv) under the
+# time-triggered injection of UCX-OS (pkt-sim/software/ucx-os/lib/noc_tt.c).
+# The DDMA reads and writes the memory of the PE through one port, which it
+# interleaves between the send and the receive of two packets; it waits
+# for the CPU after the size flit of a received packet (irq2: the address
+# of the buffer; the credit of the local port stays low) and after its last
+# flit (irq3: the handshake that lets the next packet in), and the CPU
+# injects a packet at the compare interrupt of TIMER1 at the instant of the
+# link schedule rounded up to its 16-cycle step. The model of the analysis
+# flow takes the network interface of each PE as one resource of the link
+# schedule (ni_resources: the packets that a PE sends or receives never
+# hold it in the same cycle) and adds to the occupancy the bound w_NI of
+# these three waits: o_i = L0 + w_h (m + 1) + w_NI.
+#
+# The three terms of w_NI (cycles; rttools/wcet/ucx.py, ni_terms): the
+# largest value of each term in the static analysis of the UCX-OS images
+# with the time-triggered injection (experiments/wcet, config_tt.json,
+# make analyze-tt check-tt: every term of every image at or below its
+# constant; car_full built with riscv64-unknown-elf-gcc 13.2.0 has the three
+# largest). The analysis of a run (rttools.paper.ttcheck) compares each
+# measured wait with its term.
+NI_INJECT_CYCLES = 3899     # instant s to the injection (compare interrupt of TIMER1)
+NI_RX_SIZE_CYCLES = 7113    # size flit to the buffer of irq2_handler (credit withheld)
+NI_RX_END_CYCLES = 4157     # last flit to the handshake of irq3_handler
+NI_WAIT_CYCLES = NI_INJECT_CYCLES + NI_RX_SIZE_CYCLES + NI_RX_END_CYCLES
+NI_ENV = "RTTOOLS_NI"
+# selection of the network-interface model, as the header wait: set_ni() in
+# the process, otherwise RTTOOLS_NI. "off" (default when unset or empty: no
+# resource, w_NI = 0, the model of the runs up to tag r11-rc5, whose images
+# injected each packet when its job sent it), "tt" (the network interface
+# as a resource and w_NI = NI_WAIT_CYCLES: images built with
+# INJECTION=tt, the default of pkt-sim/software/ucx-os/Makefile) or a
+# nonnegative integer (the resource and that w_NI). rttools.ucxgen tt and
+# the analysis of a run whose RUN_INFO has injection=tt select "tt".
+NI_TT = "tt"
+NI_OFF = "off"
+_ni = None
+
+
+def parse_ni(value):
+    """(resource, w_NI) for a value of RTTOOLS_NI or of set_ni: None and ""
+    give the default ("off"), "tt" gives (True, NI_WAIT_CYCLES), "off" gives
+    (False, 0), an integer n gives (True, n)."""
+    if value is None:
+        return False, 0
+    if isinstance(value, tuple):
+        return bool(value[0]), int(value[1])
+    if isinstance(value, bool):
+        raise ValueError("network interface model: expected tt, off or an integer, got " + repr(value))
+    if isinstance(value, int):
+        w = value
+    else:
+        v = str(value).strip().lower()
+        if v == NI_TT:
+            return True, NI_WAIT_CYCLES
+        if v in ("", NI_OFF):
+            return False, 0
+        try:
+            w = int(v)
+        except ValueError:
+            raise ValueError("network interface model: expected tt, off or an integer, got "
+                             + repr(value)) from None
+    if w < 0:
+        raise ValueError("network interface model: negative wait " + repr(value))
+    return True, w
+
+
+def set_ni(value):
+    """Selects the network-interface model for this process (see parse_ni);
+    None returns to the environment variable. Returns the previous
+    selection."""
+    global _ni
+    prev = _ni
+    _ni = None if value is None else parse_ni(value)
+    return prev
+
+
+def ni_model():
+    """(resource, w_NI) of the network-interface model in use."""
+    if _ni is not None:
+        return _ni
+    return parse_ni(os.environ.get(NI_ENV))
+
+
+def ni_wait():
+    """w_NI (cycles) that occupancy() adds."""
+    return ni_model()[1]
+
+
+def ni_resources():
+    """True when the link schedule takes the network interface of each PE
+    as one resource (ni_label)."""
+    return ni_model()[0]
+
+
+def ni_label(node):
+    """Label of the network-interface resource of PE `node` in the link
+    schedule (the paths keep their links; the resource is extra)."""
+    return "NI-" + str(node)
+
+
+def occupancy(hops, datasize, wait=None, ni=None):
     """Cycles a packet of `datasize` payload bytes holds each link of an
-    XY path with `hops` hops: o_i = L0 + w_h (m + 1), with the zero-load
-    latency of the Hermes L0 = 6 (m + 1) + p + 1 (p from getPacketFlits;
-    the GHDL simulation of the router reproduces L0 for m from 1 to 9 hops)
-    and the header wait w_h per router of each of the m + 1 routers of the
-    path. `wait` gives w_h; None takes header_wait() (default
-    HEADER_WAIT_CYCLES = 20, the bound of the wait of the Hermes; "off"
-    or 0 gives o_i = L0)."""
+    XY path with `hops` hops: o_i = L0 + w_h (m + 1) + w_NI, with the
+    zero-load latency of the Hermes L0 = 6 (m + 1) + p + 1 (p from
+    getPacketFlits; the GHDL simulation of the router reproduces L0 for m
+    from 1 to 9 hops), the header wait w_h per router of each of the m + 1
+    routers of the path and the bound w_NI of the waits of the network
+    interfaces (NI_WAIT_CYCLES). `wait` gives w_h; None takes header_wait()
+    (default HEADER_WAIT_CYCLES = 20, the bound of the wait of the Hermes;
+    "off" or 0 gives w_h = 0). `ni` gives the network-interface model
+    (parse_ni); None takes ni_model() (default off, w_NI = 0; "tt" gives
+    NI_WAIT_CYCLES)."""
     w = header_wait() if wait is None else parse_header_wait(wait)
-    return getRoutingTime() * (hops + 1) + getPacketFlits(datasize) + 1 + w * (hops + 1)
+    n = ni_wait() if ni is None else parse_ni(ni)[1]
+    return getRoutingTime() * (hops + 1) + getPacketFlits(datasize) + 1 + w * (hops + 1) + n
 
 
 def manhattan(source, target, graph):
