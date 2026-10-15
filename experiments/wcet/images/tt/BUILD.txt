@@ -1,0 +1,7 @@
+riscv64-elf-gcc (Arch Linux Repositories) 12.2.0 (the compiler of the RTL runs; container build with the Arch package riscv64-elf-gcc 12.2.0, which reproduces the images of the runs of tag r11-rc5 byte for byte)
+kernel without UCX_ISR_NESTING, crt0.s of this tree (CRT0=guard_readback), time-triggered injection (INJECTION=tt, the default: lib/noc_tt.c, table app/<app>_tt.h)
+weird_a: F_CLK=434912000 APP=weird_a experiments/exp23/build_sw.sh (release by tick, TR_DEFS)
+car_v: F_CLK=419680000 APP=car_v experiments/exp23/build_sw.sh (release by tick, TR_DEFS; clock of the flow with w_NI)
+wcet_e: F_CLK=500000000 APP=wcet_e experiments/exp23/build_sw.sh (release by tick, TR_DEFS)
+carv_e: F_CLK=434912000 APP=carv_e experiments/exp23/build_sw.sh (release by tick, TR_DEFS)
+car_full: F_CLK=432000000 F_TICK=4000 APP=car_full experiments/exp23/build_sw.sh (time-triggered tasks, TT_DEFS)

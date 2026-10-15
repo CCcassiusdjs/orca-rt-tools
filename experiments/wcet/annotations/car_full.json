@@ -1,0 +1,97 @@
+{
+ "_doc": "Flow facts of CAR with four periods (pkt-sim/software/ucx-os/app/car_full.c, rttools.ucxgen, time-triggered tasks) for the static analysis of the kernel terms and of the sections with interrupts disabled (rttools.wcet.ucx, sections). tcb = 4: at most 3 tasks per PE plus the idle task. heap_blocks: blocks of the heap of the largest PE: 1 end block, 3 per task and for the idle task (tcb, rt, stack; kernel/ucx.c), 2 per comm (queue and slots; lib/queue.c), 1 per buffer of an output edge (create_pkt; TT_BUFFERS of app/car_full_tt.h) and 2 packets in flight per input edge between PEs (one queued packet per source with UCX_NOC_LATEST and one in reception): 32 on PE 1-2 with one buffer per output edge, bound 40. read_one (one packet of the queue with interrupts disabled): 6 tests of the loop over the input edges (at most MAX_IN = 5 edges); read_inputs: the queue holds at most one packet per input edge (UCX_NOC_LATEST), so read_one runs at most 6 times; ucx_app_tick: one release per tick (the release request comes before the tick of its phase and the hook serves a request that the release interrupt has not served, so the loop over the pending releases runs once and tests once more: bound 2), and one pass per task of the PE in it (bound tcb); begin_marks: one marker per input edge; pktdrv_put_latest (send_local, irq3_handler): one pass per queued packet, at most MAX_PKT_QUEUE_SLOTS = 8. sections: the functions of car_full.c that run with interrupts disabled (TT_SECTION; wait_release blocks in ucx_task_yield between _di and _ei).",
+ "params": {
+  "tcb": 4,
+  "heap_blocks": 40
+ },
+ "sections": [
+  {
+   "function": "wait_release",
+   "yield": true
+  },
+  {
+   "function": "read_one",
+   "yield": false
+  },
+  {
+   "function": "begin_marks",
+   "yield": false
+  },
+  {
+   "function": "send_local",
+   "yield": false
+  }
+ ],
+ "functions": {
+  "ucx_app_tick": {
+   "loops": [
+    {
+     "select": {
+      "contains_call": "ucx_noc_tt_ticks"
+     },
+     "bound": 2
+    },
+    {
+     "select": "rest",
+     "bound": "tcb"
+    }
+   ]
+  },
+  "read_one": {
+   "loops": [
+    {
+     "select": "all",
+     "bound": 6
+    }
+   ]
+  },
+  "read_inputs": {
+   "loops": [
+    {
+     "select": "all",
+     "bound": 6
+    }
+   ]
+  },
+  "begin_marks": {
+   "loops": [
+    {
+     "select": "all",
+     "bound": 6
+    }
+   ]
+  },
+  "pktdrv_put_latest": {
+   "loops": [
+    {
+     "select": "all",
+     "bound": 9
+    }
+   ]
+  },
+  "send_local": {
+   "loops": [
+    {
+     "select": "rest",
+     "bound": 9
+    }
+   ]
+  },
+  "ucx_noc_send": {
+   "loops": [
+    {
+     "select": "rest",
+     "bound": 9
+    }
+   ]
+  },
+  "irq3_handler": {
+   "loops": [
+    {
+     "select": "rest",
+     "bound": 9
+    }
+   ]
+  }
+ }
+}

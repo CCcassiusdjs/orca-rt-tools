@@ -1,0 +1,100 @@
+{
+ "_doc": "experiments/wcet, images with the time-triggered injection (pkt-sim/software/ucx-os/lib/noc_tt.c, INJECTION=tt; images/tt: riscv64-elf-gcc 12.2.0, the compiler of the RTL runs; images/tt13: riscv64-unknown-elf-gcc 13.2.0): static t(v) (rttools.wcet) of E, CAR-V and WCET-E with t(V_k) per PE against the costs of the CSV (pe_bound), and the terms of the network interface of every image against the w_NI of the model (rttools/modules/routing/router.py, NI_WAIT_CYCLES). make analyze-tt check-tt; rttools/paper/wcet.py. Paths relative to this file.",
+ "apps": {
+  "E": {
+   "spec": "specs/weird_a_tt.json",
+   "csv": "../../apps/synthetic-app-e/synthetic-app-e.csv",
+   "map": "../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map"
+  },
+  "CAR-V": {
+   "spec": "specs/car_v_tt.json",
+   "csv": "../../apps/car-v/car-v.csv",
+   "map": "../../apps/car-v/car-v-ONTO-hermes4x4.map"
+  },
+  "WCET-E": {
+   "spec": "specs/wcet_e_tt.json",
+   "csv": "../../apps/wcet-e/wcet-e.csv",
+   "map": "../../apps/wcet-e/wcet-e-ONTO-hermes2x2.map"
+  }
+ },
+ "ni_images": {
+  "weird_a_gcc12": {
+   "image": "images/tt/weird_a.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "annotations/weird_a.json"
+   ]
+  },
+  "car_v_gcc12": {
+   "image": "images/tt/car_v.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/car_v.json"
+   ]
+  },
+  "wcet_e_gcc12": {
+   "image": "images/tt/wcet_e.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/wcet_e.json"
+   ]
+  },
+  "carv_e_gcc12": {
+   "image": "images/tt/carv_e.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/carv_e.json"
+   ]
+  },
+  "car_full_gcc12": {
+   "image": "images/tt/car_full.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/car_full.json"
+   ]
+  },
+  "weird_a_gcc13": {
+   "image": "images/tt13/weird_a.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "annotations/weird_a.json"
+   ]
+  },
+  "car_v_gcc13": {
+   "image": "images/tt13/car_v.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/car_v.json"
+   ]
+  },
+  "wcet_e_gcc13": {
+   "image": "images/tt13/wcet_e.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/wcet_e.json"
+   ]
+  },
+  "carv_e_gcc13": {
+   "image": "images/tt13/carv_e.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/carv_e.json"
+   ]
+  },
+  "car_full_gcc13": {
+   "image": "images/tt13/car_full.elf",
+   "annotations": [
+    "../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+    "../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+    "annotations/car_full.json"
+   ]
+  }
+ }
+}
