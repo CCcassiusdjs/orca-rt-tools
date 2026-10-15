@@ -1,5 +1,5 @@
 {
- "_doc": "Reference of make -C experiments/tt run (rttools/paper/ttflow.py): the model of the runs of round r11f with the network-interface model tt and t(v) = max(CSV, static t(v) of the image).",
+ "_doc": "rttools.paper.ttflow run",
  "ni": "tt",
  "w_ni_cycles": 15169,
  "header_wait_cycles": 20,
@@ -2549,6 +2549,8 @@
      "periodic_from_hyperperiod": 0,
      "link_schedule_feasible": true,
      "packets_between_pes": 347,
+     "chains": 34,
+     "packets_per_hyperperiod": 347,
      "data_age": {
       "TPMS-STAC-TPRC": 10511800,
       "TPMS-STAC-THRC": 4947766,
@@ -2598,6 +2600,23 @@
       "clock": true,
       "costs": true
      }
+    }
+   },
+   "model": {
+    "phase_ms": 0.25,
+    "hyperperiod_ms": 12.5,
+    "phases_per_hyperperiod": 50,
+    "flows": 38,
+    "flows_on_one_pe": 18,
+    "p_min_cycles": 119574,
+    "f_cpu_hz": 478296000.0,
+    "utilization_bound_cycles": 114074,
+    "utilization_bound_hz": 456296000.0,
+    "f_cpu_phase_hz": 9025616000.0,
+    "data_age_max_at_minimum": {
+     "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+     "cycles": 13629511,
+     "ms": 28.49597529563283
     }
    }
   }

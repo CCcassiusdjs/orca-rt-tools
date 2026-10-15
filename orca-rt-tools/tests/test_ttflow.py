@@ -103,3 +103,28 @@ def test_analysis_of_a_run_takes_the_model_of_its_images(tmp_path):
     with ttcheck.run_ni(str(log)):
         assert router.ni_model() == (True, router.NI_WAIT_CYCLES)
     assert router.ni_model() == (True, router.NI_WAIT_CYCLES)
+
+
+def test_model_of_car_full(run):
+    """CAR-FULL with the defaults (t(v) = max(CSV, static), model tt): the
+    values of the general phase model that the paper reports, in
+    metrics.json and values.tex."""
+    m, out = run
+    md = m["apps"]["CAR-FULL"]["model"]
+    assert (md["phase_ms"], md["hyperperiod_ms"], md["phases_per_hyperperiod"]) == (0.25, 12.5, 50)
+    assert (md["flows"], md["flows_on_one_pe"]) == (38, 18)
+    assert (md["p_min_cycles"], md["f_cpu_hz"]) == (119574, 478296000.0)
+    # utilization bound: the largest utilization of a PE reaches 1 at 114,074 cycles per phase
+    assert (md["utilization_bound_cycles"], md["utilization_bound_hz"]) == (114074, 456296000.0)
+    # phase rule: every job within the phase of its release
+    assert md["f_cpu_phase_hz"] == 9025616000.0
+    r = m["apps"]["CAR-FULL"]["runs"]["CF5"]
+    assert (r["chains"], r["packets_per_hyperperiod"], r["hyper_cycles"]) == (34, 347, 5979200)
+    assert r["data_age_max"]["chain"] == "POSI-OBMG-OBDB-NAVC-DIRC" and r["data_age_max"]["cycles"] == 13630621
+    assert md["data_age_max_at_minimum"]["cycles"] == 13629511
+    values = (out / "values.tex").read_text()
+    for macro, v in (("ExpTtCarfullUtilizationBoundMhz", "456.296"), ("ExpTtCarfullCpuPhaseMhz", "9025.616"),
+                     ("ExpTtCarfullPMinCycles", "119,574"), ("ExpTtCarfullLocalFlows", "18"),
+                     ("ExpTtCarfullCffivePackets", "347"), ("ExpTtCarfullCffiveChains", "34"),
+                     ("ExpTtWNi", "15169")):
+        assert f"\\newcommand{{\\{macro}}}{{{v}}}" in values, macro

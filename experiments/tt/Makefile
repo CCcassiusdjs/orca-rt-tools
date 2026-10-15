@@ -8,7 +8,9 @@
 #                 the phase a multiple of 16 cycles; E and WCET-E also at 500 MHz), the period P in
 #                 cycles, S and F of every task, R_bound (data age of every chain for CAR-full), the
 #                 length of the simulation against SIM_NS, the injection table app/<image>_tt.h of each
-#                 clock with the costs file; into $(BUILD)/metrics.json
+#                 clock with the costs file; for CAR-FULL also P_min, the utilization-bound frequency, the
+#                 phase-rule frequency, chains, flows on one PE, packets per hyperperiod and the largest data
+#                 age; into $(BUILD)/metrics.json and $(BUILD)/values.tex (macros \ExpTt...)
 #   make check    $(BUILD)/metrics.json against reference.json (default target: run check)
 #   make tables   the link schedule and the finish of every job of each run, the tables of the
 #                 conferencia of run_r11f.sh (rttools.paper.ttflow tables), into $(BUILD)/tables
