@@ -1,0 +1,20 @@
+{
+ "_doc": "experiments/ablation: the applications of ../tt/config.json (models of the runs of round r11g), the deadline sweep (D of every task, s) and the skew bounds sigma added to w_NI (cycles; 2,245 cycles = 5 us at 449 MHz). rttools/paper/ablation.py; paths relative to this file.",
+ "include": "../tt/config.json",
+ "deadline_sweep_s": {
+  "E": [
+   0.002,
+   0.00175,
+   0.00173,
+   0.0017
+  ],
+  "CAR-V": [
+   0.0025,
+   0.0022
+  ]
+ },
+ "skew_sigma_cycles": [
+  224,
+  2245
+ ]
+}

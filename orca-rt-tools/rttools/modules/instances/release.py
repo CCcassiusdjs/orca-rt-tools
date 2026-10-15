@@ -269,6 +269,28 @@ def task_windows(instance, mapping):
     return out
 
 
+def deadline_fits(instance, mapping):
+    """False when, in the phase model of one period, a task v with an
+    end-to-end deadline D(v) (instance["deadlines"], cycles) has n(v) P +
+    F(v) > D(v), with F of task_windows (the handlers included) and n(v) of
+    the sequences (rttools/bench_t/estimate.py, phases); the largest of
+    these sums is R_bound. True without deadlines, with several periods
+    (the general phase model bounds the data age of the chains) and outside
+    the phase model."""
+    dl = instance.get("deadlines")
+    rel = instance.get("release") or settings({})
+    if not dl or rel["model"] != PHASE or instance.get("rates") is not None or not instance["flows"]:
+        return True
+    from rttools.bench_t import estimate
+    win = task_windows(instance, mapping)
+    edges = [(s, t) for s, t, _ in instance["flows"]]
+    seqs = pe_sequences(list(win), edges, mapping, rel["sequences"], rel.get("creation"))
+    pe_of = {t: win[t]["node"] for t in win}
+    phi = estimate.phases(edges, pe_of, sequence_positions(seqs))
+    P = instance["flows"][0][2]["period"]
+    return all(phi[t] * P + win[t]["finish"] <= d for t, d in dl.items() if t in win)
+
+
 def handlers_fit(instance, mapping):
     """False when, in the phase model with the handlers of the
     time-triggered images (task_windows), a task finishes after the end of

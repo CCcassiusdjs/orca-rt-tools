@@ -17,6 +17,10 @@ DIRS   += ch6# anon:drop-line
 DIRS   += multiapp
 # tt: model of the runs of round r11g (time-triggered injection, defaults of rttools), seconds
 DIRS   += tt
+# cputime: CPU time of the stored runs with the kernel work in idle slices, seconds
+DIRS   += cputime
+# ablation: terms of the flow and the event-triggered baseline, about 20 s
+DIRS   += ablation
 
 .PHONY: all clean $(DIRS)
 

@@ -56,6 +56,9 @@ def schedule_at(app, noc, mapping, appname, frequency, cfg):
         if sched is not None and not release.handlers_fit(instance, mapping):
             # phase model with the handlers of the packet events: a task ends after its phase
             sched = None
+        if sched is not None and not release.deadline_fits(instance, mapping):
+            # R_bound above the end-to-end deadline D of the application
+            sched = None
         new = _handler_round(instance, noc, mapping, problem, sched, skipped, extra)
         if new is None or new == extra:
             break
@@ -223,7 +226,7 @@ def network_check(app, noc, mapping, appname, frequency, cfg, schedule=None):
             "packets": len(attempt["problem"]["packets"]), "skipped": len(attempt["skipped"])}
 
 
-def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
+def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None, schedule=None):
     """Minimum frequency of the analysis flow.
 
     1. The CPU test gives f_CPU once (cpu_check), outside the bisection.
@@ -250,14 +253,17 @@ def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
     is not feasible there, the search runs above f_CPU (final_search).
     f_star_hz is then the lowest frequency at or above f_CPU with a
     feasible link schedule (f_CPU itself when final_check is feasible) and
-    network is None."""
+    network is None.
+
+    `schedule` replaces schedule_at in every evaluation (the baselines of
+    rttools/paper/ablation.py)."""
     cpu = cpu_check(app, mapping, noc)
     f_cpu = cpu["f_cpu_hz"] if cpu is not None else None
     if f_cpu is not None:
         info("CPU test: f_CPU = " + str(f_cpu) + "Hz (largest CPU demand per release period)")
     if cpu is not None and cpu.get("model") == "multirate":
         info("Network check at f_CPU = " + str(f_cpu) + "Hz (general phase model)")
-        check = network_check(app, noc, mapping, appname, f_cpu, cfg)
+        check = network_check(app, noc, mapping, appname, f_cpu, cfg, schedule)
         above = None
         if check["feasible"]:
             final = f_cpu
@@ -265,11 +271,12 @@ def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
             warn("No schedule at f_CPU; searching above f_CPU")
             up = dict(cfg)
             up["frequency"] = 2 * f_cpu
-            above = search_minimum_frequency(app, noc, mapping, appname, up, on_attempt, floor=f_cpu)
+            above = search_minimum_frequency(app, noc, mapping, appname, up, on_attempt, floor=f_cpu,
+                                             schedule=schedule)
             final = above["frequency"] if above is not None else None
         return {"cpu": cpu, "network": None, "f_star_hz": final, "f_cpu_hz": f_cpu, "final_check": check,
                 "final_search": above, "frequency_hz": final}
-    net = search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt)
+    net = search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt, schedule=schedule)
     f_star = net["frequency"] if net is not None else None
     check = None
     above = None
@@ -279,14 +286,15 @@ def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
         final = f_star
     else:
         info("Network check at f_CPU = " + str(f_cpu) + "Hz")
-        check = network_check(app, noc, mapping, appname, f_cpu, cfg)
+        check = network_check(app, noc, mapping, appname, f_cpu, cfg, schedule)
         if check["feasible"]:
             final = f_cpu
         else:
             warn("No schedule at f_CPU; searching above f_CPU")
             up = dict(cfg)
             up["frequency"] = 2 * f_cpu
-            above = search_minimum_frequency(app, noc, mapping, appname, up, on_attempt, floor=f_cpu)
+            above = search_minimum_frequency(app, noc, mapping, appname, up, on_attempt, floor=f_cpu,
+                                             schedule=schedule)
             final = above["frequency"] if above is not None else None
     return {"cpu": cpu, "network": net, "f_star_hz": f_star, "f_cpu_hz": f_cpu, "final_check": check,
             "final_search": above, "frequency_hz": final}
