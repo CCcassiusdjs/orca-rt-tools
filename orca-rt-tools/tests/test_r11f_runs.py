@@ -194,3 +194,40 @@ def test_run_images_equal_the_images_of_the_analysis():
              "wcet/logs/W4.image.elf": "wcet_e", "multiapp/logs/VMA.image.elf": "carv_e"}
     for run, img in pairs.items():
         assert content(os.path.join(EXP, run)) == content(os.path.join(EXP, "wcet", "images", "tt", img + ".elf")), run
+
+
+def test_run_cf5_jobs_after_their_finish(tmp_path):
+    """make -C experiments/car-full check-cf5: run CF5 (car_full of tag
+    r11-rc7, 478.336 MHz) meets the checks of the injection, but jobs 3, 13,
+    23, 33 and 43 of USOS (PE 0-1, phase 10 of each hyperperiod of 50
+    phases) end after F of the model. In the log, the first job of OBDB ends
+    before the tick of phase 11, USOS (id 2) starts in the rest of phase 10
+    and the tick of phase 11 dispatches OBMG (id 3), the task after USOS in
+    the round robin, while the model dispatches USOS at that tick."""
+    import csv
+    from rttools.paper import rtlmr
+    d = os.path.join(EXP, "car-full")
+    app = os.path.join(APPS, "car-full")
+    log = os.path.join(d, "logs", "CF5.events.txt")
+    m = rtlmr.analyze(log, os.path.join(APP_DIR, "car_full.json"), os.path.join(app, "car-full.csv"),
+                      os.path.join(app, "car-full-ONTO-hermes4x4.map"), str(tmp_path),
+                      arch=os.path.join(REPO_ROOT, "arch", "hermes-4x4.gml"))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, "reference_CF5.json")) == []
+    t = m["tt"]
+    assert t["packets"] == 1695 and (t["early"], t["late"], t["occupancy_above"]) == (0, 0, 0)
+    assert t["ready"]["late"] == 0 and m["jobs"]["complete"] == 2945
+    assert m["reads"]["older_than_model"] == 0 and m["data_age"]["above_bound"] == 0
+    with open(tmp_path / "tt_jobs.csv") as f:
+        late = [(r["pe"], r["task"], int(r["j"]), int(r["q"])) for r in csv.DictReader(f) if float(r["slack"]) < 0]
+    assert late == [("0-1", "USOS", j, 5 * (j - 1)) for j in (3, 13, 23, 33, 43)]
+    assert t["jobs"]["late"] == 5 and t["jobs"]["slack_min"] == -106282
+    # dispatches of PE 0-1 from the tick of phase 10 to the end of USOS 3 (ns of the log)
+    rel = [int(x.split()[-2]) for x in open(log) if "TRIGGER: workflow iteration at" in x]
+    seq = []
+    for x in open(log):
+        p = x.split()
+        if len(p) > 4 and p[2] == "0-1" and p[1].isdigit() and rel[10] <= int(p[1]) <= rel[13]:
+            if p[3] == "scheduled" or p[3] == "ITER":
+                seq.append(" ".join(p[3:]))
+    assert seq[:6] == ["scheduled 1", "ITER end R 1", "scheduled 2", "ITER begin E 3", "scheduled 3",
+                       "scheduled 2"] and seq[6] == "ITER end E 3"

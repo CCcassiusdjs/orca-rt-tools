@@ -430,19 +430,25 @@ def analyze_run(log_path, clk, releases_raw, table, packets, phase_of, w_h=None,
 def costs_of_run(info):
     """Costs file of a run from its RUN_INFO (costs=max_csv_static
     costs_file=<file> costs_sha256=<hash>, experiments/exp23/simulate.sh):
-    the path of the file in experiments/wcet/costs/tt of this tree, after a
-    check of its hash; None for a run with the costs of the CSV."""
+    the path of the file in experiments/wcet/costs/tt of this tree, or of
+    the file of an earlier image in costs/tt/previous/<stem>-<first 12
+    digits of the hash>.json, after a check of its hash; None for a run
+    with the costs of the CSV."""
     import hashlib
     info = info or {}
     if info.get("costs") != "max_csv_static":
         return None
-    name, sha = info["costs_file"], info["costs_sha256"]
-    path = os.path.join(REPO, "experiments", "wcet", "costs", "tt", name)
-    with open(path, "rb") as f:
-        got = hashlib.sha256(f.read()).hexdigest()
-    if got != sha.strip():
-        raise ValueError(f"RUN_INFO costs: {name} of this tree has sha256 {got}, the run {sha.strip()}")
-    return path
+    name, sha = info["costs_file"], info["costs_sha256"].strip()
+    base = os.path.join(REPO, "experiments", "wcet", "costs", "tt")
+    stem = os.path.splitext(name)[0]
+    for path in (os.path.join(base, name), os.path.join(base, "previous", f"{stem}-{sha[:12]}.json")):
+        if not os.path.exists(path):
+            continue
+        with open(path, "rb") as f:
+            got = hashlib.sha256(f.read()).hexdigest()
+        if got == sha:
+            return path
+    raise ValueError(f"RUN_INFO costs: no {name} with sha256 {sha} in {base} or {base}/previous")
 
 
 ROW_FILES = (("per_packet", "tt_packets.csv"), ("jobs_rows", "tt_jobs.csv"), ("ready_rows", "tt_ready.csv"))

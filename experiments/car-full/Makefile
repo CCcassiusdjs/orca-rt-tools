@@ -25,6 +25,8 @@
 #                 $(BUILD)/results_CF2
 #   make check-cf4  analyze + check-run of the stored run CF4 (logs/CF4.*, reference_CF4.json) into
 #                 $(BUILD)/results_CF4
+#   make check-cf5  analyze + check-run of the stored run CF5 (logs/CF5.*, reference_CF5.json) into
+#                 $(BUILD)/results_CF5
 #
 # LOG, REF and OUTDIR default to run CF (logs/CF.*, reference_CF.json): car_full of tag
 # r11-multirate-rc1 (48bb43a) at 432 MHz, 64 ms. In run CF five PEs (0-1, 0-2, 1-2, 2-0, 3-0) stop
@@ -40,7 +42,14 @@
 # _interrupt_set(0) (crt0 guard_readback; pkt-sim/software/ucx-os/Makefile). Run CF4 (tag r11-rc5,
 # logs/CF4.*, reference_CF4.json: crt0 guard_readback, the same clock, phase and duration) completes
 # its 2,945 jobs: no task stops, no job begun twice in a phase, no read older than the model, no phase
-# above the busy time of the model, 34 of 34 chains measured and none above its bound. After `make sim`:
+# above the busy time of the model, 34 of 34 chains measured and none above its bound. Run CF5 (tag
+# r11-rc7, logs/CF5.*, reference_CF5.json: time-triggered injection, t(v) = max(CSV, static), 478.336 MHz,
+# 64 ms) meets every check of the injection but 5 of its 2,945 jobs end after F of the model: jobs 3, 13,
+# 23, 33 and 43 of USOS (PE 0-1, phase 10 of each hyperperiod), by up to 106,282 cycles. The first job of
+# OBDB ends before the tick of phase 11, USOS starts in the rest of phase 10, and the round robin gives
+# that tick to OBMG (the task after USOS) for a whole phase, while the model, where OBDB runs to the
+# tick, dispatches USOS there. The kernel of tag r11-rc8 starts the search of the scheduler at each tick
+# at the position of the model (TT_TICK of app/car_full_tt.h, rttools/bench/ucx.py). After `make sim`:
 #   make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim
 #
 # F_CLK: the clock of the flow with the model of the time-triggered injection and t(v) = max(CSV,
@@ -83,9 +92,9 @@ LOG     ?= logs/CF.events.txt
 REF     ?= reference_CF.json
 OUTDIR  ?= $(BUILD)/results_CF
 
-.PHONY: all app generate run check ucx ucx-check build sim analyze check-run check-cf2 check-cf4 clean
+.PHONY: all app generate run check ucx ucx-check build sim analyze check-run check-cf2 check-cf4 check-cf5 clean
 
-all: app run check ucx-check analyze check-run check-cf2 check-cf4
+all: app run check ucx-check analyze check-run check-cf2 check-cf4 check-cf5
 
 app:
 	$(RUN) generate --config config.json --apps $(APPS) --check
@@ -133,6 +142,10 @@ check-cf2:
 check-cf4:
 	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF4.events.txt REF=reference_CF4.json \
 		OUTDIR=$(BUILD)/results_CF4
+
+check-cf5:
+	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF5.events.txt REF=reference_CF5.json \
+		OUTDIR=$(BUILD)/results_CF5
 
 clean:
 	rm -rf $(BUILD)
