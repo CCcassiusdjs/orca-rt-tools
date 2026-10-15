@@ -3,7 +3,7 @@
 # analysis flow (rttools/bench_t/multirate.py), and its UCX-OS application for
 # the 4x4 manycore (rttools.ucxgen, time-triggered tasks).
 #
-#   make          app + run + check + ucx-check + analyze + check-run of run CF + check-cf2 + check-cf4 (seconds)
+#   make          app + run + check + ucx-check + analyze + check-run of run CF + check-cf2, cf4, cf5, cf6 (seconds)
 #   make app      compare apps/car-full/car-full.{csv,map} with the generator (fails when they differ)
 #   make generate write apps/car-full/car-full.{csv,map} from apps/shi-2010 and config.json
 #   make run      CPU test (ORT/BENCH over the hyperperiod), frequency search, network at the clock,
@@ -27,6 +27,8 @@
 #                 $(BUILD)/results_CF4
 #   make check-cf5  analyze + check-run of the stored run CF5 (logs/CF5.*, reference_CF5.json) into
 #                 $(BUILD)/results_CF5
+#   make check-cf6  analyze + check-run of the stored run CF6 (logs/CF6.*, reference_CF6.json) into
+#                 $(BUILD)/results_CF6
 #
 # LOG, REF and OUTDIR default to run CF (logs/CF.*, reference_CF.json): car_full of tag
 # r11-multirate-rc1 (48bb43a) at 432 MHz, 64 ms. In run CF five PEs (0-1, 0-2, 1-2, 2-0, 3-0) stop
@@ -49,7 +51,9 @@
 # OBDB ends before the tick of phase 11, USOS starts in the rest of phase 10, and the round robin gives
 # that tick to OBMG (the task after USOS) for a whole phase, while the model, where OBDB runs to the
 # tick, dispatches USOS there. The kernel of tag r11-rc8 starts the search of the scheduler at each tick
-# at the position of the model (TT_TICK of app/car_full_tt.h, rttools/bench/ucx.py). After `make sim`:
+# at the position of the model (TT_TICK of app/car_full_tt.h, rttools/bench/ucx.py). Run CF6 (tag r11-rc9,
+# logs/CF6.*, reference_CF6.json: the deadline model tick, 526.08 MHz, 64 ms) ends all 2,945 jobs at or before
+# F of the model, keeps 34 of 34 chains within their bound and meets every check of the injection. After `make sim`:
 #   make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim
 #
 # F_CLK: the clock of the flow with the model of the time-triggered injection, t(v) = max(CSV,
@@ -94,9 +98,9 @@ LOG     ?= logs/CF.events.txt
 REF     ?= reference_CF.json
 OUTDIR  ?= $(BUILD)/results_CF
 
-.PHONY: all app generate run check ucx ucx-check build sim analyze check-run check-cf2 check-cf4 check-cf5 clean
+.PHONY: all app generate run check ucx ucx-check build sim analyze check-run check-cf2 check-cf4 check-cf5 check-cf6 clean
 
-all: app run check ucx-check analyze check-run check-cf2 check-cf4 check-cf5
+all: app run check ucx-check analyze check-run check-cf2 check-cf4 check-cf5 check-cf6
 
 app:
 	$(RUN) generate --config config.json --apps $(APPS) --check
@@ -148,6 +152,10 @@ check-cf4:
 check-cf5:
 	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF5.events.txt REF=reference_CF5.json \
 		OUTDIR=$(BUILD)/results_CF5
+
+check-cf6:
+	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF6.events.txt REF=reference_CF6.json \
+		OUTDIR=$(BUILD)/results_CF6
 
 clean:
 	rm -rf $(BUILD)

@@ -238,3 +238,30 @@ def test_run_cf5_jobs_after_their_finish(tmp_path):
                 seq.append(" ".join(p[3:]))
     assert seq[:6] == ["scheduled 1", "ITER end R 1", "scheduled 2", "ITER begin E 3", "scheduled 3",
                        "scheduled 2"] and seq[6] == "ITER end E 3"
+
+
+def test_run_cf6_within_the_model(tmp_path):
+    """make -C experiments/car-full check-cf6: run CF6 (car_full of tag
+    r11-rc9, 526.08 MHz, deadline model tick, tick hook of TT_TICK) ends
+    every job at or before F of the model, misses no deadline, reads no
+    data older than the model, keeps every chain within its bound DA and
+    every packet between PEs within the checks of the injection."""
+    from rttools.paper import rtlmr, ttcheck
+    d = os.path.join(EXP, "car-full")
+    app = os.path.join(APPS, "car-full")
+    log = os.path.join(d, "logs", "CF6.events.txt")
+    info = exp23.read_run_info(exp23.run_info_path(log))
+    assert info["repo_tag"] == "r11-rc9" and info["deadline"] == "tick" and ttcheck.injection_rule(info) == "tt"
+    m = rtlmr.analyze(log, os.path.join(APP_DIR, "car_full.json"), os.path.join(app, "car-full.csv"),
+                      os.path.join(app, "car-full-ONTO-hermes4x4.map"), str(tmp_path),
+                      arch=os.path.join(REPO_ROOT, "arch", "hermes-4x4.gml"))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, "reference_CF6.json")) == []
+    j = m["jobs"]
+    assert (j["complete"], j["end_after_model_finish"], j["deadline_misses"]) == (2945, 0, 0)
+    assert m["phases"]["jobs_begun_twice_in_a_phase"] == 0 and m["cpu_phases"]["phases_above_model"] == 0
+    assert m["reads"]["older_than_model"] == 0
+    a = m["data_age"]
+    assert (a["measured_chains"], a["above_bound"]) == (34, 0) and a["margin_min_cycles"] > 0
+    assert m["packets"]["after_deadline"] == 0 and m["monitor"]["errors"] == 0
+    injection_conforms(m["tt"], 1695)
+    assert m["tt"]["jobs"]["events"] == 2945
