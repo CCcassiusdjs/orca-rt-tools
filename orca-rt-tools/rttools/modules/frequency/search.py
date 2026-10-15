@@ -33,10 +33,10 @@ def schedule_windows_fit(instance, noc, mapping, problem, sched):
     valid for the finishes and starts that these charges give.
 
     The schedule places each packet inside [F(u), a] of the finishes with
-    the windows [F(u), a] (Eq. (9)), so [s, s + o_i] lies inside that
+    the windows [F(u), a] (Eq. (7)), so [s, s + o_i] lies inside that
     window, the charge of every task can only drop, and each new F'(u) <= F(u)
     <= s: no packet leaves before its source ends. A deadline that depends on
-    the start of the reader (Eq. (6), n(v) - n(u) >= 2) can move earlier with
+    the start of the reader (Eq. (4), n(v) - n(u) >= 2) can move earlier with
     the new starts, so the function also checks s + o_i against the deadline
     of the new instance."""
     if instance.get("rates") is not None or sched is None:
