@@ -12,7 +12,10 @@ compose.minimum_frequency) under each setting:
 | no_wni | w_NI = 0 (the network interface of each PE stays a resource of the link schedule, which keeps the deadline model tick and the handlers of Eq. (9)) |
 | no_handlers | no handler charge of Eq. (9) (no handlers file) |
 | links_only | the three removed: o_i = L0 |
-| event_triggered | single-period applications: no link schedule; each packet enters the NoC when its job sends it, and a candidate is feasible when F(u) + WCTT_i <= a_{i,j} for every packet (rttools/modules/routing/wctt.py) and every task ends within its phase with the handlers |
+| schedule_windows | the flow, and a candidate whose tasks fail Eq. (9) with the windows [F(u), a] passes when they fit with the handlers of each packet inside its reservation [s, s + o_i] of the link schedule (search.schedule_windows_fit) |
+| event_triggered | one release period (single applications and the composition): no link schedule; each packet enters the NoC when its job sends it, and a candidate is feasible when F(u) + WCTT_i <= a_{i,j} and F(u) + WCTT_i <= the end of the phase of its release for every packet (rttools/modules/routing/wctt.py: polling arbiter of the Hermes router, DDMA interleaving, every packet of the phase can meet every other) and every task ends within its phase with the handlers |
+| event_triggered_exact | as event_triggered with every packet released at F(u) (jobs that execute for exactly t(v), the most favorable case for the offsets): two packets meet only when their windows [F(u), F(u) + WCTT] meet |
+| event_triggered_no_wni | as event_triggered with w_NI = 0 (no injection or receive handlers in the WCTT); compare with no_wni |
 
 Skew (single-period applications, at the clock of the run: the lowest clock at or above the minimum whose phase is
 a whole number of 16-cycle steps): the largest skew between the ticks of two PEs that the link schedule tolerates
@@ -50,6 +53,7 @@ SETTINGS = {
     "no_wni": {"wait": "bound", "ni": (True, 0), "handlers": True},
     "no_handlers": {"wait": "bound", "ni": "tt", "handlers": False},
     "links_only": {"wait": 0, "ni": (True, 0), "handlers": False},
+    "schedule_windows": {"wait": "bound", "ni": "tt", "handlers": True, "schedule_windows": True},
 }
 
 
@@ -57,6 +61,8 @@ SETTINGS = {
 def setting(s):
     prev_w = router.set_header_wait(s["wait"])
     prev_n = router.set_ni(s["ni"])
+    prev_s = router.set_skew(s.get("skew", 0))
+    prev_sw = search.set_schedule_windows(s.get("schedule_windows", False))
     load = wcosts.load_handlers
     if not s["handlers"]:
         wcosts.load_handlers = lambda *a, **k: None
@@ -66,23 +72,63 @@ def setting(s):
         wcosts.load_handlers = load
         router.set_header_wait(prev_w)
         router.set_ni(prev_n)
+        router.set_skew(prev_s)
+        search.set_schedule_windows(prev_sw)
 
 
-def event_triggered_at(app, noc, mapping, appname, frequency, cfg):
+def _et_check(packets, period, exact=False):
+    """WCTT of every packet (wctt.wctt over the packets of one hyperperiod
+    of one release period: every packet of the phase can meet every other;
+    exact: the offset-aware variant with every packet released at F(u),
+    the release of a job that executes for exactly t(v)) and the packets
+    that miss their deadline or leave the NoC after the end of the phase of
+    their release."""
+    earliest = {p["name"]: p["min_start"] for p in packets} if exact else None
+    bound = wctt.wctt(packets, earliest=earliest)
+    late = {p["name"] for p in packets if p["name"] in bound and (
+        p["min_start"] + bound[p["name"]] > p["abs_deadline"]
+        or p["min_start"] % period + bound[p["name"]] > period)}
+    return bound, late
+
+
+def event_triggered_at(app, noc, mapping, appname, frequency, cfg, exact=False):
     """Attempt of search (keys of schedule_at) for event-triggered injection:
     feasible when every packet of the phase meets its deadline with its
-    WCTT from the finish of its source and every task fits its phase with
-    the handlers."""
+    WCTT from the finish of its source, leaves the NoC within the phase of
+    its release, and every task fits its phase with the handlers."""
     instance = instantiator.createInstance(app, noc, frequency)
     packets, hp, _ = flowUnwrapper.unwrap(instance, noc, mapping)
     if hp == 0:
         return None
-    bound = wctt.wctt(packets)
-    late = {p["name"] for p in packets if p["name"] in bound
-            and p["min_start"] + bound[p["name"]] > p["abs_deadline"]}
+    bound, late = _et_check(packets, hp, exact)
     ok = not late and release.handlers_fit(instance, mapping) and release.deadline_fits(instance, mapping)
     return {"frequency": frequency, "hyperperiod": hp, "problem": {"packets": packets},
             "schedule": {} if ok else None, "skipped": late, "wctt": bound}
+
+
+def event_triggered_exact_at(app, noc, mapping, appname, frequency, cfg):
+    return event_triggered_at(app, noc, mapping, appname, frequency, cfg, exact=True)
+
+
+def event_triggered_union(apps, exact=False):
+    """schedule_at replacement for the composition (compose.scheduler) under
+    event-triggered injection: the WCTT over the packets of every
+    application of the NoC (one release period)."""
+    from rttools.multiapp import compose
+
+    def run(_app, noc, _mapping, _appname, frequency, cfg):
+        packets, H, _, info = compose.union_packets(apps, noc, frequency)
+        if H == 0:
+            return None
+        period = min(info[a["name"]]["hyperperiod"] for a in apps)
+        bound, late = _et_check(packets, period, exact)
+        ok = not late and all(
+            release.handlers_fit(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])
+            and release.deadline_fits(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])
+            for a in apps)
+        return {"frequency": frequency, "hyperperiod": H, "problem": {"packets": packets},
+                "schedule": {} if ok else None, "skipped": late, "wctt": bound}
+    return run
 
 
 def _single(a, schedule=None):
@@ -92,13 +138,20 @@ def _single(a, schedule=None):
     return f
 
 
-def _composition(a):
+def _composition(a, et=None):
     from rttools.multiapp import compose
     spec = compose.read_spec(a["composition"])
     compose.set_costs(spec, {x["name"]: a["costs"] for x in spec["apps"]})
     with tnet.quiet():
         comp = compose.load(spec)
-        return compose.minimum_frequency(comp["apps"], comp["noc"], search_config(a["f0_hz"]))
+        if et is None:
+            return compose.minimum_frequency(comp["apps"], comp["noc"], search_config(a["f0_hz"]))
+        sched = compose.scheduler
+        compose.scheduler = lambda apps: event_triggered_union(apps, exact=et == "exact")
+        try:
+            return compose.minimum_frequency(comp["apps"], comp["noc"], search_config(a["f0_hz"]))
+        finally:
+            compose.scheduler = sched
 
 
 def minimum(a):
@@ -163,10 +216,35 @@ def wctt_rows(a, frequency):
     g, appname, noc, entries, _ = ttflow.load_app(a["csv"], a["map"], a["arch"], a["costs"])
     with tnet.quiet():
         inst = instantiator.createInstance(g, noc, frequency)
-        packets, _, _ = flowUnwrapper.unwrap(inst, noc, entries)
+        packets, hp, _ = flowUnwrapper.unwrap(inst, noc, entries)
     bound = wctt.wctt(packets)
     return {p["name"]: {"wctt": bound[p["name"]], "occupancy": p["net_time"], "release": p["min_start"],
                         "deadline": p["abs_deadline"]} for p in packets if p["name"] in bound}
+
+
+def et_run(a, run, base):
+    """Measured software latency of each packet between PEs of a stored
+    RTL run with event-triggered injection (rttools.paper.rtlapp metrics:
+    arrival_max - send_min per flow, from the send call of the source to
+    the receive marker of the target) against the WCTT of wctt.wctt at the
+    clock of the run."""
+    with open(os.path.join(base, run["reference"])) as fh:
+        ref = json.load(fh)
+    rows = wctt_rows(a, run["clock_hz"])
+    flows = {}
+    for f in ref["packets"]["flows"]:
+        name = "f%d:0" % f["flow"]
+        if name not in rows:
+            continue
+        lat = f["arrival_max"] - f["send_min"]
+        flows[str(f["flow"])] = {"measured_max": lat, "wctt": rows[name]["wctt"],
+                                 "late_packets": f["late"], "slack_min": f["min_slack_cycles"]}
+    meas = [v["measured_max"] for v in flows.values()]
+    return {"clock_hz": run["clock_hz"], "flows": flows, "measured_max": max(meas),
+            "measured_above_wctt": sum(v["measured_max"] > v["wctt"] for v in flows.values()),
+            "wctt_over_measured_min": min(v["wctt"] / v["measured_max"] for v in flows.values()),
+            "late_packets": sum(v["late_packets"] for v in flows.values()),
+            "slack_min": min(v["slack_min"] for v in flows.values())}
 
 
 def run(cfg_path, out_dir):
@@ -176,6 +254,7 @@ def run(cfg_path, out_dir):
         cfg = ttflow.load_config(os.path.join(os.path.dirname(os.path.abspath(cfg_path)), own["include"]))
         cfg["deadline_sweep_s"] = own.get("deadline_sweep_s", {})
         cfg["skew_sigma_cycles"] = own.get("skew_sigma_cycles")
+        cfg["et_runs"] = own.get("et_runs", {})
     else:
         cfg = ttflow.load_config(cfg_path)
     out = {"_doc": "rttools.paper.ablation run --config " + os.path.basename(cfg_path), "apps": {}}
@@ -184,24 +263,30 @@ def run(cfg_path, out_dir):
         for sname, s in SETTINGS.items():
             with setting(s):
                 row[sname] = minimum(a)
-        if a["kind"] == "single":
-            with setting(SETTINGS["flow"]):
-                et = _single(a, schedule=event_triggered_at)
-                row["event_triggered"] = {"f_cpu_hz": et["f_cpu_hz"], "minimum_hz": et["frequency_hz"]}
-                if et["frequency_hz"] is not None:
-                    row["event_triggered"]["packets"] = wctt_rows(a, et["frequency_hz"])
+        if a["kind"] in ("single", "composition"):
+            for key, fn, mode, st in (("event_triggered", event_triggered_at, "bound", "flow"),
+                                      ("event_triggered_exact", event_triggered_exact_at, "exact", "flow"),
+                                      ("event_triggered_no_wni", event_triggered_at, "bound", "no_wni")):
+                with setting(SETTINGS[st]):
+                    et = _single(a, schedule=fn) if a["kind"] == "single" else _composition(a, et=mode)
+                    row[key] = {"f_cpu_hz": et["f_cpu_hz"], "minimum_hz": et["frequency_hz"]}
+                    if et["frequency_hz"] is not None and a["kind"] == "single" and key == "event_triggered":
+                        row[key]["packets"] = wctt_rows(a, et["frequency_hz"])
         if a["kind"] == "single":
             from rttools.paper import exp23
             with setting(SETTINGS["flow"]):
                 clock = exp23.flow_clock(row["flow"]["minimum_hz"], a["period_s"])["f_clk_hz"]
                 row["skew"] = skew_tolerance(a, clock)
         sig = cfg.get("skew_sigma_cycles")
-        if sig and a["kind"] in ("single", "composition"):
+        if sig:
             row["skew_sweep"] = {}
             for sigma in sig:
-                st = dict(SETTINGS["flow"], ni=(True, router.NI_WAIT_CYCLES + sigma))
+                st = dict(SETTINGS["flow"], ni=(True, router.NI_WAIT_CYCLES + sigma), skew=sigma)
                 with setting(st):
                     row["skew_sweep"][str(sigma)] = minimum(a)
+        for r in cfg.get("et_runs", {}).get(name, []):
+            with setting(SETTINGS["flow"]):
+                row.setdefault("et_runs", {})[r["run"]] = et_run(a, r, os.path.dirname(os.path.abspath(cfg_path)))
         sweep = cfg.get("deadline_sweep_s", {}).get(name)
         if sweep:
             with setting(SETTINGS["flow"]):
@@ -216,7 +301,10 @@ def run(cfg_path, out_dir):
 def summary(m):
     for name, row in m["apps"].items():
         cells = ", ".join(f"{k} {v['minimum_hz'] / 1e6:.3f}" if v["minimum_hz"] else f"{k} none"
-                          for k, v in row.items() if k not in ("deadline_sweep", "skew", "skew_sweep"))
+                          for k, v in row.items() if k not in ("deadline_sweep", "skew", "skew_sweep", "et_runs"))
+        for r, v in row.get("et_runs", {}).items():
+            cells += (f"; run {r} at {v['clock_hz'] / 1e6:.0f} MHz: measured max {v['measured_max']} cycles, "
+                      f"{v['measured_above_wctt']} flows above the WCTT, WCTT/measured >= {v['wctt_over_measured_min']:.2f}")
         for sg, v in row.get("skew_sweep", {}).items():
             cells += f"; sigma {sg}: {v['minimum_hz'] / 1e6:.3f} MHz"
         if "skew" in row:

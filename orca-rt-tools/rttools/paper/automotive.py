@@ -15,7 +15,7 @@ III to VII of the paper):
 | Tasks | the runnables of one activation pattern of a chain form one task (Section II.A of the paper: runnables with the same activation pattern are mapped to the same task), which runs them in their chain order in one job |
 | Execution times | ACET of each runnable from a Weibull distribution (shape `weibull_shape`) truncated to [min, max] of Table IV, with the scale that gives the average of Table IV; BCET = ACET x U(fmin, fmax) and WCET = ACET x U(fmin, fmax) of Table V |
 | Cost | c(v) = round(WCET(v) x `cycles_per_us`) + `scheduler_cycles`, WCET(v) the sum of the WCETs of the runnables of task v (the time scale of the microcontroller of the characteristics, plus the dispatch of the job); BCET(v) the sum of their BCETs |
-| Edges | consecutive tasks of a chain, and one edge from the last task of an earlier chain with a harmonic period to the first task of each other chain (inter-task communication), so the graph is acyclic; payload of each edge: a label size from Table I |
+| Edges | consecutive tasks of a chain, and one edge from the last task of an earlier chain with a harmonic period to the first task of each other chain (inter-task communication), so the graph is acyclic; payload of each edge: a label size from Table I; period of each flow: the period of its source (every job sends) |
 | End-to-end constraint | the sum of the periods of the activation patterns of the chain (Section IV.E of the paper) |
 | Mapping | steps 1 and 2 of the flow (spiral.map_application: ORT/GCM with the four criteria, smallest M2, Spiral Mapping) on the `width` x `height` mesh |
 
@@ -24,7 +24,17 @@ the flow (search.minimum_frequency), the data age bound DA of every chain at
 that frequency against its end-to-end constraint, and the execution-time
 variation: `trials` simulations of each PE with the tick table of the flow
 (rttools.bench.ucx, owners), each job of v with a work drawn in [BCET, WCET]
-of v, against F_j(v) of the model.
+of v, against F_j(v) of the model, under the platform accounting of
+rttools/bench/ucx.py (tick_sigma): each tick costs e = scheduler_cycles / 2
+to the job it dispatches and each job carries its work and a dispatch
+d = scheduler_cycles / 2, so c(v) = WCET + scheduler_cycles >= work + d + e
+and sigma = scheduler_cycles >= e, the conditions of the tick table
+(Section 6.6 of the paper).
+
+Chain constraints: the end-to-end constraint of every chain is an input of
+the frequency search (graph.graph["chain_constraints"],
+search.chains_fit): a candidate is feasible only when the data age bound of
+every chain is at most its constraint.
 """
 from __future__ import annotations
 
@@ -135,8 +145,9 @@ def generate(cfg):
         return rnd.randint(lo, hi)
 
     def flow(u, v):
-        T = max(period_of[u], period_of[v])
-        flows.append((u, v, T, label_bytes()))
+        # every job of the source sends its output (flow period = period of the source), so the reader takes
+        # the latest output released before its own release
+        flows.append((u, v, period_of[u], label_bytes()))
 
     runnables = []
     for c in range(cfg["chains"]):
@@ -215,12 +226,13 @@ def variation(spec, sched, app, cfg):
             return o[t] if t < len(o) else o[loop + (t - loop) % (len(o) - loop)]
         for _ in range(cfg["trials"]):
             tasks = []
+            e = d = spec.sigma // 2
             for t in ts:
                 lo, hi = bw[t]
-                work = min(spec.cost[t], max(1, round(rnd.uniform(lo, hi) * cyc)) + spec.sigma)
-                tasks.append({"name": t, "cost": work, "period": spec.ticks[t], "offset": spec.offsets[t]})
-            run = ucx.simulate(tasks, sched.P, 3 * spec.hyper_ticks, spec.sigma, tail=3 * spec.hyper_ticks,
-                               owner_of=owner_of)
+                work = min(spec.cost[t] - d - e, max(1, round(rnd.uniform(lo, hi) * cyc)))
+                tasks.append({"name": t, "cost": work + d, "period": spec.ticks[t], "offset": spec.offsets[t]})
+            run = ucx.simulate(tasks, sched.P, 3 * spec.hyper_ticks, e, tail=3 * spec.hyper_ticks,
+                               owner_of=owner_of, tick_sigma=True)
             for t, js in run["jobs"].items():
                 for j, mj in zip(js, sched.sims[node]["jobs"][t]):
                     if j.finish is not None and mj.finish is not None:
@@ -242,6 +254,7 @@ def run(cfg_path, out_dir):
         g, name = appparser.loadFromFile(csv_path)
         noc = nocparser.loadFromFile(os.path.join(base, cfg["arch"]))
     entries = mapfile.from_dict(mres["mapping"])
+    g.graph["chain_constraints"] = [(c["tasks"], c["constraint_ms"] / 1000) for c in app["chains"]]
     r = multirate.graph_rates(g)
     spec = multirate.spec_from_graph(g, entries, r, noc)
     with tnet.quiet():
@@ -264,6 +277,17 @@ def run(cfg_path, out_dir):
             rows.append({"chain": "-".join(c["tasks"]), "periods_ms": c["periods_ms"],
                          "constraint_ms": c["constraint_ms"], "data_age_ms": ms, "within": ms <= c["constraint_ms"]})
         out["chains_within_constraint"] = sum(r_["within"] for r_ in rows)
+        multi = [r_ for r_, c in zip(rows, app["chains"]) if len(c["tasks"]) > 1]
+        out["chains_with_several_tasks"] = len(multi)
+        out["several_tasks_within_constraint"] = sum(r_["within"] for r_ in multi)
+        out["single_task_data_age_ms_max"] = max((r_["data_age_ms"] for r_, c in zip(rows, app["chains"])
+                                                  if len(c["tasks"]) == 1), default=None)
+        util = {}
+        for node, ts in spec.orders.items():
+            util[str(node)] = sum(spec.cost[t] * (spec.hyper_ticks // spec.ticks[t]) for t in ts) / (
+                P * spec.hyper_ticks)
+        out["utilization_at_minimum"] = {"max": max(util.values()), "min": min(util.values()),
+                                         "mean": sum(util.values()) / len(util)}
         out["data_age_over_constraint_max"] = max(r_["data_age_ms"] / r_["constraint_ms"] for r_ in rows)
         out["chain_rows"] = rows
         out["variation"] = variation(spec, sched, app, cfg)

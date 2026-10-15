@@ -1,5 +1,5 @@
 {
- "_doc": "experiments/cputime: CPU time of each PE in the stored runs of tag r11-rc9 with the kernel work that runs while the idle task holds the CPU (rttools/paper/cputime.py), in windows of phi(v_last) + 1 releases from r_{phi(v_last)}. Paths relative to this file. release_isr: the term release of the kernel of ../wcet/reference_r11g.json (249 cycles in the images of E, CAR-V and WCET-E; the image of VMA has the kernel of these images).",
+ "_doc": "experiments/cputime: CPU time of each PE in the stored runs of tag r11-rc9 with the kernel work that runs while the idle task holds the CPU (rttools/paper/cputime.py), in windows of phi(v_last) + 1 releases from r_{phi(v_last)}. Paths relative to this file. rx_isr: the static WCETs of irq2_handler (size flit) and irq3_handler (end of reception) with their entry (terms receive_isr_size and receive_isr_end of ../wcet/reference_r11g.json and reference_tt.json, image of the run); release_isr: the term release of the kernel of ../wcet/reference_r11g.json (249 cycles in the images of E, CAR-V and WCET-E; the image of VMA has the kernel of these images).",
  "runs": {
   "VH": {
    "kind": "exp23",
@@ -12,7 +12,11 @@
     "app": "E",
     "key": "name"
    },
-   "release_isr": 249
+   "release_isr": 249,
+   "rx_isr": [
+    3174,
+    699
+   ]
   },
   "VG": {
    "kind": "exp23",
@@ -20,7 +24,11 @@
    "exp23_config": "../exp23/config.json",
    "reference": "../exp23/reference_VG.json",
    "handlers": "../wcet/costs/tt/weird_a.handlers.json",
-   "release_isr": 249
+   "release_isr": 249,
+   "rx_isr": [
+    3174,
+    699
+   ]
   },
   "VCV": {
    "kind": "rtlapp",
@@ -36,7 +44,11 @@
     "app": "CAR-V",
     "key": "lane"
    },
-   "release_isr": 249
+   "release_isr": 249,
+   "rx_isr": [
+    2470,
+    681
+   ]
   },
   "VMA_CARV": {
    "kind": "rtlapp",
@@ -48,7 +60,11 @@
    "map": "../multiapp/maps/CARV.map",
    "reference": "../multiapp/reference_VMA_CARV.json",
    "handlers": "../wcet/costs/tt/carv_e.handlers.json",
-   "release_isr": 249
+   "release_isr": 249,
+   "rx_isr": [
+    3174,
+    699
+   ]
   },
   "VMA_E": {
    "kind": "rtlapp",
@@ -60,7 +76,11 @@
    "map": "../multiapp/maps/E.map",
    "reference": "../multiapp/reference_VMA_E.json",
    "handlers": "../wcet/costs/tt/carv_e.handlers.json",
-   "release_isr": 249
+   "release_isr": 249,
+   "rx_isr": [
+    3174,
+    699
+   ]
   },
   "W4": {
    "kind": "rtlapp",
@@ -71,7 +91,11 @@
    "map": "../../apps/wcet-e/wcet-e-ONTO-hermes2x2.map",
    "reference": "../wcet/reference_W4.json",
    "handlers": "../wcet/costs/tt/wcet_e.handlers.json",
-   "release_isr": 249
+   "release_isr": 249,
+   "rx_isr": [
+    3174,
+    699
+   ]
   },
   "W5": {
    "kind": "rtlapp",
@@ -82,7 +106,11 @@
    "map": "../../apps/wcet-e/wcet-e-ONTO-hermes2x2.map",
    "reference": "../wcet/reference_W5.json",
    "handlers": "../wcet/costs/tt/wcet_e.handlers.json",
-   "release_isr": 249
+   "release_isr": 249,
+   "rx_isr": [
+    3174,
+    699
+   ]
   }
  }
 }

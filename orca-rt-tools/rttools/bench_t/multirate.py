@@ -450,7 +450,7 @@ def link_events(spec, sched, rows):
     injection: the compare interrupt of TIMER1 at the tick plus s16 and its
     wait within NI_INJECT_CYCLES, on the PE of the source; the reception:
     irq2_handler and irq3_handler inside [s, s + o_i], on the PE of the
-    target."""
+    target, widened by the skew bound sigma (router.skew) on both sides."""
     from rttools.modules.routing import router
     h = spec.handlers
     src = {label: u for label, u, _, _ in spec.flows}
@@ -459,7 +459,9 @@ def link_events(spec, sched, rows):
     for r in rows:
         inj = r["phase_start"] + r["s16"]
         ev.setdefault(spec.node_of[src[r["flow"]]], []).append((inj, inj + router.NI_INJECT_CYCLES, h["inject"]))
-        ev.setdefault(spec.node_of[dst[r["flow"]]], []).append((r["s"], r["s"] + r["occupancy"], h["receive"]))
+        sg = router.skew()
+        ev.setdefault(spec.node_of[dst[r["flow"]]], []).append((r["s"] - sg, r["s"] + r["occupancy"] + sg,
+                                                                 h["receive"]))
     return ev
 
 

@@ -26,7 +26,8 @@ def test_estimate_above_every_window_and_phase(tmp_path):
         assert r["every_phase_below_estimate"], rid
         for lane, q in r["pes"].items():
             assert q["over_window_max_percent"] > 0, (rid, lane)
-            assert q["mean"] >= q["busy_mean"], (rid, lane)
+            assert q["mean"] >= q["measured_mean"] >= q["busy_mean"], (rid, lane)
+            assert q["over_measured_percent"] >= q["over_mean_percent"], (rid, lane)
 
 
 def test_windows_after_the_pipeline_fills():

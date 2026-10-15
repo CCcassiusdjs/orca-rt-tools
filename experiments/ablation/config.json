@@ -1,5 +1,5 @@
 {
- "_doc": "experiments/ablation: the applications of ../tt/config.json (models of the runs of round r11g), the deadline sweep (D of every task, s) and the skew bounds sigma added to w_NI (cycles; 2,245 cycles = 5 us at 449 MHz). rttools/paper/ablation.py; paths relative to this file.",
+ "_doc": "experiments/ablation: the applications of ../tt/config.json (models of the runs of round r11g), the deadline sweep (D of every task, s) and the skew bound sigma added to w_NI and to both ends of the window of each receive handler (cycles; 3,147 cycles: the largest blocking term B of the images of the runs, ../wcet/reference_tt.json ni_images, the delay of the entry of a common interrupt that would start TIMER1 of every PE). et_runs: stored RTL runs with event-triggered injection (reference metrics of experiments/car-v-rtl) whose measured packet latencies the WCTT bound must cover. rttools/paper/ablation.py; paths relative to this file.",
  "include": "../tt/config.json",
  "deadline_sweep_s": {
   "E": [
@@ -14,7 +14,20 @@
   ]
  },
  "skew_sigma_cycles": [
-  224,
-  2245
- ]
+  3147
+ ],
+ "et_runs": {
+  "CAR-V": [
+   {
+    "run": "TCV",
+    "reference": "../car-v-rtl/reference_TCV.json",
+    "clock_hz": 380000000
+   },
+   {
+    "run": "UCV",
+    "reference": "../car-v-rtl/reference_UCV.json",
+    "clock_hz": 380000000
+   }
+  ]
+ }
 }

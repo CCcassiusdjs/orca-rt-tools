@@ -1,0 +1,5 @@
+{
+ "_doc": "experiments/linkload: the applications E and CAR-V of ../tt/config.json with the payload of every flow multiplied by each factor (analysis only), to find workloads in which the links set f_NoC. rttools/paper/linkload.py; paths relative to this file.",
+ "include": "../tt/config.json",
+ "factors": {"E": [1, 16, 32], "CAR-V": [1, 48, 64]}
+}

@@ -1,8 +1,11 @@
 """Ablation of the terms of the flow and the event-triggered baseline
 (rttools/paper/ablation.py, experiments/ablation): the run reproduces
 reference.json; without contention the WCTT of a packet equals its
-occupancy o_i; the time-triggered link schedule never needs a higher clock
-than the event-triggered baseline."""
+occupancy o_i; the bound sums the packets of each competing input port
+(polling control unit of the Hermes router) and slows the flits of a
+packet whose DDMA also receives; the time-triggered link schedule never
+needs a higher clock than the event-triggered baseline; the WCTT covers the
+measured latencies of the stored event-triggered runs."""
 import os
 
 from rttools.modules.routing import router, wctt
@@ -21,14 +24,48 @@ def test_wctt_without_contention_is_the_occupancy():
     assert wctt.wctt([p]) == {"q": router.occupancy(1, 1230)}
 
 
-def test_wctt_round_robin_blocking():
+HOLD = router.getPacketFlits(64) + 1 + router.NI_RX_SIZE_CYCLES + router.NI_RX_END_CYCLES
+
+
+def test_wctt_blocking_of_one_packet():
     """Two packets from different input ports to one ejection port: each
-    waits at most for the hold of the other (flits + 1 + receive handlers)."""
+    waits at most for the hold of the other (flits + 1 + receive handlers)
+    and one header service of the control unit."""
     a = {"name": "a", "datasize": 64, "path": _path(["L", "0", "1", "L"])}
     b = {"name": "b", "datasize": 64, "path": _path(["L", "2", "1", "L"])}
     w = wctt.wctt([a, b])
-    hold = router.getPacketFlits(64) + 1 + router.NI_RX_SIZE_CYCLES + router.NI_RX_END_CYCLES
-    assert w["a"] == router.occupancy(1, 64) + hold and w["b"] == router.occupancy(1, 64) + hold
+    extra = HOLD + wctt.HEADER_SERVICE
+    assert w["a"] == router.occupancy(1, 64) + extra and w["b"] == router.occupancy(1, 64) + extra
+
+
+def test_wctt_polling_sums_the_packets_of_a_port():
+    """Packets b1 and b2 enter router 1 by one port: the polling control
+    unit can serve both before a, so a waits for both holds; the rule of a
+    round-robin arbiter per output counts one of them."""
+    a = {"name": "a", "datasize": 64, "path": _path(["L", "0", "1", "L"])}
+    b1 = {"name": "b1", "datasize": 64, "path": _path(["L", "2", "1", "L"])}
+    b2 = {"name": "b2", "datasize": 64, "path": _path(["L", "3", "2", "1", "L"])}
+    poll = wctt.wctt([a, b1, b2], ni="off")["a"]
+    rr = wctt.wctt([a, b1, b2], ni="off", arbitration="round_robin")["a"]
+    hold = router.getPacketFlits(64) + 1 + wctt.HEADER_SERVICE
+    assert poll - rr == hold
+
+
+def test_wctt_ddma_interleaving():
+    """A packet whose target PE also sends a packet moves its flits at the
+    rate of the shared memory port of the DDMA."""
+    a = {"name": "a", "datasize": 400, "path": _path(["L", "0", "1", "L"])}
+    b = {"name": "b", "datasize": 400, "path": _path(["L", "1", "2", "L"])}
+    p = router.getPacketFlits(400)
+    w = wctt.wctt([a, b], ni="off")
+    assert w["a"] == router.occupancy(1, 400, wait="bound", ni="off") - p + wctt.interleaved(p)
+
+
+def test_wctt_offsets_remove_packets_that_cannot_meet():
+    a = {"name": "a", "datasize": 64, "path": _path(["L", "0", "1", "L"]), "min_start": 0}
+    b = {"name": "b", "datasize": 64, "path": _path(["L", "2", "1", "L"]), "min_start": 100000}
+    w, sets = wctt.wctt([a, b], earliest={"a": 0, "b": 100000}, details=True)
+    assert sets == {"a": [], "b": []} and w["a"] == router.occupancy(1, 64)
 
 
 def test_reference(tmp_path):
@@ -37,4 +74,7 @@ def test_reference(tmp_path):
     for name, row in m["apps"].items():
         if "event_triggered" in row:
             assert row["flow"]["minimum_hz"] <= row["event_triggered"]["minimum_hz"], name
+            assert row["event_triggered_exact"]["minimum_hz"] <= row["event_triggered"]["minimum_hz"], name
+        for r, v in row.get("et_runs", {}).items():
+            assert v["measured_above_wctt"] == 0 and v["late_packets"] == 0, (name, r)
         assert row["links_only"]["minimum_hz"] <= row["flow"]["minimum_hz"], name

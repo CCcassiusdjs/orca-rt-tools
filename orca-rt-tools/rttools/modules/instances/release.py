@@ -216,6 +216,11 @@ def handler_windows(instance, mapping, base, seqs, ends):
         F(y) = f^(y) + max(0, sum of the events that start in (-c_e, F(y)) - sum of B_z for z <= y in the sequence)
 
     a fixed point over every PE (the windows start at F of the sources).
+    With a skew bound sigma (router.skew), the receive handlers start up
+    to sigma before or after the window in the time of the target. With
+    instance["release"]["handler_schedule"] ({flow label: (s, s + o_i)}, the
+    reservation of the packet in a link schedule: search.schedule_windows_fit),
+    the window of the flow is that interval instead of [F(u), end of the flow].
     Returns {task: F(y)}."""
     h = instance["release"]["handlers"]
     budget = h.get("budget") or {}
@@ -223,12 +228,15 @@ def handler_windows(instance, mapping, base, seqs, ends):
     fin = {t: base[t]["finish"] for t in base}
     cross = [(s, t, d["label"]) for s, t, d in instance["flows"] if base[s]["node"] != base[t]["node"]]
     period = next(iter(P.values()), None)
+    from rttools.modules.routing import router
+    sigma = router.skew()
+    fixed = instance["release"].get("handler_schedule") or {}
     for _ in range(1000):
         ev = {}
         for s, t, label in cross:
-            w = (fin[s], ends[label])
-            ev.setdefault(base[s]["node"], []).append(w + (h["inject"],))
-            ev.setdefault(base[t]["node"], []).append(w + (h["receive"],))
+            a, b = fixed.get(label, (fin[s], ends[label]))
+            ev.setdefault(base[s]["node"], []).append((a, b, h["inject"]))
+            ev.setdefault(base[t]["node"], []).append((a - sigma, b + sigma, h["receive"]))
         new = dict(fin)
         for node, ts in seqs.items():
             pool = 0

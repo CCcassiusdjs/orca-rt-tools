@@ -137,7 +137,7 @@ def run_single(name, a):
     fmin = freq["frequency_hz"]
     out = {"kind": "single", "costs": costs, "pes": pe_rows(costs["tasks"]),
            "f_cpu_hz": freq["f_cpu_hz"], "f_noc_hz": freq["f_star_hz"], "minimum_hz": fmin,
-           "binding": None if fmin is None else ("cpu" if fmin == freq["f_cpu_hz"] else "network"), "runs": {}}
+           "binding": None if fmin is None else ("cpu" if fmin == freq["f_cpu_hz"] else "f_noc"), "runs": {}}
     T = a["period_s"]
     clocks = {}
     fc = exp23.flow_clock(fmin, T)
@@ -186,7 +186,7 @@ def run_composition(name, a):
     out = {"kind": "composition", "costs": {"tasks": tasks, "file": os.path.basename(a["costs"]),
                                             "sha256": exp23_sha(a["costs"])},
            "pes": pe_rows(tasks), "f_cpu_hz": freq["f_cpu_hz"], "f_noc_hz": freq["f_star_hz"], "minimum_hz": fmin,
-           "binding": None if fmin is None else ("cpu" if fmin == freq["f_cpu_hz"] else "network"), "runs": {}}
+           "binding": None if fmin is None else ("cpu" if fmin == freq["f_cpu_hz"] else "f_noc"), "runs": {}}
     T = a["period_s"]
     f = exp23.flow_clock(fmin, T)["f_clk_hz"]
     r = {"clock_hz": f, "rule": "flow", "cpu_feasible": freq["f_cpu_hz"] <= f, "apps": {}}
@@ -229,7 +229,7 @@ def run_multirate(name, a):
     phase_s = float(rates["phase_s"])
     out = {"kind": "multirate", "costs": costs, "pes": pe_rows(costs["tasks"]),
            "f_cpu_hz": freq["f_cpu_hz"], "f_noc_hz": freq["f_star_hz"], "minimum_hz": fmin,
-           "binding": None if fmin is None else ("cpu" if fmin == freq["f_cpu_hz"] else "network"), "runs": {}}
+           "binding": None if fmin is None else ("cpu" if fmin == freq["f_cpu_hz"] else "f_noc"), "runs": {}}
     f = exp23.flow_clock(fmin, phase_s)["f_clk_hz"]
     at, sched, ages = carfull.at_frequency(g, noc, entries, f, spec)
     cpu = freq["cpu"]

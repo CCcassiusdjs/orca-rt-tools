@@ -19,7 +19,7 @@ RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.automotive
 all: run check
 
 run:
-	$(RUN) run --config config.json --out $(BUILD) 2>/dev/null
+	$(RUN) run --config config.json --out $(BUILD)
 
 check:
 	$(RUN) check $(BUILD)/metrics.json reference.json

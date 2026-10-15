@@ -1,0 +1,28 @@
+{
+ "runs": 1000,
+ "packets": 11960,
+ "flits_with_error": 0,
+ "lost_or_timeout": 0,
+ "above_bound_polling": 0,
+ "above_bound_round_robin": 289,
+ "largest_latency_over_bound": 0.9734,
+ "largest_case": {
+  "p": 64,
+  "ns": [
+   4,
+   6,
+   5,
+   1
+  ],
+  "offs": [
+   9,
+   9,
+   18,
+   15
+  ],
+  "packet": "3:0",
+  "latency": 1136,
+  "bound": 1167
+ },
+ "largest_packets_of_one_port_before_a_packet": 6
+}

@@ -507,11 +507,27 @@ def schedule_union(apps, noc, frequency, cfg):
                                     cfg["pruning_factor"], cfg["fail_threshold"], cfg["heuristic"])
     sched, skipped = (None, set()) if result is None else result
     if sched is not None and not general(apps) and not all(
-            release.handlers_fit(instantiator.createInstance(a["graph"], noc, frequency), a["entries"]) for a in apps):
+            release.handlers_fit(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])
+            or (search.SCHEDULE_WINDOWS and _app_schedule_fit(a, noc, frequency, problem, sched)) for a in apps):
         # phase model with the handlers of the packet events: a task ends after its phase
         sched = None
     return {"frequency": frequency, "hyperperiod": H, "problem": problem, "schedule": sched,
             "skipped": skipped, "apps": info}
+
+
+def _app_schedule_fit(a, noc, frequency, problem, sched):
+    """search.schedule_windows_fit for application `a` of the union: its
+    packets (names without the prefix of the application) and their
+    reservations in the link schedule of the union."""
+    pre = qualify(a["name"], "")
+    cols = [i for i, p in enumerate(problem["packets"]) if p.get("app") == a["name"]]
+    packets = [dict(problem["packets"][i], name=problem["packets"][i]["name"][len(pre):],
+                    flow=problem["packets"][i]["flow"][len(pre):]) for i in cols]
+    sub = {"packets": packets, "links": problem["links"],
+           "occupancy": [[row[i] for i in cols] for row in problem["occupancy"]]}
+    sub_sched = [[row[i] for i in cols] for row in sched]
+    inst = instantiator.createInstance(a["graph"], noc, frequency)
+    return search.schedule_windows_fit(inst, noc, a["entries"], sub, sub_sched)
 
 
 def scheduler(apps):

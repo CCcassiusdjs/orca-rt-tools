@@ -13,6 +13,83 @@ from rttools.modules.backend.ags import ags
 HANDLER_ROUNDS = 64
 
 
+# Handler windows of Eq. (9) from the link schedule (ablation, R1 of round
+# 2): when the windows [F(u), a] fail, schedule_at also accepts the
+# candidate when the windows [s, s + o_i] of the schedule pass
+# (schedule_windows_fit). Off by default (the flow of the runs).
+SCHEDULE_WINDOWS = False
+
+
+def set_schedule_windows(value):
+    global SCHEDULE_WINDOWS
+    prev = SCHEDULE_WINDOWS
+    SCHEDULE_WINDOWS = bool(value)
+    return prev
+
+
+def schedule_windows_fit(instance, noc, mapping, problem, sched):
+    """Phase model of one period: True when every task ends within its
+    phase with the handlers of each packet charged inside the reservation
+    [s, s + o_i] that the link schedule gives it, and the schedule stays
+    valid for the finishes and starts that these charges give.
+
+    The schedule places each packet inside [F(u), a] of the finishes with
+    the windows [F(u), a] (Eq. (9)), so [s, s + o_i] lies inside that
+    window, the charge of every task can only drop, and each new F'(u) <= F(u)
+    <= s: no packet leaves before its source ends. A deadline that depends on
+    the start of the reader (Eq. (6), n(v) - n(u) >= 2) can move earlier with
+    the new starts, so the function also checks s + o_i against the deadline
+    of the new instance."""
+    if instance.get("rates") is not None or sched is None:
+        return False
+    packets = problem["packets"]
+    links = problem["links"]
+    occ = problem["occupancy"]
+    win = {}
+    for i, p in enumerate(packets):
+        starts = [sched[r][i] for r in range(len(links)) if sched[r][i] is not None]
+        if not starts:
+            continue
+        s = min(starts)
+        o = max(occ[r][i] for r in range(len(links)) if occ[r][i] is not None)
+        a, b = win.get(p["flow"], (s, s + o))
+        win[p["flow"]] = (min(a, s), max(b, s + o))
+    inst = dict(instance)
+    inst["release"] = dict(instance["release"], handler_schedule=win)
+    if not release.handlers_fit(inst, mapping):
+        return False
+    new, _, _ = flowUnwrapper.unwrap(inst, noc, mapping)
+    by_name = {p["name"]: p for p in new}
+    for i, p in enumerate(packets):
+        q = by_name.get(p["name"])
+        if q is None:
+            continue
+        starts = [sched[r][i] for r in range(len(links)) if sched[r][i] is not None]
+        o = max(occ[r][i] for r in range(len(links)) if occ[r][i] is not None)
+        if q["min_start"] > min(starts) or min(starts) + o > q["abs_deadline"]:
+            return False
+    return release.deadline_fits(inst, mapping)
+
+
+def chains_fit(app, instance, noc, mapping, extra):
+    """General phase model: True when the data age bound of every chain of
+    app.graph["chain_constraints"] ([(tasks, constraint in s)]) is at most
+    its constraint at the frequency of the instance (multirate.data_age on
+    the CPU schedule with the handler charges `extra`); True without
+    constraints."""
+    cons = app.graph.get("chain_constraints") if app is not None else None
+    if not cons or instance.get("rates") is None:
+        return True
+    from rttools.bench_t import multirate
+    spec = multirate.spec_from_instance(instance, mapping, noc)
+    ms = multirate.schedule(spec, instance["rates"]["phase_cycles"], extra=extra)
+    if not ms.feasible:
+        return False
+    f = instance["rates"]["phase_cycles"] / float(spec.phase_s)
+    ages = multirate.data_age(spec, ms, [list(t) for t, _ in cons])
+    return all(a["max_cycles"] <= c * f for a, (_, c) in zip(ages, cons))
+
+
 def schedule_at(app, noc, mapping, appname, frequency, cfg):
     """Builds the problem at `frequency` and runs the AGS backend.
 
@@ -53,7 +130,8 @@ def schedule_at(app, noc, mapping, appname, frequency, cfg):
             cfg["heuristic"],
         )
         sched, skipped = (None, set()) if result is None else result
-        if sched is not None and not release.handlers_fit(instance, mapping):
+        if sched is not None and not release.handlers_fit(instance, mapping) and not (
+                SCHEDULE_WINDOWS and schedule_windows_fit(instance, noc, mapping, problem, sched)):
             # phase model with the handlers of the packet events: a task ends after its phase
             sched = None
         if sched is not None and not release.deadline_fits(instance, mapping):
@@ -64,6 +142,9 @@ def schedule_at(app, noc, mapping, appname, frequency, cfg):
             break
         extra = new
     else:
+        sched = None
+    if sched is not None and not skipped and not chains_fit(app, instance, noc, mapping, extra):
+        # general phase model: a chain exceeds its end-to-end constraint
         sched = None
     return {
         "frequency": frequency,

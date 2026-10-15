@@ -141,7 +141,7 @@
    "f_cpu_hz": 434900000.0,
    "f_noc_hz": 449150085.44921875,
    "minimum_hz": 449150085.44921875,
-   "binding": "network",
+   "binding": "f_noc",
    "runs": {
     "VH": {
      "clock_hz": 449152000,
@@ -705,7 +705,7 @@
    "f_cpu_hz": 380000000.0,
    "f_noc_hz": 441082000.7324219,
    "minimum_hz": 441082000.7324219,
-   "binding": "network",
+   "binding": "f_noc",
    "runs": {
     "VCV": {
      "clock_hz": 441088000,
@@ -1075,7 +1075,7 @@
    "f_cpu_hz": 220388000.0,
    "f_noc_hz": 234638214.11132812,
    "minimum_hz": 234638214.11132812,
-   "binding": "network",
+   "binding": "f_noc",
    "runs": {
     "W5": {
      "clock_hz": 234656000,
@@ -1756,7 +1756,7 @@
    "f_cpu_hz": 443346000.0,
    "f_noc_hz": 457595825.1953125,
    "minimum_hz": 457595825.1953125,
-   "binding": "network",
+   "binding": "f_noc",
    "runs": {
     "VMA": {
      "clock_hz": 457600000,
@@ -2538,7 +2538,7 @@
    "f_cpu_hz": 477952000.0,
    "f_noc_hz": 526056421.875,
    "minimum_hz": 526056421.875,
-   "binding": "network",
+   "binding": "f_noc",
    "runs": {
     "CF6": {
      "clock_hz": 526080000,

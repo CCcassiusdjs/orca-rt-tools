@@ -9,20 +9,26 @@ handler with the scheduler (from the TIMER line of the tick to the next
 `scheduled` marker), the compare handler that injects a packet (TIMER line
 off the tick), and the two receive handlers of a packet (FLIT RX at the head
 flit and FLIT END after the last flit). When the idle task holds the CPU,
-this work is missing from the measured time. This module adds it:
+this work is missing from the busy time. The log marks when each handler
+starts but not when it returns, so this module gives t_RTL as an interval:
 
-    t_RTL = busy + sum of the measured tick-to-dispatch times that start in an
-            idle slice + n_inject * c_inject + n_receive * c_receive
-            + n_release * c_release
+    t_RTL,meas = busy + sum of the measured tick-to-dispatch times that start
+                 in an idle slice
+    t_RTL      = t_RTL,meas + n_inject * c_inject + n_size * c_size
+                 + n_end * c_end + n_release * c_release
 
 where n_inject counts the compare interrupts that fire in an idle slice,
-n_receive counts the packets whose head flit or end of reception falls in an
-idle slice, and c_inject and c_receive are the static WCETs of the handlers of
-one packet event in the image of the run (experiments/wcet costs/tt
-<image>.handlers.json, keys inject and receive). n_release counts the release
-interrupts (TRIGGER-PE lines) that the PE acknowledges in an idle slice, and
-c_release is the static WCET of the release handler (release_isr of the
-config: the term release of the kernel of experiments/wcet reference_r11g.json).
+n_size and n_end count the head flits and the ends of reception that fall in
+an idle slice (each event charged once, with its own handler), and c_inject,
+c_size and c_end are the static WCETs of the handlers in the image of the run
+(experiments/wcet costs/tt <image>.handlers.json, key inject; rx_isr of the
+config: irq2_handler and irq3_handler). n_release counts the release
+interrupts that the PE acknowledges in an idle slice (TRIGGER-PE lines; PE
+0-0 logs its acknowledgment as "TRIGGER: workflow iteration"), and c_release
+is the static WCET of the release handler (release_isr of the config: the
+term release of the kernel of experiments/wcet reference_r11g.json).
+t_RTL,meas is the measured part (a lower bound of the CPU time) and t_RTL adds
+the static bounds of the handlers that run in idle slices (an upper bound).
 
 Windows: n = phi(v_last) + 1 consecutive releases from r_{phi(v_last)}
 (0-indexed TRIGGER lines), the first window in which every phase holds a job
@@ -47,6 +53,7 @@ from rttools.tui.model import parsers
 RE_TIMER = re.compile(r"^TIMER t=(\d+) pe=(\d+-\d+) cyc=(\d+)")
 RE_FLIT = re.compile(r"^FLIT (RX|END) t=(\d+) src=(\S+) dst=(\S+) tag=(\d+)")
 RE_ACK = re.compile(r"^TRIGGER-PE (\d+-\d+): release acknowledged at (\d+)")
+RE_ACK0 = re.compile(r"^TRIGGER: workflow iteration at (\d+)")    # acknowledgment of PE 0-0
 
 
 def num(x):
@@ -74,6 +81,10 @@ def kernel_events(log_path, swap, period_cycles):
             if m:
                 pe = parsers.swap_node(m.group(1)) if swap else m.group(1)
                 acks.setdefault(pe, []).append(int(m.group(2)))
+                continue
+            m = RE_ACK0.match(s)
+            if m:
+                acks.setdefault("0-0", []).append(int(m.group(1)))
                 continue
             m = RE_FLIT.match(s)
             if m:
@@ -124,14 +135,13 @@ def charge(tr, clk, lane, ev, a, b, costs):
                 tick += clk.cycles(min(nxt, b) - t)
                 n_tick += 1
     n_inj = sum(1 for t in e["compare"] if a <= t < b and _idle(tr, lane, t))
-    n_rx = 0
-    for head, end in e["packets"]:
-        if a <= head < b and (_idle(tr, lane, head) or _idle(tr, lane, end)):
-            n_rx += 1
+    n_size = sum(1 for head, _ in e["packets"] if a <= head < b and _idle(tr, lane, head))
+    n_end = sum(1 for _, end in e["packets"] if a <= end < b and _idle(tr, lane, end))
     n_rel = sum(1 for t in e.get("release", []) if a <= t < b and _idle(tr, lane, t))
-    total = tick + n_inj * costs["inject"] + n_rx * costs["receive"] + n_rel * costs["release"]
-    return {"cycles": total, "tick_cycles": tick, "ticks": n_tick, "injections": n_inj, "receptions": n_rx,
-            "releases": n_rel}
+    handlers = (n_inj * costs["inject"] + n_size * costs["rx_size"] + n_end * costs["rx_end"]
+                + n_rel * costs["release"])
+    return {"cycles": tick + handlers, "tick_cycles": tick, "handler_cycles": handlers, "ticks": n_tick,
+            "injections": n_inj, "size_flits": n_size, "ends": n_end, "releases": n_rel}
 
 
 def windows(releases, n, t1, p_raw):
@@ -182,7 +192,8 @@ def load(run, base):
 def analyze_run(run, base):
     tr, clk, lanes, est, n, period_cycles = load(run, base)
     costs = json.load(open(os.path.join(base, run["handlers"])))
-    costs = {"inject": costs["inject"], "receive": costs["receive"], "release": run["release_isr"]}
+    costs = {"inject": costs["inject"], "rx_size": run["rx_isr"][0], "rx_end": run["rx_isr"][1],
+             "release": run["release_isr"]}
     static = run.get("static") or {}
     releases = sorted(m.time for m in tr.lane_marks("TRIGGER"))
     p_raw = releases[1] - releases[0]
@@ -190,11 +201,12 @@ def analyze_run(run, base):
     ev = kernel_events(os.path.join(base, run["log"]), bool(tr.meta.get("swap_xy")), period_cycles)
     out = {}
     for lane, name in lanes.items():
-        per, busy_per, ch = [], [], []
+        per, meas, busy_per, ch = [], [], [], []
         for a, b in wins:
             busy = clk.cycles(tmetrics.lane_stats(tr, lane, a, b).busy)
             c = charge(tr, clk, lane, ev, a, b, costs)
             per.append((busy + c["cycles"]) / n)
+            meas.append((busy + c["tick_cycles"]) / n)
             busy_per.append(busy / n)
             ch.append(c)
         ph = []
@@ -202,6 +214,7 @@ def analyze_run(run, base):
             busy = clk.cycles(tmetrics.lane_stats(tr, lane, a, b).busy)
             ph.append(busy + charge(tr, clk, lane, ev, a, b, costs)["cycles"])
         mean = sum(per) / len(per)
+        mean_meas = sum(meas) / len(meas)
         row = {
             "name": name,
             "estimated": est[lane],
@@ -210,12 +223,17 @@ def analyze_run(run, base):
             "window_max": num(max(per)),
             "phase_max": num(max(ph)),
             "busy_mean": num(sum(busy_per) / len(busy_per)),
+            "measured_mean": num(mean_meas),
+            "static_handlers_per_iteration": num(sum(c["handler_cycles"] for c in ch) / len(ch) / n),
             "idle_kernel_per_iteration": num(sum(c["cycles"] for c in ch) / len(ch) / n),
             "idle_injections": sum(c["injections"] for c in ch),
-            "idle_receptions": sum(c["receptions"] for c in ch),
+            "idle_size_flits": sum(c["size_flits"] for c in ch),
+            "idle_ends": sum(c["ends"] for c in ch),
             "idle_ticks": sum(c["ticks"] for c in ch),
             "idle_releases": sum(c["releases"] for c in ch),
             "over_mean_percent": 100 * (est[lane] - mean) / mean,
+            "over_measured_percent": 100 * (est[lane] - mean_meas) / mean_meas,
+            "handler_share_percent": 100 * (mean - mean_meas) / mean,
             "over_window_max_percent": 100 * (est[lane] - max(per)) / max(per),
             "phase_max_below_estimate": max(ph) <= est[lane],
         }
@@ -224,6 +242,7 @@ def analyze_run(run, base):
         if sref is not None:
             row["static"] = sref
             row["static_over_mean_percent"] = 100 * (sref - mean) / mean
+            row["static_over_measured_percent"] = 100 * (sref - mean_meas) / mean_meas
         out[lane] = row
 
     def stats(k):
@@ -236,6 +255,9 @@ def analyze_run(run, base):
         "handler_costs": costs,
         "pes": out,
         "over_mean_percent": stats("over_mean_percent"),
+        "over_measured_percent": stats("over_measured_percent"),
+        "handler_share_percent": stats("handler_share_percent"),
+        "static_over_measured_percent": stats("static_over_measured_percent"),
         "over_window_max_percent": stats("over_window_max_percent"),
         "static_over_mean_percent": stats("static_over_mean_percent"),
         "every_phase_below_estimate": all(r["phase_max_below_estimate"] for r in out.values()),
@@ -288,13 +310,13 @@ def check(metrics_path, ref_path):
 
 def summary(res):
     for rid, r in res["runs"].items():
-        o = r["over_mean_percent"]
-        print(f"{rid}: windows {len(r['windows'])} of {r['releases_per_window']} releases; over mean "
-              f"{o['min']:.2f} to {o['max']:.2f} % (mean {o['mean']:.2f} %); every phase below t(V_k): "
-              f"{r['every_phase_below_estimate']}")
+        o, m = r["over_mean_percent"], r["over_measured_percent"]
+        print(f"{rid}: windows {len(r['windows'])} of {r['releases_per_window']} releases; over t_RTL "
+              f"{o['min']:.2f} to {o['max']:.2f} % (mean {o['mean']:.2f} %), over t_RTL,meas {m['min']:.2f} to "
+              f"{m['max']:.2f} % (mean {m['mean']:.2f} %); every phase below t(V_k): {r['every_phase_below_estimate']}")
         for lane, q in r["pes"].items():
-            print(f"   {lane} {q['name']:>12}: t(V_k) {q['estimated']}, t_RTL {q['mean']:.1f} (busy {q['busy_mean']:.1f},"
-                  f" idle kernel {q['idle_kernel_per_iteration']:.1f}; inj {q['idle_injections']}, rx {q['idle_receptions']}),"
+            print(f"   {lane} {q['name']:>12}: t(V_k) {q['estimated']}, t_RTL [{q['measured_mean']:.1f}, {q['mean']:.1f}] (busy {q['busy_mean']:.1f},"
+                  f" idle kernel {q['idle_kernel_per_iteration']:.1f}; inj {q['idle_injections']}, size {q['idle_size_flits']}, end {q['idle_ends']}),"
                   f" window max {q['window_max']:.1f}, phase max {q['phase_max']:.1f}, over {q['over_mean_percent']:.2f} %"
                   + (f", static {q['static']} ({q['static_over_mean_percent']:.2f} %)" if "static" in q else ""))
 

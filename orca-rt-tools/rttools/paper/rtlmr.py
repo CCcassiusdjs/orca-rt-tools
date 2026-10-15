@@ -505,8 +505,13 @@ def summary_lines(m):
            f"{m['packets']['after_deadline']} after the deadline"]
     pc = m.get("phase_conformance")
     if pc is not None:
-        from rttools.paper import phasecheck
-        out.append("  phase conformance: " + phasecheck.summary(pc)[0][2:])
+        ok = pc["phases_with_a_task_twice"] == 0 and pc["early_jobs"] == 0
+        out.append(f"  executions per phase (phases between two releases): {pc['phases']} phases, {pc['jobs']} "
+                   f"executions, {pc['phases_with_a_task_twice']} phases with a task twice, {pc['early_jobs']} early "
+                   f"executions -> " + ("conform" if ok else "do not conform")
+                   + f"; {pc['late_jobs']} executions begin after their release phase (jobs of several ticks); "
+                   f"CPU of {pc['phases_cpu_above']} release-to-release phases above the busy time of the model, "
+                   f"which counts its phases from the ticks (the check of the CPU per tick phase is the line CPU)")
     if m.get("injection") == "tt":
         from rttools.paper import ttcheck
         out += ["  " + x.lstrip() for x in ttcheck.summary_lines(m.get("tt"))]

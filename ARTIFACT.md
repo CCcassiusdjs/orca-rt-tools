@@ -19,9 +19,10 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | `experiments/car-full` | CAR as a whole (four periods, two cycles) with the general phase model (`rttools/bench_t/multirate.py`): analysis flow and check; UCX-OS application `car_full` (time-triggered tasks) and the targets of its RTL run |
 | `experiments/wcet` | Static task costs t(v) (`rttools.wcet`: static WCET analysis of the PE image plus the kernel costs) against the stored runs H and CV2; application WCET-E (`apps/wcet-e`, input-dependent bodies) for the RTL |
 | `experiments/multiapp` | CAR-V and application E on one 4x5 NoC (`rttools.multiapp`): one link schedule for the packets of both applications, one clock, R_bound per application; UCX-OS image `carv_e` of both applications (`rttools.ucxgen compose`) and the analysis of its RTL run per application |
-| `experiments/cputime` | CPU time of each PE in the stored runs VH, VG, VCV, VMA, W4 and W5 with the kernel work that runs while the idle task holds the CPU (`rttools.paper.cputime`): the measured time from each tick to the next dispatch and the static WCETs of the injection, receive and release handlers that start in an idle slice, in windows of n(v_last) + 1 releases from r_{n(v_last)}; mean, largest window and largest phase against t(V_k) and the static t(V_k) |
-| `experiments/ablation` | Minimum frequency of each application of `experiments/tt` without w_h, without w_NI, without the handler charge of Eq. (9), with the links alone, and with event-triggered injection (WCTT by the recursive calculus of round-robin wormhole networks, `rttools/modules/routing/wctt.py`); the end-to-end deadline D as an input of the search (sweep of D); the skew between the ticks of two PEs that each link schedule tolerates and the minimum frequency with a bound on the skew added to w_NI (`rttools.paper.ablation`) |
-| `experiments/automotive` | Engine-control workload generated from the application characteristics of Kramer, Ziegenbein and Hamann (WATERS 2015): 40 cause-effect chains, one task per activation pattern of a chain, periods of 1 ms to 1 s, Weibull execution times with the BCET and WCET factors of the characteristics; the flow with the general phase model on the 4x4 mesh, the data age bound of each chain against the sum of its periods, and simulations of each PE with the tick table and execution times between BCET and WCET (`rttools.paper.automotive`) |
+| `experiments/cputime` | CPU time of each PE in the stored runs VH, VG, VCV, VMA, W4 and W5 as an interval (`rttools.paper.cputime`): the lower end adds to the busy time the measured time from each tick in an idle slice to the next dispatch; the upper end also adds the static WCET of each injection, size-flit, end-of-reception and release handler that starts in an idle slice (each event with its own handler); windows of n(v_last) + 1 releases from r_{n(v_last)}; mean, largest window and largest phase against t(V_k) and the static t(V_k) (Table 4, Figure 6a, Sections 7.4 to 7.10) |
+| `experiments/ablation` | Table 5 and Section 7.11: minimum frequency of each application of `experiments/tt` without w_h, without w_NI, without the handler charge of Eq. (9), with the links alone, with the handler windows of the link schedule, and with event-triggered injection (`rttools/modules/routing/wctt.py`: recursive calculus with the polling control unit of the Hermes router, the receive handlers and the shared memory port of the DDMA; with the release windows of the phase model, with exact releases, and with w_NI = 0); the WCTT against the measured latencies of the stored event-triggered runs TCV and UCV; the end-to-end deadline D as an input of the search (sweep of D); the skew between the ticks of two PEs that each link schedule tolerates and the minimum frequency with a skew bound in w_NI and in the handler windows (`rttools.paper.ablation`) |
+| `experiments/automotive` | Section 7.8: engine-control workload generated from the application characteristics of Kramer, Ziegenbein and Hamann (WATERS 2015): 40 cause-effect chains, one task per activation pattern of a chain, periods of 1 ms to 1 s, Weibull execution times with the BCET and WCET factors of the characteristics, flow period = period of the source; the flow with the general phase model and the chain constraints on the 4x4 mesh, the data age bound of each chain against the sum of its periods, and simulations of each PE with the tick table and execution times between BCET and WCET under the platform accounting of Lemma 1 (`rttools.paper.automotive`) |
+| `experiments/linkload` | Section 7.11: E and CAR-V with the payload of every flow multiplied by a factor: f_CPU, the minimum frequency of the flow and of the links alone, and the lowest frequency at which each packet alone fits its window (`rttools.paper.linkload`) |
 
 ## Requirements
 
@@ -48,11 +49,13 @@ This repository holds the RTL of the 2x2 manycore (Hermes NoC, RV32E cores, DDMA
 | `make -C experiments/cputime PYTHON=<python>` | `experiments/cputime/build/metrics.json` against `reference.json` | seconds |
 | `make -C experiments/ablation PYTHON=<python>` | `experiments/ablation/build/metrics.json` against `reference.json` | about 1 min |
 | `make -C experiments/automotive PYTHON=<python>` | `experiments/automotive/build/{metrics.json,automotive.csv}` against `reference.json` | about 10 s |
+| `make -C experiments/linkload PYTHON=<python>` | `experiments/linkload/build/metrics.json` against `reference.json` (`timing.json`: time of each search, not checked) | about 10 s |
+| `make -C experiments/zll polling` | GHDL: 1000 cases of packets from four input ports to one output of router 4 of a 3x3 mesh (`tb_poll.vhd`), every latency against the event-triggered bound of `wctt.py`, against `reference_polling.json` | about 1 min |
 | `make -C experiments/multiapp sim ENV_SETUP="..."` | New RTL simulation of the composition (4x5, 434.912 MHz, 11.5 ms) in `experiments/multiapp/build/sim`; `make -C experiments/multiapp analyze` analyzes it per application into `build/results_sim/{CARV,E}` | not measured (estimate: about 21 min of `vsim`, run CV2 scaled by 20/16 PEs and 434.912/380 MHz) |
 | `make -C experiments/exp23 instrumentation ENV_SETUP="..."` | `experiments/exp23/build/sw/{with,without}` (images with and without the instrumentation writes, `build_sw.sh`), then the bound of the writes in the measured CPU time of run F against `reference_head.json` | 4 s (container) |
 | `make -C experiments/wcet PYTHON=<python>` | `experiments/wcet/build`: t(v) of E (image of run H), CAR-V and WCET-E from the static analysis, against the CPU time per iteration of runs H and CV2 and the GHDL cycles of the bodies of WCET-E; flow of E with the static costs; checked against `reference.json` | about 1 min |
 | `make -C experiments/wcet sim F_CLK=500000000 ENV_SETUP="..."`, then `make -C experiments/wcet run-analyze LOG=build/sim/events.txt` | RTL simulation of WCET-E (`build/sim`) and its CPU time per PE against the static t(V_k) of its image; without LOG, the stored run W1 (`logs/W1.*`, checked against `reference_W1.json` by `make -C experiments/wcet check`) | `vsim` 2 min 36 s for 10 ms (run W1, `logs/W1.time.txt`) |
-| `cd orca-rt-tools && python -m pytest -q` | Python, C host and RTL tests (the RTL tests skip without Verilator or GHDL) | about 1 min |
+| `cd orca-rt-tools && python -m pytest -q` | Python, C host and RTL tests (the RTL tests skip without Verilator or GHDL) | about 11 min |
 
 ## Measured times
 
@@ -80,14 +83,17 @@ Each time below comes from one run of the command.
 | `make -C experiments/exp23 sim software-without` (run G, 500 MHz, 20 ms) | `vsim` alone: 6 min 3 s wall clock, 360.7 s user time, 48 MB (`experiments/exp23/logs/G.time.txt`); with the builds: 6 min 11 s | Simulation host |
 | The steps of `make -C experiments/exp23 paper-flow` (run H, 434.912 MHz, 20 ms) | `vsim` alone: 5 min 29 s wall clock, 327.8 s user time, 49 MB (`experiments/exp23/logs/H.time.txt`); with the builds: 5 min 37 s | Simulation host |
 
-TODO(re-measure on the workstation): the container times come from a shared container; measure every command again on the simulation host.
+The container times come from a shared container with 2 vCPU.
 
 ## Numbers of the paper
 
 | Research question or result | Pipeline |
 |---|---|
-| RQ1: contraction criteria on the random graphs and on CAR | `experiments/ch7` |
-| RQ2 (CPU time per iteration), RQ3 (response time and flows), f* (f_NoC in the paper) and f_CPU of application E | `experiments/exp23` |
+| Contraction criteria on the random graphs (Section 5) | `experiments/ch7` |
+| RQ1 (CPU time per PE, Table 4, Figure 6a, Sections 7.4 to 7.10) | `experiments/cputime` |
+| RQ2 (response and packets): application E (runs VH, VG), CAR-V (VCV), CAR-V and E (VMA), WCET-E (W4, W5), CAR (CF6) | `experiments/exp23`, `experiments/car-v-rtl`, `experiments/multiapp`, `experiments/wcet`, `experiments/car-full`; models of the runs: `experiments/tt` |
+| RQ3 (Table 5, event-triggered bound, skew, deadline sweep, larger payloads) | `experiments/ablation`, `experiments/zll` (`polling`), `experiments/linkload` |
+| Engine-control workload (Section 7.8) | `experiments/automotive` |
 | Rows and coordinates of the criteria table, the Gantt, the response per iteration and the flow table | `experiments/figures` |
 | L0 = 6(m+1) + p + 1 at 256 points of the Hermes RTL (GHDL); header wait of at most 20 cycles per router (2624 runs) | `experiments/zll` |
 

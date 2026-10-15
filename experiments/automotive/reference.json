@@ -13,7 +13,7 @@
   {
    "chain": "T2-T3",
    "constraint_ms": 1010,
-   "data_age_ms": 1000.0143280360347,
+   "data_age_ms": 10.014328036034845,
    "periods_ms": [
     10,
     1000
@@ -143,7 +143,7 @@
   {
    "chain": "T20-T21",
    "constraint_ms": 30,
-   "data_age_ms": 21.763361636986374,
+   "data_age_ms": 11.763361636986376,
    "periods_ms": [
     10,
     20
@@ -235,13 +235,13 @@
   {
    "chain": "T32-T33-T34",
    "constraint_ms": 130,
-   "data_age_ms": 201.29706721291615,
+   "data_age_ms": 121.29706721291615,
    "periods_ms": [
     20,
     100,
     10
    ],
-   "within": false
+   "within": true
   },
   {
    "chain": "T35",
@@ -264,13 +264,13 @@
   {
    "chain": "T37-T38-T39",
    "constraint_ms": 130,
-   "data_age_ms": 201.36452792370127,
+   "data_age_ms": 121.36452792370129,
    "periods_ms": [
     20,
     100,
     10
    ],
-   "within": false
+   "within": true
   },
   {
    "chain": "T40",
@@ -329,7 +329,7 @@
   {
    "chain": "T46-T47-T48",
    "constraint_ms": 130,
-   "data_age_ms": 120.5916509730069,
+   "data_age_ms": 30.591650973006907,
    "periods_ms": [
     10,
     20,
@@ -349,7 +349,7 @@
   {
    "chain": "T50-T51-T52",
    "constraint_ms": 130,
-   "data_age_ms": 120.97353553374964,
+   "data_age_ms": 20.97353553374963,
    "periods_ms": [
     20,
     10,
@@ -377,15 +377,16 @@
   }
  ],
  "chains": 40,
- "chains_within_constraint": 38,
+ "chains_with_several_tasks": 10,
+ "chains_within_constraint": 40,
  "criterion": "MAX_PROC",
- "data_age_over_constraint_max": 1.5489579071053945,
+ "data_age_over_constraint_max": 1.0,
  "edges": 53,
  "edges_on_noc": 15,
  "f_cpu_hz": 181602000.0,
  "hyperperiod_ms": 1000,
  "minimum_hz": 181602000.0,
- "packets_per_hyperperiod": 503,
+ "packets_per_hyperperiod": 832,
  "periods_ms": [
   1,
   2,
@@ -396,7 +397,14 @@
   1000
  ],
  "runnables": 163,
+ "several_tasks_within_constraint": 10,
+ "single_task_data_age_ms_max": 2.457555533529366,
  "tasks": 54,
+ "utilization_at_minimum": {
+  "max": 0.43731880706159626,
+  "mean": 0.13970438135317892,
+  "min": 0.01677536591006707
+ },
  "variation": {
   "jobs": 260580,
   "late": 0,

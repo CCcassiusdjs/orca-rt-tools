@@ -21,6 +21,16 @@
    "no_wni": {
     "f_cpu_hz": 477952000.0,
     "minimum_hz": 526056421.875
+   },
+   "schedule_windows": {
+    "f_cpu_hz": 477952000.0,
+    "minimum_hz": 526056421.875
+   },
+   "skew_sweep": {
+    "3147": {
+     "f_cpu_hz": 477952000.0,
+     "minimum_hz": 526056421.875
+    }
    }
   },
   "CAR-V": {
@@ -36,107 +46,329 @@
      "response_bound_ms": 2.215379449574926
     }
    },
+   "et_runs": {
+    "TCV": {
+     "clock_hz": 380000000,
+     "flows": {
+      "11": {
+       "late_packets": 0,
+       "measured_max": 4690,
+       "slack_min": 110212,
+       "wctt": 20550.0
+      },
+      "12": {
+       "late_packets": 0,
+       "measured_max": 4503,
+       "slack_min": 109886,
+       "wctt": 89453.0
+      },
+      "13": {
+       "late_packets": 0,
+       "measured_max": 1784,
+       "slack_min": 27626,
+       "wctt": 73814.0
+      },
+      "14": {
+       "late_packets": 0,
+       "measured_max": 2597,
+       "slack_min": 26813,
+       "wctt": 73840.0
+      },
+      "15": {
+       "late_packets": 0,
+       "measured_max": 1898,
+       "slack_min": 112656,
+       "wctt": 50464.0
+      },
+      "16": {
+       "late_packets": 0,
+       "measured_max": 1801,
+       "slack_min": 55611,
+       "wctt": 73840.0
+      },
+      "17": {
+       "late_packets": 0,
+       "measured_max": 2595,
+       "slack_min": 26815,
+       "wctt": 67042.0
+      },
+      "18": {
+       "late_packets": 0,
+       "measured_max": 1782,
+       "slack_min": 27628,
+       "wctt": 73658.0
+      },
+      "19": {
+       "late_packets": 0,
+       "measured_max": 2821,
+       "slack_min": 111732,
+       "wctt": 73632.0
+      },
+      "20": {
+       "late_packets": 0,
+       "measured_max": 1835,
+       "slack_min": 112719,
+       "wctt": 50360.0
+      },
+      "21": {
+       "late_packets": 0,
+       "measured_max": 2737,
+       "slack_min": 110319,
+       "wctt": 28838.0
+      },
+      "22": {
+       "late_packets": 0,
+       "measured_max": 3973,
+       "slack_min": 109122,
+       "wctt": 28812.0
+      },
+      "23": {
+       "late_packets": 0,
+       "measured_max": 1933,
+       "slack_min": 112266,
+       "wctt": 15846.0
+      },
+      "3": {
+       "late_packets": 0,
+       "measured_max": 1726,
+       "slack_min": 26459,
+       "wctt": 42987.0
+      },
+      "4": {
+       "late_packets": 0,
+       "measured_max": 2463,
+       "slack_min": 25724,
+       "wctt": 89453.0
+      },
+      "7": {
+       "late_packets": 0,
+       "measured_max": 4501,
+       "slack_min": 109886,
+       "wctt": 42987.0
+      }
+     },
+     "late_packets": 0,
+     "measured_above_wctt": 0,
+     "measured_max": 4690,
+     "slack_min": 25724,
+     "wctt_over_measured_min": 4.381663113006397
+    },
+    "UCV": {
+     "clock_hz": 380000000,
+     "flows": {
+      "11": {
+       "late_packets": 0,
+       "measured_max": 4753,
+       "slack_min": 110105,
+       "wctt": 20550.0
+      },
+      "12": {
+       "late_packets": 0,
+       "measured_max": 4567,
+       "slack_min": 109775,
+       "wctt": 89453.0
+      },
+      "13": {
+       "late_packets": 0,
+       "measured_max": 1823,
+       "slack_min": 27488,
+       "wctt": 73814.0
+      },
+      "14": {
+       "late_packets": 0,
+       "measured_max": 2676,
+       "slack_min": 26635,
+       "wctt": 73840.0
+      },
+      "15": {
+       "late_packets": 0,
+       "measured_max": 1936,
+       "slack_min": 112572,
+       "wctt": 50464.0
+      },
+      "16": {
+       "late_packets": 0,
+       "measured_max": 1841,
+       "slack_min": 55471,
+       "wctt": 73840.0
+      },
+      "17": {
+       "late_packets": 0,
+       "measured_max": 2676,
+       "slack_min": 26635,
+       "wctt": 67042.0
+      },
+      "18": {
+       "late_packets": 0,
+       "measured_max": 1822,
+       "slack_min": 27488,
+       "wctt": 73658.0
+      },
+      "19": {
+       "late_packets": 0,
+       "measured_max": 2898,
+       "slack_min": 111611,
+       "wctt": 73632.0
+      },
+      "20": {
+       "late_packets": 0,
+       "measured_max": 1872,
+       "slack_min": 112637,
+       "wctt": 50360.0
+      },
+      "21": {
+       "late_packets": 0,
+       "measured_max": 2796,
+       "slack_min": 110195,
+       "wctt": 28838.0
+      },
+      "22": {
+       "late_packets": 0,
+       "measured_max": 4072,
+       "slack_min": 108958,
+       "wctt": 28812.0
+      },
+      "23": {
+       "late_packets": 0,
+       "measured_max": 1972,
+       "slack_min": 112182,
+       "wctt": 15846.0
+      },
+      "3": {
+       "late_packets": 0,
+       "measured_max": 1763,
+       "slack_min": 26315,
+       "wctt": 42987.0
+      },
+      "4": {
+       "late_packets": 0,
+       "measured_max": 2538,
+       "slack_min": 25540,
+       "wctt": 89453.0
+      },
+      "7": {
+       "late_packets": 0,
+       "measured_max": 4568,
+       "slack_min": 109774,
+       "wctt": 42987.0
+      }
+     },
+     "late_packets": 0,
+     "measured_above_wctt": 0,
+     "measured_max": 4753,
+     "slack_min": 25540,
+     "wctt_over_measured_min": 4.323585104144751
+    }
+   },
    "event_triggered": {
     "f_cpu_hz": 380000000.0,
-    "minimum_hz": 514560699.4628906,
+    "minimum_hz": 558906555.1757812,
     "packets": {
      "f11:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 17651,
       "release": 95000,
-      "wctt": 17651.0
+      "wctt": 20550.0
      },
      "f12:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 17625,
       "release": 95000,
-      "wctt": 67280.0
+      "wctt": 89453.0
      },
      "f13:0": {
-      "deadline": 268280,
+      "deadline": 290453,
       "occupancy": 15405,
       "release": 190000,
-      "wctt": 72727.0
+      "wctt": 73814.0
      },
      "f14:0": {
-      "deadline": 268280,
+      "deadline": 290453,
       "occupancy": 15431,
       "release": 190000,
-      "wctt": 72753.0
+      "wctt": 73840.0
      },
      "f15:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15379,
       "release": 95000,
-      "wctt": 26833.0
+      "wctt": 50464.0
      },
      "f16:0": {
-      "deadline": 268280,
+      "deadline": 290453,
       "occupancy": 15431,
       "release": 161998,
-      "wctt": 72753.0
+      "wctt": 73840.0
      },
      "f17:0": {
-      "deadline": 268280,
+      "deadline": 290453,
       "occupancy": 15431,
       "release": 190000,
-      "wctt": 51987.0
+      "wctt": 67042.0
      },
      "f18:0": {
-      "deadline": 268280,
+      "deadline": 290453,
       "occupancy": 15405,
       "release": 190000,
-      "wctt": 72571.0
+      "wctt": 73658.0
      },
      "f19:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15379,
       "release": 95000,
-      "wctt": 72545.0
+      "wctt": 73632.0
      },
      "f20:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15353,
       "release": 95000,
-      "wctt": 38209.0
+      "wctt": 50360.0
      },
      "f21:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15763,
       "release": 107015,
-      "wctt": 27575.0
+      "wctt": 28838.0
      },
      "f22:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15737,
       "release": 110166,
-      "wctt": 27549.0
+      "wctt": 28812.0
      },
      "f23:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15533,
       "release": 96258,
-      "wctt": 15533.0
+      "wctt": 15846.0
      },
      "f3:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15257,
       "release": 190000,
-      "wctt": 32970.0
+      "wctt": 42987.0
      },
      "f4:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 15283,
       "release": 190000,
-      "wctt": 67280.0
+      "wctt": 89453.0
      },
      "f7:0": {
-      "deadline": 257280,
+      "deadline": 279453,
       "occupancy": 17651,
       "release": 95000,
-      "wctt": 32970.0
+      "wctt": 42987.0
      }
     }
+   },
+   "event_triggered_exact": {
+    "f_cpu_hz": 380000000.0,
+    "minimum_hz": 456802368.1640625
+   },
+   "event_triggered_no_wni": {
+    "f_cpu_hz": 380000000.0,
+    "minimum_hz": 393844604.4921875
    },
    "flow": {
     "f_cpu_hz": 380000000.0,
@@ -158,6 +390,10 @@
     "f_cpu_hz": 380000000.0,
     "minimum_hz": 380409240.72265625
    },
+   "schedule_windows": {
+    "f_cpu_hz": 380000000.0,
+    "minimum_hz": 441082000.7324219
+   },
    "skew": {
     "deadline_slack_min": 0,
     "frequency_hz": 441088000,
@@ -166,17 +402,25 @@
     "sigma_us": 0.0
    },
    "skew_sweep": {
-    "224": {
+    "3147": {
      "f_cpu_hz": 380000000.0,
-     "minimum_hz": 441978454.58984375
-    },
-    "2245": {
-     "f_cpu_hz": 380000000.0,
-     "minimum_hz": 450065612.79296875
+     "minimum_hz": 453670501.7089844
     }
    }
   },
   "CARV-E": {
+   "event_triggered": {
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 574745178.2226562
+   },
+   "event_triggered_exact": {
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 573329925.5371094
+   },
+   "event_triggered_no_wni": {
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 457595825.1953125
+   },
    "flow": {
     "f_cpu_hz": 443346000.0,
     "minimum_hz": 457595825.1953125
@@ -197,12 +441,12 @@
     "f_cpu_hz": 443346000.0,
     "minimum_hz": 457595825.1953125
    },
+   "schedule_windows": {
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 443347930.9082031
+   },
    "skew_sweep": {
-    "224": {
-     "f_cpu_hz": 443346000.0,
-     "minimum_hz": 457595825.1953125
-    },
-    "2245": {
+    "3147": {
      "f_cpu_hz": 443346000.0,
      "minimum_hz": 457595825.1953125
     }
@@ -233,39 +477,47 @@
    },
    "event_triggered": {
     "f_cpu_hz": 434900000.0,
-    "minimum_hz": 449150085.44921875,
+    "minimum_hz": 495243072.5097656,
     "packets": {
      "f10:0": {
-      "deadline": 224575,
+      "deadline": 247621,
       "occupancy": 17450,
       "release": 98000,
-      "wctt": 48761.0
+      "wctt": 60287.0
      },
      "f1:0": {
-      "deadline": 224575,
+      "deadline": 247621,
       "occupancy": 15533,
       "release": 28530,
-      "wctt": 34708.0
+      "wctt": 59319.0
      },
      "f4:0": {
-      "deadline": 224575,
+      "deadline": 247621,
       "occupancy": 15551,
       "release": 100825,
-      "wctt": 15551.0
+      "wctt": 15930.0
      },
      "f6:0": {
-      "deadline": 224575,
+      "deadline": 247621,
       "occupancy": 16946,
       "release": 188301,
-      "wctt": 34708.0
+      "wctt": 59319.0
      },
      "f9:0": {
-      "deadline": 224575,
+      "deadline": 247621,
       "occupancy": 16643,
       "release": 173370,
-      "wctt": 48761.0
+      "wctt": 60287.0
      }
     }
+   },
+   "event_triggered_exact": {
+    "f_cpu_hz": 434900000.0,
+    "minimum_hz": 449150085.44921875
+   },
+   "event_triggered_no_wni": {
+    "f_cpu_hz": 434900000.0,
+    "minimum_hz": 449150085.44921875
    },
    "flow": {
     "f_cpu_hz": 434900000.0,
@@ -286,6 +538,10 @@
    "no_wni": {
     "f_cpu_hz": 434900000.0,
     "minimum_hz": 449150085.44921875
+   },
+   "schedule_windows": {
+    "f_cpu_hz": 434900000.0,
+    "minimum_hz": 434902191.1621094
    },
    "skew": {
     "deadline_slack_min": 2563,
@@ -295,11 +551,7 @@
     "sigma_us": 0.27384938728982616
    },
    "skew_sweep": {
-    "224": {
-     "f_cpu_hz": 434900000.0,
-     "minimum_hz": 449150085.44921875
-    },
-    "2245": {
+    "3147": {
      "f_cpu_hz": 434900000.0,
      "minimum_hz": 449150085.44921875
     }
@@ -308,39 +560,47 @@
   "WCET-E": {
    "event_triggered": {
     "f_cpu_hz": 220388000.0,
-    "minimum_hz": 246753692.62695312,
+    "minimum_hz": 280765533.4472656,
     "packets": {
      "f10:0": {
-      "deadline": 123376,
+      "deadline": 140382,
       "occupancy": 17450,
       "release": 55345,
-      "wctt": 48761.0
+      "wctt": 60287.0
      },
      "f1:0": {
-      "deadline": 123376,
+      "deadline": 140382,
       "occupancy": 15533,
       "release": 11377,
-      "wctt": 34708.0
+      "wctt": 59319.0
      },
      "f4:0": {
-      "deadline": 123376,
+      "deadline": 140382,
       "occupancy": 15551,
       "release": 31531,
-      "wctt": 15551.0
+      "wctt": 15930.0
      },
      "f6:0": {
-      "deadline": 123376,
+      "deadline": 140382,
       "occupancy": 16946,
       "release": 81062,
-      "wctt": 34708.0
+      "wctt": 59319.0
      },
      "f9:0": {
-      "deadline": 123376,
+      "deadline": 140382,
       "occupancy": 16643,
       "release": 74615,
-      "wctt": 48761.0
+      "wctt": 60287.0
      }
     }
+   },
+   "event_triggered_exact": {
+    "f_cpu_hz": 220388000.0,
+    "minimum_hz": 261001586.9140625
+   },
+   "event_triggered_no_wni": {
+    "f_cpu_hz": 220388000.0,
+    "minimum_hz": 234638214.11132812
    },
    "flow": {
     "f_cpu_hz": 220388000.0,
@@ -362,6 +622,10 @@
     "f_cpu_hz": 220388000.0,
     "minimum_hz": 234638214.11132812
    },
+   "schedule_windows": {
+    "f_cpu_hz": 220388000.0,
+    "minimum_hz": 220390319.82421875
+   },
    "skew": {
     "deadline_slack_min": 2070,
     "frequency_hz": 234656000,
@@ -370,11 +634,7 @@
     "sigma_us": 2.586765307513978
    },
    "skew_sweep": {
-    "224": {
-     "f_cpu_hz": 220388000.0,
-     "minimum_hz": 234638214.11132812
-    },
-    "2245": {
+    "3147": {
      "f_cpu_hz": 220388000.0,
      "minimum_hz": 234638214.11132812
     }

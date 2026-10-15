@@ -222,6 +222,27 @@ def ni_resources():
     return ni_model()[0]
 
 
+# Skew bound sigma (cycles) between the ticks of two PEs, set by
+# set_skew() (rttools/paper/ablation.py, skew_sweep, which also adds sigma to
+# w_NI): the handlers of a packet at its target start up to sigma before or
+# after the window of the packet in the time of the source
+# (rttools/modules/instances/release.py, handler_windows). Default 0 (one
+# reset and one clock for every PE).
+_skew = 0
+
+
+def set_skew(value):
+    """Selects the skew bound sigma in cycles; returns the previous value."""
+    global _skew
+    prev = _skew
+    _skew = int(value or 0)
+    return prev
+
+
+def skew():
+    return _skew
+
+
 # deadline of a packet between PEs on the time-triggered platform, as the
 # header wait: set_deadline() in the process, otherwise RTTOOLS_DEADLINE.
 # "tick" (default when unset or empty): the tick of the release of the job

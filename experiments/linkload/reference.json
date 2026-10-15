@@ -1,0 +1,87 @@
+{
+ "_doc": "rttools.paper.linkload run --config config.json",
+ "apps": {
+  "CAR-V": {
+   "1": {
+    "flow": {
+     "f_cpu_hz": 380000000.0,
+     "minimum_hz": 441082000.7324219
+    },
+    "isolated_hz": 380110549.9267578,
+    "links_bind": true,
+    "links_only": {
+     "f_cpu_hz": 380000000.0,
+     "minimum_hz": 380207061.7675781
+    },
+    "packets": 16
+   },
+   "48": {
+    "flow": {
+     "f_cpu_hz": 380000000.0,
+     "minimum_hz": 519100189.2089844
+    },
+    "isolated_hz": 420445251.46484375,
+    "links_bind": true,
+    "links_only": {
+     "f_cpu_hz": 380000000.0,
+     "minimum_hz": 432781219.4824219
+    },
+    "packets": 16
+   },
+   "64": {
+    "flow": {
+     "f_cpu_hz": 380000000.0,
+     "minimum_hz": 601829528.8085938
+    },
+    "isolated_hz": 497244262.6953125,
+    "links_bind": true,
+    "links_only": {
+     "f_cpu_hz": 380000000.0,
+     "minimum_hz": 513675689.6972656
+    },
+    "packets": 16
+   }
+  },
+  "E": {
+   "1": {
+    "flow": {
+     "f_cpu_hz": 434900000.0,
+     "minimum_hz": 449150085.44921875
+    },
+    "isolated_hz": 380038070.67871094,
+    "links_bind": false,
+    "links_only": {
+     "f_cpu_hz": 434900000.0,
+     "minimum_hz": 434900000.0
+    },
+    "packets": 5
+   },
+   "16": {
+    "flow": {
+     "f_cpu_hz": 434900000.0,
+     "minimum_hz": 507297515.8691406
+    },
+    "isolated_hz": 430889511.10839844,
+    "links_bind": true,
+    "links_only": {
+     "f_cpu_hz": 434900000.0,
+     "minimum_hz": 446418762.20703125
+    },
+    "packets": 5
+   },
+   "32": {
+    "flow": {
+     "f_cpu_hz": 434900000.0,
+     "minimum_hz": 630897521.9726562
+    },
+    "isolated_hz": 485129356.38427734,
+    "links_bind": true,
+    "links_only": {
+     "f_cpu_hz": 434900000.0,
+     "minimum_hz": 546020507.8125
+    },
+    "packets": 5
+   }
+  }
+ }
+}
