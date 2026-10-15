@@ -65,9 +65,11 @@
 # packets, logs/MA.output-0-1.txt): the responses of CAR-V cover
 # iterations 1 to 6 (PR-403-multiapp-noc.md).
 #
-# F_CLK: the clock of the platform from the flow, 434.9 MHz (f_CPU of E), on
-# the grid of 32 kHz of the release period (exp23.flow_clock): 434.912 MHz,
-# metrics.json rtl.clock. SIM_NS: 3 ms + (n(v_last) of CAR-V = 4 + 8 measured
+# F_CLK: the clock of the platform from the flow with the model of the
+# time-triggered injection and t(v) = max(CSV, static) (experiments/tt, run
+# VMA): f_CPU 443.346 MHz on the grid of 32 kHz, 443.36 MHz (the runs MA,
+# TMA and UMA ran at 434.912 MHz, f_CPU of E with the costs of the CSV,
+# metrics.json rtl.clock). SIM_NS: 3 ms + (n(v_last) of CAR-V = 4 + 8 measured
 # iterations - 1) T + R_bound of CAR-V (2.218 ms) + T = 11.22 ms (metrics.json
 # rtl.sim_ns_min), rounded up to 11.5 ms, the duration of the CAR-V runs.
 # After `make sim`: make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim.
@@ -83,11 +85,14 @@ CARV_CSV := ../../apps/car-v/car-v.csv
 E_CSV   := ../../apps/synthetic-app-e/synthetic-app-e.csv
 E_MAP2  := ../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map
 APPS     = --app CARV:$(CARV_CSV):maps/CARV.map --app E:$(E_CSV):maps/E.map
-F_CLK   ?= 434912000
+F_CLK   ?= 443360000
 SIM_NS  ?= 11500000
 # clocks of the injection tables carv_e_tt.h and e_ucx_tt.h: F_CLK and 500 MHz, the default clock of
 # a build (arch.mak)
 TT_CLOCKS ?= $(F_CLK) 500000000
+# t(v) = max(CSV, static t(v) of the image of carv_e, experiments/wcet costs/tt) in the link schedule of
+# carv_e_tt.h (e_ucx, no run of round r11f: the costs of the CSV)
+TT_COSTS ?= ../wcet/costs/tt/carv_e.json
 # _heap_size of the image of carv_e built with riscv64-unknown-elf-gcc 13.2,
 # release by tick (TR_DEFS), crt0.s of this tree, time-triggered injection
 # (INJECTION=tt; 48756 with INJECTION=finish, 48836 for the image of run TMA,
@@ -130,12 +135,12 @@ maps-check:
 
 app:
 	$(GEN) compose $(APPS) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
-	$(GEN) tt-compose --composition composition.json --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
+	$(GEN) tt-compose --composition composition.json --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
 
 app-check:
 	$(GEN) compose-check $(APPS) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
 	$(GEN) check $(E_CSV) $(E_MAP2) --name e_ucx --mesh 2x2 --out $(APP_DIR)
-	$(GEN) tt-compose-check --composition composition.json --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
+	$(GEN) tt-compose-check --composition composition.json --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
 	$(GEN) tt-check $(E_CSV) $(E_MAP2) --arch ../../arch/hermes-2x2.gml --name e_ucx $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
 

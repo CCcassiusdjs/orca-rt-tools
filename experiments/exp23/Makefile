@@ -124,8 +124,11 @@ PAPER_REF ?= reference_head.json
 CLOCK   := $(BUILD)/frequency/clock.json
 # clocks of the injection table of weird_a (the clocks of runs UG/VG and UH/VH)
 TT_CLOCKS ?= 434912000 500000000
+# t(v) = max(CSV, static t(v) of the image, experiments/wcet costs/tt) in the link schedule of the table
+TT_COSTS ?= ../wcet/costs/tt/weird_a.json
 TT_ARGS  = $(APP_E)/synthetic-app-e.csv $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --arch $(ARCH) \
-	--name weird_a $(foreach f,$(TT_CLOCKS),--clock $(f)) --style named --out ../../pkt-sim/software/ucx-os/app
+	--name weird_a $(foreach f,$(TT_CLOCKS),--clock $(f)) --style named --costs $(TT_COSTS) \
+	--out ../../pkt-sim/software/ucx-os/app
 
 SW      ?= $(BUILD)/sw
 UCX_IMG := pkt-sim/software/ucx-os/build/target

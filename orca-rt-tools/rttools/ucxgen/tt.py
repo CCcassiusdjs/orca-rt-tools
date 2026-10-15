@@ -247,6 +247,8 @@ HEADER = """\
  * (TIMER1 step, hal.c): s16 = ticks P + 16 count, P = cycles per tick. The
  * comment of each entry gives s, the release r and the deadline a of the
  * packet (cycles from the same phase start) and o_i.
+ *
+ * Costs: {costs}
  */
 """
 
@@ -256,7 +258,7 @@ def _entry(r):
             f"a {r['deadline'] - r['phase_start']}, o {r['occupancy']}")
 
 
-def header(name, cmd, inputs, tables, flows, style="array", w_h=None, w_ni=None):
+def header(name, cmd, inputs, tables, flows, style="array", w_h=None, w_ni=None, costs=None):
     """Text of app/<name>_tt.h. `tables`: results of single or union per
     clock; `flows`: manifest flows ({"id", "csv_id", "source", "target",
     "local", optional "app"}) or, with style "named", the flows of the CSV
@@ -265,12 +267,15 @@ def header(name, cmd, inputs, tables, flows, style="array", w_h=None, w_ni=None)
     per flow between PEs: application E, weird_a.c) and "jobs" (several
     periods: TT_AT[flow id] points to the entries of the packets of the flow
     in one hyperperiod, TT_PACKETS[flow id] counts them, TT_BUFFERS[flow id]
-    gives the buffers of the flow)."""
+    gives the buffers of the flow). `costs`: text of the line "Costs:"
+    (the costs of the link schedule; experiments/exp23/simulate.sh copies
+    it to the line costs of RUN_INFO); None: the costs of the CSV."""
     if style not in ("array", "named", "jobs"):
         raise TTError("style must be array, named or jobs")
     w_h = router.header_wait() if w_h is None else w_h
     w_ni = router.ni_wait() if w_ni is None else w_ni
-    text = HEADER.format(name=name, cmd=cmd, inputs=inputs, w_h=w_h, w_ni=w_ni)
+    text = HEADER.format(name=name, cmd=cmd, inputs=inputs, w_h=w_h, w_ni=w_ni,
+                         costs=costs or "CSV (Capacity column)")
     by_key = {}
     for f in flows:
         by_key[(f.get("app"), int(f["csv_id"] if "csv_id" in f else f["id"]))] = f

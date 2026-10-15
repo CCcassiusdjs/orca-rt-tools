@@ -20,9 +20,9 @@
 #   make tt      write app/$(NAME)_tt.h: injection instants of the packets between PEs in the link
 #                schedule at TT_CLOCKS (rttools.ucxgen tt; model of the time-triggered injection)
 #   make tt-check  $(NAME)_tt.h equals a new generation (part of `make check`)
-# TT_CLOCKS: 419.68 MHz, the clock of the flow with the model of the time-triggered injection
-# (RTTOOLS_NI=tt make -C ../car-v run, exp23.flow_clock; 380 MHz has no link schedule with
-# w_NI), and 500 MHz, the default F_CLK.
+# TT_CLOCKS: 419.68 MHz, the clock of the flow with the model of the time-triggered injection and
+# t(v) = max(CSV, static) (experiments/tt, run VCV; 380 MHz has no link schedule with w_NI), and
+# 500 MHz, the default F_CLK. TT_COSTS: static t(v) of the image (experiments/wcet, costs/tt).
 #
 # CSV and MAP: the files of the CAR-V analysis flow (apps/car-v, rttools.paper.carv)
 # when they exist, otherwise input/car-v.csv and input/car-v.map, provisional
@@ -68,6 +68,7 @@ SIM_NS  ?= 11500000
 # clock of the simulation (Hz); default 500 MHz, the clock of run F
 F_CLK   ?= 500000000
 TT_CLOCKS ?= 419680000 500000000
+TT_COSTS ?= ../wcet/costs/tt/car_v.json
 CARV_METRICS ?= ../car-v/build/metrics.json
 FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \
 	m = json.load(open('$(CARV_METRICS)')); \
@@ -127,10 +128,10 @@ sim:
 	F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) $(MESH)
 
 tt:
-	$(GEN) tt $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
+	$(GEN) tt $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
 
 tt-check:
-	$(GEN) tt-check $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --out $(APP_DIR)
+	$(GEN) tt-check $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
 
 flow-clock:
 	$(MAKE) -C ../car-v run PYTHON=$(PYTHON)

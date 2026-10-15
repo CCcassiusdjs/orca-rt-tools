@@ -4,11 +4,12 @@
  * (orca-rt-tools). Do not edit: change the inputs and run the generator
  * again.
  *
- *   python -m rttools.ucxgen tt synthetic-app-e.csv synthetic-app-e-ONTO-hermes2x2.map --arch hermes-2x2.gml --name weird_a --clock 434912000 --clock 500000000 --style named
+ *   python -m rttools.ucxgen tt synthetic-app-e.csv synthetic-app-e-ONTO-hermes2x2.map --arch hermes-2x2.gml --name weird_a --clock 434912000 --clock 500000000 --style named --costs weird_a.json
  *
  * Input: synthetic-app-e.csv (sha256 522dcca19a8df3bc57c2ad86f28a9d9e51f81075906bbb1179a28b057fa1efe5)
  * Input: synthetic-app-e-ONTO-hermes2x2.map (sha256 1290bf43b88419d1e9ca087590124bc07c320e3cbbd98eee0143b0564241f8a5)
  * Input: hermes-2x2.gml (sha256 7f5b99836ef8b0644c57f3b4403f1f1798e5b947e5afc6aa08ea7ced18960759)
+ * Input: weird_a.json (sha256 8fcc97623e595bc9eddf7dccb1be462ffdb624b952277ef2b527155407211c4f)
  *
  * Link schedule of each clock below: AGS (rttools/modules/backend/ags, the
  * parameters of the command line of rttools) on the packets of one
@@ -20,6 +21,8 @@
  * (TIMER1 step, hal.c): s16 = ticks P + 16 count, P = cycles per tick. The
  * comment of each entry gives s, the release r and the deadline a of the
  * packet (cycles from the same phase start) and o_i.
+ *
+ * Costs: max(CSV, static) weird_a.json sha256 8fcc97623e595bc9eddf7dccb1be462ffdb624b952277ef2b527155407211c4f
  */
 #if F_CPU == 434912000
 /* 434912000 Hz: 5 packets between PEs in a hyperperiod of 217456 cycles, 217456 cycles per tick; at most 2 packets wait for their instant on one PE */
@@ -27,10 +30,10 @@
 static const struct ucx_tt_at TT_AT_A_C = {0, 1784};
 /* f4 C->E: s 116330, s16 116336, r 96330, a 228456, o 15551 */
 static const struct ucx_tt_at TT_AT_C_E = {0, 7271};
-/* f6 F->G: s 181930, s16 181936, r 181930, a 336026, o 16946 */
-static const struct ucx_tt_at TT_AT_F_G = {0, 11371};
-/* f9 I->J: s 199370, s16 199376, r 173370, a 228456, o 16643 */
-static const struct ucx_tt_at TT_AT_I_J = {0, 12461};
+/* f6 F->G: s 188301, s16 188304, r 188301, a 336026, o 16946 */
+static const struct ucx_tt_at TT_AT_F_G = {0, 11769};
+/* f9 I->J: s 205370, s16 205376, r 173370, a 228456, o 16643 */
+static const struct ucx_tt_at TT_AT_I_J = {0, 12836};
 /* f10 H->J: s 98000, s16 98000, r 98000, a 228456, o 17450 */
 static const struct ucx_tt_at TT_AT_H_J = {0, 6125};
 #elif F_CPU == 500000000
@@ -39,10 +42,10 @@ static const struct ucx_tt_at TT_AT_H_J = {0, 6125};
 static const struct ucx_tt_at TT_AT_A_C = {0, 1784};
 /* f4 C->E: s 116330, s16 116336, r 96330, a 261000, o 15551 */
 static const struct ucx_tt_at TT_AT_C_E = {0, 7271};
-/* f6 F->G: s 181930, s16 181936, r 181930, a 368570, o 16946 */
-static const struct ucx_tt_at TT_AT_F_G = {0, 11371};
-/* f9 I->J: s 199370, s16 199376, r 173370, a 261000, o 16643 */
-static const struct ucx_tt_at TT_AT_I_J = {0, 12461};
+/* f6 F->G: s 188301, s16 188304, r 188301, a 368570, o 16946 */
+static const struct ucx_tt_at TT_AT_F_G = {0, 11769};
+/* f9 I->J: s 205370, s16 205376, r 173370, a 261000, o 16643 */
+static const struct ucx_tt_at TT_AT_I_J = {0, 12836};
 /* f10 H->J: s 98000, s16 98000, r 98000, a 261000, o 17450 */
 static const struct ucx_tt_at TT_AT_H_J = {0, 6125};
 #else

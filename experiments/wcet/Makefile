@@ -77,6 +77,10 @@ NAME    := wcet_e
 MESH    := 2x2
 GENARGS  = $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --bodies $(BODIES) --out $(APP_DIR)
 F_CLK   ?= 500000000
+# clocks of wcet_e_tt.h: the clock of the flow with t(v) = max(CSV, static) (experiments/tt, run W5) and
+# 500 MHz (run W4); TT_COSTS: static t(v) of the image (costs/tt)
+TT_CLOCKS ?= 220416000 500000000
+TT_COSTS ?= costs/tt/wcet_e.json
 SIM_NS  ?= 10000000
 LOG     ?= logs/W1.events.txt
 REF     ?= reference_W1.json
@@ -98,7 +102,7 @@ analyze:
 check:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/metrics.json reference.json
 	$(GEN) check $(GENARGS)
-	$(GEN) tt-check $(CSV) $(MAP) --arch ../../arch/hermes-2x2.gml --name $(NAME) --clock $(F_CLK) --out $(APP_DIR)
+	$(GEN) tt-check $(CSV) $(MAP) --arch ../../arch/hermes-2x2.gml --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
 	$(MAKE) run-analyze check-run
 	$(MAKE) run-analyze check-run LOG=logs/W2.events.txt REF=reference_W2.json
 	$(MAKE) run-analyze check-run LOG=logs/W3.events.txt REF=reference_W3.json
@@ -108,7 +112,7 @@ check:
 
 app:
 	$(GEN) generate $(GENARGS)
-	$(GEN) tt $(CSV) $(MAP) --arch ../../arch/hermes-2x2.gml --name $(NAME) --clock $(F_CLK) --out $(APP_DIR)
+	$(GEN) tt $(CSV) $(MAP) --arch ../../arch/hermes-2x2.gml --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
 
 csv:
 	$(RUN) set-csv $(BUILD)/WCET-E/costs.json $(CSV)
@@ -169,8 +173,8 @@ images-tt:
 	F_CLK=434912000 APP=weird_a ../exp23/build_sw.sh $(BUILD)/img-tt/weird_a
 	F_CLK=419680000 APP=car_v ../exp23/build_sw.sh $(BUILD)/img-tt/car_v
 	F_CLK=500000000 APP=wcet_e ../exp23/build_sw.sh $(BUILD)/img-tt/wcet_e
-	F_CLK=434912000 APP=carv_e ../exp23/build_sw.sh $(BUILD)/img-tt/carv_e
-	F_CLK=432000000 F_TICK=4000 APP=car_full ../exp23/build_sw.sh $(BUILD)/img-tt/car_full
+	F_CLK=443360000 APP=carv_e ../exp23/build_sw.sh $(BUILD)/img-tt/carv_e
+	F_CLK=478336000 F_TICK=4000 APP=car_full ../exp23/build_sw.sh $(BUILD)/img-tt/car_full
 	for a in weird_a car_v wcet_e carv_e car_full; do ls -l $(BUILD)/img-tt/$$a/$(UCX_IMG)/image.elf; done
 
 clean:

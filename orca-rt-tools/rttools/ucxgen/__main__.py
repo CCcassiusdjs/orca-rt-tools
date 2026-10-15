@@ -202,6 +202,9 @@ def add_tt_args(p, composition=False):
     p.add_argument("--ni", default="tt",
                    help="network-interface model of the link schedule (rttools/modules/routing/router.py, "
                         "parse_ni; default tt: the resource and w_NI = NI_WAIT_CYCLES)")
+    p.add_argument("--costs", default=None,
+                   help="costs file of rttools.wcet (static t(v) of the image, experiments/wcet/costs/tt): the link "
+                        "schedule takes t(v) = max(CSV, static) (rttools/wcet/costs.py, rule max)")
 
 
 def tt_text(a, composition=False):
@@ -219,9 +222,15 @@ def _tt_text(a, composition=False):
     from rttools.tui.model import network as tnet
     from rttools.ucxgen import tt
     rel = os.path.basename
+    from rttools.wcet import costs as wcosts
+    costs_line = None
+    if a.costs:
+        costs_line = f"max(CSV, static) {os.path.basename(a.costs)} sha256 {model.sha256(a.costs)}"
     if composition:
         from rttools.multiapp import compose
         spec = compose.read_spec(a.composition)
+        if a.costs:
+            compose.set_costs(spec, {x["name"]: a.costs for x in spec["apps"]})
         with tnet.quiet():
             comp = compose.load(spec)
         tables = [tt.union(comp, f) for f in sorted(set(a.clock))]
@@ -230,13 +239,16 @@ def _tt_text(a, composition=False):
         paths = [a.composition, spec["arch"]] + [x["csv"] for x in spec["apps"]] + [
             x["map"] for x in spec["apps"] if x["map"] != compose.MAP_SPIRAL]
         cmd = (f"tt-compose --composition {rel(a.composition)} --name {a.name} "
-               + " ".join(f"--clock {f}" for f in sorted(set(a.clock))) + (f" --ni {a.ni}" if a.ni != "tt" else ""))
+               + " ".join(f"--clock {f}" for f in sorted(set(a.clock))) + (f" --ni {a.ni}" if a.ni != "tt" else "")
+               + (f" --costs {rel(a.costs)}" if a.costs else ""))
         style = "array"
     else:
         with tnet.quiet():
             g, appname = appparser.loadFromFile(a.csv)
             noc = nocparser.loadFromFile(a.arch)
             entries = mapparser.loadFromFile(a.map)
+        if a.costs:
+            wcosts.apply(g, a.costs, wcosts.MAX)
         tables = [tt.single(g, noc, entries, appname, f) for f in sorted(set(a.clock))]
         style = a.style
         if style == "named":
@@ -251,8 +263,10 @@ def _tt_text(a, composition=False):
         paths = [a.csv, a.map, a.arch]
         cmd = (f"tt {rel(a.csv)} {rel(a.map)} --arch {rel(a.arch)} --name {a.name} "
                + " ".join(f"--clock {f}" for f in sorted(set(a.clock))) + (f" --style {a.style}" if a.style else "")
-               + (f" --ni {a.ni}" if a.ni != "tt" else ""))
-    return tt.header(a.name, cmd, tt.inputs_comment(paths), tables, flows, style)
+               + (f" --ni {a.ni}" if a.ni != "tt" else "") + (f" --costs {rel(a.costs)}" if a.costs else ""))
+    if a.costs:
+        paths.append(a.costs)
+    return tt.header(a.name, cmd, tt.inputs_comment(paths), tables, flows, style, costs=costs_line)
 
 
 def cmd_tt(a, composition=False):

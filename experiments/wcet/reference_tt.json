@@ -1,11 +1,11 @@
 {
- "_doc": "Reference of make analyze-tt (config_tt.json): static t(v) of E, CAR-V and WCET-E on the images with the time-triggered injection (images/tt, riscv64-elf-gcc 12.2.0), t(V_k) per PE against the CSV (pe_bound; CAR-V PEs 12 to 14 and WCET-E PEs 0 to 2 above the CSV, above it also in the images of the runs UCV and W3 of tag r11-rc5), and the terms of the network interface of the images of images/tt and images/tt13 against the constants of rttools/modules/routing/router.py (ni_within_bound).",
+ "_doc": "rttools.paper.wcet analyze",
  "apps": {
   "E": {
    "image": {
     "file": "weird_a.elf",
     "kind": "elf",
-    "sha256": "469f582429a744eb4a3f6543532ba3ca46a47a54acf3aef319a6c008a0732876"
+    "sha256": "6625b595eb8389a474fc6673d8f66d69f98a38a1f4848020a26a39e7d2e5b59a"
    },
    "kernel": {
     "yield_save": 519,
@@ -204,7 +204,7 @@
    "image": {
     "file": "car_v.elf",
     "kind": "elf",
-    "sha256": "93e9f7903dc728efe1347b7bc2f45afc45d1ba38af8ee3cfcdee8ab222fc7028"
+    "sha256": "fc1ed44aadba0b3a25ed50ecb4344844ee8dcf7672b4a2bf07334288a5d89366"
    },
    "kernel": {
     "yield_save": 433,
@@ -643,7 +643,7 @@
    "image": {
     "file": "wcet_e.elf",
     "kind": "elf",
-    "sha256": "db20227c6c6675865bc362153c19a02eedf568886b3e88efdb4e772df260d9ec"
+    "sha256": "784674e258cf79f8dfd1f0dfc9007b21a59cea8717c0a2c29c372a9c30566ddd"
    },
    "kernel": {
     "yield_save": 519,
@@ -837,13 +837,986 @@
     }
    },
    "pe_bound_sound": false
+  },
+  "CARV-E": {
+   "image": {
+    "file": "carv_e.elf",
+    "kind": "elf",
+    "sha256": "c51afd009cbe7ba5ec8258c1bd702c1aef120a480cdfa78805a2c2186281e244"
+   },
+   "kernel": {
+    "yield_save": 519,
+    "yield_resume": 39,
+    "dispatch": 558,
+    "tick_dispatch_save": 984,
+    "tick_dispatch_resume": 8,
+    "tick": 1361,
+    "send_isr": 622,
+    "receive_isr_size": 3174,
+    "receive_isr_end": 699,
+    "receive_isr": 3873,
+    "send_ack_isr": 243,
+    "release": 249
+   },
+   "params": {
+    "tcb": 5,
+    "heap_blocks": 32,
+    "ddma_wait": 1,
+    "name_len": 5,
+    "tt_slots": 8
+   },
+   "t": {
+    "FBU1": 89416,
+    "FBU2": 89416,
+    "FBU3": 90038,
+    "FBU4": 61416,
+    "FBU5": 89416,
+    "FBU6": 89416,
+    "FBU7": 89416,
+    "FBU8": 90038,
+    "NAVC": 95018,
+    "BFE1": 93713,
+    "BFE2": 93713,
+    "BFE3": 93713,
+    "BFE4": 93713,
+    "BFE5": 93713,
+    "BFE6": 93713,
+    "BFE7": 93713,
+    "BFE8": 93713,
+    "FDF1": 106356,
+    "FDF2": 106356,
+    "STPH": 97928,
+    "VOD1": 93713,
+    "VOD2": 93713,
+    "OBMG": 90803,
+    "A": 23568,
+    "B": 57313,
+    "C": 95043,
+    "D": 12713,
+    "E": 54309,
+    "F": 79513,
+    "G": 108593,
+    "H": 44013,
+    "I": 74083,
+    "J": 111793
+   },
+   "terms": {
+    "FBU1": {
+     "body": 84390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "FBU2": {
+     "body": 84390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "FBU3": {
+     "body": 84390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 1244,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "FBU4": {
+     "body": 56390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "FBU5": {
+     "body": 84390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "FBU6": {
+     "body": 84390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "FBU7": {
+     "body": 84390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "FBU8": {
+     "body": 84390,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 1244,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "NAVC": {
+     "body": 84745,
+     "send": 0,
+     "receive": 356,
+     "dispatch": 561,
+     "send_isr": 0,
+     "receive_isr": 7746,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE1": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE2": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE3": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE4": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE5": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE6": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE7": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "BFE8": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "FDF1": {
+     "body": 85170,
+     "send": 2233,
+     "receive": 668,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 15492,
+     "tick": 1361,
+     "release": 249
+    },
+    "FDF2": {
+     "body": 85170,
+     "send": 2233,
+     "receive": 668,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 15492,
+     "tick": 1361,
+     "release": 249
+    },
+    "STPH": {
+     "body": 84800,
+     "send": 2233,
+     "receive": 356,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 7746,
+     "tick": 1361,
+     "release": 249
+    },
+    "VOD1": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "VOD2": {
+     "body": 84614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "OBMG": {
+     "body": 84559,
+     "send": 0,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 0,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "A": {
+     "body": 17920,
+     "send": 2233,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 1244,
+     "receive_isr": 0,
+     "tick": 1361,
+     "release": 249
+    },
+    "B": {
+     "body": 48214,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "C": {
+     "body": 85944,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "D": {
+     "body": 3614,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "E": {
+     "body": 42355,
+     "send": 4466,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 1244,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "F": {
+     "body": 70414,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "G": {
+     "body": 99494,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "H": {
+     "body": 34914,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "I": {
+     "body": 64984,
+     "send": 2233,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 622,
+     "receive_isr": 3873,
+     "tick": 1361,
+     "release": 249
+    },
+    "J": {
+     "body": 97491,
+     "send": 0,
+     "receive": 512,
+     "dispatch": 561,
+     "send_isr": 0,
+     "receive_isr": 11619,
+     "tick": 1361,
+     "release": 249
+    }
+   },
+   "injection": "tt",
+   "ni": {
+    "blocking": 2901,
+    "resume": 140,
+    "inject": 3542,
+    "rx_size": 6079,
+    "rx_end": 3604,
+    "ni_wait": 13225,
+    "timer_step": 16,
+    "irq_decision": 4
+   },
+   "sections": {
+    "yield": 896,
+    "ucx_phase_wait": 1151,
+    "tt_insert": 1098
+   }
+  },
+  "CAR-FULL": {
+   "image": {
+    "file": "car_full.elf",
+    "kind": "elf",
+    "sha256": "2bf69f6afbafe4cea1eece992ef1705c7ac2641acf534bf53bf18a777d9df759"
+   },
+   "kernel": {
+    "yield_save": 476,
+    "yield_resume": 39,
+    "dispatch": 515,
+    "tick_dispatch_save": 1283,
+    "tick_dispatch_resume": 8,
+    "tick": 1660,
+    "send_isr": 622,
+    "receive_isr_size": 3878,
+    "receive_isr_end": 925,
+    "receive_isr": 4803,
+    "send_ack_isr": 243,
+    "release": 249
+   },
+   "params": {
+    "tcb": 4,
+    "heap_blocks": 40,
+    "ddma_wait": 1,
+    "name_len": 5,
+    "tt_slots": 8
+   },
+   "t": {
+    "TPMS": 474719,
+    "VIBS": 148049,
+    "SPES": 153031,
+    "POSI": 713031,
+    "USOS": 101379,
+    "FBU1": 64049,
+    "FBU2": 64049,
+    "FBU3": 69031,
+    "FBU4": 45379,
+    "FBU5": 64049,
+    "FBU6": 64049,
+    "FBU7": 64049,
+    "FBU8": 69031,
+    "STAC": 168527,
+    "TPRC": 1408062,
+    "DIRC": 148062,
+    "NAVC": 183797,
+    "OBDB": 723383,
+    "BFE1": 69057,
+    "BFE2": 69057,
+    "BFE3": 69057,
+    "BFE4": 69057,
+    "BFE5": 69057,
+    "BFE6": 69057,
+    "BFE7": 69057,
+    "BFE8": 69057,
+    "FDF1": 84689,
+    "FDF2": 84689,
+    "STPH": 74401,
+    "THRC": 153406,
+    "VOD1": 69057,
+    "VOD2": 69057,
+    "OBMG": 1428689
+   },
+   "terms": {
+    "TPMS": {
+     "body": 469519,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "VIBS": {
+     "body": 142849,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "SPES": {
+     "body": 145058,
+     "send": 4302,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 1244,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "POSI": {
+     "body": 705058,
+     "send": 4302,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 1244,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "USOS": {
+     "body": 96179,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU1": {
+     "body": 58849,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU2": {
+     "body": 58849,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU3": {
+     "body": 61058,
+     "send": 4302,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 1244,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU4": {
+     "body": 40179,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU5": {
+     "body": 58849,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU6": {
+     "body": 58849,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU7": {
+     "body": 58849,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "FBU8": {
+     "body": 61058,
+     "send": 4302,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 1244,
+     "receive_isr": 0,
+     "tick": 1660,
+     "release": 249
+    },
+    "STAC": {
+     "body": 146394,
+     "send": 4302,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 1244,
+     "receive_isr": 14409,
+     "tick": 1660,
+     "release": 0
+    },
+    "TPRC": {
+     "body": 1401081,
+     "send": 0,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 0,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "DIRC": {
+     "body": 141081,
+     "send": 0,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 0,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "NAVC": {
+     "body": 149285,
+     "send": 6453,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 1866,
+     "receive_isr": 24015,
+     "tick": 1660,
+     "release": 0
+    },
+    "OBDB": {
+     "body": 706053,
+     "send": 4302,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 1244,
+     "receive_isr": 9606,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE1": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE2": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE3": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE4": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE5": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE6": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE7": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "BFE8": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "FDF1": {
+     "body": 60526,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 19212,
+     "tick": 1660,
+     "release": 0
+    },
+    "FDF2": {
+     "body": 60526,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 19212,
+     "tick": 1660,
+     "release": 0
+    },
+    "STPH": {
+     "body": 59844,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 9606,
+     "tick": 1660,
+     "release": 0
+    },
+    "THRC": {
+     "body": 141622,
+     "send": 0,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 0,
+     "receive_isr": 9606,
+     "tick": 1660,
+     "release": 0
+    },
+    "VOD1": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "VOD2": {
+     "body": 59303,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 4803,
+     "tick": 1660,
+     "release": 0
+    },
+    "OBMG": {
+     "body": 1404526,
+     "send": 2151,
+     "receive": 0,
+     "dispatch": 518,
+     "send_isr": 622,
+     "receive_isr": 19212,
+     "tick": 1660,
+     "release": 0
+    }
+   },
+   "injection": "tt",
+   "ni": {
+    "blocking": 3204,
+    "resume": 104,
+    "inject": 3845,
+    "rx_size": 7086,
+    "rx_end": 4133,
+    "ni_wait": 15064,
+    "timer_step": 16,
+    "irq_decision": 4
+   },
+   "sections": {
+    "yield": 853,
+    "wait_release": 1001,
+    "tt_insert": 1098,
+    "read_one": 332,
+    "begin_marks": 342,
+    "send_local": 1191
+   },
+   "pe_bound": {
+    "0": {
+     "tasks": [
+      "TPRC"
+     ],
+     "static": 1408062,
+     "csv": 1411000,
+     "sound": true
+    },
+    "1": {
+     "tasks": [
+      "SPES"
+     ],
+     "static": 153031,
+     "csv": 151000,
+     "sound": false
+    },
+    "2": {
+     "tasks": [
+      "THRC"
+     ],
+     "static": 153406,
+     "csv": 151000,
+     "sound": false
+    },
+    "3": {
+     "tasks": [
+      "VIBS",
+      "TPMS",
+      "STAC"
+     ],
+     "static": 791295,
+     "csv": 779668,
+     "sound": false
+    },
+    "4": {
+     "tasks": [
+      "OBDB",
+      "USOS",
+      "OBMG"
+     ],
+     "static": 2253451,
+     "csv": 2226332,
+     "sound": false
+    },
+    "5": {
+     "tasks": [
+      "FBU3",
+      "VOD1"
+     ],
+     "static": 138088,
+     "csv": 134000,
+     "sound": false
+    },
+    "6": {
+     "tasks": [
+      "FBU8",
+      "VOD2"
+     ],
+     "static": 138088,
+     "csv": 134000,
+     "sound": false
+    },
+    "7": {
+     "tasks": [
+      "FBU4",
+      "BFE4"
+     ],
+     "static": 114436,
+     "csv": 115332,
+     "sound": true
+    },
+    "8": {
+     "tasks": [
+      "POSI",
+      "NAVC",
+      "DIRC"
+     ],
+     "static": 1044890,
+     "csv": 1013000,
+     "sound": false
+    },
+    "9": {
+     "tasks": [
+      "BFE3",
+      "FDF1",
+      "STPH"
+     ],
+     "static": 228147,
+     "csv": 201000,
+     "sound": false
+    },
+    "10": {
+     "tasks": [
+      "BFE8",
+      "FDF2"
+     ],
+     "static": 153746,
+     "csv": 134000,
+     "sound": false
+    },
+    "11": {
+     "tasks": [
+      "FBU1",
+      "BFE1"
+     ],
+     "static": 133106,
+     "csv": 134000,
+     "sound": true
+    },
+    "12": {
+     "tasks": [
+      "FBU7",
+      "BFE7"
+     ],
+     "static": 133106,
+     "csv": 134000,
+     "sound": true
+    },
+    "13": {
+     "tasks": [
+      "FBU6",
+      "BFE6"
+     ],
+     "static": 133106,
+     "csv": 134000,
+     "sound": true
+    },
+    "14": {
+     "tasks": [
+      "FBU5",
+      "BFE5"
+     ],
+     "static": 133106,
+     "csv": 134000,
+     "sound": true
+    },
+    "15": {
+     "tasks": [
+      "FBU2",
+      "BFE2"
+     ],
+     "static": 133106,
+     "csv": 134000,
+     "sound": true
+    }
+   },
+   "pe_bound_sound": false
   }
  },
  "ni_images": {
   "weird_a_gcc12": {
    "image": {
     "file": "weird_a.elf",
-    "sha256": "469f582429a744eb4a3f6543532ba3ca46a47a54acf3aef319a6c008a0732876"
+    "sha256": "6625b595eb8389a474fc6673d8f66d69f98a38a1f4848020a26a39e7d2e5b59a"
    },
    "kernel": {
     "tick": 1361,
@@ -876,7 +1849,7 @@
   "car_v_gcc12": {
    "image": {
     "file": "car_v.elf",
-    "sha256": "93e9f7903dc728efe1347b7bc2f45afc45d1ba38af8ee3cfcdee8ab222fc7028"
+    "sha256": "fc1ed44aadba0b3a25ed50ecb4344844ee8dcf7672b4a2bf07334288a5d89366"
    },
    "kernel": {
     "tick": 1221,
@@ -909,7 +1882,7 @@
   "wcet_e_gcc12": {
    "image": {
     "file": "wcet_e.elf",
-    "sha256": "db20227c6c6675865bc362153c19a02eedf568886b3e88efdb4e772df260d9ec"
+    "sha256": "784674e258cf79f8dfd1f0dfc9007b21a59cea8717c0a2c29c372a9c30566ddd"
    },
    "kernel": {
     "tick": 1361,
@@ -942,7 +1915,7 @@
   "carv_e_gcc12": {
    "image": {
     "file": "carv_e.elf",
-    "sha256": "9c0024086e4cec2682f84346ed17ac3187ed20e7e6d05497ac8ef0973e3fe259"
+    "sha256": "c51afd009cbe7ba5ec8258c1bd702c1aef120a480cdfa78805a2c2186281e244"
    },
    "kernel": {
     "tick": 1361,
@@ -975,7 +1948,7 @@
   "car_full_gcc12": {
    "image": {
     "file": "car_full.elf",
-    "sha256": "8c5847094b58e2009931e146e44ceac0ce157af37afc102d59016c1f289cb477"
+    "sha256": "2bf69f6afbafe4cea1eece992ef1705c7ac2641acf534bf53bf18a777d9df759"
    },
    "kernel": {
     "tick": 1660,
@@ -1011,7 +1984,7 @@
   "weird_a_gcc13": {
    "image": {
     "file": "weird_a.elf",
-    "sha256": "4a03f703abea006be01e1c08c385c0bf99ccfbbd9f8cd922b7058f3048aa1f49"
+    "sha256": "61e34cb311dbcf5fe8c65b069b378968a92855d6c12501359f80930858d181a6"
    },
    "kernel": {
     "tick": 1388,
@@ -1044,7 +2017,7 @@
   "car_v_gcc13": {
    "image": {
     "file": "car_v.elf",
-    "sha256": "9775c5460f493aa5c95df790a1e2b4e01811062183c90f35d8293ba830313442"
+    "sha256": "0732ac749417475d9ce7a1c315439206db6a3155667607bab973182c22515340"
    },
    "kernel": {
     "tick": 1248,
@@ -1077,7 +2050,7 @@
   "wcet_e_gcc13": {
    "image": {
     "file": "wcet_e.elf",
-    "sha256": "76c901d85e9a7249b0b1d43286e58fb6acdf6008c3498d266393241ab5fa5781"
+    "sha256": "ca979f732286ed405018adba8b086279eb959c7fc01771078109bfad9e2aa6c1"
    },
    "kernel": {
     "tick": 1388,
@@ -1110,7 +2083,7 @@
   "carv_e_gcc13": {
    "image": {
     "file": "carv_e.elf",
-    "sha256": "cb9bd63bd0f82bfa5cdba66d83676a0af915729173d0342b38827bf84da67348"
+    "sha256": "3c184fba68c5fc2cc85dbc50302bdcd5312c3b52a6150a42ab26610bdfd07175"
    },
    "kernel": {
     "tick": 1388,
@@ -1143,7 +2116,7 @@
   "car_full_gcc13": {
    "image": {
     "file": "car_full.elf",
-    "sha256": "47c3948f951e0afb6dc5e702cc86fe120fb89d4f8200fc559591b2107a800dfe"
+    "sha256": "0d3e7b650cdf6b5ba71e73c7b6be71ea0bf58d066c598f3ffd8abc29352a928e"
    },
    "kernel": {
     "tick": 1687,

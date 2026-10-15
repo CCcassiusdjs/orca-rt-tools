@@ -4,11 +4,12 @@
  * (orca-rt-tools). Do not edit: change the inputs and run the generator
  * again.
  *
- *   python -m rttools.ucxgen tt car-v.csv car-v-ONTO-hermes4x4.map --arch hermes-4x4.gml --name car_v --clock 419680000 --clock 500000000
+ *   python -m rttools.ucxgen tt car-v.csv car-v-ONTO-hermes4x4.map --arch hermes-4x4.gml --name car_v --clock 419680000 --clock 500000000 --costs car_v.json
  *
  * Input: car-v.csv (sha256 f2d3d1d0d6d01b1139f2ce6902adad589e36502243cf5202cd6b7d383c23caa0)
  * Input: car-v-ONTO-hermes4x4.map (sha256 9fbf86c91619af9824f716ed918dacdccc2f4a6a53d1b294bcc4ea05eca0bdb2)
  * Input: hermes-4x4.gml (sha256 9358c82c682719cefa86c536dee47390f25034f23c7a9fe7e44fc9876d2546ee)
+ * Input: car_v.json (sha256 dd9a8a3d1ce0e909f905977e0369f2226d9b5984ace4d9f7407f7a8e5f2119c3)
  *
  * Link schedule of each clock below: AGS (rttools/modules/backend/ags, the
  * parameters of the command line of rttools) on the packets of one
@@ -20,6 +21,8 @@
  * (TIMER1 step, hal.c): s16 = ticks P + 16 count, P = cycles per tick. The
  * comment of each entry gives s, the release r and the deadline a of the
  * packet (cycles from the same phase start) and o_i.
+ *
+ * Costs: max(CSV, static) car_v.json sha256 dd9a8a3d1ce0e909f905977e0369f2226d9b5984ace4d9f7407f7a8e5f2119c3
  */
 #if F_CPU == 419680000
 /* 419680000 Hz: 16 packets between PEs in a hyperperiod of 209840 cycles, 209840 cycles per tick; at most 2 packets wait for their instant on one PE */
@@ -39,15 +42,15 @@ static const struct ucx_tt_at TT_AT[24] = {
   {0, 5938},   /* f12 FBU8->BFE8: s 95000, s16 95008, r 95000, a 220840, o 17625 */
   {0, 12840},   /* f13 BFE1->FDF1: s 205435, s16 205440, r 190000, a 220840, o 15405 */
   {0, 11875},   /* f14 BFE2->FDF1: s 190000, s16 190000, r 190000, a 220840, o 15431 */
-  {0, 7063},   /* f15 BFE3->FDF1: s 113000, s16 113008, r 95000, a 220840, o 15379 */
+  {0, 7563},   /* f15 BFE3->FDF1: s 121000, s16 121008, r 95000, a 220840, o 15379 */
   {0, 10125},   /* f16 BFE4->FDF1: s 161998, s16 162000, r 161998, a 220840, o 15431 */
   {0, 11875},   /* f17 BFE5->FDF2: s 190000, s16 190000, r 190000, a 220840, o 15431 */
   {0, 12840},   /* f18 BFE6->FDF2: s 205435, s16 205440, r 190000, a 220840, o 15405 */
-  {0, 7938},   /* f19 BFE7->FDF2: s 127000, s16 127008, r 95000, a 220840, o 15379 */
-  {0, 8938},   /* f20 BFE8->FDF2: s 143000, s16 143008, r 95000, a 220840, o 15353 */
-  {0, 5938},   /* f21 FDF1->STPH: s 95000, s16 95008, r 95000, a 220840, o 15763 */
-  {0, 6938},   /* f22 FDF2->STPH: s 111000, s16 111008, r 95000, a 220840, o 15737 */
-  {0, 7938},   /* f23 STPH->OBMG: s 127000, s16 127008, r 95000, a 220840, o 15533 */
+  {0, 8438},   /* f19 BFE7->FDF2: s 135000, s16 135008, r 95000, a 220840, o 15379 */
+  {0, 9438},   /* f20 BFE8->FDF2: s 151000, s16 151008, r 95000, a 220840, o 15353 */
+  {0, 6453},   /* f21 FDF1->STPH: s 103242, s16 103248, r 103242, a 220840, o 15763 */
+  {0, 7453},   /* f22 FDF2->STPH: s 119242, s16 119248, r 103242, a 220840, o 15737 */
+  {0, 8517},   /* f23 STPH->OBMG: s 136258, s16 136272, r 96258, a 220840, o 15533 */
 };
 #elif F_CPU == 500000000
 /* 500000000 Hz: 16 packets between PEs in a hyperperiod of 250000 cycles, 250000 cycles per tick; at most 2 packets wait for their instant on one PE */
@@ -67,15 +70,15 @@ static const struct ucx_tt_at TT_AT[24] = {
   {0, 5938},   /* f12 FBU8->BFE8: s 95000, s16 95008, r 95000, a 261000, o 17625 */
   {0, 12875},   /* f13 BFE1->FDF1: s 206000, s16 206000, r 190000, a 261000, o 15405 */
   {0, 11875},   /* f14 BFE2->FDF1: s 190000, s16 190000, r 190000, a 261000, o 15431 */
-  {0, 7063},   /* f15 BFE3->FDF1: s 113000, s16 113008, r 95000, a 261000, o 15379 */
+  {0, 7563},   /* f15 BFE3->FDF1: s 121000, s16 121008, r 95000, a 261000, o 15379 */
   {0, 10125},   /* f16 BFE4->FDF1: s 161998, s16 162000, r 161998, a 261000, o 15431 */
   {0, 11875},   /* f17 BFE5->FDF2: s 190000, s16 190000, r 190000, a 261000, o 15431 */
   {0, 12875},   /* f18 BFE6->FDF2: s 206000, s16 206000, r 190000, a 261000, o 15405 */
-  {0, 7938},   /* f19 BFE7->FDF2: s 127000, s16 127008, r 95000, a 261000, o 15379 */
-  {0, 8938},   /* f20 BFE8->FDF2: s 143000, s16 143008, r 95000, a 261000, o 15353 */
-  {0, 5938},   /* f21 FDF1->STPH: s 95000, s16 95008, r 95000, a 261000, o 15763 */
-  {0, 6938},   /* f22 FDF2->STPH: s 111000, s16 111008, r 95000, a 261000, o 15737 */
-  {0, 7938},   /* f23 STPH->OBMG: s 127000, s16 127008, r 95000, a 261000, o 15533 */
+  {0, 8438},   /* f19 BFE7->FDF2: s 135000, s16 135008, r 95000, a 261000, o 15379 */
+  {0, 9438},   /* f20 BFE8->FDF2: s 151000, s16 151008, r 95000, a 261000, o 15353 */
+  {0, 6453},   /* f21 FDF1->STPH: s 103242, s16 103248, r 103242, a 261000, o 15763 */
+  {0, 7453},   /* f22 FDF2->STPH: s 119242, s16 119248, r 103242, a 261000, o 15737 */
+  {0, 8517},   /* f23 STPH->OBMG: s 136258, s16 136272, r 96258, a 261000, o 15533 */
 };
 #else
 #error "app/car_v_tt.h: no injection table for this F_CPU (rttools.ucxgen tt --clock)"

@@ -4,7 +4,7 @@
  * (orca-rt-tools). Do not edit: change the inputs and run the generator
  * again.
  *
- *   python -m rttools.ucxgen tt synthetic-app-e.csv synthetic-app-e-ONTO-hermes2x2.map --arch hermes-2x2.gml --name e_ucx --clock 434912000 --clock 500000000
+ *   python -m rttools.ucxgen tt synthetic-app-e.csv synthetic-app-e-ONTO-hermes2x2.map --arch hermes-2x2.gml --name e_ucx --clock 443360000 --clock 500000000
  *
  * Input: synthetic-app-e.csv (sha256 522dcca19a8df3bc57c2ad86f28a9d9e51f81075906bbb1179a28b057fa1efe5)
  * Input: synthetic-app-e-ONTO-hermes2x2.map (sha256 1290bf43b88419d1e9ca087590124bc07c320e3cbbd98eee0143b0564241f8a5)
@@ -20,21 +20,23 @@
  * (TIMER1 step, hal.c): s16 = ticks P + 16 count, P = cycles per tick. The
  * comment of each entry gives s, the release r and the deadline a of the
  * packet (cycles from the same phase start) and o_i.
+ *
+ * Costs: CSV (Capacity column)
  */
-#if F_CPU == 434912000
-/* 434912000 Hz: 5 packets between PEs in a hyperperiod of 217456 cycles, 217456 cycles per tick; at most 2 packets wait for their instant on one PE */
+#if F_CPU == 443360000
+/* 443360000 Hz: 5 packets between PEs in a hyperperiod of 221680 cycles, 221680 cycles per tick; at most 2 packets wait for their instant on one PE */
 static const struct ucx_tt_at TT_AT[12] = {
   {0, 0},   /* no flow 0 */
-  {0, 1784},   /* f1 A->C: s 28530, s16 28544, r 28530, a 228456, o 15533 */
+  {0, 1784},   /* f1 A->C: s 28530, s16 28544, r 28530, a 232680, o 15533 */
   {0, 0},   /* f2 A->B: same PE */
   {0, 0},   /* f3 B->D: same PE */
-  {0, 7271},   /* f4 C->E: s 116330, s16 116336, r 96330, a 228456, o 15551 */
+  {0, 7271},   /* f4 C->E: s 116330, s16 116336, r 96330, a 232680, o 15551 */
   {0, 0},   /* f5 D->F: same PE */
-  {0, 11371},   /* f6 F->G: s 181930, s16 181936, r 181930, a 336026, o 16946 */
+  {0, 11371},   /* f6 F->G: s 181930, s16 181936, r 181930, a 340250, o 16946 */
   {0, 0},   /* f7 E->I: same PE */
   {0, 0},   /* f8 E->H: same PE */
-  {0, 12461},   /* f9 I->J: s 199370, s16 199376, r 173370, a 228456, o 16643 */
-  {0, 6125},   /* f10 H->J: s 98000, s16 98000, r 98000, a 228456, o 17450 */
+  {0, 12461},   /* f9 I->J: s 199370, s16 199376, r 173370, a 232680, o 16643 */
+  {0, 6125},   /* f10 H->J: s 98000, s16 98000, r 98000, a 232680, o 17450 */
   {0, 0},   /* f11 G->J: same PE */
 };
 #elif F_CPU == 500000000

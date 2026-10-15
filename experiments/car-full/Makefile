@@ -43,8 +43,11 @@
 # above the busy time of the model, 34 of 34 chains measured and none above its bound. After `make sim`:
 #   make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim
 #
-# F_CLK: f_CPU of the chosen candidate (432 MHz, reference.json chosen.cpu.f_cpu_hz); the phase of
-# 0.25 ms is then 108,000 cycles, a multiple of the 16-cycle step of TIMER1.
+# F_CLK: the clock of the flow with the model of the time-triggered injection and t(v) = max(CSV,
+# static) (experiments/tt, run CF5): f_CPU 478.296 MHz on the grid of 64 kHz of the phase of 0.25 ms,
+# 478.336 MHz, a phase of 119,584 cycles (a multiple of the 16-cycle step of TIMER1). The runs CF to CF4
+# ran at 432 MHz, f_CPU of the chosen candidate with the costs of the CSV (reference.json
+# chosen.cpu.f_cpu_hz).
 # SIM_NS: first release at 3 ms + the largest data age at F_CLK (36.0 ms, chain POSI-OBMG-OBDB-NAVC-DIRC)
 # + two hyperperiods (25 ms) = 64 ms.
 
@@ -66,7 +69,9 @@ MESH    ?= 4x4
 # toolchain in use
 HEAP    ?= 44624
 IN_FLIGHT ?= 2
-F_CLK   ?= 432000000
+F_CLK   ?= 478336000
+# t(v) = max(CSV, static t(v) of the image, experiments/wcet costs/tt) in the link schedule of car_full_tt.h
+TT_COSTS ?= ../wcet/costs/tt/car_full.json
 PHASE_NS ?= 250000
 SIM_NS  ?= 64000000
 LOG     ?= logs/CF.events.txt
@@ -91,11 +96,11 @@ check:
 
 ucx:
 	$(GEN) generate $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
-	$(GEN) tt $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) --clock $(F_CLK) --out $(APP_DIR)
+	$(GEN) tt $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) --clock $(F_CLK) --costs $(TT_COSTS) --out $(APP_DIR)
 
 ucx-check:
 	$(GEN) check $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR)
-	$(GEN) tt-check $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) --clock $(F_CLK) --out $(APP_DIR)
+	$(GEN) tt-check $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) --clock $(F_CLK) --costs $(TT_COSTS) --out $(APP_DIR)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
 
 build:

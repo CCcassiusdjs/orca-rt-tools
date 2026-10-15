@@ -4,12 +4,13 @@
  * (orca-rt-tools). Do not edit: change the inputs and run the generator
  * again.
  *
- *   python -m rttools.ucxgen tt-compose --composition composition.json --name carv_e --clock 434912000 --clock 500000000
+ *   python -m rttools.ucxgen tt-compose --composition composition.json --name carv_e --clock 443360000 --clock 500000000 --costs carv_e.json
  *
  * Input: composition.json (sha256 0fbbcb7b9a3e627ebff2bd21384308a21d9ec1ef197fb7fbceae844faa9128e3)
  * Input: hermes-4x5.gml (sha256 f7331f0eb3423285cabbec5efaa6e269ede0f61249e485d4e166c88c9c084e4a)
  * Input: car-v.csv (sha256 f2d3d1d0d6d01b1139f2ce6902adad589e36502243cf5202cd6b7d383c23caa0)
  * Input: synthetic-app-e.csv (sha256 522dcca19a8df3bc57c2ad86f28a9d9e51f81075906bbb1179a28b057fa1efe5)
+ * Input: carv_e.json (sha256 c462f4d9e91eaa28b7d2dade61c47bd3e9941f796fa3114fa1dfa06c72b2d2c1)
  *
  * Link schedule of each clock below: AGS (rttools/modules/backend/ags, the
  * parameters of the command line of rttools) on the packets of one
@@ -21,44 +22,46 @@
  * (TIMER1 step, hal.c): s16 = ticks P + 16 count, P = cycles per tick. The
  * comment of each entry gives s, the release r and the deadline a of the
  * packet (cycles from the same phase start) and o_i.
+ *
+ * Costs: max(CSV, static) carv_e.json sha256 c462f4d9e91eaa28b7d2dade61c47bd3e9941f796fa3114fa1dfa06c72b2d2c1
  */
-#if F_CPU == 434912000
-/* 434912000 Hz: 21 packets between PEs in a hyperperiod of 217456 cycles, 217456 cycles per tick; at most 2 packets wait for their instant on one PE */
+#if F_CPU == 443360000
+/* 443360000 Hz: 21 packets between PEs in a hyperperiod of 221680 cycles, 221680 cycles per tick; at most 2 packets wait for their instant on one PE */
 static const struct ucx_tt_at TT_AT[35] = {
   {0, 0},   /* no flow 0 */
   {0, 0},   /* f1 FBU3->VOD1: same PE */
   {0, 0},   /* f2 FBU8->VOD2: same PE */
-  {0, 11875},   /* f3 VOD1->NAVC: s 190000, s16 190000, r 190000, a 228456, o 15309 */
-  {0, 12875},   /* f4 VOD2->NAVC: s 206000, s16 206000, r 190000, a 228456, o 15283 */
+  {0, 11875},   /* f3 VOD1->NAVC: s 190000, s16 190000, r 190000, a 232680, o 15309 */
+  {0, 12875},   /* f4 VOD2->NAVC: s 206000, s16 206000, r 190000, a 232680, o 15283 */
   {0, 0},   /* f5 FBU1->BFE1: same PE */
   {0, 0},   /* f6 FBU2->BFE2: same PE */
-  {0, 5938},   /* f7 FBU3->BFE3: s 95000, s16 95008, r 95000, a 228456, o 17651 */
+  {0, 5938},   /* f7 FBU3->BFE3: s 95000, s16 95008, r 95000, a 232680, o 17651 */
   {0, 0},   /* f8 FBU4->BFE4: same PE */
   {0, 0},   /* f9 FBU5->BFE5: same PE */
   {0, 0},   /* f10 FBU6->BFE6: same PE */
-  {0, 5938},   /* f11 FBU7->BFE7: s 95000, s16 95008, r 95000, a 228456, o 17703 */
-  {0, 5938},   /* f12 FBU8->BFE8: s 95000, s16 95008, r 95000, a 228456, o 17677 */
-  {0, 11875},   /* f13 BFE1->FDF1: s 190000, s16 190000, r 190000, a 228456, o 15457 */
-  {0, 12875},   /* f14 BFE2->FDF1: s 206000, s16 206000, r 190000, a 228456, o 15431 */
-  {0, 7063},   /* f15 BFE3->FDF1: s 113000, s16 113008, r 95000, a 228456, o 15483 */
-  {0, 10125},   /* f16 BFE4->FDF1: s 161998, s16 162000, r 161998, a 228456, o 15483 */
-  {0, 11875},   /* f17 BFE5->FDF2: s 190000, s16 190000, r 190000, a 228456, o 15431 */
-  {0, 12875},   /* f18 BFE6->FDF2: s 206000, s16 206000, r 190000, a 228456, o 15405 */
-  {0, 8063},   /* f19 BFE7->FDF2: s 129000, s16 129008, r 95000, a 228456, o 15431 */
-  {0, 9063},   /* f20 BFE8->FDF2: s 145000, s16 145008, r 95000, a 228456, o 15405 */
-  {0, 5938},   /* f21 FDF1->STPH: s 95000, s16 95008, r 95000, a 228456, o 15763 */
-  {0, 6938},   /* f22 FDF2->STPH: s 111000, s16 111008, r 95000, a 228456, o 15737 */
-  {0, 7938},   /* f23 STPH->OBMG: s 127000, s16 127008, r 95000, a 228456, o 15533 */
-  {0, 1784},   /* f24 A->C: s 28530, s16 28544, r 28530, a 228456, o 15533 */
+  {0, 5938},   /* f11 FBU7->BFE7: s 95000, s16 95008, r 95000, a 232680, o 17703 */
+  {0, 5938},   /* f12 FBU8->BFE8: s 95000, s16 95008, r 95000, a 232680, o 17677 */
+  {0, 11875},   /* f13 BFE1->FDF1: s 190000, s16 190000, r 190000, a 232680, o 15457 */
+  {0, 12875},   /* f14 BFE2->FDF1: s 206000, s16 206000, r 190000, a 232680, o 15431 */
+  {0, 7688},   /* f15 BFE3->FDF1: s 123000, s16 123008, r 95000, a 232680, o 15483 */
+  {0, 10125},   /* f16 BFE4->FDF1: s 161998, s16 162000, r 161998, a 232680, o 15483 */
+  {0, 11875},   /* f17 BFE5->FDF2: s 190000, s16 190000, r 190000, a 232680, o 15431 */
+  {0, 12875},   /* f18 BFE6->FDF2: s 206000, s16 206000, r 190000, a 232680, o 15405 */
+  {0, 8688},   /* f19 BFE7->FDF2: s 139000, s16 139008, r 95000, a 232680, o 15431 */
+  {0, 9688},   /* f20 BFE8->FDF2: s 155000, s16 155008, r 95000, a 232680, o 15405 */
+  {0, 6648},   /* f21 FDF1->STPH: s 106356, s16 106368, r 106356, a 232680, o 15763 */
+  {0, 7648},   /* f22 FDF2->STPH: s 122356, s16 122368, r 106356, a 232680, o 15737 */
+  {0, 8746},   /* f23 STPH->OBMG: s 139928, s16 139936, r 97928, a 232680, o 15533 */
+  {0, 1784},   /* f24 A->C: s 28530, s16 28544, r 28530, a 232680, o 15533 */
   {0, 0},   /* f25 A->B: same PE */
   {0, 0},   /* f26 B->D: same PE */
-  {0, 6021},   /* f27 C->E: s 96330, s16 96336, r 96330, a 228456, o 15551 */
+  {0, 6021},   /* f27 C->E: s 96330, s16 96336, r 96330, a 232680, o 15551 */
   {0, 0},   /* f28 D->F: same PE */
-  {0, 11371},   /* f29 F->G: s 181930, s16 181936, r 181930, a 336026, o 16946 */
+  {0, 11371},   /* f29 F->G: s 181930, s16 181936, r 181930, a 344473, o 16946 */
   {0, 0},   /* f30 E->I: same PE */
   {0, 0},   /* f31 E->H: same PE */
-  {0, 12461},   /* f32 I->J: s 199370, s16 199376, r 173370, a 228456, o 16643 */
-  {0, 7125},   /* f33 H->J: s 114000, s16 114000, r 98000, a 228456, o 17450 */
+  {0, 12437},   /* f32 I->J: s 198979, s16 198992, r 174979, a 232680, o 16643 */
+  {0, 7101},   /* f33 H->J: s 113609, s16 113616, r 99609, a 232680, o 17450 */
   {0, 0},   /* f34 G->J: same PE */
 };
 #elif F_CPU == 500000000
@@ -79,25 +82,25 @@ static const struct ucx_tt_at TT_AT[35] = {
   {0, 5938},   /* f12 FBU8->BFE8: s 95000, s16 95008, r 95000, a 261000, o 17677 */
   {0, 11875},   /* f13 BFE1->FDF1: s 190000, s16 190000, r 190000, a 261000, o 15457 */
   {0, 12875},   /* f14 BFE2->FDF1: s 206000, s16 206000, r 190000, a 261000, o 15431 */
-  {0, 7063},   /* f15 BFE3->FDF1: s 113000, s16 113008, r 95000, a 261000, o 15483 */
+  {0, 7688},   /* f15 BFE3->FDF1: s 123000, s16 123008, r 95000, a 261000, o 15483 */
   {0, 10125},   /* f16 BFE4->FDF1: s 161998, s16 162000, r 161998, a 261000, o 15483 */
   {0, 11875},   /* f17 BFE5->FDF2: s 190000, s16 190000, r 190000, a 261000, o 15431 */
   {0, 12875},   /* f18 BFE6->FDF2: s 206000, s16 206000, r 190000, a 261000, o 15405 */
-  {0, 8063},   /* f19 BFE7->FDF2: s 129000, s16 129008, r 95000, a 261000, o 15431 */
-  {0, 9063},   /* f20 BFE8->FDF2: s 145000, s16 145008, r 95000, a 261000, o 15405 */
-  {0, 5938},   /* f21 FDF1->STPH: s 95000, s16 95008, r 95000, a 261000, o 15763 */
-  {0, 6938},   /* f22 FDF2->STPH: s 111000, s16 111008, r 95000, a 261000, o 15737 */
-  {0, 7938},   /* f23 STPH->OBMG: s 127000, s16 127008, r 95000, a 261000, o 15533 */
+  {0, 8688},   /* f19 BFE7->FDF2: s 139000, s16 139008, r 95000, a 261000, o 15431 */
+  {0, 9688},   /* f20 BFE8->FDF2: s 155000, s16 155008, r 95000, a 261000, o 15405 */
+  {0, 6648},   /* f21 FDF1->STPH: s 106356, s16 106368, r 106356, a 261000, o 15763 */
+  {0, 7648},   /* f22 FDF2->STPH: s 122356, s16 122368, r 106356, a 261000, o 15737 */
+  {0, 8746},   /* f23 STPH->OBMG: s 139928, s16 139936, r 97928, a 261000, o 15533 */
   {0, 1784},   /* f24 A->C: s 28530, s16 28544, r 28530, a 261000, o 15533 */
   {0, 0},   /* f25 A->B: same PE */
   {0, 0},   /* f26 B->D: same PE */
   {0, 6021},   /* f27 C->E: s 96330, s16 96336, r 96330, a 261000, o 15551 */
   {0, 0},   /* f28 D->F: same PE */
-  {0, 11371},   /* f29 F->G: s 181930, s16 181936, r 181930, a 368570, o 16946 */
+  {0, 11371},   /* f29 F->G: s 181930, s16 181936, r 181930, a 372793, o 16946 */
   {0, 0},   /* f30 E->I: same PE */
   {0, 0},   /* f31 E->H: same PE */
-  {0, 12461},   /* f32 I->J: s 199370, s16 199376, r 173370, a 261000, o 16643 */
-  {0, 7125},   /* f33 H->J: s 114000, s16 114000, r 98000, a 261000, o 17450 */
+  {0, 12437},   /* f32 I->J: s 198979, s16 198992, r 174979, a 261000, o 16643 */
+  {0, 7101},   /* f33 H->J: s 113609, s16 113616, r 99609, a 261000, o 17450 */
   {0, 0},   /* f34 G->J: same PE */
 };
 #else

@@ -4,11 +4,12 @@
  * (orca-rt-tools). Do not edit: change the inputs and run the generator
  * again.
  *
- *   python -m rttools.ucxgen tt wcet-e.csv wcet-e-ONTO-hermes2x2.map --arch hermes-2x2.gml --name wcet_e --clock 500000000
+ *   python -m rttools.ucxgen tt wcet-e.csv wcet-e-ONTO-hermes2x2.map --arch hermes-2x2.gml --name wcet_e --clock 220416000 --clock 500000000 --costs wcet_e.json
  *
  * Input: wcet-e.csv (sha256 5d38a7884e2e791fc848722cc003570cedf16cf310492c94163ea5b81ea61f24)
  * Input: wcet-e-ONTO-hermes2x2.map (sha256 1290bf43b88419d1e9ca087590124bc07c320e3cbbd98eee0143b0564241f8a5)
  * Input: hermes-2x2.gml (sha256 7f5b99836ef8b0644c57f3b4403f1f1798e5b947e5afc6aa08ea7ced18960759)
+ * Input: wcet_e.json (sha256 0c4017110d022493ac7331de70ee25552c93ce7301535c89f74337d0bf1500a4)
  *
  * Link schedule of each clock below: AGS (rttools/modules/backend/ags, the
  * parameters of the command line of rttools) on the packets of one
@@ -20,21 +21,39 @@
  * (TIMER1 step, hal.c): s16 = ticks P + 16 count, P = cycles per tick. The
  * comment of each entry gives s, the release r and the deadline a of the
  * packet (cycles from the same phase start) and o_i.
+ *
+ * Costs: max(CSV, static) wcet_e.json sha256 0c4017110d022493ac7331de70ee25552c93ce7301535c89f74337d0bf1500a4
  */
-#if F_CPU == 500000000
+#if F_CPU == 220416000
+/* 220416000 Hz: 5 packets between PEs in a hyperperiod of 110208 cycles, 110208 cycles per tick; at most 2 packets wait for their instant on one PE */
+static const struct ucx_tt_at TT_AT[12] = {
+  {0, 0},   /* no flow 0 */
+  {0, 712},   /* f1 A->C: s 11377, s16 11392, r 11377, a 121208, o 15533 */
+  {0, 0},   /* f2 A->B: same PE */
+  {0, 0},   /* f3 B->D: same PE */
+  {0, 1690},   /* f4 C->E: s 27036, s16 27040, r 27036, a 121208, o 15551 */
+  {0, 0},   /* f5 D->F: same PE */
+  {0, 5067},   /* f6 F->G: s 81062, s16 81072, r 81062, a 167604, o 16946 */
+  {0, 0},   /* f7 E->I: same PE */
+  {0, 0},   /* f8 E->H: same PE */
+  {0, 6164},   /* f9 I->J: s 98615, s16 98624, r 74615, a 121208, o 16643 */
+  {0, 3460},   /* f10 H->J: s 55345, s16 55360, r 55345, a 121208, o 17450 */
+  {0, 0},   /* f11 G->J: same PE */
+};
+#elif F_CPU == 500000000
 /* 500000000 Hz: 5 packets between PEs in a hyperperiod of 250000 cycles, 250000 cycles per tick; at most 2 packets wait for their instant on one PE */
 static const struct ucx_tt_at TT_AT[12] = {
   {0, 0},   /* no flow 0 */
-  {0, 583},   /* f1 A->C: s 9317, s16 9328, r 9317, a 261000, o 15533 */
+  {0, 712},   /* f1 A->C: s 11377, s16 11392, r 11377, a 261000, o 15533 */
   {0, 0},   /* f2 A->B: same PE */
   {0, 0},   /* f3 B->D: same PE */
-  {0, 1652},   /* f4 C->E: s 26419, s16 26432, r 26419, a 261000, o 15551 */
+  {0, 1690},   /* f4 C->E: s 27036, s16 27040, r 27036, a 261000, o 15551 */
   {0, 0},   /* f5 D->F: same PE */
-  {0, 4822},   /* f6 F->G: s 77148, s16 77152, r 77148, a 307396, o 16946 */
+  {0, 5067},   /* f6 F->G: s 81062, s16 81072, r 81062, a 307396, o 16946 */
   {0, 0},   /* f7 E->I: same PE */
   {0, 0},   /* f8 E->H: same PE */
-  {0, 5971},   /* f9 I->J: s 95525, s16 95536, r 71525, a 261000, o 16643 */
-  {0, 3305},   /* f10 H->J: s 52872, s16 52880, r 52872, a 261000, o 17450 */
+  {0, 6164},   /* f9 I->J: s 98615, s16 98624, r 74615, a 261000, o 16643 */
+  {0, 3460},   /* f10 H->J: s 55345, s16 55360, r 55345, a 261000, o 17450 */
   {0, 0},   /* f11 G->J: same PE */
 };
 #else
