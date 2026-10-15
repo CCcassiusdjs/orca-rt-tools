@@ -183,6 +183,14 @@ def tt_check(log_path, app, clk, rel, csv_path, map_path, arch, f_clk):
 
 
 def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None):
+    """Every output of the module for one log, with the network-interface
+    model of the images of the run (ttcheck.run_ni)."""
+    from rttools.paper import ttcheck
+    with ttcheck.run_ni(log_path, run_info):
+        return _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info, f_clk, arch)
+
+
+def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None):
     app = load_app(manifest_path, csv_path, map_path)
     man, spec = app["manifest"], app["spec"]
     cfg = {"pe_tasks": man["pe_tasks"], "release_period_s": man["phase_ns"] / 1e9, "clock_hz": f_clk}

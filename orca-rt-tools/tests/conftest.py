@@ -11,9 +11,10 @@ REPO_ROOT = os.path.dirname(PKG_ROOT)
 @pytest.fixture(autouse=True)
 def _default_header_wait(monkeypatch):
     """Every test starts with the default link occupancy o_i = L0 +
-    20 (m + 1): no RTTOOLS_HEADER_WAIT and no RTTOOLS_NI in the environment
-    (also for child processes) and no selection by router.set_header_wait
-    or router.set_ni (network-interface model off)."""
+    20 (m + 1) + w_NI: no RTTOOLS_HEADER_WAIT and no RTTOOLS_NI in the
+    environment (also for child processes) and no selection by
+    router.set_header_wait or router.set_ni (network-interface model tt,
+    w_NI = NI_WAIT_CYCLES)."""
     from rttools.modules.routing import router
     monkeypatch.delenv(router.HEADER_WAIT_ENV, raising=False)
     monkeypatch.delenv(router.NI_ENV, raising=False)
@@ -22,6 +23,29 @@ def _default_header_wait(monkeypatch):
     yield
     router.set_header_wait(None)
     router.set_ni(None)
+
+
+@pytest.fixture
+def ni_off(monkeypatch):
+    """Network-interface model off (RTTOOLS_NI=off, also for child
+    processes): the model of the stored references of the runs up to tag
+    r11-rc5, which their targets select (NI ?= off in the Makefiles of
+    experiments/)."""
+    from rttools.modules.routing import router
+    monkeypatch.setenv(router.NI_ENV, router.NI_OFF)
+    router.set_ni(None)
+    yield
+
+
+@pytest.fixture(scope="module")
+def ni_off_module():
+    """ni_off with scope module: the outputs of a target with a stored
+    reference that a module builds once for its tests."""
+    from rttools.modules.routing import router
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv(router.NI_ENV, router.NI_OFF)
+        router.set_ni(None)
+        yield
 
 
 def run_module(module, *args, cwd=None, block=(), timeout=120):

@@ -14,7 +14,12 @@ RTTOOLS  := $(abspath ../../orca-rt-tools)
 APPS     := $(abspath ../../apps)
 BUILD    ?= build
 STATS_IN ?= $(BUILD)/full
-ENV       = PYTHONPATH=$(RTTOOLS) $(PYTHON)
+# network-interface model of the link schedule (RTTOOLS_NI,
+# orca-rt-tools/rttools/modules/routing/router.py): off, the model of the
+# stored references (runs up to tag r11-rc5); the default of rttools (tt)
+# is the model of experiments/tt
+NI      ?= off
+ENV       = RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON)
 RUN       = $(ENV) -m rttools.paper.ch7
 ALL       = 20 30 40 50 60 70 80 90 100 200 300 400 500 600 700 800 900
 

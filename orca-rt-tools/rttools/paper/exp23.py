@@ -1252,6 +1252,16 @@ def phase_conformance(tr, cfg, clk, rule):
 
 def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None,
             release_rule=None, arch=None, mapping=None):
+    """analyze with the network-interface model of the images of the run
+    (ttcheck.run_ni)."""
+    from rttools.paper import ttcheck
+    with ttcheck.run_ni(log_path, run_info):
+        return _analyze(log_path, cfg, out_dir, unit, join, run_info, listing, listing_without,
+                        release_rule, arch, mapping)
+
+
+def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None,
+             release_rule=None, arch=None, mapping=None):
     """Every output of the module for one log; run_info: RUN_INFO path,
     "auto" (next to the log) or None (config clock_hz); listing and
     listing_without: objdump listings of the image with and without the

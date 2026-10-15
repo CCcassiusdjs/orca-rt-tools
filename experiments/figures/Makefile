@@ -20,7 +20,12 @@ LOG     ?= $(EXP23)/logs/F.events.txt
 # join rule of J (experiments/exp23/Makefile): any3 for the stored logs A to E
 JOIN    ?= $(if $(filter $(foreach r,A B C D E,$(EXP23)/logs/$(r).events.txt),$(LOG)),any3,per_producer)
 BUILD   ?= build
-ENV      = PYTHONPATH=$(RTTOOLS) $(PYTHON)
+# network-interface model of the link schedule (RTTOOLS_NI,
+# orca-rt-tools/rttools/modules/routing/router.py): off, the model of the
+# stored references (runs up to tag r11-rc5); the default of rttools (tt)
+# is the model of experiments/tt
+NI      ?= off
+ENV      = RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON)
 FIG      = $(ENV) -m rttools.paper.figures
 
 .PHONY: all contraction exp23 check clean

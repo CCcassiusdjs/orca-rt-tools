@@ -149,13 +149,16 @@ NI_RX_END_CYCLES = 4157     # last flit to the handshake of irq3_handler
 NI_WAIT_CYCLES = NI_INJECT_CYCLES + NI_RX_SIZE_CYCLES + NI_RX_END_CYCLES
 NI_ENV = "RTTOOLS_NI"
 # selection of the network-interface model, as the header wait: set_ni() in
-# the process, otherwise RTTOOLS_NI. "off" (default when unset or empty: no
-# resource, w_NI = 0, the model of the runs up to tag r11-rc5, whose images
-# injected each packet when its job sent it), "tt" (the network interface
-# as a resource and w_NI = NI_WAIT_CYCLES: images built with
-# INJECTION=tt, the default of pkt-sim/software/ucx-os/Makefile) or a
-# nonnegative integer (the resource and that w_NI). rttools.ucxgen tt and
-# the analysis of a run whose RUN_INFO has injection=tt select "tt".
+# the process, otherwise RTTOOLS_NI. "tt" (default when unset or empty: the
+# network interface as a resource and w_NI = NI_WAIT_CYCLES, the model of
+# the images built with INJECTION=tt, the default of
+# pkt-sim/software/ucx-os/Makefile, and of the runs from tag r11-rc7 on),
+# "off" (no resource, w_NI = 0: the model of the runs up to tag r11-rc5,
+# whose images injected each packet when its job sent it; the targets that
+# reproduce the references of those runs set it) or a nonnegative integer
+# (the resource and that w_NI). rttools.ucxgen tt and the analysis of a run
+# whose RUN_INFO has injection=tt select "tt"; the analysis of a run with
+# injection=send selects "off".
 NI_TT = "tt"
 NI_OFF = "off"
 _ni = None
@@ -163,10 +166,10 @@ _ni = None
 
 def parse_ni(value):
     """(resource, w_NI) for a value of RTTOOLS_NI or of set_ni: None and ""
-    give the default ("off"), "tt" gives (True, NI_WAIT_CYCLES), "off" gives
+    give the default ("tt"), "tt" gives (True, NI_WAIT_CYCLES), "off" gives
     (False, 0), an integer n gives (True, n)."""
     if value is None:
-        return False, 0
+        return True, NI_WAIT_CYCLES
     if isinstance(value, tuple):
         return bool(value[0]), int(value[1])
     if isinstance(value, bool):
@@ -175,9 +178,9 @@ def parse_ni(value):
         w = value
     else:
         v = str(value).strip().lower()
-        if v == NI_TT:
+        if v in ("", NI_TT):
             return True, NI_WAIT_CYCLES
-        if v in ("", NI_OFF):
+        if v == NI_OFF:
             return False, 0
         try:
             w = int(v)
@@ -233,8 +236,8 @@ def occupancy(hops, datasize, wait=None, ni=None):
     interfaces (NI_WAIT_CYCLES). `wait` gives w_h; None takes header_wait()
     (default HEADER_WAIT_CYCLES = 20, the bound of the wait of the Hermes;
     "off" or 0 gives w_h = 0). `ni` gives the network-interface model
-    (parse_ni); None takes ni_model() (default off, w_NI = 0; "tt" gives
-    NI_WAIT_CYCLES)."""
+    (parse_ni); None takes ni_model() (default "tt", w_NI = NI_WAIT_CYCLES;
+    "off" gives 0)."""
     w = header_wait() if wait is None else parse_header_wait(wait)
     n = ni_wait() if ni is None else parse_ni(ni)[1]
     return getRoutingTime() * (hops + 1) + getPacketFlits(datasize) + 1 + w * (hops + 1) + n

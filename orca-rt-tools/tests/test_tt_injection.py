@@ -29,18 +29,24 @@ E_MAP = os.path.join(APPS, "synthetic-app-e", "synthetic-app-e-ONTO-hermes2x2.ma
 
 # ------------------------------------------------------------ model
 
-def test_ni_model_default_is_off_and_tt_adds_the_bound(monkeypatch):
-    assert router.ni_model() == (False, 0)
+def test_ni_model_default_is_tt_and_off_removes_the_bound(monkeypatch):
+    assert router.ni_model() == (True, router.NI_WAIT_CYCLES)
+    assert router.ni_resources()
     assert router.NI_WAIT_CYCLES == router.NI_INJECT_CYCLES + router.NI_RX_SIZE_CYCLES + router.NI_RX_END_CYCLES
     l0 = router.occupancy(1, 1200, wait=0, ni="off")
+    assert router.occupancy(1, 1200, wait=0) == l0 + router.NI_WAIT_CYCLES
     assert router.occupancy(1, 1200, wait=0, ni="tt") == l0 + router.NI_WAIT_CYCLES
     assert router.occupancy(1, 1200, wait=0, ni=100) == l0 + 100
-    monkeypatch.setenv(router.NI_ENV, "tt")
+    for value in ("", "tt", "TT"):
+        monkeypatch.setenv(router.NI_ENV, value)
+        assert router.ni_model() == (True, router.NI_WAIT_CYCLES)
+    monkeypatch.setenv(router.NI_ENV, "off")
+    assert router.ni_model() == (False, 0) and not router.ni_resources()
+    assert router.occupancy(1, 1200, wait=0) == l0
+    prev = router.set_ni("tt")
     assert router.ni_model() == (True, router.NI_WAIT_CYCLES)
-    prev = router.set_ni("off")
-    assert router.ni_model() == (False, 0)
     router.set_ni(prev)
-    assert router.ni_resources()
+    assert router.ni_model() == (False, 0)
     for bad in ("x", "-1", True):
         with pytest.raises(ValueError):
             router.parse_ni(bad)

@@ -108,7 +108,12 @@ HEAP    ?= 47232
 # memory". With 1, the worst PE is 13 (36,224 bytes). The run checks the
 # allocations: grep "out of memory" in pkt-sim/logs/output-*.txt.
 IN_FLIGHT ?= 1
-RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.multiapp
+# network-interface model of the link schedule (RTTOOLS_NI,
+# orca-rt-tools/rttools/modules/routing/router.py): off, the model of the
+# stored references (runs up to tag r11-rc5); the default of rttools (tt)
+# is the model of experiments/tt
+NI      ?= off
+RUN      = RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.multiapp
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 ANALYZE  = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp
 CHECK    = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check

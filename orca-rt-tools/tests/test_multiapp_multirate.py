@@ -163,9 +163,10 @@ def math_floor(phase_s, f):
     return math.floor(multirate.seconds(phase_s) * Fraction(f))
 
 
-def test_two_periods_response_equals_r_bound(tmp_path):
+def test_two_periods_response_equals_r_bound(tmp_path, ni_off):
     """CAR-V (T = 0.5 ms) and E with T = 1 ms: phase 0.5 ms, the general
-    model; the largest data age of CAR-V equals its R_bound (one period)."""
+    model; the largest data age of CAR-V equals its R_bound (one period).
+    Network-interface model off: f of experiments/car-v (reference.json)."""
     comp = load(tmp_path, [{"name": "CARV", "csv": CARV_CSV, "map": "spiral", "pes": 16},
                            {"name": "E", "csv": e_with_period(tmp_path), "map": "spiral", "pes": 4}])
     with network.quiet():

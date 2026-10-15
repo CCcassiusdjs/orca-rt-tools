@@ -811,6 +811,16 @@ def _csv(path, rows, cols):
 
 def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None,
             app_name=None, composition=None, release_rule=None):
+    """Every output of the module for one log, with the network-interface
+    model of the images of the run (ttcheck.run_ni)."""
+    from rttools.paper import ttcheck
+    with ttcheck.run_ni(log_path, run_info):
+        return _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info, f_clk, arch,
+                        app_name, composition, release_rule)
+
+
+def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None,
+             app_name=None, composition=None, release_rule=None):
     from rttools.paper import phasecheck
     app = load_app(manifest_path, csv_path, map_path, app_name)
     tr, clk, clock = load_log(log_path, app, f_clk, run_info)

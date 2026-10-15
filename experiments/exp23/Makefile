@@ -107,7 +107,12 @@ REF     ?= reference_head.json
 OLD_APP_LOGS := $(foreach r,A B C D E,logs/$(r).events.txt)
 JOIN    ?= $(if $(filter $(OLD_APP_LOGS),$(LOG)),any3,per_producer)
 OUTDIR  ?= $(BUILD)/results
-RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23
+# network-interface model of the link schedule (RTTOOLS_NI,
+# orca-rt-tools/rttools/modules/routing/router.py): off, the model of the
+# stored references (runs up to tag r11-rc5); the default of rttools (tt)
+# is the model of experiments/tt
+NI      ?= off
+RUN      = RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23
 # release rule of LOG (auto: RUN_INFO line `release`; data for a RUN_INFO without it, the stored
 # logs A to H; tick for TG, TH, UG and UH)
 RELEASE ?= auto
@@ -155,13 +160,13 @@ check:
 	$(RUN) check $(OUTDIR)/metrics.json $(REF)
 
 frequency:
-	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
+	RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
 		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --map spiral --f0 $(F0) \
 		--config config.json --header-wait bound --out $(BUILD)/frequency
 	$(RUN) check $(BUILD)/frequency/metrics.json reference_frequency.json
 
 frequency-l0:
-	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
+	RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.frequency run --app $(APP_E)/synthetic-app-e.csv \
 		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --map spiral --f0 $(F0) \
 		--config config.json --header-wait off --out $(BUILD)/frequency_l0
 	$(RUN) check $(BUILD)/frequency_l0/metrics.json reference_frequency_l0.json

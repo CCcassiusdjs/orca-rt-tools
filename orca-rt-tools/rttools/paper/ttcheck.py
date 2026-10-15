@@ -44,6 +44,8 @@ RX.head to END), which the resource of the link schedule excludes.
 """
 from __future__ import annotations
 
+import contextlib
+import os
 import re
 from collections import Counter
 
@@ -62,6 +64,24 @@ def injection_rule(info):
     return v
 
 
+@contextlib.contextmanager
+def run_ni(log_path, run_info="auto"):
+    """Selects, for the analysis of the run of `log_path`, the
+    network-interface model of its images: "tt" for a run with
+    injection=tt in its RUN_INFO, "off" otherwise (the runs up to tag
+    r11-rc5). run_info: RUN_INFO path, "auto" (next to the log) or None
+    (no RUN_INFO)."""
+    from rttools.paper import exp23
+    path = exp23.run_info_path(log_path) if run_info == "auto" else run_info
+    info = exp23.read_run_info(path) if path else {}
+    prev = router.set_ni(router.NI_TT if injection_rule(info) == "tt" else router.NI_OFF)
+    try:
+        yield
+    finally:
+        router.set_ni(prev)
+
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 RE_END = re.compile(r"FLIT END t=(\d+) src=(\d+-\d+) dst=(\d+-\d+) tag=(\d+) cyc=(\d+)")
 RE_TIMER = re.compile(r"TIMER t=(\d+) pe=(\d+-\d+) cyc=(\d+)")
 # share of the ticks of the run with a TIMER line (the line stays high from

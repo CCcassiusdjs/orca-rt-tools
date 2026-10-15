@@ -68,14 +68,29 @@ def test_fixed_frequency_zero_hyperperiod_exits_cleanly(tmp_path):
     assert r.returncode == 1
 
 
-@pytest.mark.parametrize("value,text", [(None, "o_i = L0 + 20 (m + 1)"), ("off", "o_i = L0 ("),
-                                        ("bound", "o_i = L0 + 20 (m + 1)"), ("3", "o_i = L0 + 3 (m + 1)")])
-def test_link_occupancy_follows_header_wait(inputs, monkeypatch, value, text):
+@pytest.mark.parametrize("value,ni,text", [
+    (None, None, "o_i = L0 + 20 (m + 1) + 15169 ("), ("off", None, "o_i = L0 + 15169 ("),
+    ("bound", None, "o_i = L0 + 20 (m + 1) + 15169 ("), ("3", None, "o_i = L0 + 3 (m + 1) + 15169 ("),
+    (None, "off", "o_i = L0 + 20 (m + 1) ("), ("off", "off", "o_i = L0 ("), ("off", "7", "o_i = L0 + 7 (")])
+def test_link_occupancy_follows_header_wait(inputs, monkeypatch, value, ni, text):
+    """o_i = L0 + w_h (m + 1) + w_NI: w_h of RTTOOLS_HEADER_WAIT and w_NI of
+    RTTOOLS_NI (default tt, w_NI = NI_WAIT_CYCLES = 15169)."""
     d, files = inputs
     if value is not None:
         monkeypatch.setenv("RTTOOLS_HEADER_WAIT", value)
+    if ni is not None:
+        monkeypatch.setenv("RTTOOLS_NI", ni)
     r = run_module("rttools", *files, "1000000", cwd=str(d))
     assert text in r.stdout + r.stderr
+    assert ("network interface off" if ni == "off" else "network interface as a resource") in r.stdout + r.stderr
+
+
+def test_bad_network_interface_model_returns_nonzero(inputs, monkeypatch):
+    d, files = inputs
+    monkeypatch.setenv("RTTOOLS_NI", "x")
+    r = run_module("rttools", *files, "1000000", cwd=str(d))
+    assert r.returncode != 0
+    assert "RTTOOLS_NI" in r.stdout + r.stderr
 
 
 def test_bad_header_wait_returns_nonzero(inputs, monkeypatch):

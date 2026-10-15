@@ -56,7 +56,12 @@ RTTOOLS := $(abspath ../../orca-rt-tools)
 APPS    := $(abspath ../../apps)
 ARCH    := $(abspath ../../arch/hermes-4x4.gml)
 BUILD   ?= build
-RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.carfull
+# network-interface model of the link schedule (RTTOOLS_NI,
+# orca-rt-tools/rttools/modules/routing/router.py): off, the model of the
+# stored references (runs up to tag r11-rc5); the default of rttools (tt)
+# is the model of experiments/tt
+NI      ?= off
+RUN      = RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.carfull
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 APP_DIR := ../../pkt-sim/software/ucx-os/app
 NAME    ?= car_full
