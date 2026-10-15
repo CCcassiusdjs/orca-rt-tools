@@ -1,0 +1,27 @@
+{
+ "_doc": "Runs of round r11f (images with the time-triggered injection, tag r11-rc7): the application, its costs file of experiments/wcet (static t(v) of the image, costs/tt; the flow takes max(CSV, static)), the run identifiers (flow: the clock of the flow; keep: runs at a given clock, E and WCET-E at the 500 MHz of round r11e), f0_hz (first frequency of the search), the warmup and the length of the simulation of run_r11f.sh and the number of iterations that the length covers (one release period: warmup + (n(v_last) + iterations - 1) T + R_bound + T) or the number of phases of the run (general phase model). rttools/paper/ttflow.py; paths relative to this file.",
+ "f0_hz": 500000000,
+ "apps": {
+  "E": {"kind": "single", "image": "weird_a", "csv": "../../apps/synthetic-app-e/synthetic-app-e.csv",
+        "map": "../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map", "arch": "../../arch/hermes-2x2.gml",
+        "mesh": "2x2", "costs": "../wcet/costs/tt/weird_a.json", "style": "named", "exp23_config": "../exp23/config.json",
+        "period_s": 0.0005, "warmup_s": 0.003, "iterations": 8, "sim_ns": 20000000,
+        "runs": {"flow": "VH", "keep": {"VG": 500000000}}},
+  "CAR-V": {"kind": "single", "image": "car_v", "csv": "../../apps/car-v/car-v.csv", "map": "../../apps/car-v/car-v-ONTO-hermes4x4.map",
+            "arch": "../../arch/hermes-4x4.gml", "mesh": "4x4", "costs": "../wcet/costs/tt/car_v.json",
+            "manifest": "../../pkt-sim/software/ucx-os/app/car_v.json",
+            "period_s": 0.0005, "warmup_s": 0.003, "iterations": 8, "sim_ns": 11500000, "runs": {"flow": "VCV"}},
+  "WCET-E": {"kind": "single", "image": "wcet_e", "csv": "../../apps/wcet-e/wcet-e.csv", "map": "../../apps/wcet-e/wcet-e-ONTO-hermes2x2.map",
+             "arch": "../../arch/hermes-2x2.gml", "mesh": "2x2", "costs": "../wcet/costs/tt/wcet_e.json",
+             "manifest": "../../pkt-sim/software/ucx-os/app/wcet_e.json",
+             "period_s": 0.0005, "warmup_s": 0.003, "iterations": 8, "sim_ns": 10500000,
+             "runs": {"flow": "W5", "keep": {"W4": 500000000}}},
+  "CARV-E": {"kind": "composition", "image": "carv_e", "composition": "../multiapp/composition.json", "costs": "../wcet/costs/tt/carv_e.json",
+             "manifest": "../../pkt-sim/software/ucx-os/app/carv_e.json",
+             "period_s": 0.0005, "warmup_s": 0.003, "iterations": 8, "sim_ns": 11500000, "runs": {"flow": "VMA"}},
+  "CAR-FULL": {"kind": "multirate", "image": "car_full", "csv": "../../apps/car-full/car-full.csv",
+               "map": "../../apps/car-full/car-full-ONTO-hermes4x4.map", "arch": "../../arch/hermes-4x4.gml", "mesh": "4x4",
+               "costs": "../wcet/costs/tt/car_full.json", "manifest": "../../pkt-sim/software/ucx-os/app/car_full.json",
+               "warmup_s": 0.003, "releases": 244, "sim_ns": 64000000, "runs": {"flow": "CF5"}}
+ }
+}
