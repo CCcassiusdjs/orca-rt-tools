@@ -22,4 +22,9 @@ uint32_t ucx_phase_wait(uint32_t phase);
  * not wake such a task on a packet arrival) */
 int ucx_phase_waiting(uint16_t task_id);
 
+/* tick (lib/noc_tt.c, ucx_noc_tt_ticks) of the phase in which the current
+ * job of the calling task started (its last return from ucx_phase_wait;
+ * built with -DUCX_NOC_TT) */
+uint32_t ucx_job_tick(void);
+
 #endif

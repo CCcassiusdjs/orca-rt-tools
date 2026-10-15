@@ -139,6 +139,11 @@ void ucx_app_tick(void);
 void dispatch(void)
 {
 	if (!setjmp(kcb_p->tcb_p->context)) {
+#ifdef UCX_NOC_TT
+		/* time-triggered injection (lib/noc_tt.c): index of the tick,
+		 * packet whose instant is this tick, compare register of TIMER1 */
+		ucx_noc_tt_tick();
+#endif
 #ifdef UCX_APP_TICK
 		ucx_app_tick();
 #endif

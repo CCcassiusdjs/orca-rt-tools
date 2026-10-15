@@ -26,4 +26,5 @@ uint16_t ucx_task_id(void);
 #include <device/cacc.h>   /* set_iter_mark and the ITER_* macros */
 #include <lib/noc.h>
 #include <lib/tick_release.h>
+#include <lib/noc_tt.h>
 #endif
