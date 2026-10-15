@@ -254,6 +254,10 @@ def link_schedule(app, arch_path, f_clk, composition=None):
     with tnet.quiet():
         g, name = appparser.loadFromFile(app["csv_path"])
         noc = nocparser.loadFromFile(arch_path)
+    if app.get("costs"):
+        from rttools.wcet import costs as wcosts
+        wcosts.apply(g, app["costs"], wcosts.MAX)
+    with tnet.quiet():
         a = search.schedule_at(g, noc, app["entries"], name, f_clk, search_config(f_clk))
     if a is None or a["schedule"] is None:
         return {"feasible": False, "starts": {}}
@@ -271,8 +275,11 @@ def union_link_schedule(app, f_clk, composition):
     from rttools.multiapp import compose
     from rttools.paper.frequency import search_config
     from rttools.tui.model import network as tnet
+    spec = compose.read_spec(composition)
+    if app.get("costs"):
+        compose.set_costs(spec, {x["name"]: app["costs"] for x in spec["apps"]})
     with tnet.quiet():
-        comp = compose.load(compose.read_spec(composition))
+        comp = compose.load(spec)
     me = next((a for a in comp["apps"] if a["name"] == app.get("app_name")), None)
     if me is None:
         raise ValueError(f"application {app.get('app_name')} not in the composition {composition}")
@@ -780,12 +787,28 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
     return out
 
 
-def tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, arch, f_clk, composition=None):
+def apply_costs(app, costs):
+    """t(v) = max(CSV, static) of the costs file of a run (rttools/wcet/
+    costs.py, rule max) in the graph, the costs and the release settings
+    (scheduler_cycles) of `app` (load_app)."""
+    from rttools.wcet import costs as wcosts
+    wcosts.apply(app["graph"], costs, wcosts.MAX)
+    app["wcet"] = {str(d.get("label", n)): int(float(d["wcet"])) for n, d in app["graph"].nodes(data=True)}
+    app["release"] = release.settings(app["graph"].graph)
+    app["costs"] = costs
+    app["cost_sources"] = wcosts.sources(app["graph"])
+    return app
+
+
+def tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, arch, f_clk, composition=None,
+             marks=None, ev=None):
     """Packets between PEs of a run with the time-triggered injection
     against the link schedule of the table of its image
     (rttools.paper.ttcheck): packet k of a flow comes from the job of the
-    source in phase k - 1 + n(source)."""
-    table = ttcheck.schedule_rows(csv_path, map_path, arch, f_clk, composition)
+    source in phase k - 1 + n(source); the end of job k of v (ITER end
+    marker) at or before F(v) after the tick of phase k - 1 + n(v), and the
+    enqueue of each packet (send TAG line) at or before its instant s."""
+    table = ttcheck.schedule_rows(csv_path, map_path, arch, f_clk, composition, app.get("costs"))
     if composition:
         from rttools.multiapp import compose
         label = {fid: compose.qualify(app["app_name"], "f" + str(fl["csv_id"])) for fid, fl in app["flows"].items()}
@@ -796,7 +819,20 @@ def tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, 
 
     def phase_of(p, row, h):
         return h + mdl["tasks"][app["flows"][p["flow"]]["source"]]["phase"]
-    return ttcheck.analyze_run(log_path, clk, releases, table, pk, phase_of, w_h=mdl["header_wait_cycles"])
+    jobs = [{"pe": mdl["tasks"][v]["pe"], "task": v, "j": k, "t_raw": mk["end"],
+             "q": k - 1 + mdl["tasks"][v]["phase"], "bound": mdl["tasks"][v]["finish"]}
+            for v, ks in (marks or {}).items() for k, mk in sorted(ks.items()) if mk.get("end") is not None]
+    by = ttcheck.rows_by_flow(table)
+    ready = []
+    for fid, fl in app["flows"].items():
+        if fl["local"] or fid not in (ev or {}):
+            continue
+        s0 = by[label[fid]][0]["offset"]
+        for k, t in sorted(ev[fid]["send"].items()):
+            ready.append({"pe": fl["src_label"], "flow": fid, "n": k, "t_raw": t,
+                          "q": k - 1 + mdl["tasks"][fl["source"]]["phase"], "bound": s0})
+    return ttcheck.analyze_run(log_path, clk, releases, table, pk, phase_of, w_h=mdl["header_wait_cycles"],
+                               jobs=jobs if marks else None, ready=ready if ev else None)
 
 
 # ------------------------------------------------------------ outputs
@@ -830,6 +866,9 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
     injection = ttcheck.injection_rule(info)
     if tr.meta.get("swap_xy"):
         raise ValueError("the PE labels of the log are swapped against the manifest")
+    costs = ttcheck.costs_of_run(info) if injection == "tt" else None
+    if costs:
+        apply_costs(app, costs)
     mdl = model(app, clock["clock_hz"])
     releases = sorted(m.time for m in tr.lane_marks("TRIGGER"))
     if not releases:
@@ -856,8 +895,8 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
     tt = None
     if injection == "tt" and net is not None and (arch or composition):
         tt = tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, arch, clock["clock_hz"],
-                      composition)
-    tt_packets = tt.pop("per_packet") if tt else []
+                      composition, marks, ev)
+    tt_rows = ttcheck.pop_rows(tt)
     r2d = []
     for k, r in enumerate(releases, start=1):
         firsts = []
@@ -897,6 +936,9 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
         "link_schedule": None if sched is None else {k: v for k, v in sched.items()},
         "monitor": exp23.monitor_summary(log_path),
         "injection": injection,
+        "costs": None if not costs else {"file": os.path.basename(costs), "rule": "max",
+                                         "static_above_csv": sorted(t for t, v in app["cost_sources"].items()
+                                                                    if v == "static")},
         "tt": tt,
         "phase_conformance": phasecheck.conformance(
             tr, clk, releases, {v: {k: mk["begin"] for k, mk in ks.items()} for v, ks in marks.items()},
@@ -930,8 +972,7 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
          ["task", "pe", "source", "iterations", "phase_model", "phase_observed", "cost",
           "cpu_per_iteration_cycles", "end_minus_model_finish_max", "ends_after_model_finish",
           "max_iterations_per_run", "same_run"])
-    if tt_packets:
-        _csv(os.path.join(out_dir, "tt_packets.csv"), tt_packets, list(tt_packets[0]))
+    ttcheck.write_rows(out_dir, tt_rows)
     if net:
         _csv(os.path.join(out_dir, "network.csv"), net["flows"], list(net["flows"][0]) if net["flows"] else [])
         cols = [c for c in per_packet[0] if c not in ("links", "other", "contenders_other")] if per_packet else []

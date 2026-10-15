@@ -58,13 +58,18 @@ READ_BIT = 0x800000
 BUSY_TOLERANCE = 2
 
 
-def load_app(manifest_path, csv_path, map_path):
+def load_app(manifest_path, csv_path, map_path, costs=None):
+    """Application of a run; `costs`: costs file of the run (t(v) = max of
+    the CSV and the static t(v) of its image, rttools/wcet/costs.py)."""
     with open(manifest_path) as f:
         man = json.load(f)
     if man.get("model") != "time_triggered":
         raise ValueError("the manifest is not a time-triggered application")
     with tnet.quiet():
         g, _ = appparser.loadFromFile(csv_path)
+    if costs:
+        from rttools.wcet import costs as wcosts
+        wcosts.apply(g, costs, wcosts.MAX)
     entries = mapfile.read(map_path)
     r = multirate.graph_rates(g)
     if r is None:
@@ -78,7 +83,7 @@ def load_app(manifest_path, csv_path, map_path):
     order = {exp_label(n, man["mesh"][0]): ts for n, ts in spec.orders.items()}
     if order != man["pe_dispatch"]:
         raise ValueError("creation order of the manifest differs from the model")
-    return {"manifest": man, "graph": g, "entries": entries, "rates": r, "spec": spec,
+    return {"manifest": man, "graph": g, "entries": entries, "rates": r, "spec": spec, "costs": costs,
             "inputs": {"csv": os.path.basename(csv_path), "map": os.path.basename(map_path),
                        "manifest": os.path.basename(manifest_path),
                        "csv_matches_manifest": multirate_sha(csv_path) == man["inputs"]["csv"]["sha256"],
@@ -144,10 +149,24 @@ def parse_marks(tr, app):
     return jobs, stray
 
 
-def tt_check(log_path, app, clk, rel, csv_path, map_path, arch, f_clk):
+def job_finish(sched, spec, v, j):
+    """(release phase, F - release of the model) of job j (from 1) of v;
+    the jobs after the simulated hyperperiods repeat those of hyperperiod
+    h0 (the schedule is periodic from h0)."""
+    idx = j - 1
+    per_h = sched.per_h(v)
+    if idx >= (sched.h0 + 1) * per_h:
+        idx = sched.h0 * per_h + (idx - sched.h0 * per_h) % per_h
+    rel_c, _, fin = sched.job(v, idx)
+    return spec.offsets[v] + (j - 1) * spec.ticks[v], fin - rel_c
+
+
+def tt_check(log_path, app, clk, rel, csv_path, map_path, arch, f_clk, sched=None, jobs=None, ev=None):
     """Packets between PEs of a run with the time-triggered injection
     against the link schedule of the table of its image (module
-    docstring)."""
+    docstring); with `jobs` (parse_marks) the end of each job at or before
+    its F, with `ev` (tag events) the enqueue of each packet between PEs at
+    or before its instant s."""
     from rttools.modules.routing import router
     from rttools.paper import ttcheck
     man = app["manifest"]
@@ -174,12 +193,36 @@ def tt_check(log_path, app, clk, rel, csv_path, map_path, arch, f_clk):
     for p in sorted(pk, key=lambda p: p["tx_head"]):
         p["n"] = count.get(p["flow"], 0)
         count[p["flow"]] = p["n"] + 1
-    table = ttcheck.schedule_rows(csv_path, map_path, arch, f_clk)
+    table = ttcheck.schedule_rows(csv_path, map_path, arch, f_clk, costs=app.get("costs"))
     Ht = man["hyper_ticks"]
 
     def phase_of(p, row, h):
         return h * Ht + row["phase_start"] // row["period"]
-    return ttcheck.analyze_run(log_path, clk, rel, table, pk, phase_of, w_h=router.header_wait())
+    spec = app["spec"]
+    pe = {t["name"]: t["pe_label"] for t in man["tasks"]}
+    jl = None
+    if jobs is not None and sched is not None:
+        jl = []
+        for (v, j), row in sorted(jobs.items()):
+            if row["end"] is None:
+                continue
+            q, F = job_finish(sched, spec, v, j)
+            jl.append({"pe": pe[v], "task": v, "j": j, "t_raw": row["end"], "q": q, "bound": F})
+    rl = None
+    if ev is not None:
+        by = ttcheck.rows_by_flow(table)
+        rl = []
+        for fl in man["flows"]:
+            if fl["local"] or fl["id"] not in ev:
+                continue
+            rs = by["f" + str(fl["csv_id"])]
+            # the tag carries the job number j: packet (j - 1) / m_e of the flow
+            for k, t in sorted(ev[fl["id"]]["send"].items()):
+                h, kk = divmod((k - 1) // fl.get("every", 1), len(rs))
+                r = rs[kk]
+                rl.append({"pe": fl["src_label"], "flow": fl["id"], "n": k, "t_raw": t,
+                           "q": h * Ht + r["phase_start"] // r["period"], "bound": r["offset"]})
+    return ttcheck.analyze_run(log_path, clk, rel, table, pk, phase_of, w_h=router.header_wait(), jobs=jl, ready=rl)
 
 
 def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None):
@@ -199,7 +242,12 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
         raise ValueError("no RUN_INFO next to the log; give --f-clk")
     tr, _, clk, clock = exp23.load_run(log_path, cfg, None, path)
     from rttools.paper import ttcheck
-    injection = ttcheck.injection_rule(exp23.read_run_info(path) if path else {})
+    info = exp23.read_run_info(path) if path else {}
+    injection = ttcheck.injection_rule(info)
+    costs = ttcheck.costs_of_run(info) if injection == "tt" else None
+    if costs:
+        app = load_app(manifest_path, csv_path, map_path, costs)
+        man, spec = app["manifest"], app["spec"]
     mdl, sched = model(app, clock["clock_hz"])
     if not sched.feasible:
         raise ValueError("the CPU schedule of the model misses a deadline at the clock of the run")
@@ -383,20 +431,17 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
         "monitor": exp23.monitor_summary(log_path),
         "phase_conformance": phase_conformance(tr, clk, rel, jobs, man, spec, mdl, sched),
         "injection": injection,
-        "tt": tt_check(log_path, app, clk, rel, csv_path, map_path, arch, clock["clock_hz"])
+        "costs": None if not costs else {"file": os.path.basename(costs), "rule": "max"},
+        "tt": tt_check(log_path, app, clk, rel, csv_path, map_path, arch, clock["clock_hz"], sched, jobs, ev)
         if injection == "tt" and arch else None,
     }
-    tt_packets = m["tt"].pop("per_packet") if m["tt"] else []
+    from rttools.paper import ttcheck as _tc
+    tt_rows = _tc.pop_rows(m["tt"])
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
         json.dump(m, f, indent=1, default=str)
     import csv
-    if tt_packets:
-        with open(os.path.join(out_dir, "tt_packets.csv"), "w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(list(tt_packets[0]))
-            for r in tt_packets:
-                w.writerow(list(r.values()))
+    _tc.write_rows(out_dir, tt_rows)
     with open(os.path.join(out_dir, "chains.csv"), "w", newline="") as f:
         w = csv.writer(f)
         cols = ["chain", "bound_cycles", "measured_max_cycles", "jobs", "above_bound", "margin_cycles"]

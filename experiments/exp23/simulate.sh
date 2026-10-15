@@ -109,6 +109,10 @@
 #   crt0         guard_readback, guard or plain (CRT0 above)
 # and the injection of the packets between PEs (rttools.paper.ttcheck):
 #   injection    tt or finish (INJECTION above)
+#   costs        costs of the link schedule of the injection table of the image:
+#                max_csv_static (t(v) = max of the CSV and the static t(v) of the
+#                image, experiments/wcet costs/tt; costs_file and costs_sha256
+#                name the file) or csv
 set -euo pipefail
 
 OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]}
@@ -265,6 +269,14 @@ fi
 		echo "injection=tt"
 	else
 		echo "injection=finish"
+	fi
+	# costs of the link schedule of the table of the image (line "Costs:" of app/<app>_tt.h,
+	# rttools.ucxgen tt --costs); the images without a table take the costs of the CSV
+	TT_H="$UCX_APP/${APP}_tt.h"
+	if [ -f "$TT_H" ] && grep -q "^ \* Costs: max(CSV, static) " "$TT_H"; then
+		sed -n 's/^ \* Costs: max(CSV, static) \([^ ]*\) sha256 \([0-9a-f]*\)$/costs=max_csv_static costs_file=\1 costs_sha256=\2/p' "$TT_H" | head -1
+	else
+		echo "costs=csv"
 	fi
 	if [ "$(setup TICK_RELEASE)" = 1 ]; then echo "release=tick"; else echo "release=data"; fi
 } >> "$OUT/RUN_INFO"

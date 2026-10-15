@@ -207,7 +207,7 @@ def _swap(label):
     return f"{y}-{x}"
 
 
-def synth_log(base_log, base_info, out_dir, packets, pes, period, f_hz, perturb=None):
+def synth_log(base_log, base_info, out_dir, packets, pes, period, f_hz, perturb=None, costs=None):
     """Copy of a stored log without its FLIT lines, plus TIMER lines (ticks
     of every PE in `pes` and a compare interrupt per packet) and FLIT TX, RX
     and END lines of `packets` ({src, dst (monitor labels), tag, size, hops,
@@ -244,7 +244,11 @@ def synth_log(base_log, base_info, out_dir, packets, pes, period, f_hz, perturb=
     log = out_dir / "events.txt"
     log.write_text("".join(base) + "\n".join(extra) + "\n")
     info = open(base_info).read()
-    (out_dir / "RUN_INFO").write_text(info + ("" if info.endswith("\n") else "\n") + "injection=tt\n")
+    extra_info = "injection=tt\n"
+    if costs:
+        from rttools.ucxgen.model import sha256
+        extra_info += f"costs=max_csv_static costs_file={os.path.basename(costs)} costs_sha256={sha256(costs)}\n"
+    (out_dir / "RUN_INFO").write_text(info + ("" if info.endswith("\n") else "\n") + extra_info)
     return str(log), rel
 
 
@@ -252,14 +256,18 @@ def tick_of(rel_ns, q, f_hz, period):
     return int(round(rel_ns[0] * f_hz / 1e9)) + DELTA + q * period
 
 
-def e_packets(f_hz, rel):
+COSTS = os.path.join(EXP, "wcet", "costs", "tt")
+
+
+def e_packets(f_hz, rel, costs=None):
     """Packets of application E for run UH: the n-th packet of each flow
     between PEs from the job of phase n + n(source); monitor labels (the
     swap of the config labels, run UH)."""
     cfg = exp23.load_config(os.path.join(EXP, "exp23", "config.json"))
     phi = exp23.response_bound(cfg)["phases"]
+    router.set_ni("tt")
     rows = {r["flow"]: r for r in ttcheck.schedule_rows(E_CSV, E_MAP, os.path.join(ARCH, "hermes-2x2.gml"),
-                                                         cfg["clock_hz"])["rows"]}
+                                                         cfg["clock_hz"], costs=costs)["rows"]}
     from rttools.ucxgen.model import read_csv
     _, csv_flows, _ = read_csv(E_CSV)
     fid = {(f["source"], f["target"]): f["id"] for f in csv_flows}
@@ -279,15 +287,15 @@ def e_packets(f_hz, rel):
     return out
 
 
-def run_e(tmp_path, perturb=None):
+def run_e(tmp_path, perturb=None, costs=None):
     E = os.path.join(EXP, "exp23")
     info = exp23.read_run_info(os.path.join(E, "logs", "UH.RUN_INFO"))
     f_hz = float(info["clock_hz_exact"])
     with open(os.path.join(E, "logs", "UH.events.txt")) as f:
         rel = [int(m.group(1)) for m in (re.search(r"workflow iteration at (\d+) ns", ln) for ln in f) if m]
-    pk = e_packets(f_hz, rel)
+    pk = e_packets(f_hz, rel, costs)
     log, _ = synth_log(os.path.join(E, "logs", "UH.events.txt"), os.path.join(E, "logs", "UH.RUN_INFO"),
-                       tmp_path / "run", pk, ["0-0", "1-0", "0-1", "1-1"], 217456, f_hz, perturb)
+                       tmp_path / "run", pk, ["0-0", "1-0", "0-1", "1-1"], 217456, f_hz, perturb, costs)
     m = exp23.analyze(log, exp23.load_config(os.path.join(E, "config.json")), str(tmp_path / "out"),
                       arch=os.path.join(ARCH, "hermes-2x2.gml"), mapping=E_MAP)
     return m, pk
@@ -304,6 +312,32 @@ def test_exp23_run_with_the_injection_at_the_schedule(tmp_path):
     assert (tmp_path / "out" / "tt_packets.csv").exists()
     from rttools.paper import phasecheck
     assert phasecheck.main([str(tmp_path / "out" / "metrics.json")]) in (0, 1)
+
+
+def test_exp23_run_with_the_costs_of_the_image(tmp_path):
+    """RUN_INFO costs=max(CSV, static) weird_a.json: the link schedule takes
+    t(v) = max(CSV, static t(v) of the image); every iteration of run UH
+    ends at or before F(v) of that model after the tick of its phase and
+    every packet between PEs is enqueued (send TAG line) at or before its
+    instant s (the finish injection of UH sends a packet at the end of its
+    job, before s)."""
+    m, pk = run_e(tmp_path, costs=os.path.join(COSTS, "weird_a.json"))
+    t = m["tt"]
+    assert m["costs"] == {"file": "weird_a.json", "rule": "max"}
+    assert t["violations"] == 0 and t["packets"] == len(pk)
+    assert t["jobs"]["events"] > 300 and t["jobs"]["late"] == 0 and t["jobs"]["unchecked"] == 0
+    assert t["ready"]["events"] > 100 and t["ready"]["late"] == 0
+    assert (tmp_path / "out" / "tt_jobs.csv").exists() and (tmp_path / "out" / "tt_ready.csv").exists()
+
+
+def test_costs_of_run_checks_the_hash(tmp_path):
+    assert ttcheck.costs_of_run({"costs": "csv"}) is None and ttcheck.costs_of_run(None) is None
+    path = os.path.join(COSTS, "car_v.json")
+    from rttools.ucxgen.model import sha256
+    info = {"costs": "max_csv_static", "costs_file": "car_v.json", "costs_sha256": sha256(path)}
+    assert ttcheck.costs_of_run(info) == path
+    with pytest.raises(ValueError):
+        ttcheck.costs_of_run(dict(info, costs_sha256="00"))
 
 
 def test_exp23_run_finds_an_early_and_a_late_packet(tmp_path):
@@ -328,9 +362,13 @@ def test_runs_without_the_line_are_finish():
     assert "injection" not in m_info and ttcheck.injection_rule(m_info) == "finish"
 
 
-def test_rtlapp_run_wcet_e(tmp_path):
+@pytest.mark.parametrize("costs", [None, os.path.join(COSTS, "wcet_e.json")])
+def test_rtlapp_run_wcet_e(tmp_path, costs):
     """WCET-E (rtlapp): the packets of a synthetic run at 500 MHz with the
-    instants of wcet_e_tt.h conform; tags carry flow and iteration."""
+    instants of wcet_e_tt.h conform; tags carry flow and iteration. With
+    the costs of the image in RUN_INFO: every iteration of run W3 ends at
+    or before F(v) of the model with t(v) = max(CSV, static) and every
+    packet is enqueued at or before its instant s."""
     from rttools.paper import rtlapp
     W = os.path.join(EXP, "wcet")
     man = os.path.join(APP_DIR, "wcet_e.json")
@@ -339,7 +377,7 @@ def test_rtlapp_run_wcet_e(tmp_path):
     app = rtlapp.load_app(man, csv_p, map_p)
     mdl = rtlapp.model(app, 500000000)
     rows = {r["flow"]: r for r in ttcheck.schedule_rows(csv_p, map_p, os.path.join(ARCH, "hermes-2x2.gml"),
-                                                         500000000)["rows"]}
+                                                         500000000, costs=costs)["rows"]}
     with open(os.path.join(W, "logs", "W3.events.txt")) as f:
         rel = [int(m.group(1)) for m in (re.search(r"workflow iteration at (\d+) ns", ln) for ln in f) if m]
     f_hz = 500000000.0
@@ -357,11 +395,15 @@ def test_rtlapp_run_wcet_e(tmp_path):
                        "size": router.getPacketFlits(fl["bytes"]), "hops": exp23._hops(fl["src_label"], fl["dst_label"]),
                        "tau": tick_of(rel, q, f_hz, P), "s16": r["s16"], "s": r["offset"]})
     log, _ = synth_log(os.path.join(W, "logs", "W3.events.txt"), os.path.join(W, "logs", "W3.RUN_INFO"),
-                       tmp_path / "run", pk, ["0-0", "1-0", "0-1", "1-1"], P, f_hz)
+                       tmp_path / "run", pk, ["0-0", "1-0", "0-1", "1-1"], P, f_hz, costs=costs)
     m = rtlapp.analyze(log, man, csv_p, map_p, str(tmp_path / "out"), arch=os.path.join(ARCH, "hermes-2x2.gml"))
     t = m["tt"]
     assert t["packets"] == len(pk) and t["violations"] == 0 and t["unchecked"] == 0
     assert m["link_schedule"]["feasible"]
+    if costs:
+        assert m["costs"]["file"] == "wcet_e.json"
+        assert t["jobs"]["events"] > 50 and t["jobs"]["late"] == 0 and t["jobs"]["unchecked"] == 0
+        assert t["ready"]["events"] > 20 and t["ready"]["late"] == 0
     assert any("time-triggered injection" in x for x in rtlapp.summary_lines(m))
 
 
@@ -426,7 +468,8 @@ def test_kernel_sources_and_build_options():
 def test_simulate_injection_line(tmp_path):
     """simulate.sh passes INJECTION to make and writes injection=tt when the
     listing of the image has timer1ocr_handler, else injection=finish; an
-    unknown value stops with status 2."""
+    unknown value stops with status 2. The line costs copies the costs file
+    of the line Costs of app/<app>_tt.h (costs=csv without it)."""
     from tests.test_simulate_options import stub_repo
     repo, env, log = stub_repo(tmp_path)
     sh = str(repo / "experiments" / "exp23" / "simulate.sh")
@@ -434,6 +477,8 @@ def test_simulate_injection_line(tmp_path):
     assert r.returncode == 0, r.stderr
     assert "-s weird_a F_CLK=500000000 F_TICK=2000 INJECTION=tt" in log.read_text()
     assert "\ninjection=finish\n" in (tmp_path / "o" / "RUN_INFO").read_text()
+    assert "\ncosts=csv\n" in (tmp_path / "o" / "RUN_INFO").read_text()
+    shutil.copy(os.path.join(APP_DIR, "weird_a_tt.h"), repo / "pkt-sim" / "software" / "ucx-os" / "app")
     # a make that leaves a listing with the compare handler
     b = tmp_path / "bin2"
     b.mkdir()
@@ -445,7 +490,9 @@ def test_simulate_injection_line(tmp_path):
     r = subprocess.run(["bash", sh, str(tmp_path / "o2"), "1000"], capture_output=True, text=True, env=env2)
     assert r.returncode == 0, r.stderr
     assert "-s weird_a F_CLK=500000000 F_TICK=2000 INJECTION=finish" in log.read_text()
-    assert "\ninjection=tt\n" in (tmp_path / "o2" / "RUN_INFO").read_text()
+    info = exp23.read_run_info(str(tmp_path / "o2" / "RUN_INFO"))
+    assert info["injection"] == "tt" and info["costs"] == "max_csv_static"
+    assert ttcheck.costs_of_run(info) == os.path.join(COSTS, "weird_a.json")
     r = subprocess.run(["bash", sh, str(tmp_path / "o3"), "1000"], capture_output=True, text=True,
                        env={**env, "INJECTION": "x"})
     assert r.returncode == 2 and "INJECTION must be" in r.stderr

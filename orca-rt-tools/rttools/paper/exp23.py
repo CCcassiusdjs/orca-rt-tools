@@ -1202,12 +1202,15 @@ def mhz_text(hz):
     return f"{hz / 1e6:.6f}".rstrip("0").rstrip(".")
 
 
-def tt_check(log_path, tr, cfg, clk, per_packet, arch_path, map_path):
+def tt_check(log_path, tr, cfg, clk, per_packet, arch_path, map_path, costs=None):
     """Packets between PEs of a run with the time-triggered injection
     (weird_a.c with the table weird_a_tt.h) against the link schedule at
     the clock of the run (rttools.paper.ttcheck): the n-th packet of a flow
     (n from 0, order of TX.head) comes from the job of its source in phase
-    n + n(source)."""
+    n + n(source). `costs`: costs file of the run (t(v) = max(CSV,
+    static)); the end of iteration k of v (ITER end marker) at or before
+    F(v) of that model after the tick of phase k - 1 + n(v), and the
+    enqueue of the k-th packet of a flow (send TAG line) at or before s."""
     from rttools.paper import ttcheck
     from rttools.tui.model import parsers as tparsers
     from rttools.ucxgen.model import read_csv
@@ -1225,12 +1228,36 @@ def tt_check(log_path, tr, cfg, clk, per_packet, arch_path, map_path):
     for p in pk:
         p["n"] = count.get(p["flow"], 0)
         count[p["flow"]] = p["n"] + 1
-    table = ttcheck.schedule_rows(cfg["application"], map_path, arch_path, cfg["clock_hz"])
+    table = ttcheck.schedule_rows(cfg["application"], map_path, arch_path, cfg["clock_hz"], costs=costs)
 
     def phase_of(p, row, h):
         return h + phi[flows[p["flow"]]["source"]]
+    jobs = ready = None
+    if costs:
+        from rttools.paper import ttflow
+        from rttools.modules.routing import router
+        prev = router.set_ni("tt")
+        try:
+            g, _, noc, entries, _ = ttflow.load_app(cfg["application"], map_path, arch_path, costs)
+            pm = ttflow.phase_model(g, noc, entries, cfg["clock_hz"])
+        finally:
+            router.set_ni(prev)
+        fin = {t: x["finish"] for t, x in pm["tasks"].items()}
+        jobs = [{"pe": it["lane"], "task": v, "j": k, "t_raw": it["end"], "q": k - 1 + phi[v], "bound": fin[v]}
+                for v, ks in iteration_marks(tr).items() if v in fin
+                for k, it in sorted(ks.items()) if it["end"] is not None]
+        by = ttcheck.rows_by_flow(table)
+        ready = []
+        for f in cfg["flows"]:
+            if f["src_pe"] == f["dst_pe"]:
+                continue
+            s0 = by[label[(f["source"], f["target"])]][0]["offset"]
+            sends = sorted(m.time for m in tr.lane_marks(f["src_pe"]) if m.kind == "send" and m.label == "TAG " + f["tag"])
+            ready += [{"pe": f["src_pe"], "flow": f["name"], "n": n, "t_raw": t, "q": n + phi[f["source"]],
+                       "bound": s0} for n, t in enumerate(sends)]
     return ttcheck.analyze_run(log_path, clk, release_times(tr, cfg, clk), table, pk, phase_of,
-                               relabel=tparsers.swap_node if tr.meta.get("swap_xy") else None)
+                               relabel=tparsers.swap_node if tr.meta.get("swap_xy") else None, jobs=jobs,
+                               ready=ready)
 
 
 def phase_conformance(tr, cfg, clk, rule):
@@ -1276,6 +1303,7 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
     info = read_run_info(info_path) if info_path else {}
     rel_rule = phasecheck.release_rule(info, release_rule)
     injection = ttcheck.injection_rule(info)
+    costs = ttcheck.costs_of_run(info) if injection == "tt" else None
     windows = hyperperiods(tr, cfg, clk)
     if not windows:
         raise ValueError("the log has no complete hyperperiod after first_hyperperiod_s")
@@ -1291,8 +1319,9 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
     per_packet = net.pop("per_packet") if net else []
     tt = None
     if injection == "tt" and net is not None and arch and mapping:
-        tt = tt_check(log_path, tr, cfg, clk, per_packet, arch, mapping)
-    tt_packets = tt.pop("per_packet") if tt else []
+        tt = tt_check(log_path, tr, cfg, clk, per_packet, arch, mapping, costs)
+    from rttools.paper import ttcheck as _tc
+    tt_rows = _tc.pop_rows(tt)
     m = {
         "log": os.path.basename(log_path),
         "unit": {"name": tr.unit.name, "seconds": tr.unit.seconds, "detected": tr.meta["timescale_detected"],
@@ -1334,6 +1363,7 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
         "network": net,
         "phase_conformance": phase_conformance(tr, cfg, clk, rel_rule),
         "injection": injection,
+        "costs": None if not costs else {"file": os.path.basename(costs), "rule": "max"},
         "tt": tt,
     }
     if listing or listing_without:
@@ -1395,12 +1425,7 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
                 [("Item", "item"), ("Thesis", "thesis"), ("This run", "this_run")],
                 thesis_rows, "lrr", "Values of the thesis and of this run.", "tab:exp23-thesis")
     write_per_iteration(out_dir, m["per_iteration"])
-    if tt_packets:
-        with open(os.path.join(out_dir, "tt_packets.csv"), "w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(list(tt_packets[0]))
-            for x in tt_packets:
-                w.writerow(list(x.values()))
+    _tc.write_rows(out_dir, tt_rows)
     if net:
         cols = list(per_packet[0].keys()) if per_packet else []
         with open(os.path.join(out_dir, "network_packets.csv"), "w", newline="") as f:

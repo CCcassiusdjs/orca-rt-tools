@@ -35,6 +35,8 @@ sending job):
 | latency | RX.last - TX.head | <= o_i |
 | occupancy_used | END - (tau + s) | <= o_i (the packet holds its links and the network interfaces of its PEs inside [s, s + o_i] of the schedule) |
 | arrival | END - tau | <= s + o_i = a_{i,j} of the schedule, and <= the deadline of the packet |
+| job end (jobs) | ITER end marker of job j - tick of its phase | <= F of the job in the model with t(v) = max(CSV, static) |
+| ready (ready) | `->` TAG line of the packet (ucx_noc_send_at enqueues it) - tau | <= s |
 
 occupancy_used = inject_delay + header_wait + 6 (m + 1) + p + 1 + rx_wait
 + end_wait, so the four waits within their bounds give occupancy_used <=
@@ -258,10 +260,12 @@ def phase_ticks(release_cycles, grid, period):
     return ticks, all(b - a == period for a, b in zip(ticks, ticks[1:]))
 
 
-def schedule_rows(csv_path, map_path, arch_path, f_clk, composition=None):
+def schedule_rows(csv_path, map_path, arch_path, f_clk, composition=None, costs=None):
     """Rows of the link schedule of the time-triggered injection at f_clk
-    (rttools.ucxgen.tt, network-interface model tt), as the generator of
-    the table of the image: {"rows", "hyperperiod", "model"}."""
+    (rttools.ucxgen.tt, network-interface model tt, the costs file of the
+    run under the rule max), as the generator of the table of the image:
+    {"rows", "hyperperiod", "model"}."""
+    from rttools.wcet import costs as wcosts
     from rttools.modules.io import appparser, mapparser, nocparser
     from rttools.tui.model import network as tnet
     from rttools.ucxgen import tt
@@ -269,13 +273,18 @@ def schedule_rows(csv_path, map_path, arch_path, f_clk, composition=None):
     try:
         if composition:
             from rttools.multiapp import compose
+            spec = compose.read_spec(composition)
+            if costs:
+                compose.set_costs(spec, {x["name"]: costs for x in spec["apps"]})
             with tnet.quiet():
-                comp = compose.load(compose.read_spec(composition))
+                comp = compose.load(spec)
             return tt.union(comp, f_clk)
         with tnet.quiet():
             g, appname = appparser.loadFromFile(csv_path)
             noc = nocparser.loadFromFile(arch_path)
             entries = mapparser.loadFromFile(map_path)
+        if costs:
+            wcosts.apply(g, costs, wcosts.MAX)
         return tt.single(g, noc, entries, appname, f_clk)
     finally:
         router.set_ni(prev)
@@ -291,6 +300,38 @@ def rows_by_flow(table):
     return out
 
 
+def all_phase_ticks(release_cycles, grids, period):
+    """({pe: [tick of phase q]}, PEs whose phase ticks are not one tick
+    apart)."""
+    ticks, irregular = {}, 0
+    for pe, g in grids.items():
+        ticks[pe], ok = phase_ticks(release_cycles, g, period)
+        irregular += not ok
+    return ticks, irregular
+
+
+def deadlines(events, ticks, to_cycles):
+    """Events against a bound from the tick of a phase: `events` = [{"pe",
+    "t_raw" (instant in raw units of the log), "q" (phase), "bound" (cycles
+    from the tick of phase q), ...}]. Returns {"events", "unchecked",
+    "late", "slack_min", "rows"} (slack = bound - (instant - tick))."""
+    rows, unchecked = [], 0
+    for e in events:
+        tk = ticks.get(e["pe"])
+        if tk is None or e["t_raw"] is None or not 0 <= e["q"] < len(tk):
+            unchecked += 1
+            continue
+        d = to_cycles(e["t_raw"]) - tk[e["q"]]
+        rows.append(dict(e, after_tick=exact_cycles(d), slack=exact_cycles(e["bound"] - d)))
+    return {"events": len(rows), "unchecked": unchecked, "late": sum(1 for r in rows if r["slack"] < 0),
+            "slack_min": min((r["slack"] for r in rows), default=None), "rows": rows}
+
+
+def exact_cycles(x):
+    r = round(x)
+    return r if abs(x - r) < 1e-6 else x
+
+
 def attach(packets, table, phase_of, release_cycles, grids, period):
     """Sets tau, s, s16, occupancy, deadline and phase of each packet with
     `flow_label` (label of the schedule rows) and `n` (0-based position of
@@ -300,10 +341,7 @@ def attach(packets, table, phase_of, release_cycles, grids, period):
     or a release keep tau None. Returns the count of PEs whose phase ticks
     are not one tick apart."""
     by = rows_by_flow(table)
-    ticks, irregular = {}, 0
-    for pe, g in grids.items():
-        ticks[pe], ok = phase_ticks(release_cycles, g, period)
-        irregular += not ok
+    ticks, irregular = all_phase_ticks(release_cycles, grids, period)
     for p in packets:
         p["tau"] = None
         rs = by.get(p.get("flow_label"))
@@ -323,7 +361,13 @@ def summary_lines(t):
     if t is None:
         return ["time-triggered injection: no FLIT END or TIMER lines"]
     b = t["bounds"]
-    return [f"time-triggered injection: {t['packets']} packets ({t['unchecked']} unchecked), violations "
+    extra = []
+    for key, what in (("jobs", "job ends after F"), ("ready", "packets enqueued after s")):
+        if key in t:
+            x = t[key]
+            extra.append(f"  {what}: {x['late']} of {x['events']} ({x['unchecked']} unchecked), smallest slack "
+                         f"{x['slack_min']}")
+    return extra + [f"time-triggered injection: {t['packets']} packets ({t['unchecked']} unchecked), violations "
             f"{t['violations']}: early {t['early']}, inject > {b['inject']}: {t['inject_above_bound']}, header > "
             f"w_h (m + 1): {t['header_above_bound']}, rx wait > {b['rx_size']}: {t['rx_wait_above_bound']}, end wait > "
             f"{b['rx_end']}: {t['end_wait_above_bound']}, latency > o_i: {t['latency_above_occupancy']}, "
@@ -333,7 +377,8 @@ def summary_lines(t):
             f"smallest occupancy slack {t['occupancy_slack_min']}, smallest deadline slack {t['deadline_slack_min']}"]
 
 
-def analyze_run(log_path, clk, releases_raw, table, packets, phase_of, w_h=None, relabel=None):
+def analyze_run(log_path, clk, releases_raw, table, packets, phase_of, w_h=None, relabel=None, jobs=None,
+                ready=None):
     """Time-triggered injection of a run: `packets` from the FLIT lines
     (dicts with src, dst, tag, size, hops, tx_head, tx_last, rx_head,
     rx_last, flow (name of the analysis), flow_label (label of the rows of
@@ -341,7 +386,10 @@ def analyze_run(log_path, clk, releases_raw, table, packets, phase_of, w_h=None,
     log (exp23.Clock clk); `relabel` maps the PE labels of the monitor to
     the labels of the packets (swap_xy of the trace). Returns None without
     TIMER lines, else the result of evaluate plus the tick grid of each
-    PE."""
+    PE. `jobs`: the end of each job ({"pe", "task", "j", "t_raw", "q",
+    "bound" = F of the job in the model}); `ready`: the enqueue of each
+    packet between PEs (`->` TAG line; {"pe", "flow", "n", "t_raw", "q",
+    "bound" = s}): deadlines() of each, "jobs" and "ready" of the result."""
     ends, timers = read(log_path)
     if relabel is not None:
         for e in ends:
@@ -364,5 +412,56 @@ def analyze_run(log_path, clk, releases_raw, table, packets, phase_of, w_h=None,
                           for pe, g in sorted(grids.items())},
                tick_grid_coverage_min=round(min(g["coverage"] for g in grids.values()), 6),
                end_lines=len(ends), timer_lines=len(timers))
+    ticks, _ = all_phase_ticks(rel, grids, period)
+    to_cyc = (lambda t: clk.cycles(t) - c0)
+    for key, ev in (("jobs", jobs), ("ready", ready)):
+        if ev is not None:
+            d = deadlines(ev, ticks, to_cyc)
+            out[key] = {k: v for k, v in d.items() if k != "rows"}
+            out[key + "_rows"] = d["rows"]
+            out["violations"] += d["late"] + d["unchecked"]
     out["violations"] += irregular + (out["tick_grid_coverage_min"] < GRID_MIN_COVERAGE)
     return out
+
+
+def costs_of_run(info):
+    """Costs file of a run from its RUN_INFO (costs=max_csv_static
+    costs_file=<file> costs_sha256=<hash>, experiments/exp23/simulate.sh):
+    the path of the file in experiments/wcet/costs/tt of this tree, after a
+    check of its hash; None for a run with the costs of the CSV."""
+    import hashlib
+    info = info or {}
+    if info.get("costs") != "max_csv_static":
+        return None
+    name, sha = info["costs_file"], info["costs_sha256"]
+    path = os.path.join(REPO, "experiments", "wcet", "costs", "tt", name)
+    with open(path, "rb") as f:
+        got = hashlib.sha256(f.read()).hexdigest()
+    if got != sha.strip():
+        raise ValueError(f"RUN_INFO costs: {name} of this tree has sha256 {got}, the run {sha.strip()}")
+    return path
+
+
+ROW_FILES = (("per_packet", "tt_packets.csv"), ("jobs_rows", "tt_jobs.csv"), ("ready_rows", "tt_ready.csv"))
+
+
+def pop_rows(t):
+    """Removes the rows of a result of analyze_run (per packet, per job,
+    per enqueue) and returns them: {file name: rows}."""
+    if not t:
+        return {}
+    return {name: t.pop(key) for key, name in ROW_FILES if key in t}
+
+
+def write_rows(out_dir, rows):
+    """Writes the rows of pop_rows as CSV files in out_dir."""
+    import csv
+    for name, rs in rows.items():
+        if not rs:
+            continue
+        cols = list(dict.fromkeys(k for r in rs for k in r))
+        with open(os.path.join(out_dir, name), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(cols)
+            for r in rs:
+                w.writerow([r.get(c) for c in cols])
