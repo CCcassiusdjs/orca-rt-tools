@@ -21,6 +21,8 @@ DIRS   += tt
 DIRS   += cputime
 # ablation: terms of the flow and the event-triggered baseline, about 20 s
 DIRS   += ablation
+# automotive: engine-control workload (Kramer et al., WATERS 2015), general phase model, about 10 s
+DIRS   += automotive
 
 .PHONY: all clean $(DIRS)
 

@@ -1,0 +1,409 @@
+{
+ "_doc": "rttools.paper.automotive run --config config.json",
+ "chain_rows": [
+  {
+   "chain": "T1",
+   "constraint_ms": 100,
+   "data_age_ms": 0.16687591546348607,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T2-T3",
+   "constraint_ms": 1010,
+   "data_age_ms": 1000.0143280360347,
+   "periods_ms": [
+    10,
+    1000
+   ],
+   "within": true
+  },
+  {
+   "chain": "T4",
+   "constraint_ms": 100,
+   "data_age_ms": 0.4547306747723043,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T5",
+   "constraint_ms": 10,
+   "data_age_ms": 0.576645631656039,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T6-T7",
+   "constraint_ms": 1020,
+   "data_age_ms": 1002.3838724243126,
+   "periods_ms": [
+    1000,
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T8-T9",
+   "constraint_ms": 30,
+   "data_age_ms": 20.53890926311384,
+   "periods_ms": [
+    20,
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T10",
+   "constraint_ms": 100,
+   "data_age_ms": 0.03443244017136375,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T11",
+   "constraint_ms": 10,
+   "data_age_ms": 0.3077003557229546,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T12",
+   "constraint_ms": 10,
+   "data_age_ms": 0.8595389918613231,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T13",
+   "constraint_ms": 10,
+   "data_age_ms": 2.457555533529366,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T14",
+   "constraint_ms": 10,
+   "data_age_ms": 2.1807138687899914,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T15-T16",
+   "constraint_ms": 30,
+   "data_age_ms": 20.91635554674508,
+   "periods_ms": [
+    20,
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T17",
+   "constraint_ms": 100,
+   "data_age_ms": 0.6146518210151871,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T18",
+   "constraint_ms": 20,
+   "data_age_ms": 0.4144723075737051,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T19",
+   "constraint_ms": 100,
+   "data_age_ms": 0.8194458210812656,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T20-T21",
+   "constraint_ms": 30,
+   "data_age_ms": 21.763361636986374,
+   "periods_ms": [
+    10,
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T22",
+   "constraint_ms": 100,
+   "data_age_ms": 0.2162366053237299,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T23",
+   "constraint_ms": 20,
+   "data_age_ms": 0.9478585037609718,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T24",
+   "constraint_ms": 100,
+   "data_age_ms": 1.0875981542053503,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T25",
+   "constraint_ms": 100,
+   "data_age_ms": 0.6591116837920288,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T26",
+   "constraint_ms": 2,
+   "data_age_ms": 1.1696346956531316,
+   "periods_ms": [
+    2
+   ],
+   "within": true
+  },
+  {
+   "chain": "T27",
+   "constraint_ms": 10,
+   "data_age_ms": 0.83794781995793,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T28",
+   "constraint_ms": 20,
+   "data_age_ms": 1.1411878723802602,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T29",
+   "constraint_ms": 5,
+   "data_age_ms": 1.60144161407914,
+   "periods_ms": [
+    5
+   ],
+   "within": true
+  },
+  {
+   "chain": "T30-T31",
+   "constraint_ms": 1020,
+   "data_age_ms": 1000.531486437374,
+   "periods_ms": [
+    1000,
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T32-T33-T34",
+   "constraint_ms": 130,
+   "data_age_ms": 201.29706721291615,
+   "periods_ms": [
+    20,
+    100,
+    10
+   ],
+   "within": false
+  },
+  {
+   "chain": "T35",
+   "constraint_ms": 20,
+   "data_age_ms": 0.8294126716666116,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T36",
+   "constraint_ms": 10,
+   "data_age_ms": 1.8963777931961103,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T37-T38-T39",
+   "constraint_ms": 130,
+   "data_age_ms": 201.36452792370127,
+   "periods_ms": [
+    20,
+    100,
+    10
+   ],
+   "within": false
+  },
+  {
+   "chain": "T40",
+   "constraint_ms": 10,
+   "data_age_ms": 1.8092587086045306,
+   "periods_ms": [
+    10
+   ],
+   "within": true
+  },
+  {
+   "chain": "T41",
+   "constraint_ms": 20,
+   "data_age_ms": 0.5084966024603254,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T42",
+   "constraint_ms": 20,
+   "data_age_ms": 1.4200449334258434,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T43",
+   "constraint_ms": 20,
+   "data_age_ms": 1.496101364522417,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T44",
+   "constraint_ms": 100,
+   "data_age_ms": 0.9247915771852733,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T45",
+   "constraint_ms": 20,
+   "data_age_ms": 1.8226726577901124,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  },
+  {
+   "chain": "T46-T47-T48",
+   "constraint_ms": 130,
+   "data_age_ms": 120.5916509730069,
+   "periods_ms": [
+    10,
+    20,
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T49",
+   "constraint_ms": 100,
+   "data_age_ms": 1.2682129051442164,
+   "periods_ms": [
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T50-T51-T52",
+   "constraint_ms": 130,
+   "data_age_ms": 120.97353553374964,
+   "periods_ms": [
+    20,
+    10,
+    100
+   ],
+   "within": true
+  },
+  {
+   "chain": "T53",
+   "constraint_ms": 1,
+   "data_age_ms": 1.0,
+   "periods_ms": [
+    1
+   ],
+   "within": true
+  },
+  {
+   "chain": "T54",
+   "constraint_ms": 20,
+   "data_age_ms": 1.0534795872292155,
+   "periods_ms": [
+    20
+   ],
+   "within": true
+  }
+ ],
+ "chains": 40,
+ "chains_within_constraint": 38,
+ "criterion": "MAX_PROC",
+ "data_age_over_constraint_max": 1.5489579071053945,
+ "edges": 53,
+ "edges_on_noc": 15,
+ "f_cpu_hz": 181602000.0,
+ "hyperperiod_ms": 1000,
+ "minimum_hz": 181602000.0,
+ "packets_per_hyperperiod": 503,
+ "periods_ms": [
+  1,
+  2,
+  5,
+  10,
+  20,
+  100,
+  1000
+ ],
+ "runnables": 163,
+ "tasks": 54,
+ "variation": {
+  "jobs": 260580,
+  "late": 0,
+  "trials_per_pe": 20
+ },
+ "wcet_us": {
+  "max": 1418.5296279361573,
+  "min": 3.0454480985865473
+ }
+}
