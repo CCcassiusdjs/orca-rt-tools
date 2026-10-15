@@ -1,4 +1,4 @@
-# Ablation of the terms of the analysis flow (w_h, w_NI, the handlers of Eq. (9)) and the baseline
+# Ablation of the terms of the analysis flow (w_h, w_NI, the handlers of Eq. (7)) and the baseline
 # with event-triggered injection (WCTT by the recursive calculus of round-robin wormhole networks),
 # on the models of the runs of round r11g (../tt/config.json): rttools/paper/ablation.py.
 #

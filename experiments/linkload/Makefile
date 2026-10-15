@@ -1,4 +1,4 @@
-# Workloads in which the links set f_NoC: E and CAR-V with the payload of every flow multiplied
+# Workloads in which the contention of packets sets f_NoC: E and CAR-V with the cost of every task divided
 # by a factor (rttools/paper/linkload.py), analysis only: f_CPU, the minimum frequency of the flow
 # and of the links alone, the lowest frequency at which each packet alone fits its window.
 #

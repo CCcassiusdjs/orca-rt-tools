@@ -13,7 +13,7 @@
 #                 age; into $(BUILD)/metrics.json and $(BUILD)/values.tex (macros \ExpTt...)
 #   make check    $(BUILD)/metrics.json against reference.json (default target: run check)
 #   make tables   the link schedule and the finish of every job of each run, the tables of the
-#                 conferencia of run_r11g.sh (rttools.paper.ttflow tables), into $(BUILD)/tables
+#                 check of run_r11g.sh (rttools.paper.ttflow tables), into $(BUILD)/tables
 #
 # The models of the runs up to tag r11-rc5 (stored logs, references of ch6, ch7, figures, exp23,
 # car-v, multiapp, wcet and car-full) set the network-interface model off in their own targets

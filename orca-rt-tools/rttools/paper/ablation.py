@@ -7,14 +7,14 @@ compose.minimum_frequency) under each setting:
 
 | Setting | Model |
 |---|---|
-| flow | the model of the runs: w_h = 20, the network interface as a resource with w_NI = 15,169, the handlers of Eq. (9) |
+| flow | the model of the runs: w_h = 20, the network interface as a resource with w_NI = 15,169, the handlers of Eq. (7) |
 | no_wh | w_h = 0 |
-| no_wni | w_NI = 0 (the network interface of each PE stays a resource of the link schedule, which keeps the deadline model tick and the handlers of Eq. (9)) |
-| no_handlers | no handler charge of Eq. (9) (no handlers file) |
+| no_wni | w_NI = 0 (the network interface of each PE stays a resource of the link schedule, which keeps the deadline model tick and the handlers of Eq. (7)) |
+| no_handlers | no handler charge of Eq. (7) (no handlers file) |
 | links_only | the three removed: o_i = L0 |
-| schedule_windows | the flow, and a candidate whose tasks fail Eq. (9) with the windows [F(u), a] passes when they fit with the handlers of each packet inside its reservation [s, s + o_i] of the link schedule (search.schedule_windows_fit) |
+| schedule_windows | the flow, and a candidate whose tasks fail Eq. (7) with the windows [F(u), a] passes when they fit with the handlers of each packet inside its reservation [s, s + o_i] of the link schedule (search.schedule_windows_fit) |
 | event_triggered | one release period (single applications and the composition): no link schedule; each packet enters the NoC when its job sends it, and a candidate is feasible when F(u) + WCTT_i <= a_{i,j} and F(u) + WCTT_i <= the end of the phase of its release for every packet (rttools/modules/routing/wctt.py: polling arbiter of the Hermes router, DDMA interleaving, every packet of the phase can meet every other) and every task ends within its phase with the handlers |
-| event_triggered_exact | as event_triggered with every packet released at F(u) (jobs that execute for exactly t(v), the most favorable case for the offsets): two packets meet only when their windows [F(u), F(u) + WCTT] meet |
+| event_triggered_b50, _b90, _b100 | as event_triggered with the release jitter of each packet limited to [phase start + beta F(u), F(u)] (beta = 1: every job executes for exactly t(v)); two packets meet only when their windows [earliest release, F(u) + WCTT] meet (least fixed point, wctt.wctt) |
 | event_triggered_no_wni | as event_triggered with w_NI = 0 (no injection or receive handlers in the WCTT); compare with no_wni |
 
 Skew (single-period applications, at the clock of the run: the lowest clock at or above the minimum whose phase is
@@ -76,14 +76,19 @@ def setting(s):
         search.set_schedule_windows(prev_sw)
 
 
-def _et_check(packets, period, exact=False):
+JITTER = (0.5, 0.9, 1.0)     # beta of the offset-aware variants: earliest release = phase start + beta F(u)
+
+
+def _et_check(packets, period, beta=None):
     """WCTT of every packet (wctt.wctt over the packets of one hyperperiod
     of one release period: every packet of the phase can meet every other;
-    exact: the offset-aware variant with every packet released at F(u),
-    the release of a job that executes for exactly t(v)) and the packets
-    that miss their deadline or leave the NoC after the end of the phase of
-    their release."""
-    earliest = {p["name"]: p["min_start"] for p in packets} if exact else None
+    beta: the offset-aware variant with the earliest release of each packet
+    at the phase start + beta F(u), beta = 1 for jobs that execute for
+    exactly t(v)) and the packets that miss their deadline or leave the NoC
+    after the end of the phase of their release (premise of the bound, so
+    that packets of distinct phases never meet)."""
+    earliest = None if beta is None else {
+        p["name"]: (p["min_start"] // period) * period + beta * (p["min_start"] % period) for p in packets}
     bound = wctt.wctt(packets, earliest=earliest)
     late = {p["name"] for p in packets if p["name"] in bound and (
         p["min_start"] + bound[p["name"]] > p["abs_deadline"]
@@ -91,7 +96,7 @@ def _et_check(packets, period, exact=False):
     return bound, late
 
 
-def event_triggered_at(app, noc, mapping, appname, frequency, cfg, exact=False):
+def event_triggered_at(app, noc, mapping, appname, frequency, cfg, beta=None):
     """Attempt of search (keys of schedule_at) for event-triggered injection:
     feasible when every packet of the phase meets its deadline with its
     WCTT from the finish of its source, leaves the NoC within the phase of
@@ -100,17 +105,19 @@ def event_triggered_at(app, noc, mapping, appname, frequency, cfg, exact=False):
     packets, hp, _ = flowUnwrapper.unwrap(instance, noc, mapping)
     if hp == 0:
         return None
-    bound, late = _et_check(packets, hp, exact)
+    bound, late = _et_check(packets, hp, beta)
     ok = not late and release.handlers_fit(instance, mapping) and release.deadline_fits(instance, mapping)
     return {"frequency": frequency, "hyperperiod": hp, "problem": {"packets": packets},
             "schedule": {} if ok else None, "skipped": late, "wctt": bound}
 
 
-def event_triggered_exact_at(app, noc, mapping, appname, frequency, cfg):
-    return event_triggered_at(app, noc, mapping, appname, frequency, cfg, exact=True)
+def event_triggered_jitter(beta):
+    def at(app, noc, mapping, appname, frequency, cfg):
+        return event_triggered_at(app, noc, mapping, appname, frequency, cfg, beta=beta)
+    return at
 
 
-def event_triggered_union(apps, exact=False):
+def event_triggered_union(apps, beta=None):
     """schedule_at replacement for the composition (compose.scheduler) under
     event-triggered injection: the WCTT over the packets of every
     application of the NoC (one release period)."""
@@ -121,7 +128,7 @@ def event_triggered_union(apps, exact=False):
         if H == 0:
             return None
         period = min(info[a["name"]]["hyperperiod"] for a in apps)
-        bound, late = _et_check(packets, period, exact)
+        bound, late = _et_check(packets, period, beta)
         ok = not late and all(
             release.handlers_fit(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])
             and release.deadline_fits(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])
@@ -138,16 +145,16 @@ def _single(a, schedule=None):
     return f
 
 
-def _composition(a, et=None):
+def _composition(a, et=False, beta=None):
     from rttools.multiapp import compose
     spec = compose.read_spec(a["composition"])
     compose.set_costs(spec, {x["name"]: a["costs"] for x in spec["apps"]})
     with tnet.quiet():
         comp = compose.load(spec)
-        if et is None:
+        if not et:
             return compose.minimum_frequency(comp["apps"], comp["noc"], search_config(a["f0_hz"]))
         sched = compose.scheduler
-        compose.scheduler = lambda apps: event_triggered_union(apps, exact=et == "exact")
+        compose.scheduler = lambda apps: event_triggered_union(apps, beta=beta)
         try:
             return compose.minimum_frequency(comp["apps"], comp["noc"], search_config(a["f0_hz"]))
         finally:
@@ -264,11 +271,15 @@ def run(cfg_path, out_dir):
             with setting(s):
                 row[sname] = minimum(a)
         if a["kind"] in ("single", "composition"):
-            for key, fn, mode, st in (("event_triggered", event_triggered_at, "bound", "flow"),
-                                      ("event_triggered_exact", event_triggered_exact_at, "exact", "flow"),
-                                      ("event_triggered_no_wni", event_triggered_at, "bound", "no_wni")):
+            variants = [("event_triggered", None, "flow"), ("event_triggered_no_wni", None, "no_wni")]
+            variants += [("event_triggered_b%d" % round(100 * b), b, "flow") for b in JITTER]
+            for key, beta, st in variants:
                 with setting(SETTINGS[st]):
-                    et = _single(a, schedule=fn) if a["kind"] == "single" else _composition(a, et=mode)
+                    if a["kind"] == "single":
+                        fn = event_triggered_at if beta is None else event_triggered_jitter(beta)
+                        et = _single(a, schedule=fn)
+                    else:
+                        et = _composition(a, et=True, beta=beta)
                     row[key] = {"f_cpu_hz": et["f_cpu_hz"], "minimum_hz": et["frequency_hz"]}
                     if et["frequency_hz"] is not None and a["kind"] == "single" and key == "event_triggered":
                         row[key]["packets"] = wctt_rows(a, et["frequency_hz"])

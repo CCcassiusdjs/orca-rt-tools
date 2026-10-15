@@ -61,6 +61,17 @@ def test_wctt_ddma_interleaving():
     assert w["a"] == router.occupancy(1, 400, wait="bound", ni="off") - p + wctt.interleaved(p)
 
 
+def test_wctt_least_fixed_point_adds_packets_whose_windows_meet():
+    """Exact releases: a starts at 0, b at 20; b meets a only through the
+    window of a without contention, so the least fixed point charges a to b
+    and b to a, and a packet released after both windows meets neither."""
+    a = {"name": "a", "datasize": 64, "path": _path(["L", "0", "1", "L"]), "min_start": 0}
+    b = {"name": "b", "datasize": 64, "path": _path(["L", "2", "1", "L"]), "min_start": 20}
+    c = {"name": "c", "datasize": 64, "path": _path(["L", "3", "1", "L"]), "min_start": 10 ** 6}
+    w, sets = wctt.wctt([a, b, c], earliest={"a": 0, "b": 20, "c": 10 ** 6}, details=True)
+    assert sets == {"a": ["b"], "b": ["a"], "c": []}
+
+
 def test_wctt_offsets_remove_packets_that_cannot_meet():
     a = {"name": "a", "datasize": 64, "path": _path(["L", "0", "1", "L"]), "min_start": 0}
     b = {"name": "b", "datasize": 64, "path": _path(["L", "2", "1", "L"]), "min_start": 100000}
@@ -74,7 +85,10 @@ def test_reference(tmp_path):
     for name, row in m["apps"].items():
         if "event_triggered" in row:
             assert row["flow"]["minimum_hz"] <= row["event_triggered"]["minimum_hz"], name
-            assert row["event_triggered_exact"]["minimum_hz"] <= row["event_triggered"]["minimum_hz"], name
+            # less release jitter, lower event-triggered clock
+            seq = [row[k]["minimum_hz"] for k in ("event_triggered", "event_triggered_b50", "event_triggered_b90",
+                                                   "event_triggered_b100")]
+            assert seq == sorted(seq, reverse=True), name
         for r, v in row.get("et_runs", {}).items():
             assert v["measured_above_wctt"] == 0 and v["late_packets"] == 0, (name, r)
         assert row["links_only"]["minimum_hz"] <= row["flow"]["minimum_hz"], name

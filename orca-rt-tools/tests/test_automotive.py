@@ -24,7 +24,8 @@ def test_generation_rules():
         assert ps == ch["periods_ms"] and len(set(ps)) == len(ps)
         assert ch["constraint_ms"] == sum(ps)
     for t, T, c, bc, wc, ac in app["tasks"]:
-        assert bc <= ac <= wc and c == max(1, round(wc * cfg["cycles_per_us"])) + cfg["scheduler_cycles"]
+        k = cfg["kernel_cycles"]
+        assert bc <= ac <= wc and c == max(1, round(wc * cfg["cycles_per_us"])) + k["dispatch"] + k["tick"] + k["release"]
 
 
 def test_reference(tmp_path):

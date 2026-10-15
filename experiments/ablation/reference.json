@@ -60,67 +60,67 @@
        "late_packets": 0,
        "measured_max": 4503,
        "slack_min": 109886,
-       "wctt": 89453.0
+       "wctt": 89528.0
       },
       "13": {
        "late_packets": 0,
        "measured_max": 1784,
        "slack_min": 27626,
-       "wctt": 73814.0
+       "wctt": 73889.0
       },
       "14": {
        "late_packets": 0,
        "measured_max": 2597,
        "slack_min": 26813,
-       "wctt": 73840.0
+       "wctt": 73915.0
       },
       "15": {
        "late_packets": 0,
        "measured_max": 1898,
        "slack_min": 112656,
-       "wctt": 50464.0
+       "wctt": 50509.0
       },
       "16": {
        "late_packets": 0,
        "measured_max": 1801,
        "slack_min": 55611,
-       "wctt": 73840.0
+       "wctt": 73915.0
       },
       "17": {
        "late_packets": 0,
        "measured_max": 2595,
        "slack_min": 26815,
-       "wctt": 67042.0
+       "wctt": 67102.0
       },
       "18": {
        "late_packets": 0,
        "measured_max": 1782,
        "slack_min": 27628,
-       "wctt": 73658.0
+       "wctt": 73733.0
       },
       "19": {
        "late_packets": 0,
        "measured_max": 2821,
        "slack_min": 111732,
-       "wctt": 73632.0
+       "wctt": 73707.0
       },
       "20": {
        "late_packets": 0,
        "measured_max": 1835,
        "slack_min": 112719,
-       "wctt": 50360.0
+       "wctt": 50405.0
       },
       "21": {
        "late_packets": 0,
        "measured_max": 2737,
        "slack_min": 110319,
-       "wctt": 28838.0
+       "wctt": 28853.0
       },
       "22": {
        "late_packets": 0,
        "measured_max": 3973,
        "slack_min": 109122,
-       "wctt": 28812.0
+       "wctt": 28827.0
       },
       "23": {
        "late_packets": 0,
@@ -132,19 +132,19 @@
        "late_packets": 0,
        "measured_max": 1726,
        "slack_min": 26459,
-       "wctt": 42987.0
+       "wctt": 43002.0
       },
       "4": {
        "late_packets": 0,
        "measured_max": 2463,
        "slack_min": 25724,
-       "wctt": 89453.0
+       "wctt": 89528.0
       },
       "7": {
        "late_packets": 0,
        "measured_max": 4501,
        "slack_min": 109886,
-       "wctt": 42987.0
+       "wctt": 43002.0
       }
      },
      "late_packets": 0,
@@ -166,67 +166,67 @@
        "late_packets": 0,
        "measured_max": 4567,
        "slack_min": 109775,
-       "wctt": 89453.0
+       "wctt": 89528.0
       },
       "13": {
        "late_packets": 0,
        "measured_max": 1823,
        "slack_min": 27488,
-       "wctt": 73814.0
+       "wctt": 73889.0
       },
       "14": {
        "late_packets": 0,
        "measured_max": 2676,
        "slack_min": 26635,
-       "wctt": 73840.0
+       "wctt": 73915.0
       },
       "15": {
        "late_packets": 0,
        "measured_max": 1936,
        "slack_min": 112572,
-       "wctt": 50464.0
+       "wctt": 50509.0
       },
       "16": {
        "late_packets": 0,
        "measured_max": 1841,
        "slack_min": 55471,
-       "wctt": 73840.0
+       "wctt": 73915.0
       },
       "17": {
        "late_packets": 0,
        "measured_max": 2676,
        "slack_min": 26635,
-       "wctt": 67042.0
+       "wctt": 67102.0
       },
       "18": {
        "late_packets": 0,
        "measured_max": 1822,
        "slack_min": 27488,
-       "wctt": 73658.0
+       "wctt": 73733.0
       },
       "19": {
        "late_packets": 0,
        "measured_max": 2898,
        "slack_min": 111611,
-       "wctt": 73632.0
+       "wctt": 73707.0
       },
       "20": {
        "late_packets": 0,
        "measured_max": 1872,
        "slack_min": 112637,
-       "wctt": 50360.0
+       "wctt": 50405.0
       },
       "21": {
        "late_packets": 0,
        "measured_max": 2796,
        "slack_min": 110195,
-       "wctt": 28838.0
+       "wctt": 28853.0
       },
       "22": {
        "late_packets": 0,
        "measured_max": 4072,
        "slack_min": 108958,
-       "wctt": 28812.0
+       "wctt": 28827.0
       },
       "23": {
        "late_packets": 0,
@@ -238,19 +238,19 @@
        "late_packets": 0,
        "measured_max": 1763,
        "slack_min": 26315,
-       "wctt": 42987.0
+       "wctt": 43002.0
       },
       "4": {
        "late_packets": 0,
        "measured_max": 2538,
        "slack_min": 25540,
-       "wctt": 89453.0
+       "wctt": 89528.0
       },
       "7": {
        "late_packets": 0,
        "measured_max": 4568,
        "slack_min": 109774,
-       "wctt": 42987.0
+       "wctt": 43002.0
       }
      },
      "late_packets": 0,
@@ -262,113 +262,121 @@
    },
    "event_triggered": {
     "f_cpu_hz": 380000000.0,
-    "minimum_hz": 558906555.1757812,
+    "minimum_hz": 559059143.0664062,
     "packets": {
      "f11:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 17651,
       "release": 95000,
       "wctt": 20550.0
      },
      "f12:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 17625,
       "release": 95000,
-      "wctt": 89453.0
+      "wctt": 89528.0
      },
      "f13:0": {
-      "deadline": 290453,
+      "deadline": 290529,
       "occupancy": 15405,
       "release": 190000,
-      "wctt": 73814.0
+      "wctt": 73889.0
      },
      "f14:0": {
-      "deadline": 290453,
+      "deadline": 290529,
       "occupancy": 15431,
       "release": 190000,
-      "wctt": 73840.0
+      "wctt": 73915.0
      },
      "f15:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15379,
       "release": 95000,
-      "wctt": 50464.0
+      "wctt": 50509.0
      },
      "f16:0": {
-      "deadline": 290453,
+      "deadline": 290529,
       "occupancy": 15431,
       "release": 161998,
-      "wctt": 73840.0
+      "wctt": 73915.0
      },
      "f17:0": {
-      "deadline": 290453,
+      "deadline": 290529,
       "occupancy": 15431,
       "release": 190000,
-      "wctt": 67042.0
+      "wctt": 67102.0
      },
      "f18:0": {
-      "deadline": 290453,
+      "deadline": 290529,
       "occupancy": 15405,
       "release": 190000,
-      "wctt": 73658.0
+      "wctt": 73733.0
      },
      "f19:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15379,
       "release": 95000,
-      "wctt": 73632.0
+      "wctt": 73707.0
      },
      "f20:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15353,
       "release": 95000,
-      "wctt": 50360.0
+      "wctt": 50405.0
      },
      "f21:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15763,
       "release": 107015,
-      "wctt": 28838.0
+      "wctt": 28853.0
      },
      "f22:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15737,
       "release": 110166,
-      "wctt": 28812.0
+      "wctt": 28827.0
      },
      "f23:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15533,
       "release": 96258,
       "wctt": 15846.0
      },
      "f3:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15257,
       "release": 190000,
-      "wctt": 42987.0
+      "wctt": 43002.0
      },
      "f4:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 15283,
       "release": 190000,
-      "wctt": 89453.0
+      "wctt": 89528.0
      },
      "f7:0": {
-      "deadline": 279453,
+      "deadline": 279529,
       "occupancy": 17651,
       "release": 95000,
-      "wctt": 42987.0
+      "wctt": 43002.0
      }
     }
    },
-   "event_triggered_exact": {
+   "event_triggered_b100": {
     "f_cpu_hz": 380000000.0,
-    "minimum_hz": 456802368.1640625
+    "minimum_hz": 433864593.5058594
+   },
+   "event_triggered_b50": {
+    "f_cpu_hz": 380000000.0,
+    "minimum_hz": 559059143.0664062
+   },
+   "event_triggered_b90": {
+    "f_cpu_hz": 380000000.0,
+    "minimum_hz": 456863403.3203125
    },
    "event_triggered_no_wni": {
     "f_cpu_hz": 380000000.0,
-    "minimum_hz": 393844604.4921875
+    "minimum_hz": 393997192.3828125
    },
    "flow": {
     "f_cpu_hz": 380000000.0,
@@ -411,11 +419,19 @@
   "CARV-E": {
    "event_triggered": {
     "f_cpu_hz": 443346000.0,
-    "minimum_hz": 574745178.2226562
+    "minimum_hz": 574954986.5722656
    },
-   "event_triggered_exact": {
+   "event_triggered_b100": {
     "f_cpu_hz": 443346000.0,
-    "minimum_hz": 573329925.5371094
+    "minimum_hz": 457595825.1953125
+   },
+   "event_triggered_b50": {
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 574954986.5722656
+   },
+   "event_triggered_b90": {
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 480125427.24609375
    },
    "event_triggered_no_wni": {
     "f_cpu_hz": 443346000.0,
@@ -477,41 +493,49 @@
    },
    "event_triggered": {
     "f_cpu_hz": 434900000.0,
-    "minimum_hz": 495243072.5097656,
+    "minimum_hz": 495300292.96875,
     "packets": {
      "f10:0": {
-      "deadline": 247621,
+      "deadline": 247650,
       "occupancy": 17450,
       "release": 98000,
-      "wctt": 60287.0
+      "wctt": 60317.0
      },
      "f1:0": {
-      "deadline": 247621,
+      "deadline": 247650,
       "occupancy": 15533,
       "release": 28530,
-      "wctt": 59319.0
+      "wctt": 59349.0
      },
      "f4:0": {
-      "deadline": 247621,
+      "deadline": 247650,
       "occupancy": 15551,
       "release": 100825,
       "wctt": 15930.0
      },
      "f6:0": {
-      "deadline": 247621,
+      "deadline": 247650,
       "occupancy": 16946,
       "release": 188301,
-      "wctt": 59319.0
+      "wctt": 59349.0
      },
      "f9:0": {
-      "deadline": 247621,
+      "deadline": 247650,
       "occupancy": 16643,
       "release": 173370,
-      "wctt": 60287.0
+      "wctt": 60317.0
      }
     }
    },
-   "event_triggered_exact": {
+   "event_triggered_b100": {
+    "f_cpu_hz": 434900000.0,
+    "minimum_hz": 449150085.44921875
+   },
+   "event_triggered_b50": {
+    "f_cpu_hz": 434900000.0,
+    "minimum_hz": 471763610.83984375
+   },
+   "event_triggered_b90": {
     "f_cpu_hz": 434900000.0,
     "minimum_hz": 449150085.44921875
    },
@@ -560,43 +584,51 @@
   "WCET-E": {
    "event_triggered": {
     "f_cpu_hz": 220388000.0,
-    "minimum_hz": 280765533.4472656,
+    "minimum_hz": 280822753.90625,
     "packets": {
      "f10:0": {
-      "deadline": 140382,
+      "deadline": 140411,
       "occupancy": 17450,
       "release": 55345,
-      "wctt": 60287.0
+      "wctt": 60317.0
      },
      "f1:0": {
-      "deadline": 140382,
+      "deadline": 140411,
       "occupancy": 15533,
       "release": 11377,
-      "wctt": 59319.0
+      "wctt": 59349.0
      },
      "f4:0": {
-      "deadline": 140382,
+      "deadline": 140411,
       "occupancy": 15551,
       "release": 31531,
       "wctt": 15930.0
      },
      "f6:0": {
-      "deadline": 140382,
+      "deadline": 140411,
       "occupancy": 16946,
       "release": 81062,
-      "wctt": 59319.0
+      "wctt": 59349.0
      },
      "f9:0": {
-      "deadline": 140382,
+      "deadline": 140411,
       "occupancy": 16643,
       "release": 74615,
-      "wctt": 60287.0
+      "wctt": 60317.0
      }
     }
    },
-   "event_triggered_exact": {
+   "event_triggered_b100": {
     "f_cpu_hz": 220388000.0,
-    "minimum_hz": 261001586.9140625
+    "minimum_hz": 234638214.11132812
+   },
+   "event_triggered_b50": {
+    "f_cpu_hz": 220388000.0,
+    "minimum_hz": 269866943.359375
+   },
+   "event_triggered_b90": {
+    "f_cpu_hz": 220388000.0,
+    "minimum_hz": 261058807.37304688
    },
    "event_triggered_no_wni": {
     "f_cpu_hz": 220388000.0,

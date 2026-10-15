@@ -4,25 +4,25 @@
  "flits_with_error": 0,
  "lost_or_timeout": 0,
  "above_bound_polling": 0,
- "above_bound_round_robin": 289,
- "largest_latency_over_bound": 0.9734,
+ "above_bound_round_robin": 170,
+ "largest_latency_over_bound": 0.8164,
  "largest_case": {
   "p": 64,
   "ns": [
-   4,
-   6,
    5,
-   1
+   6,
+   1,
+   3
   ],
   "offs": [
-   9,
-   9,
-   18,
-   15
+   7,
+   3,
+   7,
+   10
   ],
-  "packet": "3:0",
-  "latency": 1136,
-  "bound": 1167
+  "packet": "2:0",
+  "latency": 1067,
+  "bound": 1307
  },
  "largest_packets_of_one_port_before_a_packet": 6
 }

@@ -4,7 +4,7 @@
   {
    "chain": "T1",
    "constraint_ms": 100,
-   "data_age_ms": 0.16687591546348607,
+   "data_age_ms": 2.7991747578759196,
    "periods_ms": [
     100
    ],
@@ -13,7 +13,7 @@
   {
    "chain": "T2-T3",
    "constraint_ms": 1010,
-   "data_age_ms": 10.014328036034845,
+   "data_age_ms": 12.038690877034027,
    "periods_ms": [
     10,
     1000
@@ -23,7 +23,7 @@
   {
    "chain": "T4",
    "constraint_ms": 100,
-   "data_age_ms": 0.4547306747723043,
+   "data_age_ms": 4.037650141417604,
    "periods_ms": [
     100
    ],
@@ -32,7 +32,7 @@
   {
    "chain": "T5",
    "constraint_ms": 10,
-   "data_age_ms": 0.576645631656039,
+   "data_age_ms": 4.307947546924932,
    "periods_ms": [
     10
    ],
@@ -41,7 +41,7 @@
   {
    "chain": "T6-T7",
    "constraint_ms": 1020,
-   "data_age_ms": 1002.3838724243126,
+   "data_age_ms": 1005.3939000648928,
    "periods_ms": [
     1000,
     20
@@ -51,7 +51,7 @@
   {
    "chain": "T8-T9",
    "constraint_ms": 30,
-   "data_age_ms": 20.53890926311384,
+   "data_age_ms": 23.224823381043922,
    "periods_ms": [
     20,
     10
@@ -61,7 +61,7 @@
   {
    "chain": "T10",
    "constraint_ms": 100,
-   "data_age_ms": 0.03443244017136375,
+   "data_age_ms": 1.0515347789355112,
    "periods_ms": [
     100
    ],
@@ -70,7 +70,7 @@
   {
    "chain": "T11",
    "constraint_ms": 10,
-   "data_age_ms": 0.3077003557229546,
+   "data_age_ms": 0.614450307935303,
    "periods_ms": [
     10
    ],
@@ -79,7 +79,7 @@
   {
    "chain": "T12",
    "constraint_ms": 10,
-   "data_age_ms": 0.8595389918613231,
+   "data_age_ms": 2.9377517661895607,
    "periods_ms": [
     10
    ],
@@ -88,7 +88,7 @@
   {
    "chain": "T13",
    "constraint_ms": 10,
-   "data_age_ms": 2.457555533529366,
+   "data_age_ms": 5.537239969145251,
    "periods_ms": [
     10
    ],
@@ -97,7 +97,7 @@
   {
    "chain": "T14",
    "constraint_ms": 10,
-   "data_age_ms": 2.1807138687899914,
+   "data_age_ms": 1.9784628947142873,
    "periods_ms": [
     10
    ],
@@ -106,7 +106,7 @@
   {
    "chain": "T15-T16",
    "constraint_ms": 30,
-   "data_age_ms": 20.91635554674508,
+   "data_age_ms": 21.297234092050005,
    "periods_ms": [
     20,
     10
@@ -116,7 +116,7 @@
   {
    "chain": "T17",
    "constraint_ms": 100,
-   "data_age_ms": 0.6146518210151871,
+   "data_age_ms": 3.362420873483281,
    "periods_ms": [
     100
    ],
@@ -125,7 +125,7 @@
   {
    "chain": "T18",
    "constraint_ms": 20,
-   "data_age_ms": 0.4144723075737051,
+   "data_age_ms": 2.827739889559585,
    "periods_ms": [
     20
    ],
@@ -134,7 +134,7 @@
   {
    "chain": "T19",
    "constraint_ms": 100,
-   "data_age_ms": 0.8194458210812656,
+   "data_age_ms": 3.0952334308767893,
    "periods_ms": [
     100
    ],
@@ -143,7 +143,7 @@
   {
    "chain": "T20-T21",
    "constraint_ms": 30,
-   "data_age_ms": 11.763361636986376,
+   "data_age_ms": 12.932695015488594,
    "periods_ms": [
     10,
     20
@@ -153,7 +153,7 @@
   {
    "chain": "T22",
    "constraint_ms": 100,
-   "data_age_ms": 0.2162366053237299,
+   "data_age_ms": 1.16403217709647,
    "periods_ms": [
     100
    ],
@@ -162,7 +162,7 @@
   {
    "chain": "T23",
    "constraint_ms": 20,
-   "data_age_ms": 0.9478585037609718,
+   "data_age_ms": 2.0768797521824838,
    "periods_ms": [
     20
    ],
@@ -171,7 +171,7 @@
   {
    "chain": "T24",
    "constraint_ms": 100,
-   "data_age_ms": 1.0875981542053503,
+   "data_age_ms": 1.2016088548235035,
    "periods_ms": [
     100
    ],
@@ -180,7 +180,7 @@
   {
    "chain": "T25",
    "constraint_ms": 100,
-   "data_age_ms": 0.6591116837920288,
+   "data_age_ms": 1.8397389590195048,
    "periods_ms": [
     100
    ],
@@ -189,7 +189,7 @@
   {
    "chain": "T26",
    "constraint_ms": 2,
-   "data_age_ms": 1.1696346956531316,
+   "data_age_ms": 0.45867055207963464,
    "periods_ms": [
     2
    ],
@@ -198,7 +198,7 @@
   {
    "chain": "T27",
    "constraint_ms": 10,
-   "data_age_ms": 0.83794781995793,
+   "data_age_ms": 2.077332778274338,
    "periods_ms": [
     10
    ],
@@ -207,7 +207,7 @@
   {
    "chain": "T28",
    "constraint_ms": 20,
-   "data_age_ms": 1.1411878723802602,
+   "data_age_ms": 1.3207669609295607,
    "periods_ms": [
     20
    ],
@@ -216,7 +216,7 @@
   {
    "chain": "T29",
    "constraint_ms": 5,
-   "data_age_ms": 1.60144161407914,
+   "data_age_ms": 3.6071039388782093,
    "periods_ms": [
     5
    ],
@@ -225,7 +225,7 @@
   {
    "chain": "T30-T31",
    "constraint_ms": 1020,
-   "data_age_ms": 1000.531486437374,
+   "data_age_ms": 1002.2083185385624,
    "periods_ms": [
     1000,
     20
@@ -235,7 +235,7 @@
   {
    "chain": "T32-T33-T34",
    "constraint_ms": 130,
-   "data_age_ms": 121.29706721291615,
+   "data_age_ms": 122.58901962704934,
    "periods_ms": [
     20,
     100,
@@ -246,7 +246,7 @@
   {
    "chain": "T35",
    "constraint_ms": 20,
-   "data_age_ms": 0.8294126716666116,
+   "data_age_ms": 1.6692787089980776,
    "periods_ms": [
     20
    ],
@@ -255,7 +255,7 @@
   {
    "chain": "T36",
    "constraint_ms": 10,
-   "data_age_ms": 1.8963777931961103,
+   "data_age_ms": 3.389969757447382,
    "periods_ms": [
     10
    ],
@@ -264,7 +264,7 @@
   {
    "chain": "T37-T38-T39",
    "constraint_ms": 130,
-   "data_age_ms": 121.36452792370129,
+   "data_age_ms": 122.34010015549815,
    "periods_ms": [
     20,
     100,
@@ -275,7 +275,7 @@
   {
    "chain": "T40",
    "constraint_ms": 10,
-   "data_age_ms": 1.8092587086045306,
+   "data_age_ms": 4.9224590746023775,
    "periods_ms": [
     10
    ],
@@ -284,7 +284,7 @@
   {
    "chain": "T41",
    "constraint_ms": 20,
-   "data_age_ms": 0.5084966024603254,
+   "data_age_ms": 0.6566796860651624,
    "periods_ms": [
     20
    ],
@@ -293,7 +293,7 @@
   {
    "chain": "T42",
    "constraint_ms": 20,
-   "data_age_ms": 1.4200449334258434,
+   "data_age_ms": 1.9408127532966832,
    "periods_ms": [
     20
    ],
@@ -302,7 +302,7 @@
   {
    "chain": "T43",
    "constraint_ms": 20,
-   "data_age_ms": 1.496101364522417,
+   "data_age_ms": 3.379709328664308,
    "periods_ms": [
     20
    ],
@@ -311,7 +311,7 @@
   {
    "chain": "T44",
    "constraint_ms": 100,
-   "data_age_ms": 0.9247915771852733,
+   "data_age_ms": 2.1367159281525105,
    "periods_ms": [
     100
    ],
@@ -320,7 +320,7 @@
   {
    "chain": "T45",
    "constraint_ms": 20,
-   "data_age_ms": 1.8226726577901124,
+   "data_age_ms": 4.309943310518776,
    "periods_ms": [
     20
    ],
@@ -329,7 +329,7 @@
   {
    "chain": "T46-T47-T48",
    "constraint_ms": 130,
-   "data_age_ms": 30.591650973006907,
+   "data_age_ms": 31.040894787751157,
    "periods_ms": [
     10,
     20,
@@ -340,7 +340,7 @@
   {
    "chain": "T49",
    "constraint_ms": 100,
-   "data_age_ms": 1.2682129051442164,
+   "data_age_ms": 3.6579163248564397,
    "periods_ms": [
     100
    ],
@@ -349,7 +349,7 @@
   {
    "chain": "T50-T51-T52",
    "constraint_ms": 130,
-   "data_age_ms": 20.97353553374963,
+   "data_age_ms": 21.310347360816916,
    "periods_ms": [
     20,
     10,
@@ -360,7 +360,7 @@
   {
    "chain": "T53",
    "constraint_ms": 1,
-   "data_age_ms": 1.0,
+   "data_age_ms": 0.955701394585726,
    "periods_ms": [
     1
    ],
@@ -369,7 +369,7 @@
   {
    "chain": "T54",
    "constraint_ms": 20,
-   "data_age_ms": 1.0534795872292155,
+   "data_age_ms": 2.368983629840951,
    "periods_ms": [
     20
    ],
@@ -380,12 +380,16 @@
  "chains_with_several_tasks": 10,
  "chains_within_constraint": 40,
  "criterion": "MAX_PROC",
- "data_age_over_constraint_max": 1.0,
+ "data_age_over_constraint_max": 0.9856802941812675,
  "edges": 53,
  "edges_on_noc": 15,
- "f_cpu_hz": 181602000.0,
+ "f_cpu_hz": 81673000.0,
+ "generation_order": {
+  "f_cpu_hz": 183276000.0,
+  "minimum_hz": 183276000.0
+ },
  "hyperperiod_ms": 1000,
- "minimum_hz": 181602000.0,
+ "minimum_hz": 81673000.0,
  "packets_per_hyperperiod": 832,
  "periods_ms": [
   1,
@@ -398,13 +402,14 @@
  ],
  "runnables": 163,
  "several_tasks_within_constraint": 10,
- "single_task_data_age_ms_max": 2.457555533529366,
+ "single_task_data_age_ms_max": 5.537239969145251,
  "tasks": 54,
  "utilization_at_minimum": {
-  "max": 0.43731880706159626,
-  "mean": 0.13970438135317892,
-  "min": 0.01677536591006707
+  "max": 0.9796315795917867,
+  "mean": 0.3124907519927026,
+  "min": 0.03771038164387252
  },
+ "utilization_bound_hz": 80010000.0,
  "variation": {
   "jobs": 260580,
   "late": 0,
