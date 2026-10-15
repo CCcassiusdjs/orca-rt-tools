@@ -12,8 +12,9 @@ compose.minimum_frequency) under each setting:
 | no_wni | w_NI = 0 (the network interface of each PE stays a resource of the link schedule, which keeps the deadline model tick and the handlers of Eq. (7)) |
 | no_handlers | no handler charge of Eq. (7) (no handlers file) |
 | links_only | the three removed: o_i = L0 |
+| no_wni_schedule_windows | no_wni with the handler windows of the link schedule (compare with event_triggered_no_wni) |
 | schedule_windows | the flow, and a candidate whose tasks fail Eq. (7) with the windows [F(u), a] passes when they fit with the handlers of each packet inside its reservation [s, s + o_i] of the link schedule (search.schedule_windows_fit) |
-| event_triggered | one release period (single applications and the composition): no link schedule; each packet enters the NoC when its job sends it, and a candidate is feasible when F(u) + WCTT_i <= a_{i,j} and F(u) + WCTT_i <= the end of the phase of its release for every packet (rttools/modules/routing/wctt.py: polling arbiter of the Hermes router, DDMA interleaving, every packet of the phase can meet every other) and every task ends within its phase with the handlers |
+| event_triggered | one release period (single applications and the composition): no link schedule; each packet enters the NoC when its job sends it, and a candidate is feasible when F(u) + WCTT_i <= a_{i,j} and F(u) + WCTT_i <= the end of the phase of its release for every packet (rttools/modules/routing/wctt.py: polling arbiter of the Hermes router, DDMA interleaving, every packet of the phase can meet every other) and every task ends within its phase with the handlers of each packet charged inside [earliest release, F(u) + WCTT] (fixed point of the finishes and the windows) |
 | event_triggered_b50, _b90, _b100 | as event_triggered with the release jitter of each packet limited to [phase start + beta F(u), F(u)] (beta = 1: every job executes for exactly t(v)); two packets meet only when their windows [earliest release, F(u) + WCTT] meet (least fixed point, wctt.wctt) |
 | event_triggered_no_wni | as event_triggered with w_NI = 0 (no injection or receive handlers in the WCTT); compare with no_wni |
 
@@ -54,6 +55,7 @@ SETTINGS = {
     "no_handlers": {"wait": "bound", "ni": "tt", "handlers": False},
     "links_only": {"wait": 0, "ni": (True, 0), "handlers": False},
     "schedule_windows": {"wait": "bound", "ni": "tt", "handlers": True, "schedule_windows": True},
+    "no_wni_schedule_windows": {"wait": "bound", "ni": (True, 0), "handlers": True, "schedule_windows": True},
 }
 
 
@@ -79,6 +81,13 @@ def setting(s):
 JITTER = (0.5, 0.9, 1.0)     # beta of the offset-aware variants: earliest release = phase start + beta F(u)
 
 
+def _earliest(packets, period, beta):
+    """Earliest release of each packet: the start of the phase of its
+    release plus beta F(u) (beta None: 0)."""
+    b = 0.0 if beta is None else beta
+    return {p["name"]: (p["min_start"] // period) * period + b * (p["min_start"] % period) for p in packets}
+
+
 def _et_check(packets, period, beta=None):
     """WCTT of every packet (wctt.wctt over the packets of one hyperperiod
     of one release period: every packet of the phase can meet every other;
@@ -87,8 +96,7 @@ def _et_check(packets, period, beta=None):
     exactly t(v)) and the packets that miss their deadline or leave the NoC
     after the end of the phase of their release (premise of the bound, so
     that packets of distinct phases never meet)."""
-    earliest = None if beta is None else {
-        p["name"]: (p["min_start"] // period) * period + beta * (p["min_start"] % period) for p in packets}
+    earliest = None if beta is None else _earliest(packets, period, beta)
     bound = wctt.wctt(packets, earliest=earliest)
     late = {p["name"] for p in packets if p["name"] in bound and (
         p["min_start"] + bound[p["name"]] > p["abs_deadline"]
@@ -96,17 +104,47 @@ def _et_check(packets, period, beta=None):
     return bound, late
 
 
+ET_ROUNDS = 32
+
+
+def _et_windows(packets, period, beta, bound, prefix=""):
+    """Handler windows of event-triggered injection: {flow label: (earliest
+    release, F(u) + WCTT)}, the instants at which the handlers of the packet
+    can start."""
+    e = _earliest(packets, period, beta)
+    win = {}
+    for p in packets:
+        if p["name"] not in bound or not p["flow"].startswith(prefix):
+            continue
+        a, b = e[p["name"]], p["min_start"] + bound[p["name"]]
+        lo, hi = win.get(p["flow"][len(prefix):], (a, b))
+        win[p["flow"][len(prefix):]] = (min(lo, a), max(hi, b))
+    return win
+
+
 def event_triggered_at(app, noc, mapping, appname, frequency, cfg, beta=None):
     """Attempt of search (keys of schedule_at) for event-triggered injection:
     feasible when every packet of the phase meets its deadline with its
     WCTT from the finish of its source, leaves the NoC within the phase of
-    its release, and every task fits its phase with the handlers."""
+    its release, and every task fits its phase with the handlers of the
+    packet events charged inside the event-triggered windows [earliest
+    release, F(u) + WCTT] (handler_schedule of release.handler_windows), at
+    a fixed point of the finishes and the windows."""
     instance = instantiator.createInstance(app, noc, frequency)
     packets, hp, _ = flowUnwrapper.unwrap(instance, noc, mapping)
     if hp == 0:
         return None
-    bound, late = _et_check(packets, hp, beta)
-    ok = not late and release.handlers_fit(instance, mapping) and release.deadline_fits(instance, mapping)
+    inst = instance
+    for _ in range(ET_ROUNDS):
+        bound, late = _et_check(packets, hp, beta)
+        inst = dict(instance, release=dict(instance["release"], handler_schedule=_et_windows(packets, hp, beta, bound)))
+        new, _, _ = flowUnwrapper.unwrap(inst, noc, mapping)
+        if [p["min_start"] for p in new] == [p["min_start"] for p in packets]:
+            break
+        packets = new
+    else:
+        late = {"no fixed point"}
+    ok = not late and release.handlers_fit(inst, mapping) and release.deadline_fits(inst, mapping)
     return {"frequency": frequency, "hyperperiod": hp, "problem": {"packets": packets},
             "schedule": {} if ok else None, "skipped": late, "wctt": bound}
 
@@ -120,7 +158,8 @@ def event_triggered_jitter(beta):
 def event_triggered_union(apps, beta=None):
     """schedule_at replacement for the composition (compose.scheduler) under
     event-triggered injection: the WCTT over the packets of every
-    application of the NoC (one release period)."""
+    application of the NoC (one release period), with the handler windows
+    of event_triggered_at for each application."""
     from rttools.multiapp import compose
 
     def run(_app, noc, _mapping, _appname, frequency, cfg):
@@ -128,11 +167,25 @@ def event_triggered_union(apps, beta=None):
         if H == 0:
             return None
         period = min(info[a["name"]]["hyperperiod"] for a in apps)
-        bound, late = _et_check(packets, period, beta)
-        ok = not late and all(
-            release.handlers_fit(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])
-            and release.deadline_fits(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])
-            for a in apps)
+        insts = {a["name"]: instantiator.createInstance(a["graph"], noc, frequency) for a in apps}
+        for _ in range(ET_ROUNDS):
+            bound, late = _et_check(packets, period, beta)
+            for a in apps:
+                base = instantiator.createInstance(a["graph"], noc, frequency)
+                pre = compose.qualify(a["name"], "")
+                insts[a["name"]] = dict(base, release=dict(base["release"], handler_schedule=_et_windows(
+                    packets, period, beta, bound, prefix=pre)))
+            new = []
+            for a in apps:
+                pk, hp, _ = flowUnwrapper.unwrap(insts[a["name"]], noc, a["entries"])
+                new += compose.extend(pk, hp, H, a["name"])
+            if sorted((p["name"], p["min_start"]) for p in new) == sorted((p["name"], p["min_start"]) for p in packets):
+                break
+            packets = new
+        else:
+            late = {"no fixed point"}
+        ok = not late and all(release.handlers_fit(insts[a["name"]], a["entries"])
+                              and release.deadline_fits(insts[a["name"]], a["entries"]) for a in apps)
         return {"frequency": frequency, "hyperperiod": H, "problem": {"packets": packets},
                 "schedule": {} if ok else None, "skipped": late, "wctt": bound}
     return run

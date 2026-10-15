@@ -117,6 +117,8 @@ IDENTITY = [
     (r"c\.jones@edu\.pucrs\.br", "anonymous@example.org"),
     (r"cassiojonesdhein@gmail\.com", "anonymous@example.org"),
     (r"https?://(?:https?://)?github\.com/andersondomingues/+", "https://github.com/anonymous/"),
+    (r"provided by Professor Sergio F\. Johann \(sergio\.johann@acad\.pucrs\.br\)", "provided by its authors"),
+    (r"With the help of Joao Benno \(jbweber05@gmail\.com\)", "With the help of a collaborator"),
     (r"andersondomingues", "anonymous"),
     (r"anderson\.domingues", "anonymous"),
     (r"Anderson\s+(?:R(?:oberto|\.)\s+)?(?:P(?:inheiro|\.)\s+)?Domingues", "Anonymous Author"),

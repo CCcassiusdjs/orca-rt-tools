@@ -22,6 +22,10 @@
     "f_cpu_hz": 477952000.0,
     "minimum_hz": 526056421.875
    },
+   "no_wni_schedule_windows": {
+    "f_cpu_hz": 477952000.0,
+    "minimum_hz": 526056421.875
+   },
    "schedule_windows": {
     "f_cpu_hz": 477952000.0,
     "minimum_hz": 526056421.875
@@ -398,6 +402,10 @@
     "f_cpu_hz": 380000000.0,
     "minimum_hz": 380409240.72265625
    },
+   "no_wni_schedule_windows": {
+    "f_cpu_hz": 380000000.0,
+    "minimum_hz": 380409240.72265625
+   },
    "schedule_windows": {
     "f_cpu_hz": 380000000.0,
     "minimum_hz": 441082000.7324219
@@ -423,7 +431,7 @@
    },
    "event_triggered_b100": {
     "f_cpu_hz": 443346000.0,
-    "minimum_hz": 457595825.1953125
+    "minimum_hz": 443347930.9082031
    },
    "event_triggered_b50": {
     "f_cpu_hz": 443346000.0,
@@ -435,7 +443,7 @@
    },
    "event_triggered_no_wni": {
     "f_cpu_hz": 443346000.0,
-    "minimum_hz": 457595825.1953125
+    "minimum_hz": 443347930.9082031
    },
    "flow": {
     "f_cpu_hz": 443346000.0,
@@ -456,6 +464,10 @@
    "no_wni": {
     "f_cpu_hz": 443346000.0,
     "minimum_hz": 457595825.1953125
+   },
+   "no_wni_schedule_windows": {
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 443347930.9082031
    },
    "schedule_windows": {
     "f_cpu_hz": 443346000.0,
@@ -529,7 +541,7 @@
    },
    "event_triggered_b100": {
     "f_cpu_hz": 434900000.0,
-    "minimum_hz": 449150085.44921875
+    "minimum_hz": 435920715.33203125
    },
    "event_triggered_b50": {
     "f_cpu_hz": 434900000.0,
@@ -537,11 +549,11 @@
    },
    "event_triggered_b90": {
     "f_cpu_hz": 434900000.0,
-    "minimum_hz": 449150085.44921875
+    "minimum_hz": 435920715.33203125
    },
    "event_triggered_no_wni": {
     "f_cpu_hz": 434900000.0,
-    "minimum_hz": 449150085.44921875
+    "minimum_hz": 434902191.1621094
    },
    "flow": {
     "f_cpu_hz": 434900000.0,
@@ -562,6 +574,10 @@
    "no_wni": {
     "f_cpu_hz": 434900000.0,
     "minimum_hz": 449150085.44921875
+   },
+   "no_wni_schedule_windows": {
+    "f_cpu_hz": 434900000.0,
+    "minimum_hz": 434902191.1621094
    },
    "schedule_windows": {
     "f_cpu_hz": 434900000.0,
@@ -620,7 +636,7 @@
    },
    "event_triggered_b100": {
     "f_cpu_hz": 220388000.0,
-    "minimum_hz": 234638214.11132812
+    "minimum_hz": 221443176.26953125
    },
    "event_triggered_b50": {
     "f_cpu_hz": 220388000.0,
@@ -632,7 +648,7 @@
    },
    "event_triggered_no_wni": {
     "f_cpu_hz": 220388000.0,
-    "minimum_hz": 234638214.11132812
+    "minimum_hz": 220390319.82421875
    },
    "flow": {
     "f_cpu_hz": 220388000.0,
@@ -653,6 +669,10 @@
    "no_wni": {
     "f_cpu_hz": 220388000.0,
     "minimum_hz": 234638214.11132812
+   },
+   "no_wni_schedule_windows": {
+    "f_cpu_hz": 220388000.0,
+    "minimum_hz": 220390319.82421875
    },
    "schedule_windows": {
     "f_cpu_hz": 220388000.0,

@@ -13,8 +13,7 @@ from rttools.modules.backend.ags import ags
 HANDLER_ROUNDS = 64
 
 
-# Handler windows of Eq. (9) from the link schedule (ablation, R1 of round
-# 2): when the windows [F(u), a] fail, schedule_at also accepts the
+# Handler windows of Eq. (7) from the link schedule (ablation): when the windows [F(u), a] fail, schedule_at also accepts the
 # candidate when the windows [s, s + o_i] of the schedule pass
 # (schedule_windows_fit). Off by default (the flow of the runs).
 SCHEDULE_WINDOWS = False

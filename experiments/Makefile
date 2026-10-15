@@ -23,8 +23,6 @@ DIRS   += cputime
 DIRS   += ablation
 # automotive: engine-control workload (Kramer et al., WATERS 2015), general phase model, about 10 s
 DIRS   += automotive
-# linkload: E and CAR-V with larger payloads, workloads in which the links set f_NoC, about 10 s
-DIRS   += linkload
 # car-v-rtl: analysis of the stored RTL runs of CAR-V (CV, CV2, TCV, UCV, VCV), about 10 s
 DIRS   += car-v-rtl
 
