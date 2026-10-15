@@ -74,8 +74,10 @@ def mesh_size(noc):
 
 
 def read_spec(path):
-    """Composition file: {"arch", "apps": [{"name", "csv", "map", "pes"}]},
-    paths resolved against the directory of the file."""
+    """Composition file: {"arch", "apps": [{"name", "csv", "map", "pes",
+    "costs", "cost_rule"}]}, paths resolved against the directory of the
+    file; "costs": costs file of rttools.wcet, "cost_rule": rule of that
+    file (rttools/wcet/costs.py, RULES; default max)."""
     with open(path) as f:
         spec = json.load(f)
     base = os.path.dirname(os.path.abspath(path))
@@ -87,7 +89,8 @@ def read_spec(path):
         m = a.get("map", MAP_SPIRAL)
         out["apps"].append({"name": a["name"], "csv": res(a["csv"]),
                             "map": m if m == MAP_SPIRAL else res(m), "pes": a.get("pes"),
-                            "costs": res(a["costs"]) if a.get("costs") else None})
+                            "costs": res(a["costs"]) if a.get("costs") else None,
+                            "cost_rule": a.get("cost_rule", "max")})
     return out
 
 
@@ -125,10 +128,11 @@ def load(spec):
     for a in spec["apps"]:
         g, appname = appparser.loadFromFile(a["csv"])
         if a.get("costs"):
-            # static t(v) of rttools.wcet in place of the Capacity column
+            # static t(v) of rttools.wcet against the Capacity column, under the
+            # rule of the application (default max: t(v) = max(CSV, static))
             from rttools.wcet import costs as wcosts
             try:
-                wcosts.apply(g, a["costs"])
+                wcosts.apply(g, a["costs"], a.get("cost_rule", wcosts.MAX))
             except (wcosts.CostsError, ValueError) as e:
                 raise CompositionError(f"application {a['name']}: {e}") from None
         apps.append(dict(a, graph=g, appname=appname))

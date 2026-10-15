@@ -303,11 +303,26 @@ def summary(rows, key):
 
 
 def flow(cfg, costs_path, out_dir):
+    """Flow of E with the static costs and with the costs of the CSV; the
+    key "ni" of the config pins the network-interface model of the flow
+    (rttools/modules/routing/router.py; "off" for the runs up to tag
+    r11-rc5, whose images inject a packet when its job sends it)."""
+    from rttools.modules.routing import router
+    f = cfg["flow"]
+    prev = router.set_ni(f["ni"]) if "ni" in f else None
+    try:
+        return _flow(cfg, costs_path, out_dir)
+    finally:
+        if "ni" in f:
+            router.set_ni(prev)
+
+
+def _flow(cfg, costs_path, out_dir):
     from rttools.paper import frequency
     f = cfg["flow"]
     m_static = frequency.run(f["app"], f["maps"], f["arch"], f["f0"],
                              os.path.join(out_dir, "frequency"), header_wait=f.get("header_wait", "bound"),
-                             costs=costs_path)
+                             costs=costs_path, cost_rule="static")
     m_meas = frequency.run(f["app"], f["maps"], f["arch"], f["f0"],
                            os.path.join(out_dir, "frequency_measured"), header_wait=f.get("header_wait", "bound"))
     out = {}

@@ -215,7 +215,7 @@ def main():
     info("Loading application file `" + app_file + "`")
     app, appname = appparser.loadFromFile(app_file)
     if costs_file is not None:
-        info("Task costs t(v) from `" + costs_file + "` (static WCET, rttools.wcet)")
+        info("Task costs t(v) = max(CSV, static WCET of `" + costs_file + "`) (rttools.wcet)")
         try:
             for label, (old, new) in sorted(wcosts.apply(app, costs_file).items()):
                 info("  t(" + label + ") = " + str(new) + " cycles (application: " + str(old) + ")")
