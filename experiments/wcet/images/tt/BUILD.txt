@@ -1,4 +1,4 @@
-riscv64-elf-gcc (Arch Linux Repositories) 12.2.0 (the compiler of the RTL runs; container build with the Arch package riscv64-elf-gcc 12.2.0 and binutils 2.39; the images of the runs VH, VCV, W4 and VMA of tag r11-rc7 have the same allocated sections and symbol addresses, and their assembler names the mapping symbols $xrv32e1p9 where this build writes $x)
+riscv64-elf-gcc (Arch Linux Repositories) 12.2.0 (the compiler of the RTL runs; container build with the Arch package riscv64-elf-gcc 12.2.0 and binutils 2.39; the images of the runs VH, VCV, W4 and VMA of tag r11-rc9 have the same allocated sections and symbol addresses, and their assembler names the mapping symbols $xrv32e1p9 where this build writes $x)
 kernel without UCX_ISR_NESTING, crt0.s of this tree (CRT0=guard_readback), time-triggered injection (INJECTION=tt, the default: lib/noc_tt.c, table app/<app>_tt.h)
 weird_a: F_CLK=449152000 APP=weird_a experiments/exp23/build_sw.sh (release by tick, TR_DEFS; clock of run VH)
 car_v: F_CLK=441088000 APP=car_v experiments/exp23/build_sw.sh (release by tick, TR_DEFS; clock of run VCV)

@@ -34,7 +34,7 @@
 #                  against reference_G.json and reference_H.json  (anon:drop-line)
 #   make check-run analyze + check + phase-check of the stored runs of the release by tick, TG
 #                  (500 MHz) and TH (434.912 MHz) of tag r11-rc3, UG (500 MHz) and UH (434.912 MHz)
-#                  of tag r11-rc5, VG (500 MHz) and VH (434.912 MHz) of tag r11-rc7 (time-triggered
+#                  of tag r11-rc5, VG (500 MHz) and VH (449.152 MHz) of tag r11-rc9 (time-triggered
 #                  injection), against reference_<run>.json, into $(BUILD)/results_<run>
 #                  (values.tex of each run there)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
@@ -81,9 +81,9 @@
 #   logs/{UG,UH}.{events.txt,RUN_INFO,image.lst,noinstr.lst,time.txt}; UH.image.elf for
 #   experiments/wcet): make check-run, or make LOG=logs/UH.events.txt REF=reference_UH.json
 #   OUTDIR=build/results_UH analyze check
-# Runs VG and VH (r11-rc7: the same application, clocks and duration as UG and UH, the time-
-#   triggered injection, injection=tt, with the table weird_a_tt.h of t(v) = max(CSV, static),
-#   costs=max_csv_static in RUN_INFO; logs/{VG,VH}.{events.txt,RUN_INFO,image.lst,noinstr.lst,
+# Runs VG and VH (r11-rc9: the same application and duration as UG and UH, VH at 449.152 MHz, the
+#   time-triggered injection, injection=tt, with the table weird_a_tt.h of t(v) = max(CSV, static)
+#   and the deadline model tick, costs=max_csv_static and deadline=tick in RUN_INFO; logs/{VG,VH}.{events.txt,RUN_INFO,image.lst,noinstr.lst,
 #   time.txt}; VH.image.elf for experiments/wcet): make check-run, or make LOG=logs/VH.events.txt
 #   REF=reference_VH.json OUTDIR=build/results_VH analyze check. The analysis takes the model of the
 #   RUN_INFO (network-interface model tt and the costs file, whatever NI) and checks each packet,

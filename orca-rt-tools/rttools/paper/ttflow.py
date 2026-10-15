@@ -1,4 +1,4 @@
-"""Model of the runs with the time-triggered injection (round r11f): the
+"""Model of the runs with the time-triggered injection (round r11g): the
 analysis flow with the network-interface model tt and the cost rule max on
 the image of each run.
 
@@ -18,7 +18,7 @@ the image of each run.
 | General phase model (CAR-FULL) | P_min of the CPU test, the utilization-bound frequency (the smallest phase at which the largest utilization of a PE reaches 1, over P_s), the phase-rule frequency (the largest demand of a PE in one phase, every job confined to the phase of its release, over P_s), the chains and the largest data age at the clock and at the minimum frequency, the flows on one PE, the packets between PEs in one hyperperiod |
 
 `run` writes metrics.json and values.tex (macros \\ExpTt...). `tables` writes, for each run, the expected link schedule (packets) and
-the finish of every job (jobs) that the conferencia of run_r11f.sh checks
+the finish of every job (jobs) that the conferencia of run_r11g.sh checks
 (awk), in the format of the docstring of write_tables.
 """
 from __future__ import annotations
@@ -372,7 +372,7 @@ def mhz(v):
 
 def write_tables(cfg_path, out_dir):
     """For each run, <out>/<run>.packets and <out>/<run>.jobs (text tables
-    of run_r11f.sh, monitor labels X-Y of the node index):
+    of run_r11g.sh, monitor labels X-Y of the node index):
 
     packets: "# P <cycles per phase> Ht <phases per hyperperiod> tagmod <0|1024>"
     and one line per packet k of a flow between PEs in a hyperperiod:

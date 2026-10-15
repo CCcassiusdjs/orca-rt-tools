@@ -3266,7 +3266,7 @@ Disassembly of section .text:
 40003090:	00812083          	lw	ra,8(sp)
 40003094:	000036b7          	lui	a3,0x3
 40003098:	40072023          	sw	zero,1024(a4)
-4000309c:	51668693          	addi	a3,a3,1302 # 3516 <_stack_size+0x2d16>
+4000309c:	6d368693          	addi	a3,a3,1747 # 36d3 <_stack_size+0x2ed3>
 400030a0:	42d72023          	sw	a3,1056(a4)
 400030a4:	00c10113          	addi	sp,sp,12
 400030a8:	00008067          	jalr	zero,0(ra)

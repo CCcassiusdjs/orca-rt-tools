@@ -5,7 +5,7 @@
    "image": {
     "file": "VH.image.elf",
     "kind": "elf",
-    "sha256": "425f0f17df9969b55f8a602dba821ca944871342f960b522914a25865e2ccbe3"
+    "sha256": "d14ca903144fc95841e455d7321efb171b493260eef81e7581169b8e08577ade"
    },
    "kernel": {
     "yield_save": 519,
@@ -142,7 +142,7 @@
      "release": 249
     }
    },
-   "clock_hz": 434912000,
+   "clock_hz": 449152000,
    "windows": 7,
    "tasks": {
     "A": {
@@ -316,10 +316,10 @@
      },
      "measured_run_max": 92269,
      "measured_run_min": 91390,
-     "measured_per_iteration": 92237.60714285704,
+     "measured_per_iteration": 92237.60714285712,
      "single_runs": 28,
      "run_margin_percent": 0.10512739923484594,
-     "per_iteration_margin_percent": 0.13919794877603758,
+     "per_iteration_margin_percent": 0.1391979487759586,
      "run_sound": true,
      "runs_with_receptions": 28,
      "receptions_per_run_max": 2,
@@ -368,10 +368,10 @@
      },
      "measured_run_max": 60275,
      "measured_run_min": 60250,
-     "measured_per_iteration": 60274.107142857174,
+     "measured_per_iteration": 60274.10714285705,
      "single_runs": 28,
      "run_margin_percent": -0.33513065118208213,
-     "per_iteration_margin_percent": -0.333654287703549,
+     "per_iteration_margin_percent": -0.33365428770334443,
      "run_sound": false,
      "runs_with_receptions": 28,
      "receptions_per_run_max": 1,
@@ -394,10 +394,10 @@
      },
      "measured_run_max": 90607,
      "measured_run_min": 90390,
-     "measured_per_iteration": 90398.03703703707,
+     "measured_per_iteration": 90398.03703703704,
      "single_runs": 27,
      "run_margin_percent": 0.13354376593419934,
-     "per_iteration_margin_percent": 0.36501120353724603,
+     "per_iteration_margin_percent": 0.36501120353727834,
      "run_sound": true,
      "runs_with_receptions": 0,
      "receptions_per_run_max": 0,
@@ -443,12 +443,12 @@
       "E"
      ],
      "static": 143644,
-     "measured": 123063.10714285717,
+     "measured": 123063.10714285704,
      "window_max": 123064,
      "phase_busy_max": 123064,
      "estimated_input": 173370,
-     "static_margin_percent": 16.72385277356243,
-     "input_margin_percent": 40.87893928985909,
+     "static_margin_percent": 16.723852773562555,
+     "input_margin_percent": 40.87893928985924,
      "sound": true
     },
     "GJ": {
@@ -457,12 +457,12 @@
       "G"
      ],
      "static": 202428,
-     "measured": 179407.1428571428,
+     "measured": 179407.1428571429,
      "window_max": 182659,
      "phase_busy_max": 182876,
      "estimated_input": 217450,
-     "static_margin_percent": 12.83162798104872,
-     "input_margin_percent": 21.20476171517302,
+     "static_margin_percent": 12.831627981048666,
+     "input_margin_percent": 21.20476171517296,
      "sound": true
     }
    },
@@ -485,13 +485,13 @@
    "summary": {
     "static_margin_percent": {
      "min": 7.879638671875,
-     "max": 16.72385277356243,
-     "mean": 13.419800586802722
+     "max": 16.723852773562555,
+     "mean": 13.41980058680274
     },
     "input_margin_percent": {
      "min": 17.59033203125,
-     "max": 40.87893928985909,
-     "mean": 25.852250573668712
+     "max": 40.87893928985924,
+     "mean": 25.852250573668734
     },
     "run_margin_percent": {
      "min": -0.33513065118208213,
@@ -512,7 +512,7 @@
    "image": {
     "file": "VCV.image.elf",
     "kind": "elf",
-    "sha256": "43f04a545540b52fd86cb472ff7bbb0f8b6e3f79b2d321c4641f1e0f5e6492f1"
+    "sha256": "ca062da76ad6c0740ef7890c6346ce50d79be6b9bbcf1bba6d8e328548fffb62"
    },
    "kernel": {
     "yield_save": 433,
@@ -792,7 +792,7 @@
      "release": 249
     }
    },
-   "clock_hz": 419680000,
+   "clock_hz": 441088000,
    "windows": 2,
    "tasks": {
     "FBU1": {
@@ -1673,7 +1673,7 @@
    "image": {
     "file": "W5.image.elf",
     "kind": "elf",
-    "sha256": "9f66b2cf336c45431bd7c97c4c1f50d667b492fd6276893ab9004deaa900f865"
+    "sha256": "8fd2393bd0e7b3c290f15913cbb9fbcbf9c15f431f3c63b70b14dd59144d2928"
    },
    "kernel": {
     "yield_save": 519,
@@ -1810,7 +1810,7 @@
      "release": 249
     }
    },
-   "clock_hz": 220416000,
+   "clock_hz": 234656000,
    "windows": 2,
    "tasks": {
     "A": {
@@ -1828,10 +1828,10 @@
      },
      "measured_run_max": 5872,
      "measured_run_min": 5415,
-     "measured_per_iteration": 5771.249999999996,
+     "measured_per_iteration": 5771.2499999999545,
      "single_runs": 8,
      "run_margin_percent": 45.14645776566758,
-     "per_iteration_margin_percent": 47.6803118908383,
+     "per_iteration_margin_percent": 47.68031189083937,
      "run_sound": true,
      "runs_with_receptions": 8,
      "receptions_per_run_max": 1,
@@ -1854,10 +1854,10 @@
      },
      "measured_run_max": 18551,
      "measured_run_min": 15313,
-     "measured_per_iteration": 17375.49999999999,
+     "measured_per_iteration": 17375.50000000003,
      "single_runs": 8,
      "run_margin_percent": 70.0609131583203,
-     "per_iteration_margin_percent": 81.5659981007742,
+     "per_iteration_margin_percent": 81.56599810077378,
      "run_sound": true,
      "runs_with_receptions": 8,
      "receptions_per_run_max": 1,
@@ -1880,10 +1880,10 @@
      },
      "measured_run_max": 15760,
      "measured_run_min": 6767,
-     "measured_per_iteration": 9615.24999999997,
+     "measured_per_iteration": 9615.250000000036,
      "single_runs": 8,
      "run_margin_percent": 32.81091370558376,
-     "per_iteration_margin_percent": 117.685447596267,
+     "per_iteration_margin_percent": 117.68544759626552,
      "run_sound": true,
      "runs_with_receptions": 2,
      "receptions_per_run_max": 1,
@@ -1906,10 +1906,10 @@
      },
      "measured_run_max": 4578,
      "measured_run_min": 4004,
-     "measured_per_iteration": 4293.375000000019,
+     "measured_per_iteration": 4293.375000000009,
      "single_runs": 8,
      "run_margin_percent": 45.41284403669725,
-     "per_iteration_margin_percent": 55.05284304305984,
+     "per_iteration_margin_percent": 55.0528430430602,
      "run_sound": true,
      "runs_with_receptions": 8,
      "receptions_per_run_max": 1,
@@ -1932,10 +1932,10 @@
      },
      "measured_run_max": 20152,
      "measured_run_min": 17418,
-     "measured_per_iteration": 18684.375000000004,
+     "measured_per_iteration": 18684.374999999956,
      "single_runs": 8,
      "run_margin_percent": 71.70504168320763,
-     "per_iteration_margin_percent": 85.19217260411436,
+     "per_iteration_margin_percent": 85.19217260411483,
      "run_sound": true,
      "runs_with_receptions": 8,
      "receptions_per_run_max": 2,
@@ -1958,10 +1958,10 @@
      },
      "measured_run_max": 11704,
      "measured_run_min": 4324,
-     "measured_per_iteration": 8591.499999999995,
+     "measured_per_iteration": 8591.49999999997,
      "single_runs": 8,
      "run_margin_percent": 12.482911825017089,
-     "per_iteration_margin_percent": 53.232846417971345,
+     "per_iteration_margin_percent": 53.23284641797177,
      "run_sound": true,
      "runs_with_receptions": 0,
      "receptions_per_run_max": 0,
@@ -1984,10 +1984,10 @@
      },
      "measured_run_max": 19248,
      "measured_run_min": 9606,
-     "measured_per_iteration": 14521.624999999962,
+     "measured_per_iteration": 14521.625000000075,
      "single_runs": 8,
      "run_margin_percent": 199.7350374064838,
-     "per_iteration_margin_percent": 297.2902481643766,
+     "per_iteration_margin_percent": 297.2902481643735,
      "run_sound": true,
      "runs_with_receptions": 8,
      "receptions_per_run_max": 1,
@@ -2008,15 +2008,15 @@
       "tick": 1361,
       "release": 249
      },
-     "measured_run_max": 7489,
+     "measured_run_max": 6526,
      "measured_run_min": 5774,
-     "measured_per_iteration": 6481.875000000013,
+     "measured_per_iteration": 6241.125000000016,
      "single_runs": 8,
-     "run_margin_percent": 5.634931232474296,
-     "per_iteration_margin_percent": 22.04801851316146,
+     "run_margin_percent": 21.222801103279192,
+     "per_iteration_margin_percent": 26.755993510784982,
      "run_sound": true,
-     "runs_with_receptions": 2,
-     "receptions_per_run_max": 1,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
      "runs_above_run_static": 0,
      "run_with_receptions_margin_percent": 21.222801103279192,
      "run_with_receptions_sound": true
@@ -2034,17 +2034,17 @@
       "tick": 1361,
       "release": 249
      },
-     "measured_run_max": 12559,
-     "measured_run_min": 5149,
-     "measured_per_iteration": 8845.749999999969,
+     "measured_run_max": 12619,
+     "measured_run_min": 4186,
+     "measured_per_iteration": 8725.375,
      "single_runs": 8,
-     "run_margin_percent": 4.8252249382912655,
-     "per_iteration_margin_percent": 48.8285334765288,
+     "run_margin_percent": 4.326808780410492,
+     "per_iteration_margin_percent": 50.88176725928685,
      "run_sound": true,
-     "runs_with_receptions": 6,
+     "runs_with_receptions": 5,
      "receptions_per_run_max": 1,
      "runs_above_run_static": 0,
-     "run_with_receptions_margin_percent": 12.946122168840082,
+     "run_with_receptions_margin_percent": 35.01862271178382,
      "run_with_receptions_sound": true
     },
     "J": {
@@ -2062,10 +2062,10 @@
      },
      "measured_run_max": 19432,
      "measured_run_min": 6824,
-     "measured_per_iteration": 12492.12499999999,
+     "measured_per_iteration": 12492.12499999998,
      "single_runs": 8,
      "run_margin_percent": 60.80691642651297,
-     "per_iteration_margin_percent": 150.14158920119692,
+     "per_iteration_margin_percent": 150.14158920119715,
      "run_sound": true,
      "runs_with_receptions": 0,
      "receptions_per_run_max": 0,
@@ -2113,13 +2113,13 @@
       "I"
      ],
      "static": 74615,
-     "measured": 35181,
-     "attributed": 34387.076924,
+     "measured": 34819.875,
+     "attributed": 33911.153846,
      "window_max": 37249.75,
      "phase_busy_max": 40447,
      "estimated_input": 71525,
-     "static_margin_percent": 112.08891162843581,
-     "input_margin_percent": 103.30576163269947,
+     "static_margin_percent": 114.28853492437868,
+     "input_margin_percent": 105.41429284280889,
      "sound": true
     },
     "1-1": {
@@ -2156,24 +2156,24 @@
    },
    "summary": {
     "static_margin_percent": {
-     "min": 112.08891162843581,
+     "min": 114.28853492437868,
      "max": 300.81440007403637,
-     "mean": 177.0965261259016
+     "mean": 177.6464319498873
     },
     "input_margin_percent": {
-     "min": 103.30576163269947,
+     "min": 103.95697361246509,
      "max": 305.6119568738143,
-     "mean": 171.909034694808
+     "mean": 172.4361674973354
     },
     "run_margin_percent": {
-     "min": 4.8252249382912655,
+     "min": 4.326808780410492,
      "max": 199.7350374064838,
-     "mean": 54.862119217825594
+     "mean": 56.371064589118006
     },
     "run_with_receptions_margin_percent": {
      "min": 12.482911825017089,
      "max": 219.856608478803,
-     "mean": 82.6899202935146
+     "mean": 84.89717034780898
     },
     "all_groups_sound": true,
     "all_runs_sound": true,
@@ -2214,13 +2214,13 @@
   "synthetic-app-e-ONTO-hermes2x2.map": {
    "static": {
     "f_cpu_hz": 404856000.0,
-    "f_star_hz": 317356109.6191406,
+    "f_star_hz": 375724792.48046875,
     "frequency_hz": 404856000.0,
     "binding": "cpu"
    },
    "measured": {
     "f_cpu_hz": 434900000.0,
-    "f_star_hz": 358028411.8652344,
+    "f_star_hz": 413921356.2011719,
     "frequency_hz": 434900000.0,
     "binding": "cpu"
    },
@@ -2240,13 +2240,13 @@
   "spiral": {
    "static": {
     "f_cpu_hz": 404856000.0,
-    "f_star_hz": 317356109.6191406,
+    "f_star_hz": 375724792.48046875,
     "frequency_hz": 404856000.0,
     "binding": "cpu"
    },
    "measured": {
     "f_cpu_hz": 434900000.0,
-    "f_star_hz": 358028411.8652344,
+    "f_star_hz": 413921356.2011719,
     "frequency_hz": 434900000.0,
     "binding": "cpu"
    },

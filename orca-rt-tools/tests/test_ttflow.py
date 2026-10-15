@@ -1,6 +1,6 @@
-"""Model of the runs of round r11f (rttools/paper/ttflow.py, experiments/tt):
+"""Model of the runs of round r11g (rttools/paper/ttflow.py, experiments/tt):
 the defaults of rttools (network-interface model tt, cost rule max), the
-clock rule of the paper, the tables of the conferencia of run_r11f.sh and
+clock rule of the paper, the tables of the conferencia of run_r11g.sh and
 the network-interface model of the analysis of a stored run."""
 import os
 

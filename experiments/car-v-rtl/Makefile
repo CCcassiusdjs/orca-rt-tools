@@ -46,8 +46,8 @@
 # of _isr and the read back of _interrupt_set(0), crt0=guard_readback; UCV.image.elf for
 # experiments/wcet), same clock and duration:
 #   make analyze check-run phase-check LOG=logs/UCV.events.txt REF=reference_UCV.json OUTDIR=build/results_UCV
-# Run VCV (logs/VCV.*, reference_VCV.json): car_v of tag r11-rc7 (as UCV with the time-triggered
-# injection, table car_v_tt.h of t(v) = max(CSV, static), at 419.68 MHz; VCV.image.elf for
+# Run VCV (logs/VCV.*, reference_VCV.json): car_v of tag r11-rc9 (as UCV with the time-triggered
+# injection, table car_v_tt.h of t(v) = max(CSV, static) and the deadline model tick, at 441.088 MHz; VCV.image.elf for
 # experiments/wcet), 11.5 ms:
 #   make analyze check-run phase-check LOG=logs/VCV.events.txt REF=reference_VCV.json OUTDIR=build/results_VCV
 # After `make sim`, use LOG=$(BUILD)/sim/events.txt (RUN_INFO next to it).

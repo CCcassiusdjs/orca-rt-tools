@@ -1,15 +1,18 @@
-"""Stored runs of tag r11-rc7 (release by tick, UCX-OS kernel without nested
+"""Stored runs of tag r11-rc9 (release by tick, UCX-OS kernel without nested
 interrupts, crt0=guard_readback, time-triggered injection of the packets
 between PEs, injection=tt, with the tables of t(v) = max(CSV, static t(v) of
-the image), costs=max_csv_static): VG and VH (application E,
-experiments/exp23), VCV (CAR-V, experiments/car-v-rtl), VMA (carv_e,
-experiments/multiapp), W4 and W5 (WCET-E, experiments/wcet). The analysis
-takes the model of the RUN_INFO (network-interface model tt and the costs
-file). Each run conforms with the phase model, stays within R_bound and the
-deadline, has no late packet and no monitor error, injects every packet
-between PEs at or after its instant s_{i,j} and within its bounds, ends every
-job at or before F(v), enqueues every packet at or before s_{i,j}, and
-matches its reference."""
+the image) and the deadline model tick, costs=max_csv_static, deadline=tick):
+VG and VH (application E, experiments/exp23), VCV (CAR-V,
+experiments/car-v-rtl), VMA (carv_e, experiments/multiapp), W4 and W5
+(WCET-E, experiments/wcet). The analysis takes the model of the RUN_INFO
+(network-interface model tt, the costs file and the deadline model: each
+packet between PEs by the release tick of its reader, each job with the
+handlers of the packet events of its PE). Each run conforms with the phase
+model, stays within R_bound and the deadline, has no late packet and no
+monitor error, injects every packet between PEs at or after its instant
+s_{i,j} and within its bounds, ends every job at or before F(v), enqueues
+every packet at or before s_{i,j}, and matches its reference. The test of
+run CF5 (car_full of tag r11-rc7, deadline model start) stays here."""
 import json
 import os
 
@@ -53,17 +56,17 @@ def injection_conforms(t, packets):
     ("wcet/logs/W4.events.txt", "wcet/reference_W4.json"),
     ("wcet/logs/W5.events.txt", "wcet/reference_W5.json"),
 ])
-def test_r11f_runs_are_of_the_time_triggered_injection(log, ref):
-    """The runs of tag r11-rc7 have injection=tt and the costs file of the
-    table of the image in the RUN_INFO; the reference of each states
+def test_r11g_runs_are_of_the_time_triggered_injection(log, ref):
+    """The runs of tag r11-rc9 have injection=tt, deadline=tick and the costs
+    file of the table of the image in the RUN_INFO; the reference of each states
     clock.crt0 = guard_readback and the injection tt."""
     from rttools.paper import ttcheck
     info = exp23.read_run_info(exp23.run_info_path(os.path.join(EXP, log)))
-    assert info["repo_tag"] == "r11-rc7" and exp23.isr_rule(info) == "no_nesting"
+    assert info["repo_tag"] == "r11-rc9" and exp23.isr_rule(info) == "no_nesting"
+    assert info["deadline"] == "tick"
     assert exp23.crt0_rule(info) == "guard_readback" and ttcheck.injection_rule(info) == "tt"
     run = os.path.basename(log).split(".")[0]
-    # the costs file of the table of the image: costs/tt, or costs/tt/previous for the images of tag
-    # r11-rc7 after a later change of the costs of the image (the name of the RUN_INFO in the metrics)
+    # the costs file of the table of the image (costs/tt; the name of the RUN_INFO in the metrics)
     path = ttcheck.costs_of_run(info)
     assert ttcheck.costs_label(path) == COSTS[run] == info["costs_file"]
     with open(os.path.join(EXP, ref)) as f:
@@ -87,7 +90,8 @@ def test_runs_vg_vh(tmp_path, run, ni_off):
     assert m["injection"] == "tt" and m["costs"] == {"file": "weird_a.json", "rule": "max"}
     r = m["per_iteration"]["responses"]
     assert r["max_from_release_cycles"] <= m["response_bound"]["cycles"]
-    assert m["response_bound"]["cycles"] == {"VG": 857570, "VH": 759938}[run]
+    # R_bound with F(J) of the handlers of the packet events of PE (1,1): 107,570 + 3,873
+    assert m["response_bound"]["cycles"] == {"VG": 861443, "VH": 785171}[run]
     # t(V_k) of the model: max(CSV, static); D of ABDF takes its static t(v)
     est = {row["cluster"]: row["estimated"] for row in m["tab83"]["rows"]}
     assert est == {"ABDF": 188301, "C": 96330, "EHI": 173370, "GJ": 217450}
@@ -109,7 +113,7 @@ def test_run_vcv(tmp_path):
     conforms(m["phase_conformance"])
     r = m["responses"]
     assert (r["complete"], r["above_bound"], r["above_deadline"]) == (13, 0, 0)
-    assert m["model"]["response_bound"]["cycles"] == 934360
+    assert m["model"]["response_bound"]["cycles"] == 977176
     assert m["packets"]["late"] == 0 and m["monitor"]["errors"] == 0
     assert m["releases"]["acks"]["pes_min"] == 16
     assert m["costs"]["static_above_csv"] == ["FDF1", "FDF2", "STPH"]
@@ -130,20 +134,20 @@ def test_run_vma(tmp_path, app, csv):
     conforms(m["phase_conformance"])
     r = m["responses"]
     assert (r["complete"], r["above_bound"], r["above_deadline"]) == ({"CARV": 13, "E": 14}[app], 0, 0)
-    assert m["model"]["response_bound"]["cycles"] == {"CARV": 981720, "E": 776833}[app]
+    assert m["model"]["response_bound"]["cycles"] == {"CARV": 1010200, "E": 802066}[app]
     assert m["packets"]["late"] == 0 and m["monitor"]["errors"] == 0
     assert m["releases"]["acks"]["pes_expected"] == 20
     assert m["network"]["header_waits_with_other_app_contender"] == 0
     injection_conforms(m["tt"], {"CARV": 262, "E": 80}[app])
 
 
-@pytest.mark.parametrize("run,bound", [("W4", 796396), ("W5", 377020)])
+@pytest.mark.parametrize("run,bound", [("W4", 796396), ("W5", 398380)])
 def test_runs_w4_w5(tmp_path, run, bound):
     """make -C experiments/wcet run-analyze check-run LOG=logs/<run>.events.txt
-    SPEC=specs/wcet_e_tt_rc7.json: the static t(v) of the image of the run
+    SPEC=specs/wcet_e_tt.json: the static t(v) of the image of the run
     covers every PE; rtlapp with the model of the run within R_bound."""
     d = os.path.join(EXP, "wcet")
-    m = pw.run_log(os.path.join(d, "logs", f"{run}.events.txt"), os.path.join(d, "specs", "wcet_e_tt_rc7.json"),
+    m = pw.run_log(os.path.join(d, "logs", f"{run}.events.txt"), os.path.join(d, "specs", "wcet_e_tt.json"),
                    os.path.join(d, "logs", f"{run}.image.elf"), os.path.join(APP_DIR, "wcet_e.json"),
                    os.path.join(APPS, "wcet-e", "wcet-e.csv"), os.path.join(APPS, "wcet-e", "wcet-e-ONTO-hermes2x2.map"),
                    str(tmp_path), os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"))
@@ -157,16 +161,16 @@ def test_runs_w4_w5(tmp_path, run, bound):
     injection_conforms(m["rtlapp"]["tt"], 70)
 
 
-def test_wcet_of_the_r11f_runs(tmp_path):
-    """make -C experiments/wcet analyze-r11f check-r11f: t(V_k) of the images
+def test_wcet_of_the_r11g_runs(tmp_path):
+    """make -C experiments/wcet analyze-r11g check-r11g: t(V_k) of the images
     of VH, VCV and W5 covers the CPU time of every PE; the runs of I in VH
     are above job + dispatch only by the handlers of packets received
     inside them; w_NI of each image within NI_WAIT_CYCLES."""
     pytest.importorskip("scipy")
     pytest.importorskip("elftools")
     d = os.path.join(EXP, "wcet")
-    m = pw.analyze(os.path.join(d, "config_r11f.json"), str(tmp_path))
-    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, "reference_r11f.json")) == []
+    m = pw.analyze(os.path.join(d, "config_r11g.json"), str(tmp_path))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, "reference_r11g.json")) == []
     for app in ("E", "CAR-V", "WCET-E"):
         s = m["apps"][app]["summary"]
         assert s["all_groups_sound"] and s["all_runs_with_receptions_sound"], app
@@ -178,7 +182,7 @@ def test_wcet_of_the_r11f_runs(tmp_path):
 
 def test_run_images_equal_the_images_of_the_analysis():
     """The images of VH, VCV, W4 and VMA (riscv64-elf-gcc 12.2.0 of the
-    simulation server) load the bytes of images/tt-rc7 (container build of the
+    simulation server) load the bytes of images/tt (container build of the
     same compiler): every allocated section has the same address and
     content, and the symbols are the same except the names of the mapping
     symbols of the assembler ($xrv32e1p9 against $x)."""
@@ -196,7 +200,7 @@ def test_run_images_equal_the_images_of_the_analysis():
     pairs = {"exp23/logs/VH.image.elf": "weird_a", "car-v-rtl/logs/VCV.image.elf": "car_v",
              "wcet/logs/W4.image.elf": "wcet_e", "multiapp/logs/VMA.image.elf": "carv_e"}
     for run, img in pairs.items():
-        assert content(os.path.join(EXP, run)) == content(os.path.join(EXP, "wcet", "images", "tt-rc7", img + ".elf")), run
+        assert content(os.path.join(EXP, run)) == content(os.path.join(EXP, "wcet", "images", "tt", img + ".elf")), run
 
 
 def test_run_cf5_jobs_after_their_finish(tmp_path):

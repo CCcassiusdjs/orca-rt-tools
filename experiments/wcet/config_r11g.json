@@ -1,5 +1,5 @@
 {
- "_doc": "experiments/wcet, runs of tag r11-rc7 (release by tick, kernel without nested interrupts, crt0=guard_readback, time-triggered injection, t(v) = max(CSV, static) in the model of each run): static t(v) (rttools.wcet) of the image of each run against its CPU time: E on run VH, CAR-V on run VCV, WCET-E on run W5; flow of E with the static costs of the image of VH, the network-interface model tt (the default) and the deadline model start of the tables of tag r11-rc7. make analyze-r11f check-r11f; rttools/paper/wcet.py. Paths relative to this file.",
+ "_doc": "experiments/wcet, runs of tag r11-rc9 (release by tick, kernel without nested interrupts, crt0=guard_readback, time-triggered injection, t(v) = max(CSV, static) in the model of each run): static t(v) (rttools.wcet) of the image of each run against its CPU time: E on run VH, CAR-V on run VCV, WCET-E on run W5; flow of E with the static costs of the image of VH, the network-interface model tt (the default) and the deadline model tick of the tables of tag r11-rc9. make analyze-r11g check-r11g; rttools/paper/wcet.py. Paths relative to this file.",
  "apps": {
   "E": {
    "spec": "specs/weird_a_VH.json",
@@ -29,7 +29,7 @@
   "trace": "logs/bodies.trace.txt"
  },
  "flow": {
-  "deadline": "start",
+  "deadline": "tick",
   "app": "../../apps/synthetic-app-e/synthetic-app-e.csv",
   "arch": "../../arch/hermes-2x2.gml",
   "maps": [

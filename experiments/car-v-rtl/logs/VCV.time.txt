@@ -1,18 +1,18 @@
 	Command being timed: "vsim -batch -do run.do"
-	User time (seconds): 943.54
-	System time (seconds): 2.11
+	User time (seconds): 989.77
+	System time (seconds): 1.56
 	Percent of CPU this job got: 99%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 15:47.96
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 16:34.44
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 73632
+	Maximum resident set size (kbytes): 73604
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 347
-	Minor (reclaiming a frame) page faults: 378931
-	Voluntary context switches: 3663
-	Involuntary context switches: 3238
+	Major (requiring I/O) page faults: 201
+	Minor (reclaiming a frame) page faults: 378864
+	Voluntary context switches: 3380
+	Involuntary context switches: 6028
 	Swaps: 0
 	File system inputs: 322527
 	File system outputs: 33259

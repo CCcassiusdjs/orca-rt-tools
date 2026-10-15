@@ -1,9 +1,0 @@
-{
- "_doc": "rttools.wcet spec of application E on images/tt-rc7/weird_a.elf (weird_a.c with the time-triggered injection, INJECTION=tt, riscv64-elf-gcc 12.2.0; images/tt/BUILD.txt).",
- "image": "../images/tt-rc7/weird_a.elf",
- "annotations": [
-  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
-  "../annotations/weird_a.json"
- ],
- "app": "../../../apps/synthetic-app-e/synthetic-app-e.csv"
-}

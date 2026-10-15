@@ -1,5 +1,5 @@
 {
- "_doc": "Values of run VG (logs/VG.events.txt, logs/VG.RUN_INFO, logs/VG.time.txt, logs/VG.image.lst, logs/VG.noinstr.lst): simulation (simulate.sh) of a git archive of tag r11-rc7 (commit 9415ff1, repo_state=archive) of weird_a with the release by tick (RELEASE_MASK=15, release=tick), the UCX-OS kernel without nested interrupts (isr=no_nesting), the crt0.s with the return test of _isr and the read back of _interrupt_set(0) (crt0=guard_readback) and the time-triggered injection of the packets between PEs (injection=tt; table app/weird_a_tt.h with t(v) = max(CSV, static t(v) of the image), costs=max_csv_static costs_file=weird_a.json) at F_CLK = 500000000 Hz, 20 ms of platform time, Questa 2025.3, riscv64-elf-gcc 12.2.0, on the GAPH server, 2026-10-15 (run_r11f.sh: make -C experiments/exp23 sim software-without F_CLK=500000000 SIMDIR=build/sim-VG SW=build/sw-VG SIM_NS=20000000). Analysis with the join rule per_producer and the release rule tick; instrumentation from logs/VG.image.lst and logs/VG.noinstr.lst. Model of the run (the defaults of rttools): the network interface of each PE as a resource of the link schedule, o_i = L0 + 20 (m + 1) + w_NI (w_NI = 15169), and t(v) = max(CSV, static t(v)) of the costs file of RUN_INFO (experiments/wcet/costs/tt); tt: each packet against s_{i,j}, o_i and its deadline, each job end against F(v), each enqueue against s_{i,j} (rttools/paper/ttcheck.py). make check-run (or make LOG=logs/VG.events.txt REF=reference_VG.json OUTDIR=build/results_VG analyze check)",
+ "_doc": "Values of run VG (logs/VG.events.txt, logs/VG.RUN_INFO, logs/VG.time.txt, logs/VG.image.lst, logs/VG.noinstr.lst): simulation (simulate.sh) of a git archive of tag r11-rc9 (commit 8e116db, repo_state=archive) of weird_a with the release by tick (RELEASE_MASK=15, release=tick), the UCX-OS kernel without nested interrupts (isr=no_nesting), the crt0.s with the return test of _isr and the read back of _interrupt_set(0) (crt0=guard_readback) and the time-triggered injection of the packets between PEs (injection=tt; table app/weird_a_tt.h with t(v) = max(CSV, static t(v) of the image), costs=max_csv_static costs_file=weird_a.json) at F_CLK = 500000000 Hz, 20 ms of platform time, Questa 2025.3, riscv64-elf-gcc 12.2.0, on the GAPH server, 2026-10-15 (run_r11g.sh: make -C experiments/exp23 sim software-without F_CLK=500000000 SIMDIR=build/sim-VG SW=build/sw-VG SIM_NS=20000000). Analysis with the join rule per_producer and the release rule tick; instrumentation from logs/VG.image.lst and logs/VG.noinstr.lst. Model of the run (the defaults of rttools): the network interface of each PE as a resource of the link schedule, o_i = L0 + 20 (m + 1) + w_NI (w_NI = 15169), and t(v) = max(CSV, static t(v)) of the costs file of RUN_INFO (experiments/wcet/costs/tt), the deadline of each packet at the release tick of its reader and the finish of each job with the handlers of the packet events of its PE (deadline=tick in RUN_INFO); tt: each packet against s_{i,j}, o_i and its deadline, each job end against F(v), each enqueue against s_{i,j}, each arrival against the start of its reader (rttools/paper/ttcheck.py). make check-run (or make LOG=logs/VG.events.txt REF=reference_VG.json OUTDIR=build/results_VG analyze check)",
  "unit": {
   "name": "1 ns",
   "seconds": 1e-09,
@@ -156,8 +156,8 @@
   ]
  },
  "response_bound": {
-  "cycles": 857570,
-  "ms": 1.71514,
+  "cycles": 861443,
+  "ms": 1.722886,
   "task": "J",
   "phase": 3,
   "phases": {
@@ -173,7 +173,7 @@
    "J": 3
   },
   "deadline_ms": 2.0,
-  "deadline_percent": 85.757
+  "deadline_percent": 86.1443
  },
  "iterations": {
   "all": [
@@ -504,8 +504,8 @@
    "deadline": 261000,
    "volume_bytes": 1200,
    "period": 250000,
-   "latency_min_cycles": 36698,
-   "latency_max_cycles": 36947,
+   "latency_min_cycles": 37193,
+   "latency_max_cycles": 37441,
    "packets": 33
   },
   {
@@ -875,12 +875,12 @@
      "max": 31614
     },
     "sent_after_release": 0,
-    "min_slack_cycles": 229386,
+    "min_slack_cycles": 218386,
     "flow": "F1",
     "source": "A",
     "target": "C",
     "min_release": 28530,
-    "deadline": 261000,
+    "deadline": 250000,
     "phase": 0,
     "unassigned": 0,
     "fifo_mismatch": 0,
@@ -896,7 +896,7 @@
        "max": 31614
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 229386
+      "min_slack_cycles": 218386
      },
      "even": {
       "packets": 17,
@@ -909,7 +909,7 @@
        "max": 31614
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 229386
+      "min_slack_cycles": 218386
      }
     },
     "rows": [
@@ -920,7 +920,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31500,
       "after_release": false,
-      "slack_cycles": 229500
+      "slack_cycles": 218500
      },
      {
       "flow": "F1",
@@ -929,7 +929,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31612,
       "after_release": false,
-      "slack_cycles": 229388
+      "slack_cycles": 218388
      },
      {
       "flow": "F1",
@@ -938,7 +938,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -947,7 +947,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -956,7 +956,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -965,7 +965,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -974,7 +974,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -983,7 +983,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -992,7 +992,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1001,7 +1001,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1010,7 +1010,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1019,7 +1019,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1028,7 +1028,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1037,7 +1037,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1046,7 +1046,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1055,7 +1055,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1064,7 +1064,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1073,7 +1073,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1082,7 +1082,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1091,7 +1091,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1100,7 +1100,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1109,7 +1109,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1118,7 +1118,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1127,7 +1127,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1136,7 +1136,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1145,7 +1145,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1154,7 +1154,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1163,7 +1163,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1172,7 +1172,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1181,7 +1181,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1190,7 +1190,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1199,7 +1199,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1208,7 +1208,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      },
      {
       "flow": "F1",
@@ -1217,7 +1217,7 @@
       "send_cycles": 17257,
       "arrival_cycles": 31614,
       "after_release": false,
-      "slack_cycles": 229386
+      "slack_cycles": 218386
      }
     ]
    },
@@ -1232,12 +1232,12 @@
      "max": 192829
     },
     "sent_after_release": 0,
-    "min_slack_cycles": 175741,
+    "min_slack_cycles": 57171,
     "flow": "F2",
     "source": "F",
     "target": "G",
     "min_release": 188301,
-    "deadline": 368570,
+    "deadline": 250000,
     "phase": 0,
     "unassigned": 0,
     "fifo_mismatch": 0,
@@ -1253,7 +1253,7 @@
        "max": 192688
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 175882
+      "min_slack_cycles": 57312
      },
      "even": {
       "packets": 17,
@@ -1266,7 +1266,7 @@
        "max": 192829
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 175741
+      "min_slack_cycles": 57171
      }
     },
     "rows": [
@@ -1277,7 +1277,7 @@
       "send_cycles": 147711,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1286,7 +1286,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192829,
       "after_release": false,
-      "slack_cycles": 175741
+      "slack_cycles": 57171
      },
      {
       "flow": "F2",
@@ -1295,7 +1295,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1304,7 +1304,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1313,7 +1313,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1322,7 +1322,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1331,7 +1331,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1340,7 +1340,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1349,7 +1349,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1358,7 +1358,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1367,7 +1367,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1376,7 +1376,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1385,7 +1385,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1394,7 +1394,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1403,7 +1403,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1412,7 +1412,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1421,7 +1421,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1430,7 +1430,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1439,7 +1439,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1448,7 +1448,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1457,7 +1457,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1466,7 +1466,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1475,7 +1475,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1484,7 +1484,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1493,7 +1493,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1502,7 +1502,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1511,7 +1511,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1520,7 +1520,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1529,7 +1529,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1538,7 +1538,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1547,7 +1547,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      },
      {
       "flow": "F2",
@@ -1556,7 +1556,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192687,
       "after_release": false,
-      "slack_cycles": 175883
+      "slack_cycles": 57313
      },
      {
       "flow": "F2",
@@ -1565,7 +1565,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192686,
       "after_release": false,
-      "slack_cycles": 175884
+      "slack_cycles": 57314
      },
      {
       "flow": "F2",
@@ -1574,7 +1574,7 @@
       "send_cycles": 147736,
       "arrival_cycles": 192688,
       "after_release": false,
-      "slack_cycles": 175882
+      "slack_cycles": 57312
      }
     ]
    },
@@ -1585,16 +1585,16 @@
      "max": 82621
     },
     "arrival": {
-     "min": 119316,
-     "max": 119565
+     "min": 119811,
+     "max": 120062
     },
     "sent_after_release": 0,
-    "min_slack_cycles": 141435,
+    "min_slack_cycles": 129938,
     "flow": "F3",
     "source": "C",
     "target": "E",
     "min_release": 96330,
-    "deadline": 261000,
+    "deadline": 250000,
     "phase": 1,
     "unassigned": 0,
     "fifo_mismatch": 0,
@@ -1606,11 +1606,11 @@
        "max": 82621
       },
       "arrival": {
-       "min": 119316,
-       "max": 119565
+       "min": 119811,
+       "max": 120060
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 141435
+      "min_slack_cycles": 129940
      },
      "even": {
       "packets": 16,
@@ -1619,11 +1619,11 @@
        "max": 82621
       },
       "arrival": {
-       "min": 119563,
-       "max": 119565
+       "min": 120058,
+       "max": 120062
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 141435
+      "min_slack_cycles": 129938
      }
     },
     "rows": [
@@ -1632,297 +1632,297 @@
       "iteration": 1,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119316,
+      "arrival_cycles": 119811,
       "after_release": false,
-      "slack_cycles": 141684
+      "slack_cycles": 130189
      },
      {
       "flow": "F3",
       "iteration": 2,
       "parity": "even",
       "send_cycles": 82621,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120062,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129938
      },
      {
       "flow": "F3",
       "iteration": 3,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 4,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 5,
       "parity": "odd",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 6,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 7,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 8,
       "parity": "even",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 9,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 10,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 11,
       "parity": "odd",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 12,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 13,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 14,
       "parity": "even",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 15,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 16,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 17,
       "parity": "odd",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 18,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 19,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 20,
       "parity": "even",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 21,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 22,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 23,
       "parity": "odd",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 24,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 25,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 26,
       "parity": "even",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 27,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 28,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 29,
       "parity": "odd",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 30,
       "parity": "even",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 31,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119565,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141435
+      "slack_cycles": 129942
      },
      {
       "flow": "F3",
       "iteration": 32,
       "parity": "even",
       "send_cycles": 82621,
-      "arrival_cycles": 119563,
+      "arrival_cycles": 120060,
       "after_release": false,
-      "slack_cycles": 141437
+      "slack_cycles": 129940
      },
      {
       "flow": "F3",
       "iteration": 33,
       "parity": "odd",
       "send_cycles": 82618,
-      "arrival_cycles": 119564,
+      "arrival_cycles": 120058,
       "after_release": false,
-      "slack_cycles": 141436
+      "slack_cycles": 129942
      }
     ]
    },
@@ -1937,12 +1937,12 @@
      "max": 209460
     },
     "sent_after_release": 0,
-    "min_slack_cycles": 51540,
+    "min_slack_cycles": 40540,
     "flow": "F4",
     "source": "I",
     "target": "J",
     "min_release": 173370,
-    "deadline": 261000,
+    "deadline": 250000,
     "phase": 2,
     "unassigned": 0,
     "fifo_mismatch": 0,
@@ -1958,7 +1958,7 @@
        "max": 209460
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 51540
+      "min_slack_cycles": 40540
      },
      "even": {
       "packets": 16,
@@ -1971,7 +1971,7 @@
        "max": 209460
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 51540
+      "min_slack_cycles": 40540
      }
     },
     "rows": [
@@ -1982,7 +1982,7 @@
       "send_cycles": 123740,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -1991,7 +1991,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2000,7 +2000,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2009,7 +2009,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2018,7 +2018,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2027,7 +2027,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2036,7 +2036,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2045,7 +2045,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2054,7 +2054,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2063,7 +2063,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2072,7 +2072,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2081,7 +2081,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2090,7 +2090,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2099,7 +2099,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2108,7 +2108,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2117,7 +2117,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2126,7 +2126,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2135,7 +2135,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2144,7 +2144,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2153,7 +2153,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2162,7 +2162,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2171,7 +2171,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2180,7 +2180,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2189,7 +2189,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2198,7 +2198,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2207,7 +2207,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2216,7 +2216,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2225,7 +2225,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2234,7 +2234,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      },
      {
       "flow": "F4",
@@ -2243,7 +2243,7 @@
       "send_cycles": 123764,
       "arrival_cycles": 209458,
       "after_release": false,
-      "slack_cycles": 51542
+      "slack_cycles": 40542
      },
      {
       "flow": "F4",
@@ -2252,7 +2252,7 @@
       "send_cycles": 123765,
       "arrival_cycles": 209460,
       "after_release": false,
-      "slack_cycles": 51540
+      "slack_cycles": 40540
      },
      {
       "flow": "F4",
@@ -2261,7 +2261,7 @@
       "send_cycles": 123766,
       "arrival_cycles": 209459,
       "after_release": false,
-      "slack_cycles": 51541
+      "slack_cycles": 40541
      }
     ]
    },
@@ -2276,12 +2276,12 @@
      "max": 103061
     },
     "sent_after_release": 0,
-    "min_slack_cycles": 157939,
+    "min_slack_cycles": 146939,
     "flow": "F5",
     "source": "H",
     "target": "J",
     "min_release": 98000,
-    "deadline": 261000,
+    "deadline": 250000,
     "phase": 2,
     "unassigned": 0,
     "fifo_mismatch": 0,
@@ -2297,7 +2297,7 @@
        "max": 103060
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 157940
+      "min_slack_cycles": 146940
      },
      "even": {
       "packets": 16,
@@ -2310,7 +2310,7 @@
        "max": 103061
       },
       "sent_after_release": 0,
-      "min_slack_cycles": 157939
+      "min_slack_cycles": 146939
      }
     },
     "rows": [
@@ -2321,7 +2321,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103005,
       "after_release": false,
-      "slack_cycles": 157995
+      "slack_cycles": 146995
      },
      {
       "flow": "F5",
@@ -2330,7 +2330,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103061,
       "after_release": false,
-      "slack_cycles": 157939
+      "slack_cycles": 146939
      },
      {
       "flow": "F5",
@@ -2339,7 +2339,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2348,7 +2348,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2357,7 +2357,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2366,7 +2366,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2375,7 +2375,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2384,7 +2384,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2393,7 +2393,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2402,7 +2402,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2411,7 +2411,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2420,7 +2420,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2429,7 +2429,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2438,7 +2438,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2447,7 +2447,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2456,7 +2456,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2465,7 +2465,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2474,7 +2474,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2483,7 +2483,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2492,7 +2492,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2501,7 +2501,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2510,7 +2510,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2519,7 +2519,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2528,7 +2528,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2537,7 +2537,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2546,7 +2546,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2555,7 +2555,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2564,7 +2564,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2573,7 +2573,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      },
      {
       "flow": "F5",
@@ -2582,7 +2582,7 @@
       "send_cycles": 63562,
       "arrival_cycles": 103058,
       "after_release": false,
-      "slack_cycles": 157942
+      "slack_cycles": 146942
      },
      {
       "flow": "F5",
@@ -2591,7 +2591,7 @@
       "send_cycles": 63563,
       "arrival_cycles": 103060,
       "after_release": false,
-      "slack_cycles": 157940
+      "slack_cycles": 146940
      },
      {
       "flow": "F5",
@@ -2600,7 +2600,7 @@
       "send_cycles": 63564,
       "arrival_cycles": 103059,
       "after_release": false,
-      "slack_cycles": 157941
+      "slack_cycles": 146941
      }
     ]
    }
@@ -2703,8 +2703,8 @@
     "tx_block_max": 501,
     "tx_gap_min": 1,
     "tx_gap_max": 1,
-    "driver_min": 36094,
-    "driver_max": 36120
+    "driver_min": 36589,
+    "driver_max": 36615
    },
    {
     "flow": "F4",
@@ -2955,8 +2955,8 @@
   "header_wait_max": 0,
   "rx_wait_max": 505,
   "end_wait_max": 341,
-  "occupancy_slack_min": 13998,
-  "deadline_slack_min": 53222,
+  "occupancy_slack_min": 13997,
+  "deadline_slack_min": 42222,
   "violations": 0,
   "flows": [
    {
@@ -3001,17 +3001,17 @@
     "dst": "1-0",
     "packets": 33,
     "s": [
-     116330
+     116825
     ],
     "occupancy": 15551,
-    "inject_delay_max": 386,
+    "inject_delay_max": 387,
     "header_wait_max": 0,
     "rx_wait_max": 505,
     "end_wait_max": 341,
     "latency_max": 827,
-    "occupancy_used_max": 1553,
+    "occupancy_used_max": 1554,
     "inject_delay_min": 361,
-    "occupancy_slack_min": 13998
+    "occupancy_slack_min": 13997
    },
    {
     "flow": "F4",

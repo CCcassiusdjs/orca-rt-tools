@@ -1,4 +1,4 @@
-# Model of the runs of round r11f (images with the time-triggered injection): the analysis flow with
+# Model of the runs of round r11g (images with the time-triggered injection): the analysis flow with
 # the defaults of rttools, the network-interface model tt (o_i = L0 + 20 (m + 1) + w_NI, RTTOOLS_NI
 # unset) and the cost rule max, t(v) = max(CSV, static t(v) of the image of each run, ../wcet/costs/tt),
 # for every application of config.json (rttools/paper/ttflow.py).
@@ -13,7 +13,7 @@
 #                 age; into $(BUILD)/metrics.json and $(BUILD)/values.tex (macros \ExpTt...)
 #   make check    $(BUILD)/metrics.json against reference.json (default target: run check)
 #   make tables   the link schedule and the finish of every job of each run, the tables of the
-#                 conferencia of run_r11f.sh (rttools.paper.ttflow tables), into $(BUILD)/tables
+#                 conferencia of run_r11g.sh (rttools.paper.ttflow tables), into $(BUILD)/tables
 #
 # The models of the runs up to tag r11-rc5 (stored logs, references of ch6, ch7, figures, exp23,
 # car-v, multiapp, wcet and car-full) set the network-interface model off in their own targets

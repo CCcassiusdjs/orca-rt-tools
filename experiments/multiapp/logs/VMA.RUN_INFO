@@ -1,20 +1,21 @@
-repo_commit=9415ff1bed783548b5a02ef1286d7cd01e2f6a7f
+repo_commit=8e116db7fbe1d2bf245dce0364e43e395d38630b
 repo_state=archive
-repo_tag=r11-rc7
-src_sha256=f4571f9a372ec105c31bd8dc482d74c9ada7b03bd8c11be8b66df8105fc5d3fc
+repo_tag=r11-rc9
+src_sha256=57c152716c2965df08bdfa753db20a8278a6768b492978ea03387c3b1173f150
 sim_ns=11500000 monitor=1
-app=carv_e mesh=4x5 generics=-gCLOCK_HALF_PERIOD_FS=1127751 -gRELEASE_CYCLES=221680 -gWARMUP_CYCLES=1330080 -gNOC_DIM_X=4 -gNOC_DIM_Y=5 -gRELEASE_MASK=1048575
+app=carv_e mesh=4x5 generics=-gCLOCK_HALF_PERIOD_FS=1092657 -gRELEASE_CYCLES=228800 -gWARMUP_CYCLES=1372800 -gNOC_DIM_X=4 -gNOC_DIM_Y=5 -gRELEASE_MASK=1048575
 vsim=Questa Sim-64 vsim 2025.3 Simulator 2025.09 Sep 15 2025
 gcc=riscv64-elf-gcc (Arch Linux Repositories) 12.2.0
-date=2026-10-15T06:15:50Z
-f_clk_hz=443360000
+date=2026-10-15T10:35:27Z
+f_clk_hz=457600000
 f_tick_hz=2000
-clock_half_period_fs=1127751
-clock_hz_exact=443360280.771
-release_cycles=221680
-warmup_cycles=1330080
+clock_half_period_fs=1092657
+clock_hz_exact=457600143.503
+release_cycles=228800
+warmup_cycles=1372800
 isr=no_nesting
 crt0=guard_readback
 injection=tt
-costs=max_csv_static costs_file=carv_e.json costs_sha256=c462f4d9e91eaa28b7d2dade61c47bd3e9941f796fa3114fa1dfa06c72b2d2c1
+costs=max_csv_static costs_file=carv_e.json costs_sha256=d198619e24f835e34592399170784a2e5c315ff88de1fc771b31f618c3d89512
 release=tick
+deadline=tick

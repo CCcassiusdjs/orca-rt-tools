@@ -15,7 +15,7 @@ DIRS   := ch7 exp23 figures zll car-v car-full wcet
 DIRS   += ch6# anon:drop-line
 # multiapp: CAR-V and application E on one NoC (rttools.multiapp), about 20 s
 DIRS   += multiapp
-# tt: model of the runs of round r11f (time-triggered injection, defaults of rttools), seconds
+# tt: model of the runs of round r11g (time-triggered injection, defaults of rttools), seconds
 DIRS   += tt
 
 .PHONY: all clean $(DIRS)
