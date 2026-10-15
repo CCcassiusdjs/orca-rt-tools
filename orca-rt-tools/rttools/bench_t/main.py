@@ -2,7 +2,7 @@
 
     python -m rttools.bench_t.main [--costs costs.json]
 
-The costs c^(v) are characterized per task (thesis scale: 10 times the
+The costs c^(v) are characterized per task (scale of the ORCA RT-Tools reference: 10 times the
 cycles of pkt-sim/software/ucx-os/app/weird_a.c) and include the
 scheduler cost (SCHEDULER_CYCLES) of the dispatch of the task. Each list
 gives the tasks of one cluster in the dispatch order of the UCX/OS
@@ -29,7 +29,7 @@ TASK_SETS = {
 def task_sets(costs_file=None):
     """(task sets, scheduler cycles): the characterized costs above, or
     with --costs the static t(v) of a costs file of rttools.wcet (cycles of
-    the platform, not the thesis scale) and its dispatch term."""
+    the platform, not the scale of the ORCA RT-Tools reference) and its dispatch term."""
     if costs_file is None:
         return TASK_SETS, SCHEDULER_CYCLES
     from rttools.wcet import costs

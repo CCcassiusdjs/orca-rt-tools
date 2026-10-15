@@ -18,7 +18,7 @@
   "source": {"pe": "0-0", "task": "A"},
   "join": {"_doc": "rule per_producer: J runs iteration k after the k-th packet of each tag (weird_a.c of this tree); any3: J joins any packets_per_iteration packets (weird_a.c of the stored logs A to E; the Makefiles select it for these logs).", "pe": "1-1", "task": "J", "tags": ["8900", "5670", "1230"], "packets_per_iteration": 3, "rule": "per_producer"},
   "estimate": {
-    "_doc": "Characterized task costs of rttools/bench_t/main.py: tasks of each cluster (listed in the dispatch order that the kernel rule gives; the analysis takes the order from the creation rows of the application, not from this list), cost in thesis scale (10 times weird_a.c), scheduler cost included in each cost. rttools/bench_t/estimate.py runs the ORT/BENCH engine on each sequence.",
+    "_doc": "Characterized task costs of rttools/bench_t/main.py: tasks of each cluster (listed in the dispatch order that the kernel rule gives; the analysis takes the order from the creation rows of the application, not from this list), cost in scale of the ORCA RT-Tools reference (10 times weird_a.c), scheduler cost included in each cost. rttools/bench_t/estimate.py runs the ORT/BENCH engine on each sequence.",
     "scale": 10,
     "scheduler_cycles": 110000,
     "clusters": {
@@ -46,7 +46,7 @@
     {"name": "F5", "source": "H", "target": "J", "tag": "8900", "src_pe": "1-0", "dst_pe": "1-1"}
   ],
   "thesis": {
-    "_doc": "Values printed in the thesis (Ch. 8), in the units the thesis states.",
+    "_doc": "Values printed in the ORCA RT-Tools reference (Ch. 8), in the units the ORCA RT-Tools reference states.",
     "tab83_measured_cycles": {"ABDF": 1439000, "C": 801300, "EHI": 2174500, "GJ": 2384400},
     "tab83_estimated_cycles": {"ABDF": 1819300, "C": 963300, "EHI": 2667900, "GJ": 3014400},
     "tab83_mean_overestimation_percent": 23.934,

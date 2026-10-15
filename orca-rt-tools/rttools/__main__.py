@@ -90,7 +90,7 @@ def load_mapping(map_arg, app, appname, noc, noc_file):
     """Mapping entries ({"node", "tasks"}) for the <map> argument: a .map
     file (rttools.modules.io.mapparser), or the word `spiral`, which runs
     ORT/GCM (criteria of Chapter 7, smallest deviation of the cluster WCET
-    sums) and the Spiral Mapping (thesis, Section 8.1.2) and saves the
+    sums) and the Spiral Mapping (ORCA RT-Tools reference, Section 8.1.2) and saves the
     result as `<app>-SPIRAL-<arch>.map` in the current directory.
 
     Returns (entries, problems). `problems` lists a task on two nodes, a

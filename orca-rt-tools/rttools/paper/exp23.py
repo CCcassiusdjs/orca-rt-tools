@@ -422,7 +422,7 @@ def cpu_per_iteration(tr, cfg, clk, windows):
 def cpu_sequence(cfg):
     """Start and finish of each task in the sequence of its PE, in real
     cycles from the start of the phase: ORT/BENCH (rttools/bench_t/
-    estimate.py) on the characterized costs of each cluster (thesis
+    estimate.py) on the characterized costs of each cluster (ORCA RT-Tools reference
     scale) in the dispatch order of dispatch_sequences, divided by the
     scale. The start includes the scheduler cost; each cost includes the
     dispatch of the task."""
@@ -469,7 +469,7 @@ def phase_windows(cfg):
 
 
 def config_with_costs(cfg, costs_path):
-    """Config whose characterized costs (estimate.clusters, thesis scale)
+    """Config whose characterized costs (estimate.clusters, scale of the ORCA RT-Tools reference)
     and scheduler cost take the rule max of a costs file of rttools.wcet
     (rttools/wcet/costs.py): t(v) = max(cost of the config / scale, static
     t(v)); the costs of a run with costs=max_csv_static in its RUN_INFO."""

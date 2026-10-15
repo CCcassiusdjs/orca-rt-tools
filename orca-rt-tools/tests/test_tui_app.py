@@ -179,7 +179,10 @@ def ch6_dct_reference_hz():
     """run_hz of dct_verify in experiments/ch6/reference.json (all criteria
     and pruning factors give the same value), computed with o_i = L0."""
     import json
-    with open(os.path.join(REPO_ROOT, "experiments", "ch6", "reference.json")) as f:
+    path = os.path.join(REPO_ROOT, "experiments", "ch6", "reference.json")
+    if not os.path.exists(path):
+        pytest.skip("experiments/ch6 is not part of this copy of the artifact")
+    with open(path) as f:
         ref = json.load(f)
 
     def rows(node):

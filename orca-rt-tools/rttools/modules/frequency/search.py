@@ -182,7 +182,7 @@ def _converged(lower, upper, cfg):
     """Stop rule: the interval (lower, upper] is narrower than the absolute
     tolerance cfg["scaling_tolerance"] (Hz) or, when the configuration has
     "relative_tolerance" r, narrower than r * upper (the stop rule of the
-    thesis, lower / upper >= ITF = 0.98, is r = 1 - ITF = 0.02)."""
+    ORCA RT-Tools reference, lower / upper >= ITF = 0.98, is r = 1 - ITF = 0.02)."""
     width = upper - lower
     if width <= cfg["scaling_tolerance"]:
         return True

@@ -1,4 +1,4 @@
-"""Adaptive Guided Search (AGS): Fig. 6.6 of the thesis (Domingues, 2024)
+"""Adaptive Guided Search (AGS): Fig. 6.6 of the ORCA RT-Tools reference (2024)
 and Fig. 3 of Domingues et al., ICECS 2022.
 
 Published pseudocode, as this module reads it:

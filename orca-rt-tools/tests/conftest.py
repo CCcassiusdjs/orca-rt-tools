@@ -34,7 +34,7 @@ def deadline_start(monkeypatch):
     """Deadline model start (RTTOOLS_DEADLINE=start, also for child
     processes): the deadline of a packet at the modeled start of the job
     that reads it and no handlers of the packet events, the model of the
-    thesis (Tab. 8.2 and the windows of the phase model) and of the tables
+    ORCA RT-Tools reference (Tab. 8.2 and the windows of the phase model) and of the tables
     up to tag r11-rc8 (router.tick_deadline)."""
     from rttools.modules.routing import router
     monkeypatch.setenv(router.DEADLINE_ENV, "start")

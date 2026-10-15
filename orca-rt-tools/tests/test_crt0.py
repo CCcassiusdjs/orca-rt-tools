@@ -81,8 +81,8 @@ def test_simulate_crt0_line(tmp_path, env, line, asdefs):
 
 
 RUNS = [
-    ("exp23/logs/D.events.txt", "exp23/reference_D.json"),
-    ("exp23/logs/E.events.txt", "exp23/reference_E.json"),
+    ("exp23/logs/D.events.txt", "exp23/reference_D.json"),  # anon:drop-line
+    ("exp23/logs/E.events.txt", "exp23/reference_E.json"),  # anon:drop-line
     ("exp23/logs/F.events.txt", "exp23/reference_head.json"),
     ("exp23/logs/G.events.txt", "exp23/reference_G.json"),
     ("exp23/logs/H.events.txt", "exp23/reference_H.json"),

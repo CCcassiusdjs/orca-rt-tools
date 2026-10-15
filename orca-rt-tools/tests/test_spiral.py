@@ -1,6 +1,6 @@
-"""ORT/SM, Spiral Mapping (thesis, Section 8.1.2, Table 8.1, Fig. 8.2).
+"""ORT/SM, Spiral Mapping (ORCA RT-Tools reference, Section 8.1.2, Table 8.1, Fig. 8.2).
 
-The repository of the thesis has no implementation of the Spiral
+The repository of the ORCA RT-Tools reference has no implementation of the Spiral
 Mapping; rttools/modules/mapping/spiral.py implements the rule of
 Fig. 8.2.
 """

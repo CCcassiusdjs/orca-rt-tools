@@ -16,7 +16,7 @@ count cycles from the start of the phase in which the source sends, so
 the packets of all flows share the window of one hyperperiod. The relative
 deadline of the input is not used.
 
-cpa: model of ORT/FNS in the thesis (Ch. 6). CP(u) is the critical path up
+cpa: model of ORT/FNS in the ORCA RT-Tools reference (Ch. 6). CP(u) is the critical path up
 to u computed by ORT/GCPA on the whole application, and D_i the relative
 deadline of the flow in the input.
 
@@ -50,7 +50,7 @@ from rttools.modules.mapping import mapper
 PHASE = "phase"
 CPA = "cpa"
 MODELS = (PHASE, CPA)
-# applications without the parameter keep the model of the thesis (Ch. 6)
+# applications without the parameter keep the model of the ORCA RT-Tools reference (Ch. 6)
 DEFAULT_MODEL = CPA
 
 

@@ -1,5 +1,5 @@
 """<map> argument of the command line (rttools/__main__.py): a .map file
-or `spiral` (ORT/GCM clustering and Spiral Mapping, thesis Section 8.1).
+or `spiral` (ORT/GCM clustering and Spiral Mapping, ORCA RT-Tools reference Section 8.1).
 The command line checks that the mapping puts every task of the
 application on exactly one node of the architecture; before, a task
 mapped twice or not mapped reached the router (None node)."""
