@@ -38,11 +38,16 @@
 #   make check-r11e  $(BUILD)/r11e/metrics.json against reference_r11e.json
 #   make analyze-tt  the images with the time-triggered injection (config_tt.json; images/tt: riscv64-elf-gcc
 #                  12.2.0, images/tt13: riscv64-unknown-elf-gcc 13.2.0, images/*/BUILD.txt): t(v) of E,
-#                  CAR-V and WCET-E with t(V_k) per PE against the CSV, and the terms of the network
+#                  CAR-V, WCET-E, CARV-E and CAR-FULL (every task of every image of round r11f) with
+#                  t(V_k) per PE against the CSV, and the terms of the network
 #                  interface of every image (inject, rx_size, rx_end) against their constants in
 #                  rttools/modules/routing/router.py (NI_INJECT_CYCLES, NI_RX_SIZE_CYCLES,
 #                  NI_RX_END_CYCLES; w_NI = NI_WAIT_CYCLES); into $(BUILD)/tt
-#   make check-tt  $(BUILD)/tt/metrics.json against reference_tt.json and every term within its constant
+#   make check-tt  $(BUILD)/tt/metrics.json against reference_tt.json, every term within its constant, and
+#                  the costs files of costs/tt equal to the analysis
+#   make costs-tt  write costs/tt/<image>.json (static t(v) of every task and scheduler_cycles of each image of
+#                  images/tt, rttools/wcet/costs.py): the costs that the analysis flow of the runs with the
+#                  time-triggered injection takes as max(CSV, static) (experiments/tt)
 #   make images-tt  build the images of images/tt and images/tt13 with ../exp23/build_sw.sh (the compiler
 #                  of ENV_SETUP; copy each set by hand into the directory of its compiler)
 #
@@ -83,7 +88,7 @@ RTL     := ../../pkt-sim/tests/rtl
 UCX_IMG := pkt-sim/software/ucx-os/build/target
 
 .PHONY: all analyze check app csv images bodies trace sim run-analyze check-run analyze-r11c check-r11c analyze-r11e check-r11e clean
-.PHONY: analyze-tt check-tt images-tt
+.PHONY: analyze-tt check-tt images-tt costs-tt
 
 all: analyze check
 
@@ -148,7 +153,14 @@ check-r11e:
 analyze-tt:
 	$(RUN) analyze --config config_tt.json --out $(BUILD)/tt
 
+TT_COST_FILES := E:weird_a CAR-V:car_v WCET-E:wcet_e CARV-E:carv_e CAR-FULL:car_full
+
+costs-tt: analyze-tt
+	mkdir -p costs/tt
+	for p in $(TT_COST_FILES); do cp $(BUILD)/tt/$${p%%:*}/costs_file.json costs/tt/$${p##*:}.json; done
+
 check-tt:
+	for p in $(TT_COST_FILES); do cmp $(BUILD)/tt/$${p%%:*}/costs_file.json costs/tt/$${p##*:}.json || exit 1; done
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/tt/metrics.json reference_tt.json
 	$(PYTHON) -c "import json, sys; m = json.load(open('$(BUILD)/tt/metrics.json')); \
 		sys.exit(0 if m['ni_within_bound'] else 'a term of the network interface exceeds its constant')"

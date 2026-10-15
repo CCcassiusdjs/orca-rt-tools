@@ -1,5 +1,5 @@
 {
- "_doc": "experiments/wcet, images with the time-triggered injection (pkt-sim/software/ucx-os/lib/noc_tt.c, INJECTION=tt; images/tt: riscv64-elf-gcc 12.2.0, the compiler of the RTL runs; images/tt13: riscv64-unknown-elf-gcc 13.2.0): static t(v) (rttools.wcet) of E, CAR-V and WCET-E with t(V_k) per PE against the costs of the CSV (pe_bound), and the terms of the network interface of every image against the w_NI of the model (rttools/modules/routing/router.py, NI_WAIT_CYCLES). make analyze-tt check-tt; rttools/paper/wcet.py. Paths relative to this file.",
+ "_doc": "experiments/wcet, images with the time-triggered injection (pkt-sim/software/ucx-os/lib/noc_tt.c, INJECTION=tt; images/tt: riscv64-elf-gcc 12.2.0, the compiler of the RTL runs; images/tt13: riscv64-unknown-elf-gcc 13.2.0): static t(v) (rttools.wcet) of every task of the five images (E, CAR-V, WCET-E, the composition CARV-E and CAR-FULL; costs_file.json of each, copied to costs/tt by make costs-tt) with t(V_k) per PE against the costs of the CSV (pe_bound), and the terms of the network interface of every image against the w_NI of the model (rttools/modules/routing/router.py, NI_WAIT_CYCLES). make analyze-tt check-tt; rttools/paper/wcet.py. Paths relative to this file.",
  "apps": {
   "E": {
    "spec": "specs/weird_a_tt.json",
@@ -15,6 +15,14 @@
    "spec": "specs/wcet_e_tt.json",
    "csv": "../../apps/wcet-e/wcet-e.csv",
    "map": "../../apps/wcet-e/wcet-e-ONTO-hermes2x2.map"
+  },
+  "CARV-E": {
+   "spec": "specs/carv_e_tt.json"
+  },
+  "CAR-FULL": {
+   "spec": "specs/car_full_tt.json",
+   "csv": "../../apps/car-full/car-full.csv",
+   "map": "../../apps/car-full/car-full-ONTO-hermes4x4.map"
   }
  },
  "ni_images": {

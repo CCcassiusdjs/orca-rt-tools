@@ -208,10 +208,22 @@ def bodies(elf, trace):
 
 # ------------------------------------------------------------ analysis
 
+def costs_file(res):
+    """Costs file (rttools/wcet/costs.py) of a static analysis: t(v) of
+    every task and scheduler_cycles, with the image."""
+    return {"_doc": "static t(v) (rttools.wcet) of the image; the analysis flow takes max(t(v) of the CSV, this t(v)) "
+                    "(rttools/wcet/costs.py, rule max)",
+            "image": res["image"], "scheduler_cycles": res["scheduler_cycles"],
+            "tasks": {t: {"t": r["t"]} for t, r in res["tasks"].items()}}
+
+
 def static(spec_path, out_dir, image=None):
     spec = wcli.load_spec(spec_path)
     res = wcli.run_spec(spec, image)
     os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "costs_file.json"), "w") as f:
+        json.dump(costs_file(res), f, indent=1)
+        f.write("\n")
     with open(os.path.join(out_dir, "costs.json"), "w") as f:
         json.dump(res, f, indent=1)
         f.write("\n")

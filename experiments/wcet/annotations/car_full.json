@@ -1,5 +1,5 @@
 {
- "_doc": "Flow facts of CAR with four periods (pkt-sim/software/ucx-os/app/car_full.c, rttools.ucxgen, time-triggered tasks) for the static analysis of the kernel terms and of the sections with interrupts disabled (rttools.wcet.ucx, sections). tcb = 4: at most 3 tasks per PE plus the idle task. heap_blocks: blocks of the heap of the largest PE: 1 end block, 3 per task and for the idle task (tcb, rt, stack; kernel/ucx.c), 2 per comm (queue and slots; lib/queue.c), 1 per buffer of an output edge (create_pkt; TT_BUFFERS of app/car_full_tt.h) and 2 packets in flight per input edge between PEs (one queued packet per source with UCX_NOC_LATEST and one in reception): 32 on PE 1-2 with one buffer per output edge, bound 40. read_one (one packet of the queue with interrupts disabled): 6 tests of the loop over the input edges (at most MAX_IN = 5 edges); read_inputs: the queue holds at most one packet per input edge (UCX_NOC_LATEST), so read_one runs at most 6 times; ucx_app_tick: one release per tick (the release request comes before the tick of its phase and the hook serves a request that the release interrupt has not served, so the loop over the pending releases runs once and tests once more: bound 2), and one pass per task of the PE in it (bound tcb); begin_marks: one marker per input edge; pktdrv_put_latest (send_local, irq3_handler): one pass per queued packet, at most MAX_PKT_QUEUE_SLOTS = 8. sections: the functions of car_full.c that run with interrupts disabled (TT_SECTION; wait_release blocks in ucx_task_yield between _di and _ei).",
+ "_doc": "Flow facts of CAR with four periods (pkt-sim/software/ucx-os/app/car_full.c, rttools.ucxgen, time-triggered tasks) for the static analysis of the kernel terms and of the sections with interrupts disabled (rttools.wcet.ucx, sections). tcb = 4: at most 3 tasks per PE plus the idle task. heap_blocks: blocks of the heap of the largest PE: 1 end block, 3 per task and for the idle task (tcb, rt, stack; kernel/ucx.c), 2 per comm (queue and slots; lib/queue.c), 1 per buffer of an output edge (create_pkt; TT_BUFFERS of app/car_full_tt.h) and 2 packets in flight per input edge between PEs (one queued packet per source with UCX_NOC_LATEST and one in reception): 32 on PE 1-2 with one buffer per output edge, bound 40. read_one (one packet of the queue with interrupts disabled): 6 tests of the loop over the input edges (at most MAX_IN = 5 edges); read_inputs: the queue holds at most one packet per input edge (UCX_NOC_LATEST), so read_one runs at most 6 times; ucx_app_tick: one release per tick (the release request comes before the tick of its phase and the hook serves a request that the release interrupt has not served, so the loop over the pending releases runs once and tests once more: bound 2), and one pass per task of the PE in it (bound tcb); begin_marks: one marker per input edge; pktdrv_put_latest (send_local, irq3_handler): one pass per queued packet, at most MAX_PKT_QUEUE_SLOTS = 8. sections: the functions of car_full.c that run with interrupts disabled (TT_SECTION; wait_release blocks in ucx_task_yield between _di and _ei). run_task (car_full.c, a0 = TASKS[i] at the entry: n_in at byte 16, n_out at byte 17 of struct task_s; the offsets of ucxgen.json are those of the single-rate run_task): the loop of the sends runs n_out times, the loop of read_one at most n_in + 1 times (one queued packet per input edge, UCX_NOC_LATEST), the other loops (setup of the buffers and of last[]) at most MAX_IN = MAX_OUT = 5 times.",
  "params": {
   "tcb": 4,
   "heap_blocks": 40
@@ -90,6 +90,26 @@
     {
      "select": "rest",
      "bound": 9
+    }
+   ]
+  },
+  "run_task": {
+   "loops": [
+    {
+     "select": {
+      "contains_call": "ucx_noc_send_at"
+     },
+     "bound": "u8(a0 + 17)"
+    },
+    {
+     "select": {
+      "contains_call": "read_one"
+     },
+     "bound": "u8(a0 + 16) + 1"
+    },
+    {
+     "select": "rest",
+     "bound": 5
     }
    ]
   }

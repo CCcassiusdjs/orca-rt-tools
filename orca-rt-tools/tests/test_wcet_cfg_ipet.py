@@ -70,3 +70,18 @@ def test_ipet_without_bound_is_unbounded():
     p.add_edge("h", "T")
     with pytest.raises(ipet.IPETError, match="unbounded"):
         ipet.solve(p)
+
+
+def test_call_at_the_end_of_a_function_does_not_return():
+    """task_<v> of car_full.c (images/tt) ends with the call of run_task,
+    which loops forever: the call block has no successor and the graph
+    has no return."""
+    pytest.importorskip("elftools")
+    img = image.load(os.path.join(REPO_ROOT, "experiments", "wcet", "images", "tt", "car_full.elf"))
+    tasks = [f.name for f in img.functions if f.name.startswith("task_")]
+    assert len(tasks) == 33
+    for name in tasks:
+        g = cfg.build(img, name)
+        calls = [b for b in g.blocks.values() if b.term == "call" and b.callee == "run_task"]
+        assert len(calls) == 1 and calls[0].succs == []
+        assert "return" not in {b.term for b in g.blocks.values()}
