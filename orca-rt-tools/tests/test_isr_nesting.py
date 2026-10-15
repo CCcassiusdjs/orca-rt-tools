@@ -39,7 +39,8 @@ def test_kernel_sources():
     hal = read("arch", "riscv", "hf-riscv-e", "hal.c")
     assert "ctx_p[CONTEXT_RA] = (uint32_t)_task_start;" in hal
     mk = read("Makefile")
-    assert "TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST\n" in mk
+    # INJ_DEFS: -DUCX_NOC_TT with INJECTION=tt (the default), empty with INJECTION=finish
+    assert "TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST $(INJ_DEFS)\n" in mk
     assert "UCX_ISR_NO_NESTING" not in mk and "TT_ASDEFS" not in mk
 
 
@@ -193,9 +194,10 @@ def calls(funcs, fname, target):
     return sum(1 for ln in funcs.get(fname, []) if re.search(rf"\bjal\b.*<{target}>", ln))
 
 
-def make(ucx, path, target, cc=None, asdefs=None):
+def make(ucx, path, target, cc=None, asdefs=None, injection=None):
     env = {**os.environ, "PATH": path}
-    extra = ([f"CC={cc}"] if cc else []) + ([f"UCX_ASDEFS={asdefs}"] if asdefs else [])
+    extra = ([f"CC={cc}"] if cc else []) + ([f"UCX_ASDEFS={asdefs}"] if asdefs else []) \
+        + ([f"INJECTION={injection}"] if injection else [])
     for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", "clean"],
                  ["make", "-s", *extra, target, "F_CLK=434912000"]):
         r = subprocess.run(args, cwd=ucx, env=env, capture_output=True, text=True, timeout=600)

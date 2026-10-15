@@ -52,6 +52,7 @@ Measurement (log of the run):
 | Packet against [r, d] | Send and receive (TAG lines) in cycles from r_k + phi(u) P |
 | Network latency | FLIT lines of the packet monitor (rtl/pe_checker.sv): RX.last - TX.head; header = RX.head - TX.head against 6 (m + 1); TX and RX pair by source, destination and tag |
 | Phase conformance | Executions (ITER begin markers) of each task per phase [r_k, r_k+1) and CPU of each PE per phase against t(V_k) (rttools/paper/phasecheck.py); release rule of the run from the RUN_INFO line `release` (release by tick: the release acknowledgments come from every PE of tick_pes of the manifest) |
+| Time-triggered injection (RUN_INFO injection=tt, with --arch or --composition) | Each packet between PEs against its instant s, occupancy o_i and deadline in the link schedule of the table of the image (rttools/paper/ttcheck.py: FLIT END and TIMER lines; metrics.json "tt", tt_packets.csv); the link schedule of the analysis takes the network-interface model tt |
 """
 from __future__ import annotations
 
@@ -70,7 +71,7 @@ from rttools.modules.instances import release
 from rttools.modules.io import appparser
 from rttools.modules.mapping import mapfile
 from rttools.modules.routing import router
-from rttools.paper import exp23
+from rttools.paper import exp23, ttcheck
 from rttools.tui.model import metrics as tmetrics
 
 exact = exp23.exact
@@ -779,6 +780,25 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
     return out
 
 
+def tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, arch, f_clk, composition=None):
+    """Packets between PEs of a run with the time-triggered injection
+    against the link schedule of the table of its image
+    (rttools.paper.ttcheck): packet k of a flow comes from the job of the
+    source in phase k - 1 + n(source)."""
+    table = ttcheck.schedule_rows(csv_path, map_path, arch, f_clk, composition)
+    if composition:
+        from rttools.multiapp import compose
+        label = {fid: compose.qualify(app["app_name"], "f" + str(fl["csv_id"])) for fid, fl in app["flows"].items()}
+    else:
+        label = {fid: "f" + str(fl["csv_id"]) for fid, fl in app["flows"].items()}
+    pk = [dict(x, flow_label=label[x["flow"]], n=x["iteration"] - 1) for x in per_packet
+          if x["flow"] is not None and x["iteration"] is not None and not app["flows"][x["flow"]]["local"]]
+
+    def phase_of(p, row, h):
+        return h + mdl["tasks"][app["flows"][p["flow"]]["source"]]["phase"]
+    return ttcheck.analyze_run(log_path, clk, releases, table, pk, phase_of, w_h=mdl["header_wait_cycles"])
+
+
 # ------------------------------------------------------------ outputs
 
 def _csv(path, rows, cols):
@@ -795,7 +815,9 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
     app = load_app(manifest_path, csv_path, map_path, app_name)
     tr, clk, clock = load_log(log_path, app, f_clk, run_info)
     info_path = exp23.run_info_path(log_path) if run_info == "auto" else run_info
-    rel_rule = phasecheck.release_rule(exp23.read_run_info(info_path) if info_path else {}, release_rule)
+    info = exp23.read_run_info(info_path) if info_path else {}
+    rel_rule = phasecheck.release_rule(info, release_rule)
+    injection = ttcheck.injection_rule(info)
     if tr.meta.get("swap_xy"):
         raise ValueError("the PE labels of the log are swapped against the manifest")
     mdl = model(app, clock["clock_hz"])
@@ -809,12 +831,23 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
     win = cpu_windows(tr, app, mdl, clk, releases)
     att = cpu_attributed(mdl, its)
     pkts = packets(app, mdl, clk, releases, ev)
-    sched = link_schedule(app, arch, clock["clock_hz"], composition) if (arch or composition) else None
+    # link schedule of the model of the run: the network interface as a
+    # resource and w_NI in o_i for the time-triggered injection
+    prev_ni = router.set_ni("tt" if injection == "tt" else "off")
+    try:
+        sched = link_schedule(app, arch, clock["clock_hz"], composition) if (arch or composition) else None
+    finally:
+        router.set_ni(prev_ni)
     if sched:
         for f in pkts["flows"]:
             f["schedule_start"] = sched["starts"].get(f["flow"])
     net = network(log_path, app, mdl, clk, ev, sched)
     per_packet = net.pop("per_packet") if net else []
+    tt = None
+    if injection == "tt" and net is not None and (arch or composition):
+        tt = tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, arch, clock["clock_hz"],
+                      composition)
+    tt_packets = tt.pop("per_packet") if tt else []
     r2d = []
     for k, r in enumerate(releases, start=1):
         firsts = []
@@ -853,6 +886,8 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
         "network": net,
         "link_schedule": None if sched is None else {k: v for k, v in sched.items()},
         "monitor": exp23.monitor_summary(log_path),
+        "injection": injection,
+        "tt": tt,
         "phase_conformance": phasecheck.conformance(
             tr, clk, releases, {v: {k: mk["begin"] for k, mk in ks.items()} for v, ks in marks.items()},
             lambda v, j: j - 1 + mdl["tasks"][v]["phase"], {t["name"]: t["pe_label"] for t in app["manifest"]["tasks"]},
@@ -885,6 +920,8 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
          ["task", "pe", "source", "iterations", "phase_model", "phase_observed", "cost",
           "cpu_per_iteration_cycles", "end_minus_model_finish_max", "ends_after_model_finish",
           "max_iterations_per_run", "same_run"])
+    if tt_packets:
+        _csv(os.path.join(out_dir, "tt_packets.csv"), tt_packets, list(tt_packets[0]))
     if net:
         _csv(os.path.join(out_dir, "network.csv"), net["flows"], list(net["flows"][0]) if net["flows"] else [])
         cols = [c for c in per_packet[0] if c not in ("links", "other", "contenders_other")] if per_packet else []
@@ -924,6 +961,8 @@ def summary_lines(m):
     if pc is not None:
         from rttools.paper import phasecheck
         out.append("  phase conformance: " + phasecheck.summary(pc)[0][2:])
+    if m.get("injection") == "tt":
+        out += ["  " + x.lstrip() for x in ttcheck.summary_lines(m.get("tt"))]
     return out
 
 
@@ -956,7 +995,8 @@ def main(argv=None):
             p.error("--app and --composition take a composition of applications with one release "
                     "period (rttools.ucxgen compose); the manifest is a time-triggered application")
         from rttools.paper import rtlmr
-        m = rtlmr.analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk)
+        m = rtlmr.analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk,
+                          args.arch)
         lines = rtlmr.summary_lines(m)
     else:
         m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch,

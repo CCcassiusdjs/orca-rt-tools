@@ -23,6 +23,7 @@ cycles and milliseconds:
 | (metrics.json) per_iteration; packets_per_iteration.csv | Send and arrival of each packet against the phase of its own iteration; with ITER lines, also the response of each iteration to the end of J for it (iterations_markers.csv) and the iterations that a task runs in the run of the previous one |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
 | network.tex, network.csv, network_packets.csv | Network latency per flow and per packet from the FLIT lines of the packet monitor (only when the log has them) |
+| tt_packets.csv, metrics.json "tt" | Packets between PEs of a run with the time-triggered injection (RUN_INFO injection=tt; --arch and --map) against the link schedule of the table of the image (rttools/paper/ttcheck.py) |
 
 `check` compares metrics.json with a reference file and exits with 1 when
 a value differs (integers exactly; floats within 1e-6 relative).
@@ -1201,6 +1202,37 @@ def mhz_text(hz):
     return f"{hz / 1e6:.6f}".rstrip("0").rstrip(".")
 
 
+def tt_check(log_path, tr, cfg, clk, per_packet, arch_path, map_path):
+    """Packets between PEs of a run with the time-triggered injection
+    (weird_a.c with the table weird_a_tt.h) against the link schedule at
+    the clock of the run (rttools.paper.ttcheck): the n-th packet of a flow
+    (n from 0, order of TX.head) comes from the job of its source in phase
+    n + n(source)."""
+    from rttools.paper import ttcheck
+    from rttools.tui.model import parsers as tparsers
+    from rttools.ucxgen.model import read_csv
+    _, csv_flows, _ = read_csv(cfg["application"])
+    label = {(f["source"], f["target"]): "f" + str(f["id"]) for f in csv_flows}
+    flows = {f["name"]: f for f in cfg["flows"]}
+    phi = response_bound(cfg)["phases"]
+    pk = []
+    for x in sorted(per_packet, key=lambda x: x["tx_head"]):
+        f = flows.get(x["flow"])
+        if f is None:
+            continue
+        pk.append(dict(x, tag=x["tag_tx"], flow_label=label[(f["source"], f["target"])]))
+    count = {}
+    for p in pk:
+        p["n"] = count.get(p["flow"], 0)
+        count[p["flow"]] = p["n"] + 1
+    table = ttcheck.schedule_rows(cfg["application"], map_path, arch_path, cfg["clock_hz"])
+
+    def phase_of(p, row, h):
+        return h + phi[flows[p["flow"]]["source"]]
+    return ttcheck.analyze_run(log_path, clk, release_times(tr, cfg, clk), table, pk, phase_of,
+                               relabel=tparsers.swap_node if tr.meta.get("swap_xy") else None)
+
+
 def phase_conformance(tr, cfg, clk, rule):
     """Executions per phase of each task (ITER begin markers) and CPU per
     phase of each PE against t(V_k) (estimates), with n(v) of
@@ -1219,17 +1251,21 @@ def phase_conformance(tr, cfg, clk, rule):
 
 
 def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None,
-            release_rule=None):
+            release_rule=None, arch=None, mapping=None):
     """Every output of the module for one log; run_info: RUN_INFO path,
     "auto" (next to the log) or None (config clock_hz); listing and
     listing_without: objdump listings of the image with and without the
     instrumentation writes (bound of their cycles; None: no bound);
     release_rule: release rule of the run for phase_conformance ("tick",
-    "data"; None: the RUN_INFO line `release`, "data" without it)."""
-    from rttools.paper import phasecheck
+    "data"; None: the RUN_INFO line `release`, "data" without it); arch
+    and mapping (.gml and .map of E): the check of the time-triggered
+    injection of a run with injection=tt in its RUN_INFO (tt_check)."""
+    from rttools.paper import phasecheck, ttcheck
     tr, cfg, clk, clock = load_run(log_path, cfg, unit, run_info)
     info_path = run_info_path(log_path) if run_info == "auto" else run_info
-    rel_rule = phasecheck.release_rule(read_run_info(info_path) if info_path else {}, release_rule)
+    info = read_run_info(info_path) if info_path else {}
+    rel_rule = phasecheck.release_rule(info, release_rule)
+    injection = ttcheck.injection_rule(info)
     windows = hyperperiods(tr, cfg, clk)
     if not windows:
         raise ValueError("the log has no complete hyperperiod after first_hyperperiod_s")
@@ -1243,6 +1279,10 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
     rows82 = tab82(cfg, tr, clk)
     net = flit_times(log_path, tr, cfg, clk)
     per_packet = net.pop("per_packet") if net else []
+    tt = None
+    if injection == "tt" and net is not None and arch and mapping:
+        tt = tt_check(log_path, tr, cfg, clk, per_packet, arch, mapping)
+    tt_packets = tt.pop("per_packet") if tt else []
     m = {
         "log": os.path.basename(log_path),
         "unit": {"name": tr.unit.name, "seconds": tr.unit.seconds, "detected": tr.meta["timescale_detected"],
@@ -1283,6 +1323,8 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
         "per_iteration": per_iteration(tr, cfg, clk),
         "network": net,
         "phase_conformance": phase_conformance(tr, cfg, clk, rel_rule),
+        "injection": injection,
+        "tt": tt,
     }
     if listing or listing_without:
         if not (listing and listing_without):
@@ -1343,6 +1385,12 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
                 [("Item", "item"), ("Thesis", "thesis"), ("This run", "this_run")],
                 thesis_rows, "lrr", "Values of the thesis and of this run.", "tab:exp23-thesis")
     write_per_iteration(out_dir, m["per_iteration"])
+    if tt_packets:
+        with open(os.path.join(out_dir, "tt_packets.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(list(tt_packets[0]))
+            for x in tt_packets:
+                w.writerow(list(x.values()))
     if net:
         cols = list(per_packet[0].keys()) if per_packet else []
         with open(os.path.join(out_dir, "network_packets.csv"), "w", newline="") as f:
@@ -1427,6 +1475,10 @@ def main(argv=None):
                    help="objdump listing of the simulated image (build_sw.sh, image.lst)")
     a.add_argument("--listing-without", default=None,
                    help="objdump listing of the image built with -DUCX_NO_INSTRUMENTATION")
+    a.add_argument("--arch", default=None,
+                   help="architecture (.gml) of E: with --map, the check of the time-triggered injection of a run "
+                        "with injection=tt in its RUN_INFO (rttools.paper.ttcheck)")
+    a.add_argument("--map", default=None, help="mapping (.map) of E for the check of the time-triggered injection")
     c = sub.add_parser("check")
     c.add_argument("metrics")
     c.add_argument("reference")
@@ -1439,7 +1491,7 @@ def main(argv=None):
             unit = RTL_PRESETS[args.unit]
         run_info = None if args.run_info == "none" else args.run_info
         m = analyze(args.log, cfg, args.out, unit, args.join, run_info, args.listing, args.listing_without,
-                    args.release)
+                    args.release, args.arch, args.map)
         ck = m["clock"]
         print(f"{m['log']}: unit {m['unit']['name']} (detected {m['unit']['detected']}), "
               f"{m['parameters']['hyperperiods']} hyperperiods, join rule {m['join_rule']}")
@@ -1477,6 +1529,10 @@ def main(argv=None):
         if pc is not None:
             from rttools.paper import phasecheck
             print("  phase conformance: " + phasecheck.summary(pc)[0][2:])
+        if m["injection"] == "tt":
+            from rttools.paper import ttcheck
+            for line in ttcheck.summary_lines(m["tt"]):
+                print("  " + line.lstrip())
         net = m["network"]
         if net is None:
             print("  flit times: no FLIT lines")

@@ -11,7 +11,8 @@ module chk_binds;
     .send_cmd_in(ddma_if.send_cmd_in), .send_dest_in(ddma_if.send_dest_in),
     .send_addr_in(ddma_if.send_addr_in), .send_size_in(ddma_if.send_size_in),
     .recv_addr_in(ddma_if.recv_addr_in), .recv_cmd_in(ddma_if.recv_cmd_in),
-    .wb_in(mem_if_dma.wb_in), .mem_addr_in(mem_if_dma.addr_in), .mem_data_in(mem_if_dma.data_in)
+    .wb_in(mem_if_dma.wb_in), .mem_addr_in(mem_if_dma.addr_in), .mem_data_in(mem_if_dma.data_in),
+    .timer_irq(perif_if.irq)
   );
 
   longint run_ns;

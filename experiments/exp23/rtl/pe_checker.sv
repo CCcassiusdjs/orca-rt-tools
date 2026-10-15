@@ -36,6 +36,20 @@
 // of a word in bits 31:24 (core_rv32e/datapath.vhd, store half word): the
 // field at byte offset 0 of a word is {w[23:16], w[31:24]} and the field
 // at offset 2 is {w[7:0], w[15:8]}.
+//
+// End of a received packet and timer interrupts (time-triggered injection,
+// pkt-sim/software/ucx-os/lib/noc_tt.c):
+//   FLIT END t=<ns> src=<x-y> dst=<x-y> tag=<n> cyc=<cycle>
+// the edge at which the CPU writes the handshake of the received packet
+// (recv_cmd_in changes after the last flit, irq3_handler): the DDMA takes the
+// header of the next packet from the next edge on.
+//   TIMER t=<ns> pe=<x-y> cyc=<cycle>
+// the first edge at which the interrupt line of the peripherals of the PE
+// (timer_irq: irq of interface_peripherals, the timer causes TIMER1 CTC, the
+// tick, and TIMER1 OCR, the compare register) is high after a low edge. The
+// line rises one edge after the edge at which TIMER1 reaches its value
+// (hw/peripherals/peripherals_minimal.vhd: registered counter, combinational
+// cause).
 module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) (
   input logic        clock,
   input logic        reset,
@@ -53,7 +67,8 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
   input logic        recv_cmd_in,
   input logic [3:0]  wb_in,
   input logic [31:0] mem_addr_in,
-  input logic [31:0] mem_data_in
+  input logic [31:0] mem_data_in,
+  input logic        timer_irq
 );
   timeunit 1ns;
   timeprecision 100ps;
@@ -92,6 +107,10 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
   longint unsigned fr_head;
   int unsigned     fr_stall, fr_gap;
   logic [31:0]     fr_w0 = 0, fr_w2 = 0;
+  // end of a received packet (handshake of the CPU) and timer interrupt
+  bit              fe_wait = 0;
+  int unsigned     fe_src = 0, fe_tag = 0;
+  logic            prev_tirq = 0;
 
   // noc_packet_t fields (see the header of this file)
   function automatic int unsigned field_at0(input logic [31:0] w);
@@ -181,6 +200,7 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
             $display("FLIT RX t=%0d src=%0d-%0d dst=%0d-%0d tag=%0d size=%0d head=%0d last=%0d stall=%0d gap=%0d",
                      $time, (dimx != 0) ? sid % dimx : sid, (dimx != 0) ? sid / dimx : 0, x, y,
                      (r_size >= 3) ? field_at2(fr_w2) : 0, r_size, fr_head, cyc, fr_stall, fr_gap);
+            fe_wait = 1; fe_src = sid; fe_tag = (r_size >= 3) ? field_at2(fr_w2) : 0;
           end
           fr_on = 0;
         end
@@ -189,8 +209,19 @@ module pe_checker #(parameter int ADDRESS = 0, parameter int RAM_MSIZE = 65536) 
       // ---- receive: address given by the CPU ----
       if (recv_cmd_in != prev_rcmd && r_wait_base) begin
         r_base = recv_addr_in; r_wait_base = 0;
+      end else if (recv_cmd_in != prev_rcmd && fe_wait) begin
+        // ---- receive: handshake of the CPU after the last flit ----
+        $display("FLIT END t=%0d src=%0d-%0d dst=%0d-%0d tag=%0d cyc=%0d",
+                 $time, (dimx != 0) ? fe_src % dimx : fe_src, (dimx != 0) ? fe_src / dimx : 0, x, y,
+                 fe_tag, cyc);
+        fe_wait = 0;
       end
       prev_rcmd <= recv_cmd_in;
+
+      // ---- timer interrupt of the peripherals ----
+      if (timer_irq && !prev_tirq)
+        $display("TIMER t=%0d pe=%0d-%0d cyc=%0d", $time, x, y, cyc);
+      prev_tirq <= timer_irq;
 
       // ---- receive: DDMA write to memory ----
       if (wb_in != 0) begin

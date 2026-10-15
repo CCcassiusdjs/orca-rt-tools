@@ -37,6 +37,11 @@
 #                  of tag r11-rc5, against reference_<run>.json, into $(BUILD)/results_<run>
 #                  (values.tex of each run there)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
+#   make tt        write pkt-sim/software/ucx-os/app/weird_a_tt.h: the injection instants of the
+#                  packets between PEs in the link schedule of E at TT_CLOCKS (rttools.ucxgen tt,
+#                  model of the time-triggered injection: the network interface of each PE as a
+#                  resource, o_i = L0 + 20 (m + 1) + w_NI)
+#   make tt-check  weird_a_tt.h equals a new generation (part of `make all`)
 #   make phase-check  conformance of $(OUTDIR)/metrics.json with the phase model (after analyze):
 #                  no task twice in a phase, no execution before phase j + n(v), CPU per phase at
 #                  most t(V_k) (rttools.paper.phasecheck; exit 1 otherwise). The stored runs A to H
@@ -117,6 +122,10 @@ F_TICK  ?= 2000
 SIMDIR  ?= $(BUILD)/sim
 PAPER_REF ?= reference_head.json
 CLOCK   := $(BUILD)/frequency/clock.json
+# clocks of the injection table of weird_a (the clocks of runs UG/VG and UH/VH)
+TT_CLOCKS ?= 434912000 500000000
+TT_ARGS  = $(APP_E)/synthetic-app-e.csv $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map --arch $(ARCH) \
+	--name weird_a $(foreach f,$(TT_CLOCKS),--clock $(f)) --style named --out ../../pkt-sim/software/ucx-os/app
 
 SW      ?= $(BUILD)/sw
 UCX_IMG := pkt-sim/software/ucx-os/build/target
@@ -128,15 +137,16 @@ INSTR_ARGS = $(if $(LISTING),--listing $(LISTING) --listing-without $(LISTING_WI
 
 .PHONY: all sim analyze check frequency tick tick-log frequency-l0 paper flow-clock paper-flow software
 .PHONY: software-without
-.PHONY: instrumentation info clean phase-check check-run
+.PHONY: instrumentation info clean phase-check check-run tt tt-check
 
-all: analyze check frequency frequency-l0 tick
+all: analyze check frequency frequency-l0 tick tt-check
 
 sim:
 	F_CLK=$(F_CLK) ./simulate.sh $(SIMDIR) $(SIM_NS)
 
 analyze:
-	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR) $(INSTR_ARGS) --release $(RELEASE)
+	$(RUN) analyze $(LOG) --config config.json --join $(JOIN) --out $(OUTDIR) $(INSTR_ARGS) --release $(RELEASE) \
+		--arch $(ARCH) --map $(APP_E)/synthetic-app-e-ONTO-hermes2x2.map
 
 check:
 	$(RUN) check $(OUTDIR)/metrics.json $(REF)
@@ -155,6 +165,12 @@ frequency-l0:
 
 tick:
 	$(PYTHON) tick_period.py code
+
+tt:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen tt $(TT_ARGS)
+
+tt-check:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen tt-check $(TT_ARGS)
 
 tick-log:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) tick_period.py log $(LOG)
