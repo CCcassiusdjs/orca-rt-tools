@@ -266,6 +266,8 @@ def _tt_text(a, composition=False):
                + (f" --ni {a.ni}" if a.ni != "tt" else "") + (f" --costs {rel(a.costs)}" if a.costs else ""))
     if a.costs:
         paths.append(a.costs)
+        if os.path.exists(wcosts.handlers_path(a.costs)):
+            paths.append(wcosts.handlers_path(a.costs))
     return tt.header(a.name, cmd, tt.inputs_comment(paths), tables, flows, style, costs=costs_line)
 
 

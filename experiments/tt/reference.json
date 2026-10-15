@@ -86,7 +86,7 @@
      "used": 11000
     },
     "file": "weird_a.json",
-    "sha256": "8fcc97623e595bc9eddf7dccb1be462ffdb624b952277ef2b527155407211c4f"
+    "sha256": "a863a70d841eb37807c65eb5848919127c536d3754892bdd7138186aaca01654"
    },
    "pes": {
     "0": {
@@ -139,22 +139,22 @@
     }
    },
    "f_cpu_hz": 434900000.0,
-   "f_noc_hz": 358028411.8652344,
-   "minimum_hz": 434900000.0,
-   "binding": "cpu",
+   "f_noc_hz": 449150085.44921875,
+   "minimum_hz": 449150085.44921875,
+   "binding": "network",
    "runs": {
     "VH": {
-     "clock_hz": 434912000,
+     "clock_hz": 449152000,
      "rule": "flow",
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 5,
-     "period_cycles": 217456,
+     "period_cycles": 224576,
      "response_bound": {
-      "cycles": 759938,
+      "cycles": 785171,
       "task": "J",
       "phase": 3,
-      "ms": 1.7473373923920241
+      "ms": 1.7481186769734967
      },
      "tasks": {
       "A": {
@@ -184,7 +184,7 @@
       "C": {
        "pe": "1",
        "start": 11000,
-       "finish": 96330,
+       "finish": 100825,
        "phase": 1
       },
       "E": {
@@ -208,13 +208,13 @@
       "J": {
        "pe": "3",
        "start": 11000,
-       "finish": 107570,
+       "finish": 111443,
        "phase": 3
       },
       "G": {
        "pe": "3",
-       "start": 118570,
-       "finish": 217450,
+       "start": 122443,
+       "finish": 224574,
        "phase": 1
       }
      },
@@ -239,7 +239,7 @@
       ]
      },
      "sim_ns": 20000000,
-     "sim_ns_min": 10247338,
+     "sim_ns_min": 10248119,
      "sim_fits": true,
      "feasible": true,
      "table": {
@@ -255,10 +255,10 @@
      "packets_between_pes": 5,
      "period_cycles": 250000,
      "response_bound": {
-      "cycles": 857570,
+      "cycles": 861443,
       "task": "J",
       "phase": 3,
-      "ms": 1.7151399999999999
+      "ms": 1.7228860000000001
      },
      "tasks": {
       "A": {
@@ -288,7 +288,7 @@
       "C": {
        "pe": "1",
        "start": 11000,
-       "finish": 96330,
+       "finish": 100825,
        "phase": 1
       },
       "E": {
@@ -312,13 +312,13 @@
       "J": {
        "pe": "3",
        "start": 11000,
-       "finish": 107570,
+       "finish": 111443,
        "phase": 3
       },
       "G": {
        "pe": "3",
-       "start": 118570,
-       "finish": 217450,
+       "start": 122443,
+       "finish": 224574,
        "phase": 1
       }
      },
@@ -343,7 +343,7 @@
       ]
      },
      "sim_ns": 20000000,
-     "sim_ns_min": 10215141,
+     "sim_ns_min": 10222886,
      "sim_fits": true,
      "feasible": true,
      "table": {
@@ -525,7 +525,7 @@
      "used": 11000
     },
     "file": "car_v.json",
-    "sha256": "dd9a8a3d1ce0e909f905977e0369f2226d9b5984ace4d9f7407f7a8e5f2119c3"
+    "sha256": "e2f7ef03a6e10d52da056e977c841f7f39922e7f66f6e5597a68ca630bdabc9d"
    },
    "pes": {
     "2": {
@@ -703,22 +703,22 @@
     }
    },
    "f_cpu_hz": 380000000.0,
-   "f_noc_hz": 419677734.375,
-   "minimum_hz": 419677734.375,
+   "f_noc_hz": 441082000.7324219,
+   "minimum_hz": 441082000.7324219,
    "binding": "network",
    "runs": {
     "VCV": {
-     "clock_hz": 419680000,
+     "clock_hz": 441088000,
      "rule": "flow",
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 16,
-     "period_cycles": 209840,
+     "period_cycles": 220544,
      "response_bound": {
-      "cycles": 934360,
+      "cycles": 977176,
       "task": "OBMG",
       "phase": 4,
-      "ms": 2.226362943194815
+      "ms": 2.2153765235055136
      },
      "tasks": {
       "NAVC": {
@@ -844,13 +844,13 @@
       "FDF2": {
        "pe": "13",
        "start": 11000,
-       "finish": 103242,
+       "finish": 110166,
        "phase": 2
       },
       "FDF1": {
        "pe": "14",
        "start": 11000,
-       "finish": 103242,
+       "finish": 107015,
        "phase": 2
       },
       "OBMG": {
@@ -918,7 +918,7 @@
       ]
      },
      "sim_ns": 11500000,
-     "sim_ns_min": 11226363,
+     "sim_ns_min": 11215377,
      "sim_fits": true,
      "feasible": true,
      "table": {
@@ -1009,7 +1009,7 @@
      "used": 11000
     },
     "file": "wcet_e.json",
-    "sha256": "0c4017110d022493ac7331de70ee25552c93ce7301535c89f74337d0bf1500a4"
+    "sha256": "23c7616402d24def7badf95e31871176d6613bbb2f3ba5ebb8623e75ac342cb7"
    },
    "pes": {
     "0": {
@@ -1073,22 +1073,22 @@
     }
    },
    "f_cpu_hz": 220388000.0,
-   "f_noc_hz": 160518646.24023438,
-   "minimum_hz": 220388000.0,
-   "binding": "cpu",
+   "f_noc_hz": 234638214.11132812,
+   "minimum_hz": 234638214.11132812,
+   "binding": "network",
    "runs": {
     "W5": {
-     "clock_hz": 220416000,
+     "clock_hz": 234656000,
      "rule": "flow",
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 5,
-     "period_cycles": 110208,
+     "period_cycles": 117328,
      "response_bound": {
-      "cycles": 377020,
+      "cycles": 398380,
       "task": "J",
       "phase": 3,
-      "ms": 1.7104928861788617
+      "ms": 1.6977192145097506
      },
      "tasks": {
       "A": {
@@ -1118,18 +1118,18 @@
       "C": {
        "pe": "1",
        "start": 11000,
-       "finish": 27036,
+       "finish": 31531,
        "phase": 1
       },
       "E": {
        "pe": "2",
        "start": 11000,
-       "finish": 41329,
+       "finish": 45202,
        "phase": 2
       },
       "H": {
        "pe": "2",
-       "start": 52329,
+       "start": 56202,
        "finish": 55345,
        "phase": 2
       },
@@ -1148,7 +1148,7 @@
       "G": {
        "pe": "3",
        "start": 57396,
-       "finish": 110194,
+       "finish": 117318,
        "phase": 1
       }
      },
@@ -1173,7 +1173,7 @@
       ]
      },
      "sim_ns": 10500000,
-     "sim_ns_min": 10210493,
+     "sim_ns_min": 10197720,
      "sim_fits": true,
      "feasible": true,
      "table": {
@@ -1222,18 +1222,18 @@
       "C": {
        "pe": "1",
        "start": 11000,
-       "finish": 27036,
+       "finish": 31531,
        "phase": 1
       },
       "E": {
        "pe": "2",
        "start": 11000,
-       "finish": 41329,
+       "finish": 45202,
        "phase": 2
       },
       "H": {
        "pe": "2",
-       "start": 52329,
+       "start": 56202,
        "finish": 55345,
        "phase": 2
       },
@@ -1252,7 +1252,7 @@
       "G": {
        "pe": "3",
        "start": 57396,
-       "finish": 110194,
+       "finish": 117318,
        "phase": 1
       }
      },
@@ -1524,7 +1524,7 @@
      }
     },
     "file": "carv_e.json",
-    "sha256": "c462f4d9e91eaa28b7d2dade61c47bd3e9941f796fa3114fa1dfa06c72b2d2c1"
+    "sha256": "d198619e24f835e34592399170784a2e5c315ff88de1fc771b31f618c3d89512"
    },
    "pes": {
     "14": {
@@ -1754,22 +1754,22 @@
     }
    },
    "f_cpu_hz": 443346000.0,
-   "f_noc_hz": 419780731.2011719,
-   "minimum_hz": 443346000.0,
-   "binding": "cpu",
+   "f_noc_hz": 457595825.1953125,
+   "minimum_hz": 457595825.1953125,
+   "binding": "network",
    "runs": {
     "VMA": {
-     "clock_hz": 443360000,
+     "clock_hz": 457600000,
      "rule": "flow",
      "cpu_feasible": true,
      "apps": {
       "CARV": {
-       "period_cycles": 221680,
+       "period_cycles": 228800,
        "response_bound": {
-        "cycles": 981720,
+        "cycles": 1010200,
         "task": "OBMG",
         "phase": 4,
-        "ms": 2.214272825694695
+        "ms": 2.2076048951048954
        },
        "tasks": {
         "NAVC": {
@@ -1901,13 +1901,13 @@
         "FDF2": {
          "pe": "18",
          "start": 11000,
-         "finish": 106356,
+         "finish": 114724,
          "phase": 2
         },
         "FDF1": {
          "pe": "19",
          "start": 11000,
-         "finish": 106356,
+         "finish": 110851,
          "phase": 2
         }
        },
@@ -1970,30 +1970,30 @@
        }
       },
       "E": {
-       "period_cycles": 221680,
+       "period_cycles": 228800,
        "response_bound": {
-        "cycles": 776833,
+        "cycles": 802066,
         "task": "J",
         "phase": 3,
-        "ms": 1.752149494767232
+        "ms": 1.7527666083916085
        },
        "tasks": {
         "J": {
          "pe": "9",
          "start": 11000,
-         "finish": 111793,
+         "finish": 115666,
          "phase": 3
         },
         "G": {
          "pe": "9",
-         "start": 122793,
-         "finish": 221673,
+         "start": 126666,
+         "finish": 228797,
          "phase": 1
         },
         "C": {
          "pe": "10",
          "start": 11000,
-         "finish": 96330,
+         "finish": 100825,
          "phase": 1
         },
         "E": {
@@ -2063,9 +2063,9 @@
      },
      "link_schedule_feasible": true,
      "packets_between_pes": 21,
-     "period_cycles": 221680,
+     "period_cycles": 228800,
      "sim_ns": 11500000,
-     "sim_ns_min": 11214273,
+     "sim_ns_min": 11207605,
      "sim_fits": true,
      "feasible": true,
      "table": {
@@ -2317,7 +2317,7 @@
      "used": 11000
     },
     "file": "car_full.json",
-    "sha256": "0702619027b55660a973e41ce52896e0b150ec54470faa6d5f72c61cf9e16eb4"
+    "sha256": "390624704f2dc3ec4527c2a6b2455acaa00cdad54e73bb9eececa97613e201ce"
    },
    "pes": {
     "11": {
@@ -2536,63 +2536,63 @@
     }
    },
    "f_cpu_hz": 477952000.0,
-   "f_noc_hz": 477952000.0,
-   "minimum_hz": 477952000.0,
-   "binding": "cpu",
+   "f_noc_hz": 526056421.875,
+   "minimum_hz": 526056421.875,
+   "binding": "network",
    "runs": {
     "CF6": {
-     "clock_hz": 477952000,
+     "clock_hz": 526080000,
      "rule": "flow",
      "cpu_feasible": true,
-     "period_cycles": 119488,
-     "hyper_cycles": 5974400,
+     "period_cycles": 131520,
+     "hyper_cycles": 6576000,
      "periodic_from_hyperperiod": 0,
      "link_schedule_feasible": true,
      "packets_between_pes": 347,
      "chains": 34,
      "packets_per_hyperperiod": 347,
      "data_age": {
-      "TPMS-STAC-TPRC": 10504600,
-      "TPMS-STAC-THRC": 4943869,
-      "VIBS-STAC-TPRC": 8114840,
-      "VIBS-STAC-THRC": 1359229,
-      "SPES-NAVC-DIRC": 1790596,
-      "SPES-NAVC-THRC": 1359229,
-      "SPES-STAC-TPRC": 8114840,
-      "SPES-STAC-THRC": 1359229,
-      "POSI-NAVC-DIRC": 5733700,
-      "POSI-NAVC-THRC": 5541309,
-      "POSI-OBMG-OBDB-NAVC-DIRC": 13619908,
-      "POSI-OBMG-OBDB-NAVC-THRC": 13308029,
-      "USOS-OBMG-OBDB-NAVC-DIRC": 10632708,
-      "USOS-OBMG-OBDB-NAVC-THRC": 10320829,
-      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
-      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
-      "FBU3-VOD1-NAVC-DIRC": 1551620,
-      "FBU3-VOD1-NAVC-THRC": 1120253,
-      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
-      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
-      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
-      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
-      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
-      "FBU8-VOD2-NAVC-DIRC": 1551620,
-      "FBU8-VOD2-NAVC-THRC": 1120253,
-      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
-      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757
+      "TPMS-STAC-TPRC": 11396000,
+      "TPMS-STAC-THRC": 4767549,
+      "VIBS-STAC-TPRC": 8765600,
+      "VIBS-STAC-THRC": 1479549,
+      "SPES-NAVC-DIRC": 1972782,
+      "SPES-NAVC-THRC": 1479549,
+      "SPES-STAC-TPRC": 8765600,
+      "SPES-STAC-THRC": 1479549,
+      "POSI-NAVC-DIRC": 6294974,
+      "POSI-NAVC-THRC": 6082749,
+      "POSI-OBMG-OBDB-NAVC-DIRC": 14975294,
+      "POSI-OBMG-OBDB-NAVC-THRC": 14631549,
+      "USOS-OBMG-OBDB-NAVC-DIRC": 12344894,
+      "USOS-OBMG-OBDB-NAVC-THRC": 12001149,
+      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU3-VOD1-NAVC-DIRC": 1955436,
+      "FBU3-VOD1-NAVC-THRC": 1479549,
+      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU8-VOD2-NAVC-DIRC": 1955436,
+      "FBU8-VOD2-NAVC-THRC": 1479549,
+      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709
      },
      "data_age_max": {
       "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
-      "cycles": 13619908,
-      "ms": 28.496392943224425
+      "cycles": 14975294,
+      "ms": 28.46581128345499
      },
-     "sim_ns_min": 31496393,
+     "sim_ns_min": 31465812,
      "sim_ns": 64000000,
      "sim_fits": true,
      "feasible": true,
@@ -2615,8 +2615,8 @@
     "f_cpu_phase_hz": 9025160000.0,
     "data_age_max_at_minimum": {
      "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
-     "cycles": 13619908,
-     "ms": 28.496392943224425
+     "cycles": 14974628,
+     "ms": 28.46582111216623
     }
    }
   }

@@ -3,7 +3,7 @@
  "image": {
   "file": "carv_e.elf",
   "kind": "elf",
-  "sha256": "c51afd009cbe7ba5ec8258c1bd702c1aef120a480cdfa78805a2c2186281e244"
+  "sha256": "19dcf66cd4ebcdebd6c576dc0f73ec52b928098b499358f179138ad785d6ad2e"
  },
  "scheduler_cycles": 1610,
  "tasks": {

@@ -11,18 +11,35 @@ REPO_ROOT = os.path.dirname(PKG_ROOT)
 @pytest.fixture(autouse=True)
 def _default_header_wait(monkeypatch):
     """Every test starts with the default link occupancy o_i = L0 +
-    20 (m + 1) + w_NI: no RTTOOLS_HEADER_WAIT and no RTTOOLS_NI in the
-    environment (also for child processes) and no selection by
-    router.set_header_wait or router.set_ni (network-interface model tt,
-    w_NI = NI_WAIT_CYCLES)."""
+    20 (m + 1) + w_NI: no RTTOOLS_HEADER_WAIT, RTTOOLS_NI or
+    RTTOOLS_DEADLINE in the environment (also for child processes) and no
+    selection by router.set_header_wait, router.set_ni or
+    router.set_deadline (network-interface model tt, w_NI = NI_WAIT_CYCLES,
+    deadline model tick)."""
     from rttools.modules.routing import router
     monkeypatch.delenv(router.HEADER_WAIT_ENV, raising=False)
     monkeypatch.delenv(router.NI_ENV, raising=False)
+    monkeypatch.delenv(router.DEADLINE_ENV, raising=False)
     router.set_header_wait(None)
     router.set_ni(None)
+    router.set_deadline(None)
     yield
     router.set_header_wait(None)
     router.set_ni(None)
+    router.set_deadline(None)
+
+
+@pytest.fixture
+def deadline_start(monkeypatch):
+    """Deadline model start (RTTOOLS_DEADLINE=start, also for child
+    processes): the deadline of a packet at the modeled start of the job
+    that reads it and no handlers of the packet events, the model of the
+    thesis (Tab. 8.2 and the windows of the phase model) and of the tables
+    up to tag r11-rc8 (router.tick_deadline)."""
+    from rttools.modules.routing import router
+    monkeypatch.setenv(router.DEADLINE_ENV, "start")
+    router.set_deadline(None)
+    yield
 
 
 @pytest.fixture

@@ -12,6 +12,9 @@ from rttools.modules.io import appparser
 from rttools.modules.unwrapper import flowUnwrapper
 from rttools.tui.model import network
 
+# the thesis model of the phase windows: deadline at the start of the reader
+pytestmark = pytest.mark.usefixtures("deadline_start")
+
 # application E in real cycles (costs c^ of rttools/bench_t/main.py / 10)
 COSTS = {"A": 28530, "B": 58600, "C": 96330, "D": 14000, "E": 52700, "F": 80800,
          "G": 109880, "H": 45300, "I": 75370, "J": 107570}

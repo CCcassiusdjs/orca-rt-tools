@@ -286,7 +286,7 @@ def main():
 
     else:
         info("Target frequency is " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz")
-        cpu = search.cpu_check(app, mapping)
+        cpu = search.cpu_check(app, mapping, noc)
         if cpu is not None:
             info("CPU test: f_CPU = " + str(cpu["f_cpu_hz"]) + "Hz; the target frequency "
                  + ("meets" if RTTOOLS_DEFAULT_FREQUENCY >= cpu["f_cpu_hz"] else "does not meet")

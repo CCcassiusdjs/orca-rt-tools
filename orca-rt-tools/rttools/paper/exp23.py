@@ -1398,7 +1398,7 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
         "network": net,
         "phase_conformance": phase_conformance(tr, cfg, clk, rel_rule),
         "injection": injection,
-        "costs": None if not costs else {"file": os.path.basename(costs), "rule": "max"},
+        "costs": None if not costs else {"file": ttcheck.costs_label(costs), "rule": "max"},
         "tt": tt,
     }
     if listing or listing_without:

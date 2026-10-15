@@ -76,7 +76,12 @@
 #               to tag r11-rc5). RUN_INFO has injection=tt when the image
 #               has the time-triggered injection (timer1ocr_handler in
 #               image.lst), otherwise injection=finish (a RUN_INFO without
-#               the line is of a run up to tag r11-rc5, finish)
+#               the line is of a run up to tag r11-rc5, finish);
+#               RUN_INFO has deadline=tick when the table of the image has the
+#               line "Deadline: tick" (rttools.ucxgen tt from tag r11-rc9:
+#               deadline of each packet at the tick of the release of the job
+#               that reads it), otherwise deadline=start (a RUN_INFO without
+#               the line is of a run up to tag r11-rc8, start)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -279,6 +284,9 @@ fi
 		echo "costs=csv"
 	fi
 	if [ "$(setup TICK_RELEASE)" = 1 ]; then echo "release=tick"; else echo "release=data"; fi
+	# deadline model of the link schedule (line "Deadline:" of app/<app>_tt.h, rttools.ucxgen tt):
+	# tick from tag r11-rc9, start for the tables before it and the images without a table
+	if [ -f "$TT_H" ] && grep -q "^ \* Deadline: tick " "$TT_H"; then echo "deadline=tick"; else echo "deadline=start"; fi
 } >> "$OUT/RUN_INFO"
 
 if command -v /usr/bin/time > /dev/null; then

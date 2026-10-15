@@ -68,7 +68,7 @@ def test_missing_map_file(work):
 # NI_WAIT_CYCLES and the network interface of each PE as a resource) and
 # the model off of the stored references (RTTOOLS_NI=off, experiments/exp23
 # make frequency)
-F_STAR = {None: "358028411.8652344Hz (358.0 MHz)", "off": "327690124.51171875Hz (327.7 MHz)"}
+F_STAR = {None: "413921356.2011719Hz (413.9 MHz)", "off": "327690124.51171875Hz (327.7 MHz)"}
 
 
 @pytest.mark.parametrize("ni", [None, "off"])

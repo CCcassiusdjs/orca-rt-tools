@@ -154,8 +154,8 @@ def single(graph, noc, entries, appname, f):
         from rttools.bench_t import multirate
         r = inst["rates"]
         P = r["phase_cycles"]
-        spec = multirate.spec_from_instance(inst, entries)
-        sched = multirate.schedule(spec, P)
+        spec = multirate.spec_from_instance(inst, entries, noc)
+        sched = multirate.schedule(spec, P, extra=a.get("handler_extra"))
         win = multirate.packet_windows(spec, sched)
         flows = {d["label"]: (u, v) for u, v, d in inst["flows"]}
         base = sched.h0 * sched.H
@@ -253,9 +253,14 @@ HEADER = """\
  * sends it; the table holds s16, s rounded up to a multiple of 16 cycles
  * (TIMER1 step, hal.c): s16 = ticks P + 16 count, P = cycles per tick. The
  * comment of each entry gives s, the release r and the deadline a of the
- * packet (cycles from the same phase start) and o_i.
+ * packet (cycles from the same phase start) and o_i: r is the finish of the
+ * source job with the handlers of the packet events of its PE (the handlers
+ * file of the costs, when given) and a the tick of the release of the job
+ * that reads the packet (rttools/modules/instances/release.py,
+ * rttools/bench_t/multirate.py).
  *
  * Costs: {costs}
+ * Deadline: {deadline}
  */
 """
 
@@ -276,13 +281,19 @@ def header(name, cmd, inputs, tables, flows, style="array", w_h=None, w_ni=None,
     in one hyperperiod, TT_PACKETS[flow id] counts them, TT_BUFFERS[flow id]
     gives the buffers of the flow). `costs`: text of the line "Costs:"
     (the costs of the link schedule; experiments/exp23/simulate.sh copies
-    it to the line costs of RUN_INFO); None: the costs of the CSV."""
+    it to the line costs of RUN_INFO); None: the costs of the CSV. The
+    line "Deadline:" gives the deadline model of the link schedule
+    (router.tick_deadline: tick, the tick of the release of the reader and
+    the handlers of the packet events; start, the start of the reader),
+    which simulate.sh copies to the line deadline of RUN_INFO."""
     if style not in ("array", "named", "jobs"):
         raise TTError("style must be array, named or jobs")
     w_h = router.header_wait() if w_h is None else w_h
     w_ni = router.ni_wait() if w_ni is None else w_ni
+    deadline = ("tick (tick of the release of the job that reads each packet; finish of each job with the "
+                "handlers of the packet events of its PE)") if router.tick_deadline() else "start (start of the job that reads each packet)"
     text = HEADER.format(name=name, cmd=cmd, inputs=inputs, w_h=w_h, w_ni=w_ni,
-                         costs=costs or "CSV (Capacity column)")
+                         costs=costs or "CSV (Capacity column)", deadline=deadline)
     by_key = {}
     for f in flows:
         by_key[(f.get("app"), int(f["csv_id"] if "csv_id" in f else f["id"]))] = f

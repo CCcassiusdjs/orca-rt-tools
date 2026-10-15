@@ -3,7 +3,7 @@
  "image": {
   "file": "weird_a.elf",
   "kind": "elf",
-  "sha256": "6625b595eb8389a474fc6673d8f66d69f98a38a1f4848020a26a39e7d2e5b59a"
+  "sha256": "aff5b7aef18111fa1db944dcf70afe65c62f12be9a6598bb84ace7474f393e3d"
  },
  "scheduler_cycles": 1610,
  "tasks": {

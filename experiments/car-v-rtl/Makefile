@@ -20,8 +20,9 @@
 #   make tt      write app/$(NAME)_tt.h: injection instants of the packets between PEs in the link
 #                schedule at TT_CLOCKS (rttools.ucxgen tt; model of the time-triggered injection)
 #   make tt-check  $(NAME)_tt.h equals a new generation (part of `make check`)
-# TT_CLOCKS: 419.68 MHz, the clock of the flow with the model of the time-triggered injection and
-# t(v) = max(CSV, static) (experiments/tt, run VCV; 380 MHz has no link schedule with w_NI), and
+# TT_CLOCKS: 441.088 MHz, the clock of the flow with the model of the time-triggered injection,
+# t(v) = max(CSV, static) and the deadline of each packet at the release tick of its reader
+# (experiments/tt, run VCV of tag r11-rc9; f_NoC 441.082 MHz binds), and
 # 500 MHz, the default F_CLK. TT_COSTS: static t(v) of the image (experiments/wcet, costs/tt).
 #
 # CSV and MAP: the files of the CAR-V analysis flow (apps/car-v, rttools.paper.carv)
@@ -71,7 +72,7 @@ BUILD   ?= build
 SIM_NS  ?= 11500000
 # clock of the simulation (Hz); default 500 MHz, the clock of run F
 F_CLK   ?= 500000000
-TT_CLOCKS ?= 419680000 500000000
+TT_CLOCKS ?= 441088000 500000000
 TT_COSTS ?= ../wcet/costs/tt/car_v.json
 CARV_METRICS ?= ../car-v/build/metrics.json
 FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \

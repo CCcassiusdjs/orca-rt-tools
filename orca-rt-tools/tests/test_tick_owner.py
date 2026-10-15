@@ -27,10 +27,24 @@ APP_DIR = os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os", "app")
 TICK, DISPATCH = 1852, 515      # tick + release and dispatch terms of car_full (rttools.wcet), cycles
 
 
-def model(costs, P):
-    g, _, _, entries, _ = ttflow.load_app(CSV, MAP, ARCH, costs)
-    spec = multirate.spec_from_graph(g, entries, multirate.graph_rates(g))
-    return spec, multirate.schedule(spec, P)
+def model(costs, P, handlers=False):
+    """Spec and schedule of CAR-full at P cycles per phase (4000 phases per
+    second). handlers: the schedule of the generator of the table (rttools.
+    ucxgen tt): the network-interface model of the defaults and the charges
+    of the handlers of the packet events (search.schedule_at,
+    handler_extra); otherwise the schedule without the handlers."""
+    g, appname, noc, entries, _ = ttflow.load_app(CSV, MAP, ARCH, costs)
+    if not handlers:
+        spec = multirate.spec_from_graph(g, entries, multirate.graph_rates(g))
+        return spec, multirate.schedule(spec, P)
+    from rttools.modules.frequency import search
+    from rttools.modules.instances import instantiator
+    from rttools.paper.frequency import search_config
+    f = P * 4000
+    a = search.schedule_at(g, noc, entries, appname, f, search_config(f))
+    inst = instantiator.createInstance(g, noc, f)
+    spec = multirate.spec_from_instance(inst, entries, noc)
+    return spec, multirate.schedule(spec, P, extra=a.get("handler_extra"))
 
 
 def platform(spec, sched, node, work, table):
@@ -76,8 +90,8 @@ def test_round_robin_moves_usos_by_a_phase():
 
 
 def test_table_bounds_every_job():
-    """CAR-full with the costs of the image of this tree at P = 119,488 (run
-    CF6): for random work of every task (30 to 100 % of c(v) less its
+    """CAR-full with the costs of the image of this tree at P_min = 119,488
+    cycles (f_CPU = 477.952 MHz, the smallest phase of the CPU test): for random work of every task (30 to 100 % of c(v) less its
     events) on every PE, no job ends after its F with the table; without
     it, jobs do."""
     spec, sched = model(os.path.join(COSTS, "car_full.json"), 119488)
@@ -100,9 +114,9 @@ def test_tick_table_of_the_image():
         text = f.read()
     clock = int(re.search(r"#if F_CPU == (\d+)", text).group(1))
     P = int(re.search(r"(\d+) cycles per tick", text).group(1))
-    assert (clock, P) == (477952000, 119488)
+    assert (clock, P) == (526080000, 131520)
     rows = re.findall(r"\{([0-9, ]+)\},   /\* node (\d+) \*/", text)
-    spec, sched = model(os.path.join(COSTS, "car_full.json"), P)
+    spec, sched = model(os.path.join(COSTS, "car_full.json"), P, handlers=True)
     own = sched.tick_owners()
     assert len(rows) == 16
     for vals, node in rows:

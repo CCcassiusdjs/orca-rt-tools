@@ -11,6 +11,9 @@ import pytest
 from tests.conftest import REPO_ROOT
 from rttools.paper import exp23
 
+# the thesis model of the phase windows: deadline at the start of the reader
+pytestmark = pytest.mark.usefixtures("deadline_start")
+
 EXP = os.path.join(REPO_ROOT, "experiments", "exp23")
 
 

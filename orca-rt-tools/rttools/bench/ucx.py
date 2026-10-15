@@ -98,7 +98,8 @@ def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None, owner_of=No
     """Simulates one PE.
 
     `tasks`: creation order, [{"name", "cost", "period" (ticks), "offset"
-    (ticks, default 0)}]; `tick`: P in cycles; `phases`: releases happen at
+    (ticks, default 0), "extra" (optional: cycles added to job j, list
+    indexed by j modulo its length)}]; `tick`: P in cycles; `phases`: releases happen at
     ticks 0 .. phases - 1; the simulation continues with ticks and no new
     release until every job finishes, at most `tail` more ticks (default:
     phases). `boundary`: tick period (in ticks) at which the state of the
@@ -124,7 +125,7 @@ def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None, owner_of=No
         c, k, o = int(t["cost"]), int(t["period"]), int(t.get("offset", 0))
         if c < 0 or k < 1 or not 0 <= o < k:
             raise ValueError(f"task {t['name']}: cost >= 0, period >= 1 and 0 <= offset < period required")
-        spec[t["name"]] = {"cost": c, "period": k, "offset": o}
+        spec[t["name"]] = {"cost": c, "period": k, "offset": o, "extra": list(t.get("extra") or [])}
     order = [None] + names
     pending = {n: deque() for n in names}
     jobs = {n: [] for n in names}
@@ -215,7 +216,8 @@ def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None, owner_of=No
                 for n in names:
                     s = spec[n]
                     if released(s, nxt):
-                        j = Job(n, count[n], time, time + s["period"] * tick, s["cost"])
+                        x = s["extra"][count[n] % len(s["extra"])] if s["extra"] else 0
+                        j = Job(n, count[n], time, time + s["period"] * tick, s["cost"] + x)
                         count[n] += 1
                         jobs[n].append(j)
                         pending[n].append(j)

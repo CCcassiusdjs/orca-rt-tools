@@ -3,7 +3,7 @@
  "image": {
   "file": "wcet_e.elf",
   "kind": "elf",
-  "sha256": "784674e258cf79f8dfd1f0dfc9007b21a59cea8717c0a2c29c372a9c30566ddd"
+  "sha256": "a9530a64f077e7c4a47fb4cce34d51d77408e8c7805164045f274a7c3b95dcac"
  },
  "scheduler_cycles": 1610,
  "tasks": {

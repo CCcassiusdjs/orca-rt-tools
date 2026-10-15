@@ -1,6 +1,6 @@
 /* Tick hook of CAR-full with the time-triggered injection (app/car_full.c
  * and the table TT_TICK of app/car_full_tt.h, rttools.ucxgen) built with
- * -DUCX_NOC_LATEST -DUCX_NOC_TT -DF_CPU=477952000 (run.sh).
+ * -DUCX_NOC_LATEST -DUCX_NOC_TT -DF_CPU=526080000 (run.sh).
  *
  * 1. On every PE, at every phase of TT_TICK and for every state of the
  *    tasks of the PE and every task that holds the CPU: the hook releases

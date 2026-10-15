@@ -222,6 +222,55 @@ def ni_resources():
     return ni_model()[0]
 
 
+# deadline of a packet between PEs on the time-triggered platform, as the
+# header wait: set_deadline() in the process, otherwise RTTOOLS_DEADLINE.
+# "tick" (default when unset or empty): the tick of the release of the job
+# that reads the packet, the earliest start of that job, and the handlers of
+# the packet events in the finish of each job (rttools/modules/instances/
+# release.py, rttools/bench_t/multirate.py; the tables from tag r11-rc9,
+# line "Deadline: tick" of app/<app>_tt.h); "start": the modeled start of
+# the reader, without the handlers (the tables up to tag r11-rc8: the
+# analysis of a run takes the value of its RUN_INFO, deadline=, start when
+# the line is absent)
+DEADLINE_ENV = "RTTOOLS_DEADLINE"
+DEADLINES = ("tick", "start")
+_deadline = None
+
+
+def parse_deadline(value):
+    v = "tick" if value is None or str(value).strip() == "" else str(value).strip().lower()
+    if v not in DEADLINES:
+        raise ValueError("packet deadline: expected tick or start, got " + repr(value))
+    return v
+
+
+def set_deadline(value):
+    """Selects the deadline model for this process (see parse_deadline);
+    None returns to the environment variable. Returns the previous
+    selection."""
+    global _deadline
+    prev = _deadline
+    _deadline = None if value is None else parse_deadline(value)
+    return prev
+
+
+def deadline_model():
+    return _deadline if _deadline is not None else parse_deadline(os.environ.get(DEADLINE_ENV))
+
+
+def tick_deadline():
+    """True on the time-triggered platform (the network-interface model tt,
+    ni_resources) with the deadline model tick (deadline_model): a packet
+    between PEs must reach its target by the tick of the release of the job
+    that reads it, the earliest start of that job (rttools/modules/
+    instances/release.py, rttools/bench_t/multirate.py), and each job
+    carries the handlers of the packet events of its PE (the handlers file
+    of the costs, rttools/wcet/costs.py). Otherwise (the model "off" of the
+    runs up to tag r11-rc5, the deadline model start of the tables up to
+    tag r11-rc8) the deadline is the modeled start of the reader."""
+    return ni_resources() and deadline_model() == "tick"
+
+
 def ni_label(node):
     """Label of the network-interface resource of PE `node` in the link
     schedule (the paths keep their links; the resource is extra)."""

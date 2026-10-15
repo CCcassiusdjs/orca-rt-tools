@@ -10,35 +10,83 @@ from rttools.modules.unwrapper import flowUnwrapper
 from rttools.modules.backend.ags import ags
 
 
+HANDLER_ROUNDS = 64
+
+
 def schedule_at(app, noc, mapping, appname, frequency, cfg):
     """Builds the problem at `frequency` and runs the AGS backend.
 
     Returns a dict with the keys frequency, hyperperiod, problem,
-    schedule (link x packet start times or None) and skipped (set of
-    packet indices). Returns None when the hyperperiod is 0."""
-    instance = instantiator.createInstance(app, noc, frequency)
-    packets, hp, nlinks = flowUnwrapper.unwrap(instance, noc, mapping)
-    if hp == 0:
-        return None
-    problem, result = ags.agsExport(
-        packets,
-        nlinks,
-        hp,
-        mapping,
-        noc,
-        appname,
-        cfg["pruning_factor"],
-        cfg["fail_threshold"],
-        cfg["heuristic"],
-    )
-    sched, skipped = (None, set()) if result is None else result
+    schedule (link x packet start times or None), skipped (set of
+    packet indices) and handler_extra. Returns None when the hyperperiod is 0.
+
+    General phase model on the time-triggered platform with the handlers
+    of the image (rttools/bench_t/multirate.py): the CPU schedule charges
+    each job the handlers of the packet events of the link schedule
+    (multirate.handler_extra), so the packet windows, the link schedule and
+    the charges form a fixed point: from no charge, each round schedules
+    the packets of the CPU schedule with the charges of the previous round
+    and raises the charges to the events of its link schedule, until the
+    charges stay (the link schedule of that round has the windows of the
+    CPU schedule with those charges, and the charges cover its events);
+    handler_extra is that charge ({task: [cycles per job position]}), which
+    every user of the schedule at this frequency passes to
+    multirate.schedule. No fixed point within HANDLER_ROUNDS rounds, or a
+    CPU schedule that misses a deadline, gives no schedule."""
+    extra = None
+    for _ in range(HANDLER_ROUNDS):
+        instance = instantiator.createInstance(app, noc, frequency)
+        if extra is not None:
+            instance["handler_extra"] = extra
+        packets, hp, nlinks = flowUnwrapper.unwrap(instance, noc, mapping)
+        if hp == 0:
+            return None
+        problem, result = ags.agsExport(
+            packets,
+            nlinks,
+            hp,
+            mapping,
+            noc,
+            appname,
+            cfg["pruning_factor"],
+            cfg["fail_threshold"],
+            cfg["heuristic"],
+        )
+        sched, skipped = (None, set()) if result is None else result
+        if sched is not None and not release.handlers_fit(instance, mapping):
+            # phase model with the handlers of the packet events: a task ends after its phase
+            sched = None
+        new = _handler_round(instance, noc, mapping, problem, sched, skipped, extra)
+        if new is None or new == extra:
+            break
+        extra = new
+    else:
+        sched = None
     return {
         "frequency": frequency,
         "hyperperiod": hp,
         "problem": problem,
         "schedule": sched,
         "skipped": skipped,
+        "handler_extra": extra,
     }
+
+
+def _handler_round(instance, noc, mapping, problem, sched, skipped, extra):
+    """Charges of the next round of schedule_at, or None when the instance
+    has no such fixed point (no general phase model, no handlers, not the
+    time-triggered platform, or no complete link schedule)."""
+    if instance.get("rates") is None or sched is None or skipped:
+        return None
+    from rttools.bench_t import multirate
+    spec = multirate.spec_from_instance(instance, mapping, noc)
+    if not (spec.tick and spec.handlers):
+        return None
+    ms = multirate.schedule(spec, instance["rates"]["phase_cycles"], extra=extra)
+    if not ms.feasible:
+        return None
+    rows = multirate.attempt_rows(spec, ms, {"problem": problem, "schedule": sched})
+    return multirate.handler_extra(spec, ms, multirate.link_events(spec, ms, rows), extra)
 
 
 def feasible(attempt):
@@ -146,7 +194,7 @@ def search_minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None, f
     return best
 
 
-def cpu_check(app, mapping):
+def cpu_check(app, mapping, noc=None):
     """CPU test of the analysis flow (release.cpu_bound), computed once
     from the application and the mapping, before and outside the frequency
     search (it does not depend on the candidate frequency). Returns the
@@ -155,7 +203,7 @@ def cpu_check(app, mapping):
     if app is None or mapping is None:
         return None
     try:
-        return release.cpu_bound(app, mapping)
+        return release.cpu_bound(app, mapping, noc=noc)
     except ValueError as e:
         warn("CPU test skipped: " + str(e))
         return None
@@ -203,7 +251,7 @@ def minimum_frequency(app, noc, mapping, appname, cfg, on_attempt=None):
     f_star_hz is then the lowest frequency at or above f_CPU with a
     feasible link schedule (f_CPU itself when final_check is feasible) and
     network is None."""
-    cpu = cpu_check(app, mapping)
+    cpu = cpu_check(app, mapping, noc)
     f_cpu = cpu["f_cpu_hz"] if cpu is not None else None
     if f_cpu is not None:
         info("CPU test: f_CPU = " + str(f_cpu) + "Hz (largest CPU demand per release period)")

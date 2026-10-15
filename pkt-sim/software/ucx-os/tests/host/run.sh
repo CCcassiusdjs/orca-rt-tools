@@ -18,7 +18,7 @@ for t in ${*:-test_ddma test_noc test_noc_nesting test_weird_a test_car_v test_c
 	DEFS=
 	C=$t
 	[ "$t" = test_car_full ] && DEFS=-DUCX_NOC_LATEST
-	[ "$t" = test_car_full_tt ] && DEFS="-DUCX_NOC_LATEST -DUCX_NOC_TT -DF_CPU=477952000"
+	[ "$t" = test_car_full_tt ] && DEFS="-DUCX_NOC_LATEST -DUCX_NOC_TT -DF_CPU=526080000"
 	[ "$t" = test_tick_release ] && DEFS=-DUCX_TICK_RELEASE
 	[ "$t" = test_noc_nesting ] && { DEFS=-DUCX_ISR_NESTING; C=test_noc; }
 	[ "$t" = test_noc_tt ] && DEFS=-DUCX_NOC_TT

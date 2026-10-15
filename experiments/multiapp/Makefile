@@ -70,7 +70,8 @@
 #
 # F_CLK: the clock of the platform from the flow with the model of the
 # time-triggered injection and t(v) = max(CSV, static) (experiments/tt, run
-# VMA): f_CPU 443.346 MHz on the grid of 32 kHz, 443.36 MHz (the runs MA,
+# VMA of tag r11-rc9, deadline of each packet at the release tick of its reader): f_NoC of the union
+# 457.596 MHz (f_CPU 443.346 MHz) on the grid of 32 kHz, 457.6 MHz (run VMA of tag r11-rc7: 443.36 MHz; the runs MA,
 # TMA and UMA ran at 434.912 MHz, f_CPU of E with the costs of the CSV,
 # metrics.json rtl.clock). SIM_NS: 3 ms + (n(v_last) of CAR-V = 4 + 8 measured
 # iterations - 1) T + R_bound of CAR-V (2.218 ms) + T = 11.22 ms (metrics.json
@@ -88,7 +89,7 @@ CARV_CSV := ../../apps/car-v/car-v.csv
 E_CSV   := ../../apps/synthetic-app-e/synthetic-app-e.csv
 E_MAP2  := ../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map
 APPS     = --app CARV:$(CARV_CSV):maps/CARV.map --app E:$(E_CSV):maps/E.map
-F_CLK   ?= 443360000
+F_CLK   ?= 457600000
 SIM_NS  ?= 11500000
 # clocks of the injection tables carv_e_tt.h and e_ucx_tt.h: F_CLK and 500 MHz, the default clock of
 # a build (arch.mak)

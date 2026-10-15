@@ -222,7 +222,7 @@ def run_multirate(name, a):
     from rttools.paper import carfull
     g, appname, noc, entries, costs = load_app(a["csv"], a["map"], a["arch"], a["costs"])
     rates = multirate.graph_rates(g)
-    spec = multirate.spec_from_graph(g, entries, rates)
+    spec = multirate.spec_from_graph(g, entries, rates, noc)
     with tnet.quiet():
         freq = search.minimum_frequency(g, noc, entries, appname, search_config(a["f0_hz"]))
     fmin = freq["frequency_hz"]
@@ -376,14 +376,23 @@ def write_tables(cfg_path, out_dir):
 
     packets: "# P <cycles per phase> Ht <phases per hyperperiod> tagmod <0|1024>"
     and one line per packet k of a flow between PEs in a hyperperiod:
-    "src dst key k N_e q0 s o_i m" (key = tag for weird_a, flow id
+    "src dst key k N_e q0 s o_i m d" (key = tag for weird_a, flow id
     otherwise; q0 = phase of the sending job in the hyperperiod; s =
-    instant from the tick of that phase; m = XY hops).
+    instant from the tick of that phase; m = XY hops; d = deadline of the
+    packet from the same tick: the tick of the phase of the job that reads
+    it on the time-triggered platform).
 
     jobs: one line per task of one release period, "pe letter 0 q0 F"
     (job j in phase j - 1 + q0, ends at or before F cycles after the tick
     of that phase), or, for the general model, one line per job,
-    "pe letter j q F" (job j released at phase q)."""
+    "pe letter j q F" (job j released at phase q); for the general model a
+    line "# READS" and one line per job j of a reader and input edge,
+    "pe reader input j want n_v n_u j0" (want: number of the job of the
+    input whose packet job j reads in the model, multirate.read_index, 0
+    for none; the job reads that job or a newer one; for j beyond the
+    lines, want(j) = want(j - h n_v) + h n_u with h = (j - j0) div n_v and
+    want(j) = 0 when want(j - h n_v) = 0, with n_v and n_u the jobs of the
+    reader and of the input per hyperperiod)."""
     from rttools.ucxgen import tt
     cfg = load_config(cfg_path)
     os.makedirs(out_dir, exist_ok=True)
@@ -427,7 +436,8 @@ def _tables(name, a, tt):
                     continue
                 r = by[compose.qualify(x["name"], "f" + str(fl["csv_id"]))][0]
                 tp.append(f"{fl['src_label']} {fl['dst_label']} {fl['id']} 0 1 {pm['tasks'][fl['source']]['phase']} "
-                          f"{r['offset']} {r['occupancy']} {exp23._hops(fl['src_label'], fl['dst_label'])}")
+                          f"{r['offset']} {r['occupancy']} {exp23._hops(fl['src_label'], fl['dst_label'])} "
+                          f"{r['deadline'] - r['phase_start']}")
             for t in m["tasks"]:
                 if t.get("app") != x["name"]:
                     continue
@@ -441,7 +451,7 @@ def _tables(name, a, tt):
         from rttools.bench_t import multirate
         from rttools.paper import carfull
         rates = multirate.graph_rates(g)
-        spec = multirate.spec_from_graph(g, entries, rates)
+        spec = multirate.spec_from_graph(g, entries, rates, noc)
         with tnet.quiet():
             fmin = search.minimum_frequency(g, noc, entries, appname, search_config(a["f0_hz"]))["frequency_hz"]
         f = exp23.flow_clock(fmin, float(rates["phase_s"]))["f_clk_hz"]
@@ -456,7 +466,8 @@ def _tables(name, a, tt):
             rs = by["f" + str(fl["csv_id"])]
             for k, r in enumerate(rs):
                 tp.append(f"{fl['src_label']} {fl['dst_label']} {fl['id']} {k} {len(rs)} {r['phase_start'] // P} "
-                          f"{r['offset']} {r['occupancy']} {exp23._hops(fl['src_label'], fl['dst_label'])}")
+                          f"{r['offset']} {r['occupancy']} {exp23._hops(fl['src_label'], fl['dst_label'])} "
+                          f"{r['deadline'] - r['phase_start']}")
         tj = []
         phases = a["releases"]
         for t in m["tasks"]:
@@ -472,6 +483,7 @@ def _tables(name, a, tt):
                 rel_c, _, fin = sched.job(v, idx)
                 tj.append(f"{t['pe_label']} {t['iter_letter']} {j} {o + (j - 1) * k} {fin - rel_c}")
                 j += 1
+        tj += read_lines(spec, sched, m)
         yield a["runs"]["flow"], f, "\n".join(tp) + "\n", "\n".join(tj) + "\n"
         return
     with tnet.quiet():
@@ -497,7 +509,8 @@ def _tables(name, a, tt):
                     continue
                 r = by["f" + str(fl["id"])][0]
                 tp.append(f"{s} {d} {tags[(fl['source'], fl['target'])]} 0 1 "
-                          f"{pm['tasks'][fl['source']]['phase']} {r['offset']} {r['occupancy']} {exp23._hops(s, d)}")
+                          f"{pm['tasks'][fl['source']]['phase']} {r['offset']} {r['occupancy']} {exp23._hops(s, d)} "
+                          f"{r['deadline'] - r['phase_start']}")
             tj = [f"{node[t]} {t} 0 {tm['phase']} {tm['finish']}" for t, tm in sorted(pm["tasks"].items())]
         else:
             tp = [f"# P {P} Ht 1 tagmod {m['tag_mod']}"]
@@ -506,10 +519,27 @@ def _tables(name, a, tt):
                     continue
                 r = by["f" + str(fl["csv_id"])][0]
                 tp.append(f"{fl['src_label']} {fl['dst_label']} {fl['id']} 0 1 {pm['tasks'][fl['source']]['phase']} "
-                          f"{r['offset']} {r['occupancy']} {exp23._hops(fl['src_label'], fl['dst_label'])}")
+                          f"{r['offset']} {r['occupancy']} {exp23._hops(fl['src_label'], fl['dst_label'])} "
+                          f"{r['deadline'] - r['phase_start']}")
             tj = [f"{t['pe_label']} {t['iter_letter']} 0 {pm['tasks'][t['name']]['phase']} "
                   f"{pm['tasks'][t['name']]['finish']}" for t in m["tasks"]]
         yield run_id, f, "\n".join(tp) + "\n", "\n".join(tj) + "\n"
+
+
+def read_lines(spec, sched, man):
+    """Lines "# READS" and "pe reader input j want n_v n_u j0" of the
+    tables (write_tables) for the general model: the jobs j = 1 ..
+    (h0 + 2) n_v of each reader of each input edge, j0 = (h0 + 1) n_v + 1."""
+    from rttools.bench_t import multirate
+    letter = {t["name"]: (t["pe_label"], t["iter_letter"]) for t in man["tasks"]}
+    out = ["# READS"]
+    for _, u, v, m in spec.flows:
+        nv, nu = sched.per_h(v), sched.per_h(u)
+        for c in range((sched.h0 + 2) * nv):
+            i = multirate.read_index(spec, sched, u, v, m, c)
+            out.append(f"{letter[v][0]} {letter[v][1]} {letter[u][1]} {c + 1} {0 if i is None else i + 1} "
+                       f"{nv} {nu} {(sched.h0 + 1) * nv + 1}")
+    return out
 
 
 def _by_flow(rows):

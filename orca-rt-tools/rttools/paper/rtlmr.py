@@ -58,9 +58,11 @@ READ_BIT = 0x800000
 BUSY_TOLERANCE = 2
 
 
-def load_app(manifest_path, csv_path, map_path, costs=None):
+def load_app(manifest_path, csv_path, map_path, costs=None, arch=None):
     """Application of a run; `costs`: costs file of the run (t(v) = max of
-    the CSV and the static t(v) of its image, rttools/wcet/costs.py)."""
+    the CSV and the static t(v) of its image, rttools/wcet/costs.py, and
+    the handlers file next to it); `arch`: the NoC (the occupancy of each
+    flow on the time-triggered platform)."""
     with open(manifest_path) as f:
         man = json.load(f)
     if man.get("model") != "time_triggered":
@@ -74,7 +76,12 @@ def load_app(manifest_path, csv_path, map_path, costs=None):
     r = multirate.graph_rates(g)
     if r is None:
         raise ValueError("the application has one period and no cycle")
-    spec = multirate.spec_from_graph(g, entries, r)
+    noc = None
+    if arch:
+        from rttools.modules.io import nocparser
+        with tnet.quiet():
+            noc = nocparser.loadFromFile(arch)
+    spec = multirate.spec_from_graph(g, entries, r, noc)
     if int(r["phase_s"] * 10 ** 9) != man["phase_ns"]:
         raise ValueError(f"phase of the CSV {r['phase_s']} s differs from the manifest ({man['phase_ns']} ns)")
     for t in man["tasks"]:
@@ -83,7 +90,7 @@ def load_app(manifest_path, csv_path, map_path, costs=None):
     order = {exp_label(n, man["mesh"][0]): ts for n, ts in spec.orders.items()}
     if order != man["pe_dispatch"]:
         raise ValueError("creation order of the manifest differs from the model")
-    return {"manifest": man, "graph": g, "entries": entries, "rates": r, "spec": spec, "costs": costs,
+    return {"manifest": man, "graph": g, "entries": entries, "rates": r, "spec": spec, "costs": costs, "noc": noc,
             "inputs": {"csv": os.path.basename(csv_path), "map": os.path.basename(map_path),
                        "manifest": os.path.basename(manifest_path),
                        "csv_matches_manifest": multirate_sha(csv_path) == man["inputs"]["csv"]["sha256"],
@@ -105,7 +112,11 @@ def model(app, f_clk):
     P = Fraction(app["manifest"]["phase_ns"]) * f_clk / 10 ** 9
     if P.denominator != 1:
         raise ValueError(f"phase of {app['manifest']['phase_ns']} ns at {f_clk} Hz is not a whole number of cycles")
-    sched = multirate.schedule(spec, int(P))
+    extra = None
+    if spec.tick and spec.handlers:
+        from rttools.paper import carfull
+        extra = carfull.handler_extra(app["graph"], app["noc"], app["entries"], f_clk, spec)
+    sched = multirate.schedule(spec, int(P), extra=extra)
     out = {"clock_hz": f_clk, "phase_cycles": int(P), "hyper_ticks": spec.hyper_ticks,
            "hyper_cycles": sched.H, "cpu_feasible": sched.feasible, "periodic_from_hyperperiod": sched.h0,
            "misses": len(sched.misses)}
@@ -234,7 +245,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
 
 
 def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None):
-    app = load_app(manifest_path, csv_path, map_path)
+    app = load_app(manifest_path, csv_path, map_path, arch=arch)
     man, spec = app["manifest"], app["spec"]
     cfg = {"pe_tasks": man["pe_tasks"], "release_period_s": man["phase_ns"] / 1e9, "clock_hz": f_clk}
     path = exp23.run_info_path(log_path) if run_info == "auto" else run_info
@@ -246,7 +257,7 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
     injection = ttcheck.injection_rule(info)
     costs = ttcheck.costs_of_run(info) if injection == "tt" else None
     if costs:
-        app = load_app(manifest_path, csv_path, map_path, costs)
+        app = load_app(manifest_path, csv_path, map_path, costs, arch)
         man, spec = app["manifest"], app["spec"]
     mdl, sched = model(app, clock["clock_hz"])
     if not sched.feasible:
@@ -395,7 +406,7 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
             j = k - 1
             F = sched.job(u, j)[2]
             c = multirate.reader_index(spec, sched, u, v, F)
-            dl = sched.job(v, c)[1]
+            dl = sched.job(v, c)[0 if spec.tick else 1]
             arr = cyc(t_arr - rel[0])
             pk_n += 1
             pk_late += arr > dl
@@ -431,7 +442,7 @@ def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="aut
         "monitor": exp23.monitor_summary(log_path),
         "phase_conformance": phase_conformance(tr, clk, rel, jobs, man, spec, mdl, sched),
         "injection": injection,
-        "costs": None if not costs else {"file": os.path.basename(costs), "rule": "max"},
+        "costs": None if not costs else {"file": ttcheck.costs_label(costs), "rule": "max"},
         "tt": tt_check(log_path, app, clk, rel, csv_path, map_path, arch, clock["clock_hz"], sched, jobs, ev)
         if injection == "tt" and arch else None,
     }

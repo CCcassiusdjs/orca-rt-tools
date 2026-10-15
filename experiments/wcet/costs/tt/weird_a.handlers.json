@@ -1,0 +1,42 @@
+{
+ "_doc": "handlers of one packet event and the handler cycles in t(v) of each task (rttools.wcet, terms send_isr and receive_isr) of the image of the costs file next to this file",
+ "image": {
+  "file": "weird_a.elf",
+  "kind": "elf",
+  "sha256": "aff5b7aef18111fa1db944dcf70afe65c62f12be9a6598bb84ace7474f393e3d"
+ },
+ "inject": 622,
+ "receive": 3873,
+ "tasks": {
+  "A": {
+   "isr": 1244
+  },
+  "B": {
+   "isr": 4495
+  },
+  "C": {
+   "isr": 4495
+  },
+  "D": {
+   "isr": 4495
+  },
+  "E": {
+   "isr": 5117
+  },
+  "F": {
+   "isr": 4495
+  },
+  "G": {
+   "isr": 4495
+  },
+  "H": {
+   "isr": 4495
+  },
+  "I": {
+   "isr": 4495
+  },
+  "J": {
+   "isr": 11619
+  }
+ }
+}

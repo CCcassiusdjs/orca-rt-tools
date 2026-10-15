@@ -101,20 +101,20 @@ def test_buffers_cover_the_occupancy():
 
 @pytest.mark.parametrize("args", [
     ["tt-check", E_CSV, E_MAP, "--arch", os.path.join(ARCH, "hermes-2x2.gml"), "--name", "weird_a",
-     "--clock", "434912000", "--clock", "500000000", "--style", "named", "--out", APP_DIR,
+     "--clock", "449152000", "--clock", "500000000", "--style", "named", "--out", APP_DIR,
      "--costs", os.path.join(EXP, "wcet", "costs", "tt", "weird_a.json")],
     ["tt-check", os.path.join(APPS, "car-v", "car-v.csv"), os.path.join(APPS, "car-v", "car-v-ONTO-hermes4x4.map"),
-     "--arch", os.path.join(ARCH, "hermes-4x4.gml"), "--name", "car_v", "--clock", "419680000",
+     "--arch", os.path.join(ARCH, "hermes-4x4.gml"), "--name", "car_v", "--clock", "441088000",
      "--clock", "500000000", "--out", APP_DIR, "--costs", os.path.join(EXP, "wcet", "costs", "tt", "car_v.json")],
     ["tt-check", os.path.join(APPS, "wcet-e", "wcet-e.csv"), os.path.join(APPS, "wcet-e", "wcet-e-ONTO-hermes2x2.map"),
-     "--arch", os.path.join(ARCH, "hermes-2x2.gml"), "--name", "wcet_e", "--clock", "220416000",
+     "--arch", os.path.join(ARCH, "hermes-2x2.gml"), "--name", "wcet_e", "--clock", "234656000",
      "--clock", "500000000", "--out", APP_DIR, "--costs", os.path.join(EXP, "wcet", "costs", "tt", "wcet_e.json")],
     ["tt-check", os.path.join(APPS, "car-full", "car-full.csv"),
      os.path.join(APPS, "car-full", "car-full-ONTO-hermes4x4.map"), "--arch", os.path.join(ARCH, "hermes-4x4.gml"),
-     "--name", "car_full", "--clock", "477952000", "--out", APP_DIR,
+     "--name", "car_full", "--clock", "526080000", "--out", APP_DIR,
      "--costs", os.path.join(EXP, "wcet", "costs", "tt", "car_full.json")],
     ["tt-check", E_CSV, E_MAP, "--arch", os.path.join(ARCH, "hermes-2x2.gml"), "--name", "e_ucx",
-     "--clock", "443360000", "--clock", "500000000", "--out", APP_DIR],
+     "--clock", "457600000", "--clock", "500000000", "--out", APP_DIR],
 ])
 def test_stored_tables_match_the_generator(args):
     from rttools.ucxgen.__main__ import main
@@ -125,7 +125,7 @@ def test_composition_table_matches_the_generator(monkeypatch):
     from rttools.ucxgen.__main__ import main
     monkeypatch.chdir(os.path.join(EXP, "multiapp"))
     assert main(["tt-compose-check", "--composition", "composition.json", "--name", "carv_e",
-                 "--clock", "443360000", "--clock", "500000000", "--out", APP_DIR,
+                 "--clock", "457600000", "--clock", "500000000", "--out", APP_DIR,
                  "--costs", os.path.join(EXP, "wcet", "costs", "tt", "carv_e.json")]) == 0
 
 
@@ -207,11 +207,12 @@ def _swap(label):
     return f"{y}-{x}"
 
 
-def synth_log(base_log, base_info, out_dir, packets, pes, period, f_hz, perturb=None, costs=None):
+def synth_log(base_log, base_info, out_dir, packets, pes, period, f_hz, perturb=None, costs=None, deadline=None):
     """Copy of a stored log without its FLIT lines, plus TIMER lines (ticks
     of every PE in `pes` and a compare interrupt per packet) and FLIT TX, RX
     and END lines of `packets` ({src, dst (monitor labels), tag, size, hops,
-    tau, s16}); RUN_INFO with injection=tt. The line of cycle c has the
+    tau, s16}); RUN_INFO with injection=tt (and deadline=<deadline> when
+    given: the deadline model of the link schedule of `packets`). The line of cycle c has the
     $time (whole ns) of the rising edge (2 c + 1) half fs of the clock of
     f_hz, as the monitor prints it."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -247,7 +248,7 @@ def synth_log(base_log, base_info, out_dir, packets, pes, period, f_hz, perturb=
     log = out_dir / "events.txt"
     log.write_text("".join(base) + "\n".join(extra) + "\n")
     info = open(base_info).read()
-    extra_info = "injection=tt\n"
+    extra_info = "injection=tt\n" + (f"deadline={deadline}\n" if deadline else "")
     if costs:
         from rttools.ucxgen.model import sha256
         extra_info += f"costs=max_csv_static costs_file={os.path.basename(costs)} costs_sha256={sha256(costs)}\n"
@@ -398,7 +399,8 @@ def test_rtlapp_run_wcet_e(tmp_path, costs):
                        "size": router.getPacketFlits(fl["bytes"]), "hops": exp23._hops(fl["src_label"], fl["dst_label"]),
                        "tau": tick_of(rel, q, f_hz, P), "s16": r["s16"], "s": r["offset"]})
     log, _ = synth_log(os.path.join(W, "logs", "W3.events.txt"), os.path.join(W, "logs", "W3.RUN_INFO"),
-                       tmp_path / "run", pk, ["0-0", "1-0", "0-1", "1-1"], P, f_hz, costs=costs)
+                       tmp_path / "run", pk, ["0-0", "1-0", "0-1", "1-1"], P, f_hz, costs=costs,
+                       deadline=router.deadline_model())
     m = rtlapp.analyze(log, man, csv_p, map_p, str(tmp_path / "out"), arch=os.path.join(ARCH, "hermes-2x2.gml"))
     t = m["tt"]
     assert t["packets"] == len(pk) and t["violations"] == 0 and t["unchecked"] == 0
@@ -419,7 +421,13 @@ def test_rtlmr_run_car_full(tmp_path):
     man = json.load(open(man_p))
     csv_p = os.path.join(APPS, "car-full", "car-full.csv")
     map_p = os.path.join(APPS, "car-full", "car-full-ONTO-hermes4x4.map")
-    table = ttcheck.schedule_rows(csv_p, map_p, os.path.join(ARCH, "hermes-4x4.gml"), 432000000)
+    # the clock of run CF4 (432 MHz) is below the minimum of the deadline model tick: the packets of the
+    # synthetic run follow the deadline model start (the modeled start of the reader, tables up to r11-rc8)
+    prev = router.set_deadline("start")
+    try:
+        table = ttcheck.schedule_rows(csv_p, map_p, os.path.join(ARCH, "hermes-4x4.gml"), 432000000)
+    finally:
+        router.set_deadline(prev)
     by = ttcheck.rows_by_flow(table)
     with open(os.path.join(F, "logs", "CF4.events.txt")) as f:
         rel = [int(m.group(1)) for m in (re.search(r"workflow iteration at (\d+) ns", ln) for ln in f) if m]
@@ -444,7 +452,7 @@ def test_rtlmr_run_car_full(tmp_path):
             n += 1
     pes = [f"{x}-{y}" for x in range(4) for y in range(4)]
     log, _ = synth_log(os.path.join(F, "logs", "CF4.events.txt"), os.path.join(F, "logs", "CF4.RUN_INFO"),
-                       tmp_path / "run", pk, pes, P, f_hz)
+                       tmp_path / "run", pk, pes, P, f_hz, deadline="start")
     m = rtlmr.analyze(log, man_p, csv_p, map_p, str(tmp_path / "out"), arch=os.path.join(ARCH, "hermes-4x4.gml"))
     t = m["tt"]
     assert t["packets"] == len(pk) > 1000 and t["violations"] == 0 and t["unchecked"] == 0

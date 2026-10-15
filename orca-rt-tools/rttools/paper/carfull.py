@@ -174,9 +174,12 @@ def load(path, arch):
 
 def at_frequency(g, noc, entries, f, spec):
     """Schedule of the general model at f: phase in cycles, CPU
-    feasibility, data age of every chain, packets of one hyperperiod."""
+    feasibility, data age of every chain, packets of one hyperperiod. On
+    the time-triggered platform with the handlers of the image, the
+    schedule carries the charges of the fixed point with the link schedule
+    at f (search.schedule_at, handler_extra)."""
     P = math.floor(spec.phase_s * Fraction(f))
-    sched = multirate.schedule(spec, P)
+    sched = multirate.schedule(spec, P, extra=handler_extra(g, noc, entries, f, spec))
     out = {"frequency_hz": f, "phase_cycles": P, "hyper_cycles": sched.H, "cpu_feasible": sched.feasible,
            "periodic_from_hyperperiod": sched.h0, "misses": len(sched.misses)}
     if not sched.feasible:
@@ -194,6 +197,17 @@ def at_frequency(g, noc, entries, f, spec):
     return out, sched, ages
 
 
+def handler_extra(g, noc, entries, f, spec):
+    """Charges of the handlers of the packet events at f (the fixed point of
+    search.schedule_at), None without handlers or off the time-triggered
+    platform, or without a link schedule at f."""
+    if not (spec.tick and spec.handlers):
+        return None
+    with network.quiet():
+        a = search.schedule_at(g, noc, entries, "car_full", f, search_config(f))
+    return None if a is None else a.get("handler_extra")
+
+
 def run_factor(cfg, apps, arch, k, q, tmp, tmap):
     app = build(cfg, apps, k, q)
     path = os.path.join(tmp, f"car-full-k{k}-q{q}.csv")
@@ -204,7 +218,7 @@ def run_factor(cfg, apps, arch, k, q, tmp, tmap):
     plat = cfg["platform"]
     clock = plat["clock_hz"]
     r = multirate.graph_rates(g)
-    spec = multirate.spec_from_graph(g, entries, r)
+    spec = multirate.spec_from_graph(g, entries, r, noc)
     scfg = search_config(plat["f0_hz"])
     with network.quiet():
         freq = search.minimum_frequency(g, noc, entries, appname, scfg)

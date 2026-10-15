@@ -78,8 +78,10 @@ def test_tables_of_the_conferencia(run, tmp_path):
         assert head[:3] == ["#", "P", str(r["period_cycles"])]
         assert len(lines) - 1 == r["packets_between_pes"]
         for x in lines[1:]:
-            src, dst, key, k, ne, q0, s, o, hops = x.split()
+            src, dst, key, k, ne, q0, s, o, hops, a = x.split()
             assert int(o) > router.NI_WAIT_CYCLES and int(hops) >= 1
+            # deadline a (cycles from the same phase start as s): the packet holds its links within it
+            assert int(s) + int(o) <= int(a)
     # one release period: one line per task, F of the model after the tick of its phase
     for run_id in ("VH", "VG", "VCV", "W5", "W4"):
         tasks = runs[run_id]["tasks"]
@@ -119,9 +121,9 @@ def test_model_of_car_full(run):
     # phase rule: every job within the phase of its release
     assert md["f_cpu_phase_hz"] == 9025160000.0
     r = m["apps"]["CAR-FULL"]["runs"]["CF6"]
-    assert (r["chains"], r["packets_per_hyperperiod"], r["hyper_cycles"]) == (34, 347, 5974400)
-    assert r["data_age_max"]["chain"] == "POSI-OBMG-OBDB-NAVC-DIRC" and r["data_age_max"]["cycles"] == 13619908
-    assert md["data_age_max_at_minimum"]["cycles"] == 13619908
+    assert (r["chains"], r["packets_per_hyperperiod"], r["hyper_cycles"]) == (34, 347, 6576000)
+    assert r["data_age_max"]["chain"] == "POSI-OBMG-OBDB-NAVC-DIRC" and r["data_age_max"]["cycles"] == 14975294
+    assert md["data_age_max_at_minimum"]["cycles"] == 14974628
     values = (out / "values.tex").read_text()
     for macro, v in (("ExpTtCarfullUtilizationBoundMhz", "455.952"), ("ExpTtCarfullCpuPhaseMhz", "9025.160"),
                      ("ExpTtCarfullPMinCycles", "119,488"), ("ExpTtCarfullLocalFlows", "18"),

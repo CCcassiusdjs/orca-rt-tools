@@ -217,12 +217,28 @@ def costs_file(res):
             "tasks": {t: {"t": r["t"]} for t, r in res["tasks"].items()}}
 
 
+def handlers_file(res):
+    """Handlers file (rttools/wcet/costs.py, load_handlers) of a static
+    analysis: the handlers of one packet event (inject: the send_isr term,
+    the compare interrupt of TIMER1 of an image with the time-triggered
+    injection; receive: the receive_isr term) and the handler cycles that
+    t(v) of each task holds (its send_isr and receive_isr terms)."""
+    k = res["kernel"]
+    return {"_doc": "handlers of one packet event and the handler cycles in t(v) of each task (rttools.wcet, "
+                    "terms send_isr and receive_isr) of the image of the costs file next to this file",
+            "image": res["image"], "inject": k["send_isr"], "receive": k["receive_isr"],
+            "tasks": {t: {"isr": r["terms"]["send_isr"] + r["terms"]["receive_isr"]} for t, r in res["tasks"].items()}}
+
+
 def static(spec_path, out_dir, image=None):
     spec = wcli.load_spec(spec_path)
     res = wcli.run_spec(spec, image)
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "costs_file.json"), "w") as f:
         json.dump(costs_file(res), f, indent=1)
+        f.write("\n")
+    with open(os.path.join(out_dir, "costs_file.handlers.json"), "w") as f:
+        json.dump(handlers_file(res), f, indent=1)
         f.write("\n")
     with open(os.path.join(out_dir, "costs.json"), "w") as f:
         json.dump(res, f, indent=1)
@@ -306,15 +322,20 @@ def flow(cfg, costs_path, out_dir):
     """Flow of E with the static costs and with the costs of the CSV; the
     key "ni" of the config pins the network-interface model of the flow
     (rttools/modules/routing/router.py; "off" for the runs up to tag
-    r11-rc5, whose images inject a packet when its job sends it)."""
+    r11-rc5, whose images inject a packet when its job sends it) and the
+    key "deadline" the deadline model (router.set_deadline; "start" for the
+    runs up to tag r11-rc8)."""
     from rttools.modules.routing import router
     f = cfg["flow"]
     prev = router.set_ni(f["ni"]) if "ni" in f else None
+    prev_d = router.set_deadline(f["deadline"]) if "deadline" in f else None
     try:
         return _flow(cfg, costs_path, out_dir)
     finally:
         if "ni" in f:
             router.set_ni(prev)
+        if "deadline" in f:
+            router.set_deadline(prev_d)
 
 
 def _flow(cfg, costs_path, out_dir):

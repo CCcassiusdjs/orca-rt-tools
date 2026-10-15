@@ -26,6 +26,17 @@ R0_NS = 3_000_000
 
 
 def model_log(path, hyperperiods=5, late=None, old_read=None, early=None, stop=None):
+    """model_log_of with the deadline model start: the model of a run
+    without the line deadline in its RUN_INFO (router.set_deadline)."""
+    from rttools.modules.routing import router
+    prev = router.set_deadline("start")
+    try:
+        return model_log_of(path, hyperperiods, late, old_read, early, stop)
+    finally:
+        router.set_deadline(prev)
+
+
+def model_log_of(path, hyperperiods=5, late=None, old_read=None, early=None, stop=None):
     """Log of a run that follows the model at F_CLK: TRIGGER lines at the
     ticks, scheduled lines of the ORT/BENCH slices, ITER and read markers
     at the start and the finish of each job, TAG lines of the packets.

@@ -1,0 +1,10 @@
+{
+ "_doc": "rttools.wcet spec of the composition of CAR-V and E on images/tt-rc7/carv_e.elf (carv_e.c with the time-triggered injection, INJECTION=tt, riscv64-elf-gcc 12.2.0; images/tt/BUILD.txt).",
+ "image": "../images/tt-rc7/carv_e.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+  "../annotations/carv_e.json"
+ ],
+ "manifest": "../../../pkt-sim/software/ucx-os/app/carv_e.json"
+}

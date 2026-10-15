@@ -3,7 +3,7 @@
  "image": {
   "file": "car_v.elf",
   "kind": "elf",
-  "sha256": "fc1ed44aadba0b3a25ed50ecb4344844ee8dcf7672b4a2bf07334288a5d89366"
+  "sha256": "f06554f937323d10d32e794e5391c9e5b3f688589a8e6cb1814aae1a247a3f50"
  },
  "scheduler_cycles": 1470,
  "tasks": {

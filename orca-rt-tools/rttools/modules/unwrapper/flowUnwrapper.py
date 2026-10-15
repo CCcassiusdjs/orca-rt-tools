@@ -80,9 +80,9 @@ def releaseWindows(flows, app, mapping):
 
 # generates packets for a given list of flows. packets
 # are generated for the whole hyperperiod hp
-def getPacketsFromFlows(flows, hp, tasks, app, mapping=None):
+def getPacketsFromFlows(flows, hp, tasks, app, mapping=None, arch=None):
     if app.get("rates") is not None:
-        return multirateFlows(flows, app, mapping)
+        return multirateFlows(flows, app, mapping, arch)
     packets = []
     windows = releaseWindows(flows, app, mapping)
     for f in flows:
@@ -109,12 +109,13 @@ def getPacketsFromFlows(flows, hp, tasks, app, mapping=None):
 # packets of one periodic hyperperiod of the general phase model
 # (rttools/bench_t/multirate.py): one packet per job of the source that
 # sends on the flow; release = finish of the job, deadline = start of the
-# job of the target that reads it. Raises MultirateError when the CPU
+# job of the target that reads it (its release on the time-triggered
+# platform, router.tick_deadline). Raises MultirateError when the CPU
 # schedule of the frequency of the instance misses a deadline.
-def multirateFlows(flows, app, mapping):
+def multirateFlows(flows, app, mapping, arch=None):
     from rttools.bench_t import multirate
-    spec = multirate.spec_from_instance(app, mapping)
-    sched = multirate.schedule(spec, app["rates"]["phase_cycles"])
+    spec = multirate.spec_from_instance(app, mapping, arch)
+    sched = multirate.schedule(spec, app["rates"]["phase_cycles"], extra=app.get("handler_extra"))
     windows = multirate.packet_windows(spec, sched)
     packets = []
     for f in flows:
@@ -171,7 +172,7 @@ def unwrap(app, arch, mapping):
 
     # get packets from flows
     try:
-        packets = getPacketsFromFlows(flows, hp, app["tasks"], app, mapping)
+        packets = getPacketsFromFlows(flows, hp, app["tasks"], app, mapping, arch)
     except ValueError as e:
         # general phase model: no CPU schedule at this frequency
         if app.get("rates") is None:

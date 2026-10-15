@@ -71,16 +71,20 @@ def run_ni(log_path, run_info="auto"):
     """Selects, for the analysis of the run of `log_path`, the
     network-interface model of its images: "tt" for a run with
     injection=tt in its RUN_INFO, "off" otherwise (the runs up to tag
-    r11-rc5). run_info: RUN_INFO path, "auto" (next to the log) or None
+    r11-rc5); and the deadline model of its table (router.set_deadline:
+    deadline= of the RUN_INFO, start without the line, the runs up to tag
+    r11-rc8). run_info: RUN_INFO path, "auto" (next to the log) or None
     (no RUN_INFO)."""
     from rttools.paper import exp23
     path = exp23.run_info_path(log_path) if run_info == "auto" else run_info
     info = exp23.read_run_info(path) if path else {}
     prev = router.set_ni(router.NI_TT if injection_rule(info) == "tt" else router.NI_OFF)
+    prev_d = router.set_deadline(info.get("deadline", "start"))
     try:
         yield
     finally:
         router.set_ni(prev)
+        router.set_deadline(prev_d)
 
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -338,8 +342,10 @@ def attach(packets, table, phase_of, release_cycles, grids, period):
     the packet in its flow, in the order of TX.head). `phase_of(packet,
     row, h)`: phase index (release, from 0) of the sending job of the
     packet, given its row and hyperperiod h. Packets without a row, a grid
-    or a release keep tau None. Returns the count of PEs whose phase ticks
-    are not one tick apart."""
+    or a release keep tau None. The deadline counts from the tick of phase
+    q on the PE of the target (the tick of the job that reads the packet
+    comes from that PE), given from tau. Returns the count of PEs whose
+    phase ticks are not one tick apart."""
     by = rows_by_flow(table)
     ticks, irregular = all_phase_ticks(release_cycles, grids, period)
     for p in packets:
@@ -352,8 +358,10 @@ def attach(packets, table, phase_of, release_cycles, grids, period):
         q = phase_of(p, row, h)
         if q is None or q < 0 or q >= len(ticks[p["src"]]):
             continue
+        dst = ticks.get(p.get("dst"))
+        shift = dst[q] - ticks[p["src"]][q] if dst is not None and q < len(dst) else 0
         p.update(tau=ticks[p["src"]][q], phase=q, s=row["offset"], s16=row["s16"], occupancy=row["occupancy"],
-                 deadline=row["deadline"] - row["phase_start"])
+                 deadline=row["deadline"] - row["phase_start"] + shift)
     return irregular
 
 
@@ -449,6 +457,18 @@ def costs_of_run(info):
         if got == sha:
             return path
     raise ValueError(f"RUN_INFO costs: no {name} with sha256 {sha} in {base} or {base}/previous")
+
+
+def costs_label(path):
+    """Name of a costs file in the metrics of a run: the name in the RUN_INFO
+    (costs_file=<stem>.json) also for a file of an earlier image kept in
+    costs/tt/previous/<stem>-<first 12 digits of the hash>.json."""
+    name = os.path.basename(path)
+    if os.path.basename(os.path.dirname(path)) == "previous":
+        m = re.match(r"^(.*)-[0-9a-f]{12}(\.json)$", name)
+        if m:
+            return m.group(1) + m.group(2)
+    return name
 
 
 ROW_FILES = (("per_packet", "tt_packets.csv"), ("jobs_rows", "tt_jobs.csv"), ("ready_rows", "tt_ready.csv"))

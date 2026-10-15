@@ -15,6 +15,22 @@ under the rule below (default max):
 
 Without --costs the flow keeps the values of the CSV.
 
+Handlers file (`<costs>.handlers.json` next to the costs file, the same
+analysis of the same image: rttools.paper.wcet, handlers_file): the cost
+of the interrupt handlers of one packet event and, per task, the handler
+cycles that t(v) holds (the terms send_isr and receive_isr of
+rttools/wcet/ucx.py). The general phase model and the phase model of the
+time-triggered images (rttools/bench_t/multirate.py, rttools/modules/
+instances/release.py) charge to each job the handlers of the packet
+events of its PE that can run inside it beyond what its t(v) holds.
+
+| Field of <costs>.handlers.json | Use |
+|---|---|
+| image | the image of the costs file (sha256 must match) |
+| inject | cycles of the injection of one packet (compare interrupt of TIMER1, lib/noc_tt.c) |
+| receive | cycles of the reception of one packet (irq2_handler and irq3_handler with their entries) |
+| tasks.<label>.isr | handler cycles in t(v): out-degree times inject plus in-degree times receive |
+
 Rule of a costs file (`rule` of apply, RULES): "max" (default) sets t(v)
 = max(t(v) of the CSV, t(v) of the file) and scheduler_cycles = the larger
 of the two, so every cost that places a release or an instant bounds the
@@ -26,6 +42,7 @@ cost ("csv" or "static"; "csv" when the two are equal).
 from __future__ import annotations
 
 import json
+import os
 
 MEASURED = "measured"
 STATIC = "static"
@@ -37,8 +54,35 @@ class CostsError(ValueError):
     pass
 
 
+def handlers_path(path):
+    """Path of the handlers file of a costs file."""
+    stem = path[:-5] if path.endswith(".json") else path
+    return stem + ".handlers.json"
+
+
+def load_handlers(path, image=None):
+    """{"inject", "receive", "tasks": {label: isr}, "source"} of a handlers
+    file; `image`: the image of the costs file, whose sha256 must match."""
+    with open(path) as f:
+        data = json.load(f)
+    for k in ("inject", "receive"):
+        if not isinstance(data.get(k), int) or data[k] < 0:
+            raise CostsError(f"{path}: {k} must be a non-negative integer")
+    tasks = {}
+    for label, v in (data.get("tasks") or {}).items():
+        isr = v.get("isr") if isinstance(v, dict) else v
+        if not isinstance(isr, int) or isr < 0:
+            raise CostsError(f"{path}: task {label}: isr must be a non-negative integer")
+        tasks[str(label)] = isr
+    if image is not None and (data.get("image") or {}).get("sha256") != image.get("sha256"):
+        raise CostsError(f"{path}: image {(data.get('image') or {}).get('sha256')} differs from the image "
+                         f"{image.get('sha256')} of the costs file")
+    return {"inject": data["inject"], "receive": data["receive"], "tasks": tasks, "source": path}
+
+
 def load(path):
-    """{"tasks": {label: t}, "scheduler_cycles": int or None, "source": path}."""
+    """{"tasks": {label: t}, "scheduler_cycles": int or None, "source": path,
+    "handlers": load_handlers of the handlers file next to it, or None}."""
     with open(path) as f:
         data = json.load(f)
     tasks = data.get("tasks")
@@ -53,7 +97,9 @@ def load(path):
     sc = data.get("scheduler_cycles")
     if sc is not None and (not isinstance(sc, int) or sc < 0):
         raise CostsError(f"{path}: scheduler_cycles must be a non-negative integer")
-    return {"tasks": out, "scheduler_cycles": sc, "source": path}
+    hp = handlers_path(path)
+    handlers = load_handlers(hp, data.get("image")) if os.path.exists(hp) else None
+    return {"tasks": out, "scheduler_cycles": sc, "source": path, "handlers": handlers}
 
 
 def merge(csv_cost, file_cost, rule=MAX):
@@ -90,7 +136,18 @@ def apply(app, costs, rule=MAX):
         old = app.graph.get("scheduler_cycles")
         sc = costs["scheduler_cycles"]
         app.graph["scheduler_cycles"] = sc if rule == STATIC or old is None else max(int(old), sc)
+    h = costs.get("handlers")
+    if h is not None:
+        app.graph["handlers"] = graph_handlers(app, h)
     return changes
+
+
+def graph_handlers(app, h):
+    """Handlers attribute of an application graph (release.settings): the
+    event costs and the handler cycles in t(v) of every node (by node id;
+    0 for a label without a row)."""
+    return {"inject": h["inject"], "receive": h["receive"],
+            "budget": {n: h["tasks"].get(str(d.get("label", n)), 0) for n, d in app.nodes(data=True)}}
 
 
 def sources(app):

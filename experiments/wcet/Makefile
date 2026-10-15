@@ -51,7 +51,9 @@
 #                  the costs files of costs/tt equal to the analysis
 #   make costs-tt  write costs/tt/<image>.json (static t(v) of every task and scheduler_cycles of each image of
 #                  images/tt, rttools/wcet/costs.py): the costs that the analysis flow of the runs with the
-#                  time-triggered injection takes as max(CSV, static) (experiments/tt)
+#                  time-triggered injection takes as max(CSV, static) (experiments/tt); and
+#                  costs/tt/<image>.handlers.json (handlers of one packet event and the handler cycles in t(v)
+#                  of each task: the charge of the handlers that run inside another job)
 #   make images-tt  build the images of images/tt and images/tt13 with ../exp23/build_sw.sh (the compiler
 #                  of ENV_SETUP; copy each set by hand into the directory of its compiler)
 #
@@ -65,7 +67,7 @@
 # Runs W4 and W5 (logs/W4.*, logs/W5.*, reference_W4.json, reference_W5.json): wcet_e of tag r11-rc7
 # (as W3 with the time-triggered injection, table wcet_e_tt.h of t(v) = max(CSV, static); 10.5 ms at
 # 500 MHz and at 220.416 MHz, the clock of the flow with these costs): make run-analyze check-run
-# LOG=logs/W5.events.txt REF=reference_W5.json SPEC=specs/wcet_e_tt.json; rtlapp of run-log takes the
+# LOG=logs/W5.events.txt REF=reference_W5.json SPEC=specs/wcet_e_tt_rc7.json (image of tag r11-rc7, images/tt-rc7); rtlapp of run-log takes the
 # model of the RUN_INFO (network-interface model tt, t(v) = max(CSV, static)).
 # (`make check` runs W1 to W5, check-r11c, check-r11e and check-r11f).
 #
@@ -88,7 +90,7 @@ GENARGS  = $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --bodies $(BODIES) --out 
 F_CLK   ?= 500000000
 # clocks of wcet_e_tt.h: the clock of the flow with t(v) = max(CSV, static) (experiments/tt, run W5) and
 # 500 MHz (run W4); TT_COSTS: static t(v) of the image (costs/tt)
-TT_CLOCKS ?= 220416000 500000000
+TT_CLOCKS ?= 234656000 500000000
 TT_COSTS ?= costs/tt/wcet_e.json
 SIM_NS  ?= 10000000
 LOG     ?= logs/W1.events.txt
@@ -118,8 +120,8 @@ check:
 	$(MAKE) run-analyze check-run
 	$(MAKE) run-analyze check-run LOG=logs/W2.events.txt REF=reference_W2.json
 	$(MAKE) run-analyze check-run LOG=logs/W3.events.txt REF=reference_W3.json
-	$(MAKE) run-analyze check-run LOG=logs/W4.events.txt REF=reference_W4.json SPEC=specs/wcet_e_tt.json
-	$(MAKE) run-analyze check-run LOG=logs/W5.events.txt REF=reference_W5.json SPEC=specs/wcet_e_tt.json
+	$(MAKE) run-analyze check-run LOG=logs/W4.events.txt REF=reference_W4.json SPEC=specs/wcet_e_tt_rc7.json
+	$(MAKE) run-analyze check-run LOG=logs/W5.events.txt REF=reference_W5.json SPEC=specs/wcet_e_tt_rc7.json
 	$(MAKE) analyze-r11c check-r11c
 	$(MAKE) analyze-r11e check-r11e
 	$(MAKE) analyze-r11f check-r11f
@@ -182,20 +184,22 @@ TT_COST_FILES := E:weird_a CAR-V:car_v WCET-E:wcet_e CARV-E:carv_e CAR-FULL:car_
 
 costs-tt: analyze-tt
 	mkdir -p costs/tt
-	for p in $(TT_COST_FILES); do cp $(BUILD)/tt/$${p%%:*}/costs_file.json costs/tt/$${p##*:}.json; done
+	for p in $(TT_COST_FILES); do cp $(BUILD)/tt/$${p%%:*}/costs_file.json costs/tt/$${p##*:}.json; \
+		cp $(BUILD)/tt/$${p%%:*}/costs_file.handlers.json costs/tt/$${p##*:}.handlers.json; done
 
 check-tt:
-	for p in $(TT_COST_FILES); do cmp $(BUILD)/tt/$${p%%:*}/costs_file.json costs/tt/$${p##*:}.json || exit 1; done
+	for p in $(TT_COST_FILES); do cmp $(BUILD)/tt/$${p%%:*}/costs_file.json costs/tt/$${p##*:}.json || exit 1; \
+		cmp $(BUILD)/tt/$${p%%:*}/costs_file.handlers.json costs/tt/$${p##*:}.handlers.json || exit 1; done
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/tt/metrics.json reference_tt.json
 	$(PYTHON) -c "import json, sys; m = json.load(open('$(BUILD)/tt/metrics.json')); \
 		sys.exit(0 if m['ni_within_bound'] else 'a term of the network interface exceeds its constant')"
 
 images-tt:
-	F_CLK=434912000 APP=weird_a ../exp23/build_sw.sh $(BUILD)/img-tt/weird_a
-	F_CLK=419680000 APP=car_v ../exp23/build_sw.sh $(BUILD)/img-tt/car_v
+	F_CLK=449152000 APP=weird_a ../exp23/build_sw.sh $(BUILD)/img-tt/weird_a
+	F_CLK=441088000 APP=car_v ../exp23/build_sw.sh $(BUILD)/img-tt/car_v
 	F_CLK=500000000 APP=wcet_e ../exp23/build_sw.sh $(BUILD)/img-tt/wcet_e
-	F_CLK=443360000 APP=carv_e ../exp23/build_sw.sh $(BUILD)/img-tt/carv_e
-	F_CLK=477952000 F_TICK=4000 APP=car_full ../exp23/build_sw.sh $(BUILD)/img-tt/car_full
+	F_CLK=457600000 APP=carv_e ../exp23/build_sw.sh $(BUILD)/img-tt/carv_e
+	F_CLK=526080000 F_TICK=4000 APP=car_full ../exp23/build_sw.sh $(BUILD)/img-tt/car_full
 	for a in weird_a car_v wcet_e carv_e car_full; do ls -l $(BUILD)/img-tt/$$a/$(UCX_IMG)/image.elf; done
 
 clean:

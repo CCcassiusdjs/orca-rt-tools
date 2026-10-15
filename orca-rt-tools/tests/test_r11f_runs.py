@@ -62,7 +62,10 @@ def test_r11f_runs_are_of_the_time_triggered_injection(log, ref):
     assert info["repo_tag"] == "r11-rc7" and exp23.isr_rule(info) == "no_nesting"
     assert exp23.crt0_rule(info) == "guard_readback" and ttcheck.injection_rule(info) == "tt"
     run = os.path.basename(log).split(".")[0]
-    assert ttcheck.costs_of_run(info) == os.path.join(EXP, "wcet", "costs", "tt", COSTS[run])
+    # the costs file of the table of the image: costs/tt, or costs/tt/previous for the images of tag
+    # r11-rc7 after a later change of the costs of the image (the name of the RUN_INFO in the metrics)
+    path = ttcheck.costs_of_run(info)
+    assert ttcheck.costs_label(path) == COSTS[run] == info["costs_file"]
     with open(os.path.join(EXP, ref)) as f:
         flat = exp23.flatten(json.load(f))
     assert [v for k, v in flat.items() if k.endswith("clock.crt0")] == ["guard_readback"]
@@ -137,10 +140,10 @@ def test_run_vma(tmp_path, app, csv):
 @pytest.mark.parametrize("run,bound", [("W4", 796396), ("W5", 377020)])
 def test_runs_w4_w5(tmp_path, run, bound):
     """make -C experiments/wcet run-analyze check-run LOG=logs/<run>.events.txt
-    SPEC=specs/wcet_e_tt.json: the static t(v) of the image of the run
+    SPEC=specs/wcet_e_tt_rc7.json: the static t(v) of the image of the run
     covers every PE; rtlapp with the model of the run within R_bound."""
     d = os.path.join(EXP, "wcet")
-    m = pw.run_log(os.path.join(d, "logs", f"{run}.events.txt"), os.path.join(d, "specs", "wcet_e_tt.json"),
+    m = pw.run_log(os.path.join(d, "logs", f"{run}.events.txt"), os.path.join(d, "specs", "wcet_e_tt_rc7.json"),
                    os.path.join(d, "logs", f"{run}.image.elf"), os.path.join(APP_DIR, "wcet_e.json"),
                    os.path.join(APPS, "wcet-e", "wcet-e.csv"), os.path.join(APPS, "wcet-e", "wcet-e-ONTO-hermes2x2.map"),
                    str(tmp_path), os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"))
@@ -175,7 +178,7 @@ def test_wcet_of_the_r11f_runs(tmp_path):
 
 def test_run_images_equal_the_images_of_the_analysis():
     """The images of VH, VCV, W4 and VMA (riscv64-elf-gcc 12.2.0 of the
-    simulation server) load the bytes of images/tt (container build of the
+    simulation server) load the bytes of images/tt-rc7 (container build of the
     same compiler): every allocated section has the same address and
     content, and the symbols are the same except the names of the mapping
     symbols of the assembler ($xrv32e1p9 against $x)."""
@@ -193,7 +196,7 @@ def test_run_images_equal_the_images_of_the_analysis():
     pairs = {"exp23/logs/VH.image.elf": "weird_a", "car-v-rtl/logs/VCV.image.elf": "car_v",
              "wcet/logs/W4.image.elf": "wcet_e", "multiapp/logs/VMA.image.elf": "carv_e"}
     for run, img in pairs.items():
-        assert content(os.path.join(EXP, run)) == content(os.path.join(EXP, "wcet", "images", "tt", img + ".elf")), run
+        assert content(os.path.join(EXP, run)) == content(os.path.join(EXP, "wcet", "images", "tt-rc7", img + ".elf")), run
 
 
 def test_run_cf5_jobs_after_their_finish(tmp_path):

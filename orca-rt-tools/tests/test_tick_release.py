@@ -168,13 +168,13 @@ def test_simulate_release_line(tmp_path):
     assert r.returncode == 0, r.stdout + r.stderr
     assert "vsim -c work.manycore_top work.chk_binds +RUN_NS=1000 -gRELEASE_MASK=15\n" in run_do(tmp_path / "o")
     info = (tmp_path / "o" / "RUN_INFO").read_text()
-    assert "app=weird_a mesh=2x2 generics=-gRELEASE_MASK=15\n" in info and info.endswith("release=tick\n")
+    assert "app=weird_a mesh=2x2 generics=-gRELEASE_MASK=15\n" in info and info.endswith("release=tick\ndeadline=start\n")
     # weird_a_data: the vsim command of run F
     r = subprocess.run(["bash", sh, str(tmp_path / "d"), "1000", "weird_a_data"], capture_output=True, text=True,
                        env=env)
     assert r.returncode == 0, r.stdout + r.stderr
     assert "vsim -c work.manycore_top work.chk_binds +RUN_NS=1000\n" in run_do(tmp_path / "d")
-    assert (tmp_path / "d" / "RUN_INFO").read_text().endswith("release=data\n")
+    assert (tmp_path / "d" / "RUN_INFO").read_text().endswith("release=data\ndeadline=start\n")
     assert "-s weird_a_data" in log.read_text()
 
 
