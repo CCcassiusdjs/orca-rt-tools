@@ -521,8 +521,8 @@ def schedule(spec, P, max_hyperperiods=32, extra=None):
     """Simulates every PE at a phase of P cycles until the state of each PE
     at a hyperperiod boundary repeats (periodic schedule). `extra`: I(J) of
     each job position, {task: [cycles]} (handler_extra: the handlers of the
-    packet events of the time-triggered platform; the fixed point with the
-    link schedule is search.schedule_at)."""
+    packet events of the time-triggered platform; search.schedule_at
+    iterates them with the link schedule to a fixed point)."""
     if P <= 0:
         raise MultirateError("phase length must be positive")
     extra = {t: list(x) for t, x in (extra or {}).items()}

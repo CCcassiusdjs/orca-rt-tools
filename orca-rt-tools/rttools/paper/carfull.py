@@ -176,8 +176,8 @@ def at_frequency(g, noc, entries, f, spec):
     """Schedule of the general model at f: phase in cycles, CPU
     feasibility, data age of every chain, packets of one hyperperiod. On
     the time-triggered platform with the handlers of the image, the
-    schedule carries the charges of the fixed point with the link schedule
-    at f (search.schedule_at, handler_extra)."""
+    schedule carries the charges that search.schedule_at iterates with the
+    link schedule at f to a fixed point (handler_extra)."""
     P = math.floor(spec.phase_s * Fraction(f))
     sched = multirate.schedule(spec, P, extra=handler_extra(g, noc, entries, f, spec))
     out = {"frequency_hz": f, "phase_cycles": P, "hyper_cycles": sched.H, "cpu_feasible": sched.feasible,
@@ -198,7 +198,7 @@ def at_frequency(g, noc, entries, f, spec):
 
 
 def handler_extra(g, noc, entries, f, spec):
-    """Charges of the handlers of the packet events at f (the fixed point of
+    """Charges of the handlers of the packet events at f (a fixed point of
     search.schedule_at), None without handlers or off the time-triggered
     platform, or without a link schedule at f."""
     if not (spec.tick and spec.handlers):

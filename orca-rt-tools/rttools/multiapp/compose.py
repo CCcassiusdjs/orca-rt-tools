@@ -384,8 +384,8 @@ def general_packets(apps, noc, frequency):
     prefix of the application and its own flow label."""
     U, entries, flow_of, owner, r, spec = union_spec(apps, noc)
     if spec.tick and spec.handlers:
-        # the fixed point of the charges of the handlers with the link schedule is the one of
-        # search.schedule_at, for one application
+        # search.schedule_at iterates the charges of the handlers with the link schedule to a fixed point,
+        # for one application
         raise CompositionError("handlers of the packet events (handlers file of the costs) in a composition of "
                                "the general phase model: schedule each application with search.schedule_at")
     inst = instantiator.createInstance(U, noc, frequency)

@@ -509,15 +509,18 @@ def cpu_check(cfg, estimated):
             "f_cpu_hz": exact(f_cpu), "meets_phase": f_cpu <= cfg["clock_hz"]}
 
 
-def response_bound(cfg):
+def response_bound(cfg, finish=None):
     """R^ = phi(v_out) P + f^(v_out): phase index of each task (one phase
     per edge between PEs, config task_graph; on the same PE, one phase
     when the target runs before the source in the dispatch order) and the
     finish of the last task of the iteration in its sequence; P = phase in
     cycles. With the dispatch order J, G of GJ, J of iteration k runs first
     in phase 3 and G of iteration k ran in phase 1 (phi(J) = 3 comes from
-    I and H), so f^(J) = c^(J)."""
+    I and H), so f^(J) = c^(J). finish: F of each task in place of the
+    sequence (tt_finish: the handlers of the packet events of each PE)."""
     seq = cpu_sequence(cfg)
+    if finish is not None:
+        seq = {t: dict(v, finish=finish[t]) for t, v in seq.items()}
     pe_of = {t: v["cluster"] for t, v in seq.items()}
     order = release.sequence_positions(dispatch_sequences(cfg))
     phi = cpu_estimate.phases([tuple(e) for e in cfg["task_graph"]["edges"]], pe_of, order)
@@ -1266,15 +1269,7 @@ def tt_check(log_path, tr, cfg, clk, per_packet, arch_path, map_path, costs=None
         return h + phi[flows[p["flow"]]["source"]]
     jobs = ready = None
     if costs:
-        from rttools.paper import ttflow
-        from rttools.modules.routing import router
-        prev = router.set_ni("tt")
-        try:
-            g, _, noc, entries, _ = ttflow.load_app(cfg["application"], map_path, arch_path, costs)
-            pm = ttflow.phase_model(g, noc, entries, cfg["clock_hz"])
-        finally:
-            router.set_ni(prev)
-        fin = {t: x["finish"] for t, x in pm["tasks"].items()}
+        fin = tt_finish(cfg, map_path, arch_path, costs)
         jobs = [{"pe": it["lane"], "task": v, "j": k, "t_raw": it["end"], "q": k - 1 + phi[v], "bound": fin[v]}
                 for v, ks in iteration_marks(tr).items() if v in fin
                 for k, it in sorted(ks.items()) if it["end"] is not None]
@@ -1290,6 +1285,23 @@ def tt_check(log_path, tr, cfg, clk, per_packet, arch_path, map_path, costs=None
     return ttcheck.analyze_run(log_path, clk, release_times(tr, cfg, clk), table, pk, phase_of,
                                relabel=tparsers.swap_node if tr.meta.get("swap_xy") else None, jobs=jobs,
                                ready=ready)
+
+
+def tt_finish(cfg, map_path, arch_path, costs):
+    """F(v) of each task in the model of a run with the time-triggered
+    injection (rttools.paper.ttflow, phase_model): t(v) = max(CSV, static)
+    of the costs file and, with the deadline model tick of its RUN_INFO,
+    the handlers of the packet events of each PE
+    (rttools/modules/instances/release.py, task_windows)."""
+    from rttools.paper import ttflow
+    from rttools.modules.routing import router
+    prev = router.set_ni("tt")
+    try:
+        g, _, noc, entries, _ = ttflow.load_app(cfg["application"], map_path, arch_path, costs)
+        pm = ttflow.phase_model(g, noc, entries, cfg["clock_hz"])
+    finally:
+        router.set_ni(prev)
+    return {t: x["finish"] for t, x in pm["tasks"].items()}
 
 
 def phase_conformance(tr, cfg, clk, rule):
@@ -1353,6 +1365,9 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
     net = flit_times(log_path, tr, cfg, clk)
     per_packet = net.pop("per_packet") if net else []
     tt = None
+    # R^ of the model of the run: F with the handlers of the packet events (deadline model tick)
+    from rttools.modules.routing import router as _router
+    finish = tt_finish(cfg, mapping, arch, costs) if costs and arch and mapping and _router.tick_deadline() else None
     if injection == "tt" and net is not None and arch and mapping:
         tt = tt_check(log_path, tr, cfg, clk, per_packet, arch, mapping, costs)
     from rttools.paper import ttcheck as _tc
@@ -1373,7 +1388,7 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
         "tab83": {"rows": rows83, "mean_difference_percent": mean83, "per_cluster": measured},
         "cpu": cpu_check(cfg, est),
         "sequences": dispatch_sequences(cfg),
-        "response_bound": response_bound(cfg),
+        "response_bound": response_bound(cfg, finish),
         "iterations": {"all": [{k: r[k] for k in ("iteration", "response_cycles", "response_ms", "release_offset_ms",
                                                   "release_to_dispatch_cycles", "response_from_release_cycles")}
                                for r in resp],
