@@ -138,11 +138,13 @@ def header_wait():
 #
 # The three terms of w_NI (cycles; rttools/wcet/ucx.py, ni_terms): the
 # largest value of each term in the static analysis of the UCX-OS images
-# with the time-triggered injection (experiments/wcet, config_tt.json,
-# make analyze-tt check-tt: every term of every image at or below its
-# constant; car_full built with riscv64-unknown-elf-gcc 13.2.0 has the three
-# largest). The analysis of a run (rttools.paper.ttcheck) compares each
-# measured wait with its term.
+# with the time-triggered injection of tag r11-rc7 (car_full built with
+# riscv64-unknown-elf-gcc 13.2.0 had the three largest); every term of every
+# image of this tree is at or below its constant (experiments/wcet,
+# config_tt.json, make analyze-tt check-tt; the tick hook of car_full with
+# the table TT_TICK shortens its tick term, and its terms are now 3842,
+# 7056 and 4100). The analysis of a run (rttools.paper.ttcheck) compares
+# each measured wait with its term.
 NI_INJECT_CYCLES = 3899     # instant s to the injection (compare interrupt of TIMER1)
 NI_RX_SIZE_CYCLES = 7113    # size flit to the buffer of irq2_handler (credit withheld)
 NI_RX_END_CYCLES = 4157     # last flit to the handshake of irq3_handler

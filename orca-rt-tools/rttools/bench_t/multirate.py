@@ -355,6 +355,14 @@ class Schedule:
         x = self.jobs[task][j]
         return (x.release + shift, x.start + shift, x.finish + shift)
 
+    def tick_owners(self):
+        """{node: [position in the creation order of the PE (1..n) that the
+        simulation dispatches at tick t, 0: idle]} for the ticks 0 ..
+        (h0 + 1) Ht - 1; the ticks from h0 Ht repeat every Ht ticks
+        (periodic schedule)."""
+        n = (self.h0 + 1) * self.spec.hyper_ticks
+        return {node: list(sim["owners"][:n]) for node, sim in self.sims.items()}
+
     def busy_per_phase(self):
         """{node: busy cycles in each phase of the periodic hyperperiod h0}."""
         out = {}

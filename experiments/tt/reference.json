@@ -2082,242 +2082,242 @@
      "TPMS": {
       "pe": "3",
       "csv": 477668,
-      "static": 474719,
+      "static": 474662,
       "used": 477668,
       "source": "csv"
      },
      "VIBS": {
       "pe": "3",
       "csv": 151000,
-      "static": 148049,
+      "static": 147992,
       "used": 151000,
       "source": "csv"
      },
      "SPES": {
       "pe": "1",
       "csv": 151000,
-      "static": 153031,
-      "used": 153031,
+      "static": 152974,
+      "used": 152974,
       "source": "static"
      },
      "POSI": {
       "pe": "8",
       "csv": 711000,
-      "static": 713031,
-      "used": 713031,
+      "static": 712974,
+      "used": 712974,
       "source": "static"
      },
      "USOS": {
       "pe": "4",
       "csv": 104332,
-      "static": 101379,
+      "static": 101322,
       "used": 104332,
       "source": "csv"
      },
      "FBU1": {
       "pe": "11",
       "csv": 67000,
-      "static": 64049,
+      "static": 63992,
       "used": 67000,
       "source": "csv"
      },
      "FBU2": {
       "pe": "15",
       "csv": 67000,
-      "static": 64049,
+      "static": 63992,
       "used": 67000,
       "source": "csv"
      },
      "FBU3": {
       "pe": "5",
       "csv": 67000,
-      "static": 69031,
-      "used": 69031,
+      "static": 68974,
+      "used": 68974,
       "source": "static"
      },
      "FBU4": {
       "pe": "7",
       "csv": 48332,
-      "static": 45379,
+      "static": 45322,
       "used": 48332,
       "source": "csv"
      },
      "FBU5": {
       "pe": "14",
       "csv": 67000,
-      "static": 64049,
+      "static": 63992,
       "used": 67000,
       "source": "csv"
      },
      "FBU6": {
       "pe": "13",
       "csv": 67000,
-      "static": 64049,
+      "static": 63992,
       "used": 67000,
       "source": "csv"
      },
      "FBU7": {
       "pe": "12",
       "csv": 67000,
-      "static": 64049,
+      "static": 63992,
       "used": 67000,
       "source": "csv"
      },
      "FBU8": {
       "pe": "6",
       "csv": 67000,
-      "static": 69031,
-      "used": 69031,
+      "static": 68974,
+      "used": 68974,
       "source": "static"
      },
      "STAC": {
       "pe": "3",
       "csv": 151000,
-      "static": 168527,
-      "used": 168527,
+      "static": 168470,
+      "used": 168470,
       "source": "static"
      },
      "TPRC": {
       "pe": "0",
       "csv": 1411000,
-      "static": 1408062,
+      "static": 1408005,
       "used": 1411000,
       "source": "csv"
      },
      "DIRC": {
       "pe": "8",
       "csv": 151000,
-      "static": 148062,
+      "static": 148005,
       "used": 151000,
       "source": "csv"
      },
      "NAVC": {
       "pe": "8",
       "csv": 151000,
-      "static": 183797,
-      "used": 183797,
+      "static": 183740,
+      "used": 183740,
       "source": "static"
      },
      "OBDB": {
       "pe": "4",
       "csv": 711000,
-      "static": 723383,
-      "used": 723383,
+      "static": 723326,
+      "used": 723326,
       "source": "static"
      },
      "BFE1": {
       "pe": "11",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "BFE2": {
       "pe": "15",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "BFE3": {
       "pe": "9",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "BFE4": {
       "pe": "7",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "BFE5": {
       "pe": "14",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "BFE6": {
       "pe": "13",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "BFE7": {
       "pe": "12",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "BFE8": {
       "pe": "10",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "FDF1": {
       "pe": "9",
       "csv": 67000,
-      "static": 84689,
-      "used": 84689,
+      "static": 84632,
+      "used": 84632,
       "source": "static"
      },
      "FDF2": {
       "pe": "10",
       "csv": 67000,
-      "static": 84689,
-      "used": 84689,
+      "static": 84632,
+      "used": 84632,
       "source": "static"
      },
      "STPH": {
       "pe": "9",
       "csv": 67000,
-      "static": 74401,
-      "used": 74401,
+      "static": 74344,
+      "used": 74344,
       "source": "static"
      },
      "THRC": {
       "pe": "2",
       "csv": 151000,
-      "static": 153406,
-      "used": 153406,
+      "static": 153349,
+      "used": 153349,
       "source": "static"
      },
      "VOD1": {
       "pe": "5",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "VOD2": {
       "pe": "6",
       "csv": 67000,
-      "static": 69057,
-      "used": 69057,
+      "static": 69000,
+      "used": 69000,
       "source": "static"
      },
      "OBMG": {
       "pe": "4",
       "csv": 1411000,
-      "static": 1428689,
-      "used": 1428689,
+      "static": 1428632,
+      "used": 1428632,
       "source": "static"
      }
     },
     "scheduler_cycles": {
      "csv": 11000,
-     "static": 1909,
+     "static": 1852,
      "used": 11000
     },
     "file": "car_full.json",
-    "sha256": "8f4b212f68a07f21a77c55f73243a8b39c5c9e4d522e203b47f0dad25a8205c9"
+    "sha256": "0702619027b55660a973e41ce52896e0b150ec54470faa6d5f72c61cf9e16eb4"
    },
    "pes": {
     "11": {
@@ -2326,8 +2326,8 @@
       "FBU1"
      ],
      "csv": 134000,
-     "static": 133106,
-     "used": 136057,
+     "static": 132992,
+     "used": 136000,
      "static_above_csv": [
       "BFE1"
      ],
@@ -2339,8 +2339,8 @@
       "FBU2"
      ],
      "csv": 134000,
-     "static": 133106,
-     "used": 136057,
+     "static": 132992,
+     "used": 136000,
      "static_above_csv": [
       "BFE2"
      ],
@@ -2353,8 +2353,8 @@
       "STPH"
      ],
      "csv": 201000,
-     "static": 228147,
-     "used": 228147,
+     "static": 227976,
+     "used": 227976,
      "static_above_csv": [
       "BFE3",
       "FDF1",
@@ -2368,8 +2368,8 @@
       "FBU4"
      ],
      "csv": 115332,
-     "static": 114436,
-     "used": 117389,
+     "static": 114322,
+     "used": 117332,
      "static_above_csv": [
       "BFE4"
      ],
@@ -2381,8 +2381,8 @@
       "FBU5"
      ],
      "csv": 134000,
-     "static": 133106,
-     "used": 136057,
+     "static": 132992,
+     "used": 136000,
      "static_above_csv": [
       "BFE5"
      ],
@@ -2394,8 +2394,8 @@
       "FBU6"
      ],
      "csv": 134000,
-     "static": 133106,
-     "used": 136057,
+     "static": 132992,
+     "used": 136000,
      "static_above_csv": [
       "BFE6"
      ],
@@ -2407,8 +2407,8 @@
       "FBU7"
      ],
      "csv": 134000,
-     "static": 133106,
-     "used": 136057,
+     "static": 132992,
+     "used": 136000,
      "static_above_csv": [
       "BFE7"
      ],
@@ -2420,8 +2420,8 @@
       "FDF2"
      ],
      "csv": 134000,
-     "static": 153746,
-     "used": 153746,
+     "static": 153632,
+     "used": 153632,
      "static_above_csv": [
       "BFE8",
       "FDF2"
@@ -2435,8 +2435,8 @@
       "POSI"
      ],
      "csv": 1013000,
-     "static": 1044890,
-     "used": 1047828,
+     "static": 1044719,
+     "used": 1047714,
      "static_above_csv": [
       "NAVC",
       "POSI"
@@ -2449,8 +2449,8 @@
       "VOD1"
      ],
      "csv": 134000,
-     "static": 138088,
-     "used": 138088,
+     "static": 137974,
+     "used": 137974,
      "static_above_csv": [
       "FBU3",
       "VOD1"
@@ -2463,8 +2463,8 @@
       "VOD2"
      ],
      "csv": 134000,
-     "static": 138088,
-     "used": 138088,
+     "static": 137974,
+     "used": 137974,
      "static_above_csv": [
       "FBU8",
       "VOD2"
@@ -2478,8 +2478,8 @@
       "USOS"
      ],
      "csv": 2226332,
-     "static": 2253451,
-     "used": 2256404,
+     "static": 2253280,
+     "used": 2256290,
      "static_above_csv": [
       "OBDB",
       "OBMG"
@@ -2491,8 +2491,8 @@
       "SPES"
      ],
      "csv": 151000,
-     "static": 153031,
-     "used": 153031,
+     "static": 152974,
+     "used": 152974,
      "static_above_csv": [
       "SPES"
      ],
@@ -2505,8 +2505,8 @@
       "VIBS"
      ],
      "csv": 779668,
-     "static": 791295,
-     "used": 797195,
+     "static": 791124,
+     "used": 797138,
      "static_above_csv": [
       "STAC"
      ],
@@ -2517,8 +2517,8 @@
       "THRC"
      ],
      "csv": 151000,
-     "static": 153406,
-     "used": 153406,
+     "static": 153349,
+     "used": 153349,
      "static_above_csv": [
       "THRC"
      ],
@@ -2529,70 +2529,70 @@
       "TPRC"
      ],
      "csv": 1411000,
-     "static": 1408062,
+     "static": 1408005,
      "used": 1411000,
      "static_above_csv": [],
      "source": "csv"
     }
    },
-   "f_cpu_hz": 478296000.0,
-   "f_noc_hz": 478296000.0,
-   "minimum_hz": 478296000.0,
+   "f_cpu_hz": 477952000.0,
+   "f_noc_hz": 477952000.0,
+   "minimum_hz": 477952000.0,
    "binding": "cpu",
    "runs": {
-    "CF5": {
-     "clock_hz": 478336000,
+    "CF6": {
+     "clock_hz": 477952000,
      "rule": "flow",
      "cpu_feasible": true,
-     "period_cycles": 119584,
-     "hyper_cycles": 5979200,
+     "period_cycles": 119488,
+     "hyper_cycles": 5974400,
      "periodic_from_hyperperiod": 0,
      "link_schedule_feasible": true,
      "packets_between_pes": 347,
      "chains": 34,
      "packets_per_hyperperiod": 347,
      "data_age": {
-      "TPMS-STAC-TPRC": 10511800,
-      "TPMS-STAC-THRC": 4947766,
-      "VIBS-STAC-TPRC": 8120120,
-      "VIBS-STAC-THRC": 1360246,
-      "SPES-NAVC-DIRC": 1791805,
-      "SPES-NAVC-THRC": 1360246,
-      "SPES-STAC-TPRC": 8120120,
-      "SPES-STAC-THRC": 1360246,
-      "POSI-NAVC-DIRC": 5738077,
-      "POSI-NAVC-THRC": 5545686,
-      "POSI-OBMG-OBDB-NAVC-DIRC": 13630621,
-      "POSI-OBMG-OBDB-NAVC-THRC": 13318646,
-      "USOS-OBMG-OBDB-NAVC-DIRC": 10641021,
-      "USOS-OBMG-OBDB-NAVC-THRC": 10329046,
-      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11046550,
-      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11046550,
-      "FBU3-VOD1-NAVC-DIRC": 1552637,
-      "FBU3-VOD1-NAVC-THRC": 1121078,
-      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11046550,
-      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11046550,
-      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11046550,
-      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11046550,
-      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11046550,
-      "FBU8-VOD2-NAVC-DIRC": 1552637,
-      "FBU8-VOD2-NAVC-THRC": 1121078,
-      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11358525,
-      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11046550
+      "TPMS-STAC-TPRC": 10504600,
+      "TPMS-STAC-THRC": 4943869,
+      "VIBS-STAC-TPRC": 8114840,
+      "VIBS-STAC-THRC": 1359229,
+      "SPES-NAVC-DIRC": 1790596,
+      "SPES-NAVC-THRC": 1359229,
+      "SPES-STAC-TPRC": 8114840,
+      "SPES-STAC-THRC": 1359229,
+      "POSI-NAVC-DIRC": 5733700,
+      "POSI-NAVC-THRC": 5541309,
+      "POSI-OBMG-OBDB-NAVC-DIRC": 13619908,
+      "POSI-OBMG-OBDB-NAVC-THRC": 13308029,
+      "USOS-OBMG-OBDB-NAVC-DIRC": 10632708,
+      "USOS-OBMG-OBDB-NAVC-THRC": 10320829,
+      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
+      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
+      "FBU3-VOD1-NAVC-DIRC": 1551620,
+      "FBU3-VOD1-NAVC-THRC": 1120253,
+      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
+      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
+      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
+      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
+      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757,
+      "FBU8-VOD2-NAVC-DIRC": 1551620,
+      "FBU8-VOD2-NAVC-THRC": 1120253,
+      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 11349636,
+      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 11037757
      },
      "data_age_max": {
       "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
-      "cycles": 13630621,
-      "ms": 28.495912914771207
+      "cycles": 13619908,
+      "ms": 28.496392943224425
      },
-     "sim_ns_min": 31495913,
+     "sim_ns_min": 31496393,
      "sim_ns": 64000000,
      "sim_fits": true,
      "feasible": true,
@@ -2608,15 +2608,15 @@
     "phases_per_hyperperiod": 50,
     "flows": 38,
     "flows_on_one_pe": 18,
-    "p_min_cycles": 119574,
-    "f_cpu_hz": 478296000.0,
-    "utilization_bound_cycles": 114074,
-    "utilization_bound_hz": 456296000.0,
-    "f_cpu_phase_hz": 9025616000.0,
+    "p_min_cycles": 119488,
+    "f_cpu_hz": 477952000.0,
+    "utilization_bound_cycles": 113988,
+    "utilization_bound_hz": 455952000.0,
+    "f_cpu_phase_hz": 9025160000.0,
     "data_age_max_at_minimum": {
      "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
-     "cycles": 13629511,
-     "ms": 28.49597529563283
+     "cycles": 13619908,
+     "ms": 28.496392943224425
     }
    }
   }

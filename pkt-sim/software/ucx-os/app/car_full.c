@@ -177,30 +177,49 @@ void irq4_handler(void)
 }
 
 #ifdef UCX_NOC_TT
-static uint16_t countdown[MAX_LOCAL];       /* phases to the next release of each task */
+static const uint8_t *tick_row;             /* TT_TICK of this PE (app/<app>_tt.h) */
+static struct tcb_s *owner_pred[MAX_LOCAL + 1];  /* tcb before position p of the circular list */
+static uint32_t tick_idx = 0;               /* index of the next phase in TT_TICK */
 
 /* tick hook (kernel/sched.c, dispatch): a release request that the release
  * interrupt has not served yet (interrupts disabled since before the
  * request) is served here, since the generator raises it before the tick of
- * its phase; then the hook releases the jobs of the phase (countdown of
- * each task from o_v + 1, then every k_v phases) */
+ * its phase; then the hook releases the jobs of the phase (TT_TICK: bit 2 +
+ * i for the task of position i + 1, the phases o_v + j k_v) and sets the
+ * current task of the scheduler to the task before the position that the
+ * model dispatches at this tick (TT_TICK bits 0-1; 0: no change), so that
+ * krnl_schedule dispatches that position or, when its job has ended, the
+ * next ready task after it: the tasks of each phase run in the circular
+ * order of the model, whatever task holds the CPU at the tick */
 void ucx_app_tick(void)
 {
+  uint32_t p = 0;
+
   if (IRQ_CAUSE & MASK_IRQ4)
     irq4_handler();
   while (irq_pending) {
+    uint32_t e = tick_row[tick_idx];
+
     irq_pending--;
     if (phase == 0)
       phase0_tick = ucx_noc_tt_ticks();
-    for (int i = 0; i < n_local; i++) {
-      if (--countdown[i] == 0) {
-        countdown[i] = local_task[i]->period;
+    if (++tick_idx == TT_TICKS)
+      tick_idx = TT_TICK_LOOP;
+    p = e & 3;
+    e >>= 2;
+    for (int i = 0; i < n_local; i++, e >>= 1) {
+      if (e & 1) {
         released[i]++;
         if (local_tcb[i]->state == TASK_BLOCKED)
           local_tcb[i]->state = TASK_READY;
       }
     }
     phase++;
+  }
+  if (p) {
+    if (kcb_p->tcb_p->state == TASK_RUNNING)
+      kcb_p->tcb_p->state = TASK_READY;
+    kcb_p->tcb_p = owner_pred[p];
   }
 }
 #else
@@ -456,9 +475,6 @@ static void add_task(void (*fn)(void), const struct task_s *t)
   local_task[n_local] = t;
   local_tcb[n_local] = kcb_p->tcb_p;   /* tcb of the task just added */
   released[n_local] = 0;
-#ifdef UCX_NOC_TT
-  countdown[n_local] = t->offset + 1;
-#endif
   n_local++;
 }
 
@@ -536,6 +552,14 @@ int32_t app_main(void)
   default:
     break;
   }
+#ifdef UCX_NOC_TT
+  /* positions of the tick hook: the task before position p in the circular list
+   * (idle task, then the tasks in creation order) */
+  tick_row = TT_TICK[ucx_noc_cpu_id()];
+  owner_pred[1] = kcb_p->tcb_first;
+  for (int i = 1; i < n_local; i++)
+    owner_pred[i + 1] = local_tcb[i - 1];
+#endif
 
   return 1;
 }

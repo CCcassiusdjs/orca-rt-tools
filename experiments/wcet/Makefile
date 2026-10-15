@@ -195,7 +195,7 @@ images-tt:
 	F_CLK=419680000 APP=car_v ../exp23/build_sw.sh $(BUILD)/img-tt/car_v
 	F_CLK=500000000 APP=wcet_e ../exp23/build_sw.sh $(BUILD)/img-tt/wcet_e
 	F_CLK=443360000 APP=carv_e ../exp23/build_sw.sh $(BUILD)/img-tt/carv_e
-	F_CLK=478336000 F_TICK=4000 APP=car_full ../exp23/build_sw.sh $(BUILD)/img-tt/car_full
+	F_CLK=477952000 F_TICK=4000 APP=car_full ../exp23/build_sw.sh $(BUILD)/img-tt/car_full
 	for a in weird_a car_v wcet_e carv_e car_full; do ls -l $(BUILD)/img-tt/$$a/$(UCX_IMG)/image.elf; done
 
 clean:

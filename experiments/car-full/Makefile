@@ -53,12 +53,13 @@
 #   make analyze LOG=$(BUILD)/sim/events.txt OUTDIR=$(BUILD)/results_sim
 #
 # F_CLK: the clock of the flow with the model of the time-triggered injection and t(v) = max(CSV,
-# static) (experiments/tt, run CF5): f_CPU 478.296 MHz on the grid of 64 kHz of the phase of 0.25 ms,
-# 478.336 MHz, a phase of 119,584 cycles (a multiple of the 16-cycle step of TIMER1). The runs CF to CF4
+# static) (experiments/tt, run CF6): f_CPU 477.952 MHz, on the grid of 64 kHz of the phase of 0.25 ms,
+# a phase of 119,488 cycles (a multiple of the 16-cycle step of TIMER1; run CF5 of tag r11-rc7 ran at
+# 478.336 MHz, the clock of the costs of its image). The runs CF to CF4
 # ran at 432 MHz, f_CPU of the chosen candidate with the costs of the CSV (reference.json
 # chosen.cpu.f_cpu_hz).
-# SIM_NS: first release at 3 ms + the largest data age at F_CLK (36.0 ms, chain POSI-OBMG-OBDB-NAVC-DIRC)
-# + two hyperperiods (25 ms) = 64 ms.
+# SIM_NS: first release at 3 ms + the largest data age (36.0 ms at 432 MHz, chain POSI-OBMG-OBDB-NAVC-DIRC)
+# + two hyperperiods (25 ms) = 64 ms; at F_CLK the bound of that chain is 28.5 ms.
 
 PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
@@ -83,7 +84,7 @@ MESH    ?= 4x4
 # toolchain in use
 HEAP    ?= 44624
 IN_FLIGHT ?= 2
-F_CLK   ?= 478336000
+F_CLK   ?= 477952000
 # t(v) = max(CSV, static t(v) of the image, experiments/wcet costs/tt) in the link schedule of car_full_tt.h
 TT_COSTS ?= ../wcet/costs/tt/car_full.json
 PHASE_NS ?= 250000

@@ -111,7 +111,7 @@ def test_buffers_cover_the_occupancy():
      "--clock", "500000000", "--out", APP_DIR, "--costs", os.path.join(EXP, "wcet", "costs", "tt", "wcet_e.json")],
     ["tt-check", os.path.join(APPS, "car-full", "car-full.csv"),
      os.path.join(APPS, "car-full", "car-full-ONTO-hermes4x4.map"), "--arch", os.path.join(ARCH, "hermes-4x4.gml"),
-     "--name", "car_full", "--clock", "478336000", "--out", APP_DIR,
+     "--name", "car_full", "--clock", "477952000", "--out", APP_DIR,
      "--costs", os.path.join(EXP, "wcet", "costs", "tt", "car_full.json")],
     ["tt-check", E_CSV, E_MAP, "--arch", os.path.join(ARCH, "hermes-2x2.gml"), "--name", "e_ucx",
      "--clock", "443360000", "--clock", "500000000", "--out", APP_DIR],
@@ -511,8 +511,10 @@ def test_ni_terms_of_the_images_within_the_model(tmp_path):
     from rttools.paper import wcet
     m = wcet.analyze(os.path.join(EXP, "wcet", "config_tt.json"), str(tmp_path))
     assert m["ni_within_bound"] and m["ni_bound"] == router.NI_WAIT_CYCLES
-    assert m["ni_max"] == router.NI_WAIT_CYCLES        # the constant is the largest w_NI
+    # the constants are the largest terms of the images of tag r11-rc7 (car_full, gcc 13.2); the
+    # tick hook of car_full with TT_TICK shortens its terms, so the largest w_NI is now below it
+    assert m["ni_max"] == 14998 < router.NI_WAIT_CYCLES
     for name in ("inject", "rx_size", "rx_end"):
-        assert max(r["ni"][name] for r in m["ni_images"].values()) == m["ni_term_bounds"][name]
+        assert max(r["ni"][name] for r in m["ni_images"].values()) <= m["ni_term_bounds"][name]
     assert m["apps"]["E"]["pe_bound_sound"]
     assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(EXP, "wcet", "reference_tt.json")) == []

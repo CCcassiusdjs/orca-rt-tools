@@ -116,10 +116,10 @@ def test_build_car_full_and_weird_a(tmp_path):
     ucx = tmp_path / "ucx-os"
     shutil.copytree(UCX, ucx, ignore=shutil.ignore_patterns("*.o", "*.pack", "image.*", "code.txt"))
     weird_a = build(ucx, "weird_a", path)
-    # the clock of run CF5 (experiments/tt) and the phase of experiments/car-full:
+    # the clock of run CF6 (experiments/tt) and the phase of experiments/car-full:
     # app/car_full_tt.h has the injection instants of that clock (a phase of
     # 0.25 ms at the default 500 MHz is not a multiple of the 16-cycle step of TIMER1)
-    build(ucx, "car_full", path, ("F_CLK=478336000", "F_TICK=4000"))
+    build(ucx, "car_full", path, ("F_CLK=477952000", "F_TICK=4000"))
     target = ucx / "build" / "target"
     env = {**os.environ, "PATH": path}
     syms = subprocess.run(["riscv64-elf-nm", str(target / "image.elf")], capture_output=True, text=True,

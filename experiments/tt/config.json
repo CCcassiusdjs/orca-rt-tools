@@ -22,6 +22,6 @@
   "CAR-FULL": {"kind": "multirate", "image": "car_full", "csv": "../../apps/car-full/car-full.csv",
                "map": "../../apps/car-full/car-full-ONTO-hermes4x4.map", "arch": "../../arch/hermes-4x4.gml", "mesh": "4x4",
                "costs": "../wcet/costs/tt/car_full.json", "manifest": "../../pkt-sim/software/ucx-os/app/car_full.json",
-               "warmup_s": 0.003, "releases": 244, "sim_ns": 64000000, "runs": {"flow": "CF5"}}
+               "warmup_s": 0.003, "releases": 244, "sim_ns": 64000000, "runs": {"flow": "CF6"}}
  }
 }

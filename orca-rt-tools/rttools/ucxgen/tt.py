@@ -173,6 +173,12 @@ def single(graph, noc, entries, appname, f):
         rows = _rows(a, lambda label: P, phase_start, job_start)
         hyper = sched.H
         model = "multirate"
+        owners = {int(n): o for n, o in sched.tick_owners().items()}
+        L = (sched.h0 + 1) * spec.hyper_ticks
+        releases = {int(n): [[int(t >= spec.offsets[v] and (t - spec.offsets[v]) % spec.ticks[v] == 0)
+                              for v in ts] for t in range(L)] for n, ts in spec.orders.items()}
+        extra = {"owners": owners, "releases": releases, "owner_loop": sched.h0 * spec.hyper_ticks,
+                 "nodes": len(noc.nodes)}
     else:
         win = release.task_windows(inst, entries)
         periods = {d["label"]: d["period"] for _, _, d in inst["flows"]}
@@ -181,8 +187,9 @@ def single(graph, noc, entries, appname, f):
                      lambda label, k: k * periods[label] + win[src[label]]["start"])
         hyper = a["hyperperiod"]
         model = "phase"
+        extra = {}
     _check(rows, hyper)
-    return {"clock_hz": f, "hyperperiod": hyper, "model": model, "rows": rows}
+    return dict({"clock_hz": f, "hyperperiod": hyper, "model": model, "rows": rows}, **extra)
 
 
 def union(comp, f):
@@ -350,8 +357,36 @@ def header(name, cmd, inputs, tables, flows, style="array", w_h=None, w_ni=None,
                      f"static const uint16_t TT_PACKETS[{n + 1}] = {{0, " + ", ".join(npk) + "};\n"
                      f"static const uint8_t TT_BUFFERS[{n + 1}] = {{1, " + ", ".join(nbuf) + "};\n"
                      f"#define TT_MAX_BUFFERS {max(int(b) for b in nbuf)}\n")
+            if t.get("owners") is not None:
+                text += owner_table(t)
     text += "#else\n#error \"app/" + name + "_tt.h: no injection table for this F_CPU (rttools.ucxgen tt --clock)\"\n#endif\n"
     return text
+
+
+def owner_table(t):
+    """TT_TICK[node][phase] of a time-triggered application: bits 0-1, the
+    position in the creation order of the PE (1 = first task after the idle
+    task) that the tick of the phase dispatches in the simulation of the
+    general phase model at the clock of the table (rttools/bench/ucx.py,
+    owners; 0: idle); bit 2 + i, a release of the task of position i + 1 in
+    the phase (o_v + j k_v). The phases from TT_TICK_LOOP repeat every
+    TT_TICKS - TT_TICK_LOOP phases (periodic schedule)."""
+    owners, rel, n_nodes = t["owners"], t["releases"], t["nodes"]
+    L = len(next(iter(owners.values())))
+    for node, row in owners.items():
+        if max(row) > 3 or any(len(r) > 6 for r in rel[node]):
+            raise TTError(f"node {node}: TT_TICK holds positions 1 to 3 and at most 6 tasks")
+    text = ("/* each phase on each PE: position that its tick dispatches in the model (bits 0-1; rttools/bench/ucx.py,\n"
+            " * owners) and the tasks it releases (bit 2 + i: position i + 1); the tick hook starts the search\n"
+            " * of the scheduler at that position, so the tasks run in the order of the model */\n"
+            f"#define TT_TICKS {L}\n#define TT_TICK_LOOP {t['owner_loop']}\n"
+            f"static const uint8_t TT_TICK[{n_nodes}][TT_TICKS] = {{\n")
+    for node in range(n_nodes):
+        o = owners.get(node, [0] * L)
+        r = rel.get(node, [[] for _ in range(L)])
+        row = [o[k] | sum(b << (2 + i) for i, b in enumerate(r[k])) for k in range(L)]
+        text += "  {" + ", ".join(str(x) for x in row) + f"}},   /* node {node} */\n"
+    return text + "};\n"
 
 
 def inputs_comment(paths):

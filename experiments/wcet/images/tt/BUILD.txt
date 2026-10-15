@@ -4,4 +4,4 @@ weird_a: F_CLK=434912000 APP=weird_a experiments/exp23/build_sw.sh (release by t
 car_v: F_CLK=419680000 APP=car_v experiments/exp23/build_sw.sh (release by tick, TR_DEFS; clock of run VCV)
 wcet_e: F_CLK=500000000 APP=wcet_e experiments/exp23/build_sw.sh (release by tick, TR_DEFS; clock of run W4)
 carv_e: F_CLK=443360000 APP=carv_e experiments/exp23/build_sw.sh (release by tick, TR_DEFS; clock of run VMA)
-car_full: F_CLK=478336000 F_TICK=4000 APP=car_full experiments/exp23/build_sw.sh (time-triggered tasks, TT_DEFS; clock of run CF5)
+car_full: F_CLK=477952000 F_TICK=4000 APP=car_full experiments/exp23/build_sw.sh (time-triggered tasks, TT_DEFS; clock of run CF6)

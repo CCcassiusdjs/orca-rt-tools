@@ -7,6 +7,7 @@
 
 #define TASK_READY   1
 #define TASK_BLOCKED 2
+#define TASK_RUNNING 3
 
 struct tcb_s {
 	struct tcb_s *tcb_next;

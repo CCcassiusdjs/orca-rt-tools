@@ -645,30 +645,49 @@ _J_HOOK_START = ("/* tick hook (kernel/sched.c, dispatch): releases the jobs of 
 _J_HOOK_END = "    phase++;\n  }\n}\n"
 _TT_J_HOOK = """\
 #ifdef UCX_NOC_TT
-static uint16_t countdown[MAX_LOCAL];       /* phases to the next release of each task */
+static const uint8_t *tick_row;             /* TT_TICK of this PE (app/<app>_tt.h) */
+static struct tcb_s *owner_pred[MAX_LOCAL + 1];  /* tcb before position p of the circular list */
+static uint32_t tick_idx = 0;               /* index of the next phase in TT_TICK */
 
 /* tick hook (kernel/sched.c, dispatch): a release request that the release
  * interrupt has not served yet (interrupts disabled since before the
  * request) is served here, since the generator raises it before the tick of
- * its phase; then the hook releases the jobs of the phase (countdown of
- * each task from o_v + 1, then every k_v phases) */
+ * its phase; then the hook releases the jobs of the phase (TT_TICK: bit 2 +
+ * i for the task of position i + 1, the phases o_v + j k_v) and sets the
+ * current task of the scheduler to the task before the position that the
+ * model dispatches at this tick (TT_TICK bits 0-1; 0: no change), so that
+ * krnl_schedule dispatches that position or, when its job has ended, the
+ * next ready task after it: the tasks of each phase run in the circular
+ * order of the model, whatever task holds the CPU at the tick */
 void ucx_app_tick(void)
 {
+  uint32_t p = 0;
+
   if (IRQ_CAUSE & MASK_IRQ4)
     irq4_handler();
   while (irq_pending) {
+    uint32_t e = tick_row[tick_idx];
+
     irq_pending--;
     if (phase == 0)
       phase0_tick = ucx_noc_tt_ticks();
-    for (int i = 0; i < n_local; i++) {
-      if (--countdown[i] == 0) {
-        countdown[i] = local_task[i]->period;
+    if (++tick_idx == TT_TICKS)
+      tick_idx = TT_TICK_LOOP;
+    p = e & 3;
+    e >>= 2;
+    for (int i = 0; i < n_local; i++, e >>= 1) {
+      if (e & 1) {
         released[i]++;
         if (local_tcb[i]->state == TASK_BLOCKED)
           local_tcb[i]->state = TASK_READY;
       }
     }
     phase++;
+  }
+  if (p) {
+    if (kcb_p->tcb_p->state == TASK_RUNNING)
+      kcb_p->tcb_p->state = TASK_READY;
+    kcb_p->tcb_p = owner_pred[p];
   }
 }
 #else
@@ -712,7 +731,7 @@ static void read_inputs(const struct task_s *t, uint32_t *last)
 #else
 """
 _J_ADD = "  released[n_local] = 0;\n"
-_TT_J_ADD = "  released[n_local] = 0;\n#ifdef UCX_NOC_TT\n  countdown[n_local] = t->offset + 1;\n#endif\n"
+_TT_J_ADD = "  released[n_local] = 0;\n"
 _J_DECL = "  noc_packet_t *pkt[MAX_OUT];\n  uint32_t last[MAX_IN];\n  uint32_t done = 0;\n"
 _TT_J_DECL = (_J_DECL + "#ifdef UCX_NOC_TT\n"
               "  noc_packet_t *pkt_tt[MAX_OUT][TT_MAX_BUFFERS];   /* buffers of each output edge */\n"
@@ -783,6 +802,17 @@ static TT_SECTION void send_local(const struct task_s *t, int o, noc_packet_t *p
 #endif
 
 """
+_J_MAIN_END = "  default:\n    break;\n  }\n\n  return 1;\n}\n"
+_TT_J_MAIN_END = ("  default:\n    break;\n  }\n"
+                  "#ifdef UCX_NOC_TT\n"
+                  "  /* positions of the tick hook: the task before position p in the circular list\n"
+                  "   * (idle task, then the tasks in creation order) */\n"
+                  "  tick_row = TT_TICK[ucx_noc_cpu_id()];\n"
+                  "  owner_pred[1] = kcb_p->tcb_first;\n"
+                  "  for (int i = 1; i < n_local; i++)\n"
+                  "    owner_pred[i + 1] = local_tcb[i - 1];\n"
+                  "#endif\n"
+                  "\n  return 1;\n}\n")
 _TT_SECTION_DEF = ("#ifdef UCX_NOC_TT\n"
                    "/* functions that run with interrupts disabled: one function each, for the static\n"
                    " * analysis of their length (rttools.wcet, sections) */\n"
@@ -819,6 +849,7 @@ def tt_injection_jobs(text, m):
     text = _replace_once(text, _J_RUN, _TT_J_SECTIONS + _J_RUN)
     a = text.index("/* ------------------------------ tasks */\n")
     text = text[:a] + _TT_SECTION_DEF + "\n" + text[a:]
+    text = _replace_once(text, _J_MAIN_END, _TT_J_MAIN_END)
     return text
 
 
