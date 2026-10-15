@@ -1,0 +1,20 @@
+repo_commit=9415ff1bed783548b5a02ef1286d7cd01e2f6a7f
+repo_state=archive
+repo_tag=r11-rc7
+src_sha256=f4571f9a372ec105c31bd8dc482d74c9ada7b03bd8c11be8b66df8105fc5d3fc
+sim_ns=11500000 monitor=1
+app=car_v mesh=4x4 generics=-gCLOCK_HALF_PERIOD_FS=1191383 -gRELEASE_CYCLES=209840 -gWARMUP_CYCLES=1259040 -gNOC_DIM_X=4 -gNOC_DIM_Y=4 -gRELEASE_MASK=65535
+vsim=Questa Sim-64 vsim 2025.3 Simulator 2025.09 Sep 15 2025
+gcc=riscv64-elf-gcc (Arch Linux Repositories) 12.2.0
+date=2026-10-15T06:15:50Z
+f_clk_hz=419680000
+f_tick_hz=2000
+clock_half_period_fs=1191383
+clock_hz_exact=419680321.106
+release_cycles=209840
+warmup_cycles=1259040
+isr=no_nesting
+crt0=guard_readback
+injection=tt
+costs=max_csv_static costs_file=car_v.json costs_sha256=dd9a8a3d1ce0e909f905977e0369f2226d9b5984ace4d9f7407f7a8e5f2119c3
+release=tick

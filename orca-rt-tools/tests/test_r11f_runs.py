@@ -1,0 +1,196 @@
+"""Stored runs of tag r11-rc7 (release by tick, UCX-OS kernel without nested
+interrupts, crt0=guard_readback, time-triggered injection of the packets
+between PEs, injection=tt, with the tables of t(v) = max(CSV, static t(v) of
+the image), costs=max_csv_static): VG and VH (application E,
+experiments/exp23), VCV (CAR-V, experiments/car-v-rtl), VMA (carv_e,
+experiments/multiapp), W4 and W5 (WCET-E, experiments/wcet). The analysis
+takes the model of the RUN_INFO (network-interface model tt and the costs
+file). Each run conforms with the phase model, stays within R_bound and the
+deadline, has no late packet and no monitor error, injects every packet
+between PEs at or after its instant s_{i,j} and within its bounds, ends every
+job at or before F(v), enqueues every packet at or before s_{i,j}, and
+matches its reference."""
+import json
+import os
+
+import pytest
+
+from rttools.modules.routing import router
+from rttools.paper import exp23, rtlapp
+from rttools.paper import wcet as pw
+from tests.conftest import REPO_ROOT
+
+EXP = os.path.join(REPO_ROOT, "experiments")
+APP_DIR = os.path.join(REPO_ROOT, "pkt-sim", "software", "ucx-os", "app")
+APPS = os.path.join(REPO_ROOT, "apps")
+COSTS = {"VG": "weird_a.json", "VH": "weird_a.json", "VCV": "car_v.json", "VMA": "carv_e.json",
+         "W4": "wcet_e.json", "W5": "wcet_e.json"}
+
+
+def conforms(pc):
+    assert pc["release"] == "tick" and pc["conforms"]
+    assert (pc["phases_with_a_task_twice"], pc["early_jobs"], pc["phases_cpu_above"]) == (0, 0, 0)
+
+
+def injection_conforms(t, packets):
+    """Every packet between PEs at or after s and within the bounds of the
+    model tt; every job end before F and every enqueue before s."""
+    assert t["packets"] == packets and t["unchecked"] == 0 and t["violations"] == 0
+    assert t["early"] == 0 and 0 < t["inject_delay_max"] <= router.NI_INJECT_CYCLES
+    assert t["rx_wait_max"] <= router.NI_RX_SIZE_CYCLES and t["end_wait_max"] <= router.NI_RX_END_CYCLES
+    assert t["occupancy_slack_min"] > 0 and t["tick_grid_coverage_min"] == 1
+    for k in ("jobs", "ready"):
+        assert t[k]["events"] > 0 and t[k]["late"] == 0 and t[k]["unchecked"] == 0 and t[k]["slack_min"] > 0
+        assert isinstance(t[k]["slack_min"], int)
+
+
+@pytest.mark.parametrize("log,ref", [
+    ("exp23/logs/VG.events.txt", "exp23/reference_VG.json"),
+    ("exp23/logs/VH.events.txt", "exp23/reference_VH.json"),
+    ("car-v-rtl/logs/VCV.events.txt", "car-v-rtl/reference_VCV.json"),
+    ("multiapp/logs/VMA.events.txt", "multiapp/reference_VMA_CARV.json"),
+    ("multiapp/logs/VMA.events.txt", "multiapp/reference_VMA_E.json"),
+    ("wcet/logs/W4.events.txt", "wcet/reference_W4.json"),
+    ("wcet/logs/W5.events.txt", "wcet/reference_W5.json"),
+])
+def test_r11f_runs_are_of_the_time_triggered_injection(log, ref):
+    """The runs of tag r11-rc7 have injection=tt and the costs file of the
+    table of the image in the RUN_INFO; the reference of each states
+    clock.crt0 = guard_readback and the injection tt."""
+    from rttools.paper import ttcheck
+    info = exp23.read_run_info(exp23.run_info_path(os.path.join(EXP, log)))
+    assert info["repo_tag"] == "r11-rc7" and exp23.isr_rule(info) == "no_nesting"
+    assert exp23.crt0_rule(info) == "guard_readback" and ttcheck.injection_rule(info) == "tt"
+    run = os.path.basename(log).split(".")[0]
+    assert ttcheck.costs_of_run(info) == os.path.join(EXP, "wcet", "costs", "tt", COSTS[run])
+    with open(os.path.join(EXP, ref)) as f:
+        flat = exp23.flatten(json.load(f))
+    assert [v for k, v in flat.items() if k.endswith("clock.crt0")] == ["guard_readback"]
+    assert [v for k, v in flat.items() if k.endswith("injection")] == ["tt"]
+
+
+@pytest.mark.parametrize("run", ["VG", "VH"])
+def test_runs_vg_vh(tmp_path, run, ni_off):
+    """make -C experiments/exp23 check-run (NI ?= off: the analysis takes
+    the model tt and the costs file of the RUN_INFO)."""
+    log = os.path.join(EXP, "exp23", "logs", f"{run}.events.txt")
+    cfg = exp23.load_config(os.path.join(EXP, "exp23", "config.json"))
+    lst = os.path.join(EXP, "exp23", "logs", f"{run}.image.lst")
+    m = exp23.analyze(log, cfg, str(tmp_path), listing=lst, listing_without=lst.replace("image.lst", "noinstr.lst"),
+                      arch=os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"),
+                      mapping=os.path.join(APPS, "synthetic-app-e", "synthetic-app-e-ONTO-hermes2x2.map"))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(EXP, "exp23", f"reference_{run}.json")) == []
+    conforms(m["phase_conformance"])
+    assert m["injection"] == "tt" and m["costs"] == {"file": "weird_a.json", "rule": "max"}
+    r = m["per_iteration"]["responses"]
+    assert r["max_from_release_cycles"] <= m["response_bound"]["cycles"]
+    assert m["response_bound"]["cycles"] == {"VG": 857570, "VH": 759938}[run]
+    # t(V_k) of the model: max(CSV, static); D of ABDF takes its static t(v)
+    est = {row["cluster"]: row["estimated"] for row in m["tab83"]["rows"]}
+    assert est == {"ABDF": 188301, "C": 96330, "EHI": 173370, "GJ": 217450}
+    assert all(row["measured"] <= row["estimated"] for row in m["tab83"]["rows"])
+    assert m["monitor"]["errors"] == 0 and m["clock"]["crt0"] == "guard_readback"
+    injection_conforms(m["tt"], 165)
+    assert (m["tt"]["jobs"]["events"], m["tt"]["ready"]["events"]) == (329, 165)
+    # ucx_noc_send_at: every call logs one send (its own write, or the tail call of ucx_noc_send)
+    f = m["instrumentation"]["functions"]["ucx_noc_send_at"]
+    assert f["rule"] == "every_return_path_with_tail_call" and f["tail_calls"] == ["ucx_noc_send"]
+
+
+def test_run_vcv(tmp_path):
+    """make -C experiments/car-v-rtl check (run VCV)."""
+    m = rtlapp.analyze(os.path.join(EXP, "car-v-rtl", "logs", "VCV.events.txt"), os.path.join(APP_DIR, "car_v.json"),
+                       os.path.join(APPS, "car-v", "car-v.csv"), os.path.join(APPS, "car-v", "car-v-ONTO-hermes4x4.map"),
+                       str(tmp_path), arch=os.path.join(REPO_ROOT, "arch", "hermes-4x4.gml"))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(EXP, "car-v-rtl", "reference_VCV.json")) == []
+    conforms(m["phase_conformance"])
+    r = m["responses"]
+    assert (r["complete"], r["above_bound"], r["above_deadline"]) == (13, 0, 0)
+    assert m["model"]["response_bound"]["cycles"] == 934360
+    assert m["packets"]["late"] == 0 and m["monitor"]["errors"] == 0
+    assert m["releases"]["acks"]["pes_min"] == 16
+    assert m["costs"]["static_above_csv"] == ["FDF1", "FDF2", "STPH"]
+    injection_conforms(m["tt"], 262)
+    assert m["tt"]["header_wait_max"] <= 20 * 2
+
+
+@pytest.mark.parametrize("app,csv", [("CARV", os.path.join(APPS, "car-v", "car-v.csv")),
+                                     ("E", os.path.join(APPS, "synthetic-app-e", "synthetic-app-e.csv"))])
+def test_run_vma(tmp_path, app, csv):
+    """make -C experiments/multiapp check-vma: both applications of run VMA
+    within R_bound, no header wait caused by the other application."""
+    d = os.path.join(EXP, "multiapp")
+    m = rtlapp.analyze(os.path.join(d, "logs", "VMA.events.txt"), os.path.join(APP_DIR, "carv_e.json"), csv,
+                       os.path.join(d, "maps", app + ".map"), str(tmp_path), app_name=app,
+                       composition=os.path.join(d, "composition.json"))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, f"reference_VMA_{app}.json")) == []
+    conforms(m["phase_conformance"])
+    r = m["responses"]
+    assert (r["complete"], r["above_bound"], r["above_deadline"]) == ({"CARV": 13, "E": 14}[app], 0, 0)
+    assert m["model"]["response_bound"]["cycles"] == {"CARV": 981720, "E": 776833}[app]
+    assert m["packets"]["late"] == 0 and m["monitor"]["errors"] == 0
+    assert m["releases"]["acks"]["pes_expected"] == 20
+    assert m["network"]["header_waits_with_other_app_contender"] == 0
+    injection_conforms(m["tt"], {"CARV": 262, "E": 80}[app])
+
+
+@pytest.mark.parametrize("run,bound", [("W4", 796396), ("W5", 377020)])
+def test_runs_w4_w5(tmp_path, run, bound):
+    """make -C experiments/wcet run-analyze check-run LOG=logs/<run>.events.txt
+    SPEC=specs/wcet_e_tt.json: the static t(v) of the image of the run
+    covers every PE; rtlapp with the model of the run within R_bound."""
+    d = os.path.join(EXP, "wcet")
+    m = pw.run_log(os.path.join(d, "logs", f"{run}.events.txt"), os.path.join(d, "specs", "wcet_e_tt.json"),
+                   os.path.join(d, "logs", f"{run}.image.elf"), os.path.join(APP_DIR, "wcet_e.json"),
+                   os.path.join(APPS, "wcet-e", "wcet-e.csv"), os.path.join(APPS, "wcet-e", "wcet-e-ONTO-hermes2x2.map"),
+                   str(tmp_path), os.path.join(REPO_ROOT, "arch", "hermes-2x2.gml"))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, f"reference_{run}.json")) == []
+    s = m["summary"]
+    assert s["all_groups_sound"] and s["all_runs_sound"] and s["rtlapp"]["phase_conformance"]
+    r = s["rtlapp"]
+    assert r["response_bound_cycles"] == bound and r["response_max_cycles"] <= bound
+    assert r["above_bound"] == 0 and r["above_deadline"] == 0 and r["packets_late"] == 0 and r["monitor_errors"] == 0
+    assert m["rtlapp"]["costs"]["rule"] == "max"
+    injection_conforms(m["rtlapp"]["tt"], 70)
+
+
+def test_wcet_of_the_r11f_runs(tmp_path):
+    """make -C experiments/wcet analyze-r11f check-r11f: t(V_k) of the images
+    of VH, VCV and W5 covers the CPU time of every PE; the runs of I in VH
+    are above job + dispatch only by the handlers of packets received
+    inside them; w_NI of each image within NI_WAIT_CYCLES."""
+    pytest.importorskip("scipy")
+    pytest.importorskip("elftools")
+    d = os.path.join(EXP, "wcet")
+    m = pw.analyze(os.path.join(d, "config_r11f.json"), str(tmp_path))
+    assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(d, "reference_r11f.json")) == []
+    for app in ("E", "CAR-V", "WCET-E"):
+        s = m["apps"][app]["summary"]
+        assert s["all_groups_sound"] and s["all_runs_with_receptions_sound"], app
+        assert m["apps"][app]["ni"]["ni_wait"] <= router.NI_WAIT_CYCLES
+    e = m["apps"]["E"]["tasks"]
+    assert sorted(t for t, r in e.items() if r["run_sound"] is False) == ["I"]
+    assert e["I"]["runs_with_receptions"] == e["I"]["single_runs"]
+
+
+def test_run_images_equal_the_images_of_the_analysis():
+    """The images of VH, VCV, W4 and VMA (riscv64-elf-gcc 12.2.0 of the
+    simulation server) load the bytes of images/tt (container build of the
+    same compiler): every allocated section has the same address and
+    content, and the symbols are the same except the names of the mapping
+    symbols of the assembler ($xrv32e1p9 against $x)."""
+    pytest.importorskip("elftools")
+    from elftools.elf.elffile import ELFFile
+
+    def content(path):
+        with open(path, "rb") as fh:
+            elf = ELFFile(fh)
+            secs = {sec.name: (sec["sh_addr"], sec.data()) for sec in elf.iter_sections()
+                    if sec["sh_flags"] & 2 and sec["sh_type"] == "SHT_PROGBITS"}
+            syms = sorted((("$x" if x.name.startswith("$x") else x.name), x["st_value"])
+                          for x in elf.get_section_by_name(".symtab").iter_symbols())
+        return secs, syms
+    pairs = {"exp23/logs/VH.image.elf": "weird_a", "car-v-rtl/logs/VCV.image.elf": "car_v",
+             "wcet/logs/W4.image.elf": "wcet_e", "multiapp/logs/VMA.image.elf": "carv_e"}
+    for run, img in pairs.items():
+        assert content(os.path.join(EXP, run)) == content(os.path.join(EXP, "wcet", "images", "tt", img + ".elf")), run

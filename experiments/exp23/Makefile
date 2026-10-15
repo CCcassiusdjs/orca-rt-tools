@@ -34,7 +34,8 @@
 #                  against reference_G.json and reference_H.json  (anon:drop-line)
 #   make check-run analyze + check + phase-check of the stored runs of the release by tick, TG
 #                  (500 MHz) and TH (434.912 MHz) of tag r11-rc3, UG (500 MHz) and UH (434.912 MHz)
-#                  of tag r11-rc5, against reference_<run>.json, into $(BUILD)/results_<run>
+#                  of tag r11-rc5, VG (500 MHz) and VH (434.912 MHz) of tag r11-rc7 (time-triggered
+#                  injection), against reference_<run>.json, into $(BUILD)/results_<run>
 #                  (values.tex of each run there)
 #   make info      print the source identification that `make sim` writes to RUN_INFO
 #   make tt        write pkt-sim/software/ucx-os/app/weird_a_tt.h: the injection instants of the
@@ -52,7 +53,7 @@
 # RUN_INFO (simulate.sh writes release=tick for weird_a, the application with the release by
 # tick, app/weird_a.sim; release=data for weird_a_data); the stored logs A to H have no such line
 # and are of the release rule data, the code of weird_a_data (pkt-sim/software/ucx-os/Makefile);
-# TG, TH, UG and UH have release=tick.
+# TG, TH, UG, UH, VG and VH have release=tick.
 #
 # Interrupt rule (clock.isr of metrics.json, line isr of the RUN_INFO): the stored logs are of the
 # kernel whose handlers enable interrupts before the return of _isr (nesting; ISR_NESTING=1 in
@@ -80,6 +81,13 @@
 #   logs/{UG,UH}.{events.txt,RUN_INFO,image.lst,noinstr.lst,time.txt}; UH.image.elf for
 #   experiments/wcet): make check-run, or make LOG=logs/UH.events.txt REF=reference_UH.json
 #   OUTDIR=build/results_UH analyze check
+# Runs VG and VH (r11-rc7: the same application, clocks and duration as UG and UH, the time-
+#   triggered injection, injection=tt, with the table weird_a_tt.h of t(v) = max(CSV, static),
+#   costs=max_csv_static in RUN_INFO; logs/{VG,VH}.{events.txt,RUN_INFO,image.lst,noinstr.lst,
+#   time.txt}; VH.image.elf for experiments/wcet): make check-run, or make LOG=logs/VH.events.txt
+#   REF=reference_VH.json OUTDIR=build/results_VH analyze check. The analysis takes the model of the
+#   RUN_INFO (network-interface model tt and the costs file, whatever NI) and checks each packet,
+#   job end and enqueue (metrics.json tt).
 # After `make sim`, use LOG=build/sim/events.txt (make paper does it).
 #
 # Clock: F_CLK (Hz) sets the clock of the simulation (simulate.sh: F_CLK of
@@ -114,7 +122,7 @@ OUTDIR  ?= $(BUILD)/results
 NI      ?= off
 RUN      = RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23
 # release rule of LOG (auto: RUN_INFO line `release`; data for a RUN_INFO without it, the stored
-# logs A to H; tick for TG, TH, UG and UH)
+# logs A to H; tick for TG, TH, UG, UH, VG and VH)
 RELEASE ?= auto
 APP_E   := ../../apps/synthetic-app-e
 ARCH    := ../../arch/hermes-2x2.gml
@@ -201,7 +209,7 @@ paper-flow: flow-clock
 phase-check:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.phasecheck $(OUTDIR)/metrics.json --rows 5
 
-TICK_RUNS ?= TG TH UG UH
+TICK_RUNS ?= TG TH UG UH VG VH
 check-run:
 	for r in $(TICK_RUNS); do $(MAKE) --no-print-directory analyze check phase-check LOG=logs/$$r.events.txt \
 		REF=reference_$$r.json OUTDIR=$(BUILD)/results_$$r || exit 1; done

@@ -1,0 +1,1343 @@
+# Time scale of (manycore_top) is  1ns /  1fs
+# Time scale of (manycore_top.pe_x[0].pe_y[0].pe_mod) is  1ns /  1fs
+# TIMER t=503721 pe=0-0 cyc=251861
+# TIMER t=503721 pe=0-1 cyc=251861
+# TIMER t=503721 pe=1-0 cyc=251861
+# TIMER t=503721 pe=1-1 cyc=251861
+# 504713 1-0 scheduled 1
+# 504733 1-1 scheduled 1
+# 504757 0-1 scheduled 1
+# 504777 0-0 scheduled 1
+# 516713 1-1 scheduled 2
+# 534763 1-0 scheduled 0
+# 547315 1-1 scheduled 0
+# 624109 0-0 scheduled 2
+# 657989 0-1 scheduled 2
+# 690179 0-0 scheduled 3
+# 759559 0-1 scheduled 3
+# 827307 0-0 scheduled 4
+# 931509 0-0 scheduled 0
+# 952649 0-1 scheduled 0
+# TIMER t=1003721 pe=0-0 cyc=501861
+# TIMER t=1003721 pe=0-1 cyc=501861
+# TIMER t=1003721 pe=1-0 cyc=501861
+# TIMER t=1003721 pe=1-1 cyc=501861
+# 1004793 1-0 scheduled 0
+# 1004861 1-1 scheduled 0
+# 1004927 0-1 scheduled 0
+# 1004999 0-0 scheduled 0
+# TIMER t=1503721 pe=0-0 cyc=751861
+# TIMER t=1503721 pe=0-1 cyc=751861
+# TIMER t=1503721 pe=1-0 cyc=751861
+# TIMER t=1503721 pe=1-1 cyc=751861
+# 1504793 1-0 scheduled 0
+# 1504863 1-1 scheduled 0
+# 1504931 0-1 scheduled 0
+# 1504999 0-0 scheduled 0
+# TIMER t=2003721 pe=0-0 cyc=1001861
+# TIMER t=2003721 pe=0-1 cyc=1001861
+# TIMER t=2003721 pe=1-0 cyc=1001861
+# TIMER t=2003721 pe=1-1 cyc=1001861
+# 2004793 1-0 scheduled 0
+# 2004859 1-1 scheduled 0
+# 2004929 0-1 scheduled 0
+# 2004999 0-0 scheduled 0
+# TIMER t=2503721 pe=0-0 cyc=1251861
+# TIMER t=2503721 pe=0-1 cyc=1251861
+# TIMER t=2503721 pe=1-0 cyc=1251861
+# TIMER t=2503721 pe=1-1 cyc=1251861
+# 2504793 1-0 scheduled 0
+# 2504861 1-1 scheduled 0
+# 2504927 0-1 scheduled 0
+# 2504999 0-0 scheduled 0
+# TRIGGER: workflow iteration at 3000279 ns.
+# TRIGGER: next release will be at 3500000 ns
+# TRIGGER-PE 0-1: release acknowledged at 3000279 ns
+# TRIGGER-PE 1-1: release acknowledged at 3000279 ns
+# TRIGGER-PE 1-0: release acknowledged at 3000283 ns
+# TIMER t=3003721 pe=0-0 cyc=1501861
+# TIMER t=3003721 pe=0-1 cyc=1501861
+# TIMER t=3003721 pe=1-0 cyc=1501861
+# TIMER t=3003721 pe=1-1 cyc=1501861
+# 3004977 1-0 scheduled 0
+# 3005083 1-1 scheduled 0
+# 3005139 0-0 scheduled 1
+# 3005193 0-1 scheduled 0
+# 3006321 0-0 scheduled 2
+# 3007517 0-0 scheduled 3
+# 3008727 0-0 scheduled 4
+# 3010999 0-0 ITER begin A 1
+# 3014241 0-0 -> TAG 1025
+# 3018653 0-0 -> TAG 2049
+# 3019247 0-0 <- TAG 2049
+# 3019489 0-0 ITER end A 1
+# 3020471 0-0 scheduled 3
+# 3023221 0-0 ITER begin B 1
+# TIMER t=3026505 pe=0-0 cyc=1513253
+# FLIT TX t=3027215 src=0-0 dst=1-0 tag=1025 size=311 head=1513608 last=1514201 block=280 gap=1
+# FLIT RX t=3028429 src=0-0 dst=1-0 tag=1025 size=311 head=1513620 last=1514215 stall=283 gap=0
+# 3028979 1-0 <- TAG 1025
+# FLIT END t=3029055 src=0-0 dst=1-0 tag=1025 cyc=1514528
+# 3054337 0-0 -> TAG 3073
+# 3054931 0-0 <- TAG 3073
+# 3055173 0-0 ITER end B 1
+# 3056155 0-0 scheduled 2
+# 3058905 0-0 ITER begin D 1
+# 3063493 0-0 -> TAG 5121
+# 3064087 0-0 <- TAG 5121
+# 3064329 0-0 ITER end D 1
+# 3065311 0-0 scheduled 1
+# 3068061 0-0 ITER begin F 1
+# 3072673 0-0 -> TAG 6145
+# 3075127 0-0 ITER end F 1
+# 3076179 0-0 scheduled 0
+# TIMER t=3165865 pe=0-0 cyc=1582933
+# FLIT TX t=3166623 src=0-0 dst=1-1 tag=6145 size=1698 head=1583312 last=1585291 block=279 gap=1
+# FLIT RX t=3170623 src=0-0 dst=1-1 tag=6145 size=1698 head=1583330 last=1585312 stall=283 gap=0
+# 3171199 1-1 <- TAG 6145
+# FLIT END t=3171275 src=0-0 dst=1-1 tag=6145 cyc=1585638
+# TRIGGER: workflow iteration at 3500279 ns.
+# TRIGGER: next release will be at 4000000 ns
+# TRIGGER-PE 1-0: release acknowledged at 3500279 ns
+# TRIGGER-PE 0-1: release acknowledged at 3500281 ns
+# TRIGGER-PE 1-1: release acknowledged at 3500281 ns
+# TIMER t=3503721 pe=0-0 cyc=1751861
+# TIMER t=3503721 pe=0-1 cyc=1751861
+# TIMER t=3503721 pe=1-0 cyc=1751861
+# TIMER t=3503721 pe=1-1 cyc=1751861
+# 3504917 1-0 scheduled 1
+# 3505029 1-1 scheduled 2
+# 3505139 0-0 scheduled 1
+# 3505195 0-1 scheduled 0
+# 3506321 0-0 scheduled 2
+# 3507517 0-0 scheduled 3
+# 3508025 1-0 ITER begin C 1
+# 3508137 1-1 ITER begin G 1
+# 3508727 0-0 scheduled 4
+# 3510999 0-0 ITER begin A 2
+# 3514241 0-0 -> TAG 1026
+# 3515149 1-0 -> TAG 4097
+# 3515833 1-1 -> TAG 11265
+# 3516411 1-1 <- TAG 11265
+# 3516561 1-1 ITER end G 1
+# 3517477 1-1 scheduled 0
+# 3517603 1-0 ITER end C 1
+# 3518451 1-0 scheduled 0
+# 3518653 0-0 -> TAG 2050
+# 3519247 0-0 <- TAG 2050
+# 3519489 0-0 ITER end A 2
+# 3520471 0-0 scheduled 3
+# 3523221 0-0 ITER begin B 2
+# TIMER t=3526505 pe=0-0 cyc=1763253
+# FLIT TX t=3527265 src=0-0 dst=1-0 tag=1026 size=311 head=1763633 last=1764314 block=368 gap=1
+# FLIT RX t=3528655 src=0-0 dst=1-0 tag=1026 size=311 head=1763645 last=1764328 stall=371 gap=0
+# 3529203 1-0 <- TAG 1026
+# FLIT END t=3529279 src=0-0 dst=1-0 tag=1026 cyc=1764640
+# 3555131 0-0 -> TAG 3074
+# 3555725 0-0 <- TAG 3074
+# 3555967 0-0 ITER end B 2
+# 3556949 0-0 scheduled 2
+# TIMER t=3557801 pe=1-0 cyc=1778901
+# FLIT TX t=3558507 src=1-0 dst=0-1 tag=4097 size=303 head=1779254 last=1779838 block=279 gap=1
+# 3559699 0-0 ITER begin D 2
+# FLIT RX t=3559717 src=1-0 dst=0-1 tag=4097 size=303 head=1779272 last=1779859 stall=283 gap=0
+# 3560321 0-1 <- TAG 4097
+# FLIT END t=3560397 src=1-0 dst=0-1 tag=4097 cyc=1780199
+# 3563355 0-0 -> TAG 5122
+# 3563949 0-0 <- TAG 5122
+# 3564191 0-0 ITER end D 2
+# 3565173 0-0 scheduled 1
+# 3567923 0-0 ITER begin F 2
+# 3583275 0-0 -> TAG 6146
+# 3585729 0-0 ITER end F 2
+# 3586781 0-0 scheduled 0
+# TIMER t=3665865 pe=0-0 cyc=1832933
+# FLIT TX t=3666623 src=0-0 dst=1-1 tag=6146 size=1698 head=1833312 last=1835430 block=418 gap=1
+# FLIT RX t=3670901 src=0-0 dst=1-1 tag=6146 size=1698 head=1833330 last=1835451 stall=422 gap=0
+# 3671475 1-1 <- TAG 6146
+# FLIT END t=3671551 src=0-0 dst=1-1 tag=6146 cyc=1835776
+# TRIGGER: workflow iteration at 4000279 ns.
+# TRIGGER: next release will be at 4500000 ns
+# TRIGGER-PE 1-1: release acknowledged at 4000281 ns
+# TRIGGER-PE 0-1: release acknowledged at 4000283 ns
+# TRIGGER-PE 1-0: release acknowledged at 4000283 ns
+# TIMER t=4003721 pe=0-0 cyc=2001861
+# TIMER t=4003721 pe=0-1 cyc=2001861
+# TIMER t=4003721 pe=1-0 cyc=2001861
+# TIMER t=4003721 pe=1-1 cyc=2001861
+# 4004921 1-0 scheduled 1
+# 4005029 1-1 scheduled 2
+# 4005069 0-1 scheduled 1
+# 4005139 0-0 scheduled 1
+# 4006231 0-1 scheduled 2
+# 4006321 0-0 scheduled 2
+# 4007407 0-1 scheduled 3
+# 4007517 0-0 scheduled 3
+# 4008029 1-0 ITER begin C 2
+# 4008137 1-1 ITER begin G 2
+# 4008727 0-0 scheduled 4
+# 4010515 0-1 ITER begin E 1
+# 4010999 0-0 ITER begin A 3
+# 4014241 0-0 -> TAG 1027
+# 4016113 1-0 -> TAG 4098
+# 4018567 1-0 ITER end C 2
+# 4018653 0-0 -> TAG 2051
+# 4019247 0-0 <- TAG 2051
+# 4019415 1-0 scheduled 0
+# 4019489 0-0 ITER end A 3
+# 4020471 0-0 scheduled 3
+# 4023221 0-0 ITER begin B 3
+# TIMER t=4026505 pe=0-0 cyc=2013253
+# FLIT TX t=4027261 src=0-0 dst=1-0 tag=1027 size=311 head=2013631 last=2014315 block=371 gap=1
+# FLIT RX t=4028657 src=0-0 dst=1-0 tag=1027 size=311 head=2013643 last=2014329 stall=374 gap=0
+# 4029207 1-0 <- TAG 1027
+# FLIT END t=4029283 src=0-0 dst=1-0 tag=1027 cyc=2014642
+# 4040531 0-1 -> TAG 7169
+# 4041117 0-1 <- TAG 7169
+# 4043297 0-1 -> TAG 8193
+# 4043421 1-1 -> TAG 11266
+# 4043883 0-1 <- TAG 8193
+# 4043989 1-1 <- TAG 11266
+# 4044089 0-1 ITER end E 1
+# 4044139 1-1 ITER end G 2
+# 4044955 0-1 scheduled 1
+# 4045055 1-1 scheduled 0
+# 4047705 0-1 ITER begin H 1
+# 4050139 0-0 -> TAG 3075
+# 4050733 0-0 <- TAG 3075
+# 4050975 0-0 ITER end B 3
+# 4051957 0-0 scheduled 2
+# 4054707 0-0 ITER begin D 3
+# 4054709 0-1 -> TAG 10241
+# 4057163 0-1 ITER end H 1
+# TIMER t=4057801 pe=1-0 cyc=2028901
+# 4058007 0-1 scheduled 2
+# 4059029 0-0 -> TAG 5123
+# 4059623 0-0 <- TAG 5123
+# 4059865 0-0 ITER end D 3
+# FLIT TX t=4058561 src=1-0 dst=0-1 tag=4098 size=303 head=2029281 last=2030083 block=497 gap=1
+# FLIT RX t=4060207 src=1-0 dst=0-1 tag=4098 size=303 head=2029299 last=2030104 stall=501 gap=0
+# 4060809 0-1 <- TAG 4098
+# 4060847 0-0 scheduled 1
+# FLIT END t=4060885 src=1-0 dst=0-1 tag=4098 cyc=2030443
+# 4062683 0-1 ITER begin I 1
+# 4063597 0-0 ITER begin F 3
+# 4067295 0-1 -> TAG 9217
+# 4069601 0-1 ITER end I 1
+# 4070585 0-1 scheduled 0
+# 4070609 0-0 -> TAG 6147
+# 4073063 0-0 ITER end F 3
+# 4074115 0-0 scheduled 0
+# TIMER t=4114441 pe=0-1 cyc=2057221
+# TIMER t=4115259 pe=0-1 cyc=2057630
+# FLIT TX t=4115151 src=0-1 dst=1-1 tag=10241 size=2228 head=2057576 last=2060225 block=419 gap=1
+# FLIT RX t=4120477 src=0-1 dst=1-1 tag=10241 size=2228 head=2057588 last=2060239 stall=422 gap=0
+# 4121015 1-1 <- TAG 10241
+# FLIT END t=4121091 src=0-1 dst=1-1 tag=10241 cyc=2060546
+# TIMER t=4165865 pe=0-0 cyc=2082933
+# FLIT TX t=4166623 src=0-0 dst=1-1 tag=6147 size=1698 head=2083312 last=2085287 block=275 gap=1
+# FLIT RX t=4170615 src=0-0 dst=1-1 tag=6147 size=1698 head=2083330 last=2085308 stall=279 gap=0
+# 4171189 1-1 <- TAG 6147
+# FLIT END t=4171265 src=0-0 dst=1-1 tag=6147 cyc=2085633
+# TIMER t=4200969 pe=0-1 cyc=2100485
+# FLIT TX t=4201729 src=0-1 dst=1-1 tag=9217 size=1421 head=2100865 last=2102565 block=277 gap=1
+# FLIT RX t=4205157 src=0-1 dst=1-1 tag=9217 size=1421 head=2100877 last=2102579 stall=280 gap=0
+# 4205695 1-1 <- TAG 9217
+# FLIT END t=4205771 src=0-1 dst=1-1 tag=9217 cyc=2102886
+# TRIGGER: workflow iteration at 4500279 ns.
+# TRIGGER: next release will be at 5000000 ns
+# TRIGGER-PE 0-1: release acknowledged at 4500279 ns
+# TRIGGER-PE 1-0: release acknowledged at 4500283 ns
+# TRIGGER-PE 1-1: release acknowledged at 4500283 ns
+# TIMER t=4503721 pe=0-0 cyc=2251861
+# TIMER t=4503721 pe=0-1 cyc=2251861
+# TIMER t=4503721 pe=1-0 cyc=2251861
+# TIMER t=4503721 pe=1-1 cyc=2251861
+# 4504921 1-0 scheduled 1
+# 4504995 1-1 scheduled 1
+# 4505065 0-1 scheduled 1
+# 4505139 0-0 scheduled 1
+# 4506227 0-1 scheduled 2
+# 4506321 0-0 scheduled 2
+# 4507403 0-1 scheduled 3
+# 4507517 0-0 scheduled 3
+# 4508029 1-0 ITER begin C 3
+# 4508727 0-0 scheduled 4
+# 4510511 0-1 ITER begin E 2
+# 4510999 0-0 ITER begin A 4
+# 4514241 0-0 -> TAG 1028
+# 4515883 1-1 ITER begin J 1
+# 4517073 1-0 -> TAG 4099
+# 4518653 0-0 -> TAG 2052
+# 4519247 0-0 <- TAG 2052
+# 4519489 0-0 ITER end A 4
+# 4519527 1-0 ITER end C 3
+# 4520075 1-1 ITER end J 1
+# 4520375 1-0 scheduled 0
+# 4520471 0-0 scheduled 3
+# 4520885 1-1 scheduled 2
+# 4523221 0-0 ITER begin B 4
+# 4523993 1-1 ITER begin G 3
+# TIMER t=4526505 pe=0-0 cyc=2263253
+# FLIT TX t=4527261 src=0-0 dst=1-0 tag=1028 size=311 head=2263631 last=2264315 block=371 gap=1
+# FLIT RX t=4528657 src=0-0 dst=1-0 tag=1028 size=311 head=2263643 last=2264329 stall=374 gap=0
+# 4529207 1-0 <- TAG 1028
+# FLIT END t=4529283 src=0-0 dst=1-0 tag=1028 cyc=2264642
+# 4541159 0-1 -> TAG 7170
+# 4541745 0-1 <- TAG 7170
+# 4543925 0-1 -> TAG 8194
+# 4544511 0-1 <- TAG 8194
+# 4544717 0-1 ITER end E 2
+# 4545583 0-1 scheduled 1
+# 4545725 1-1 -> TAG 11267
+# 4546303 1-1 <- TAG 11267
+# 4546453 1-1 ITER end G 3
+# 4547369 1-1 scheduled 0
+# 4548333 0-1 ITER begin H 2
+# 4553831 0-0 -> TAG 3076
+# 4554425 0-0 <- TAG 3076
+# 4554667 0-0 ITER end B 4
+# 4554945 0-1 -> TAG 10242
+# 4555649 0-0 scheduled 2
+# 4557399 0-1 ITER end H 2
+# TIMER t=4557801 pe=1-0 cyc=2278901
+# 4558243 0-1 scheduled 2
+# 4558399 0-0 ITER begin D 4
+# FLIT TX t=4558561 src=1-0 dst=0-1 tag=4099 size=303 head=2279281 last=2280087 block=501 gap=1
+# FLIT RX t=4560215 src=1-0 dst=0-1 tag=4099 size=303 head=2279299 last=2280108 stall=505 gap=0
+# 4560817 0-1 <- TAG 4099
+# FLIT END t=4560893 src=1-0 dst=0-1 tag=4099 cyc=2280447
+# 4562919 0-1 ITER begin I 2
+# 4562987 0-0 -> TAG 5124
+# 4563581 0-0 <- TAG 5124
+# 4563823 0-0 ITER end D 4
+# 4564805 0-0 scheduled 1
+# 4567555 0-0 ITER begin F 4
+# 4580071 0-1 -> TAG 9218
+# 4582377 0-1 ITER end I 2
+# 4583361 0-1 scheduled 0
+# 4583507 0-0 -> TAG 6148
+# 4585961 0-0 ITER end F 4
+# 4587013 0-0 scheduled 0
+# TIMER t=4614441 pe=0-1 cyc=2307221
+# TIMER t=4615305 pe=0-1 cyc=2307653
+# FLIT TX t=4615197 src=0-1 dst=1-1 tag=10242 size=2228 head=2307599 last=2310272 block=443 gap=1
+# FLIT RX t=4620571 src=0-1 dst=1-1 tag=10242 size=2228 head=2307611 last=2310286 stall=446 gap=0
+# 4621109 1-1 <- TAG 10242
+# FLIT END t=4621185 src=0-1 dst=1-1 tag=10242 cyc=2310593
+# TIMER t=4665865 pe=0-0 cyc=2332933
+# FLIT TX t=4666621 src=0-0 dst=1-1 tag=6148 size=1698 head=2333311 last=2335286 block=275 gap=1
+# FLIT RX t=4670613 src=0-0 dst=1-1 tag=6148 size=1698 head=2333329 last=2335307 stall=279 gap=0
+# 4671187 1-1 <- TAG 6148
+# FLIT END t=4671263 src=0-0 dst=1-1 tag=6148 cyc=2335632
+# TIMER t=4700969 pe=0-1 cyc=2350485
+# FLIT TX t=4701727 src=0-1 dst=1-1 tag=9218 size=1421 head=2350864 last=2352564 block=277 gap=1
+# FLIT RX t=4705155 src=0-1 dst=1-1 tag=9218 size=1421 head=2350876 last=2352578 stall=280 gap=0
+# 4705693 1-1 <- TAG 9218
+# FLIT END t=4705769 src=0-1 dst=1-1 tag=9218 cyc=2352885
+# TRIGGER-PE 1-1: release acknowledged at 5000281 ns
+# TRIGGER: workflow iteration at 5000283 ns.
+# TRIGGER: next release will be at 5500000 ns
+# TRIGGER-PE 0-1: release acknowledged at 5000283 ns
+# TRIGGER-PE 1-0: release acknowledged at 5000283 ns
+# TIMER t=5003721 pe=0-0 cyc=2501861
+# TIMER t=5003721 pe=0-1 cyc=2501861
+# TIMER t=5003721 pe=1-0 cyc=2501861
+# TIMER t=5003721 pe=1-1 cyc=2501861
+# 5004921 1-0 scheduled 1
+# 5004993 1-1 scheduled 1
+# 5005069 0-1 scheduled 1
+# 5005143 0-0 scheduled 1
+# 5006231 0-1 scheduled 2
+# 5006325 0-0 scheduled 2
+# 5007407 0-1 scheduled 3
+# 5007521 0-0 scheduled 3
+# 5008029 1-0 ITER begin C 4
+# 5008731 0-0 scheduled 4
+# 5010515 0-1 ITER begin E 3
+# 5011003 0-0 ITER begin A 5
+# 5013327 1-1 ITER begin J 2
+# 5014245 0-0 -> TAG 1029
+# 5017831 1-1 ITER end J 2
+# 5018033 1-0 -> TAG 4100
+# 5018641 1-1 scheduled 2
+# 5018657 0-0 -> TAG 2053
+# 5019251 0-0 <- TAG 2053
+# 5019493 0-0 ITER end A 5
+# 5020475 0-0 scheduled 3
+# 5020487 1-0 ITER end C 4
+# 5021335 1-0 scheduled 0
+# 5021749 1-1 ITER begin G 4
+# 5023225 0-0 ITER begin B 5
+# TIMER t=5026505 pe=0-0 cyc=2513253
+# FLIT TX t=5027261 src=0-0 dst=1-0 tag=1029 size=311 head=2513631 last=2514315 block=371 gap=1
+# FLIT RX t=5028657 src=0-0 dst=1-0 tag=1029 size=311 head=2513643 last=2514329 stall=374 gap=0
+# 5029207 1-0 <- TAG 1029
+# FLIT END t=5029283 src=0-0 dst=1-0 tag=1029 cyc=2514642
+# 5037819 0-1 -> TAG 7171
+# 5037901 1-1 -> TAG 11268
+# 5038405 0-1 <- TAG 7171
+# 5038479 1-1 <- TAG 11268
+# 5038629 1-1 ITER end G 4
+# 5039545 1-1 scheduled 0
+# 5040585 0-1 -> TAG 8195
+# 5041171 0-1 <- TAG 8195
+# 5041377 0-1 ITER end E 3
+# 5042243 0-1 scheduled 1
+# 5044993 0-1 ITER begin H 3
+# 5050817 0-1 -> TAG 10243
+# 5053271 0-1 ITER end H 3
+# 5053307 0-0 -> TAG 3077
+# 5053901 0-0 <- TAG 3077
+# 5054115 0-1 scheduled 2
+# 5054143 0-0 ITER end B 5
+# 5055125 0-0 scheduled 2
+# 5056865 0-1 ITER begin I 3
+# TIMER t=5057801 pe=1-0 cyc=2528901
+# 5057875 0-0 ITER begin D 5
+# FLIT TX t=5058561 src=1-0 dst=0-1 tag=4100 size=303 head=2529281 last=2530085 block=499 gap=1
+# FLIT RX t=5060211 src=1-0 dst=0-1 tag=4100 size=303 head=2529299 last=2530106 stall=503 gap=0
+# 5060813 0-1 <- TAG 4100
+# FLIT END t=5060889 src=1-0 dst=0-1 tag=4100 cyc=2530445
+# 5061319 0-0 -> TAG 5125
+# 5061913 0-0 <- TAG 5125
+# 5062155 0-0 ITER end D 5
+# 5063137 0-0 scheduled 1
+# 5065887 0-0 ITER begin F 5
+# 5068683 0-1 -> TAG 9219
+# 5069059 0-0 -> TAG 6149
+# 5070989 0-1 ITER end I 3
+# 5071513 0-0 ITER end F 5
+# 5071973 0-1 scheduled 0
+# 5072565 0-0 scheduled 0
+# TIMER t=5114441 pe=0-1 cyc=2557221
+# TIMER t=5115305 pe=0-1 cyc=2557653
+# FLIT TX t=5115197 src=0-1 dst=1-1 tag=10243 size=2228 head=2557599 last=2560272 block=443 gap=1
+# FLIT RX t=5120571 src=0-1 dst=1-1 tag=10243 size=2228 head=2557611 last=2560286 stall=446 gap=0
+# 5121109 1-1 <- TAG 10243
+# FLIT END t=5121185 src=0-1 dst=1-1 tag=10243 cyc=2560593
+# TIMER t=5165865 pe=0-0 cyc=2582933
+# FLIT TX t=5166621 src=0-0 dst=1-1 tag=6149 size=1698 head=2583311 last=2585286 block=275 gap=1
+# FLIT RX t=5170613 src=0-0 dst=1-1 tag=6149 size=1698 head=2583329 last=2585307 stall=279 gap=0
+# 5171187 1-1 <- TAG 6149
+# FLIT END t=5171263 src=0-0 dst=1-1 tag=6149 cyc=2585632
+# TIMER t=5200969 pe=0-1 cyc=2600485
+# FLIT TX t=5201727 src=0-1 dst=1-1 tag=9219 size=1421 head=2600864 last=2602564 block=277 gap=1
+# FLIT RX t=5205155 src=0-1 dst=1-1 tag=9219 size=1421 head=2600876 last=2602578 stall=280 gap=0
+# 5205693 1-1 <- TAG 9219
+# FLIT END t=5205769 src=0-1 dst=1-1 tag=9219 cyc=2602885
+# TRIGGER-PE 1-1: release acknowledged at 5500281 ns
+# TRIGGER: workflow iteration at 5500283 ns.
+# TRIGGER: next release will be at 6000000 ns
+# TRIGGER-PE 0-1: release acknowledged at 5500283 ns
+# TRIGGER-PE 1-0: release acknowledged at 5500283 ns
+# TIMER t=5503721 pe=0-0 cyc=2751861
+# TIMER t=5503721 pe=0-1 cyc=2751861
+# TIMER t=5503721 pe=1-0 cyc=2751861
+# TIMER t=5503721 pe=1-1 cyc=2751861
+# 5504921 1-0 scheduled 1
+# 5504993 1-1 scheduled 1
+# 5505069 0-1 scheduled 1
+# 5505143 0-0 scheduled 1
+# 5506231 0-1 scheduled 2
+# 5506325 0-0 scheduled 2
+# 5507407 0-1 scheduled 3
+# 5507521 0-0 scheduled 3
+# 5508029 1-0 ITER begin C 5
+# 5508731 0-0 scheduled 4
+# 5510515 0-1 ITER begin E 4
+# 5511003 0-0 ITER begin A 6
+# 5513327 1-1 ITER begin J 3
+# 5514245 0-0 -> TAG 1030
+# 5515153 1-0 -> TAG 4101
+# 5517607 1-0 ITER end C 5
+# 5518455 1-0 scheduled 0
+# 5518657 0-0 -> TAG 2054
+# 5519251 0-0 <- TAG 2054
+# 5519493 0-0 ITER end A 6
+# 5520475 0-0 scheduled 3
+# 5523225 0-0 ITER begin B 6
+# TIMER t=5526505 pe=0-0 cyc=2763253
+# FLIT TX t=5527263 src=0-0 dst=1-0 tag=1030 size=311 head=2763632 last=2764315 block=370 gap=1
+# FLIT RX t=5528657 src=0-0 dst=1-0 tag=1030 size=311 head=2763644 last=2764329 stall=373 gap=0
+# 5529207 1-0 <- TAG 1030
+# FLIT END t=5529283 src=0-0 dst=1-0 tag=1030 cyc=2764642
+# 5538035 1-1 ITER end J 3
+# 5538707 0-1 -> TAG 7172
+# 5538845 1-1 scheduled 2
+# 5539293 0-1 <- TAG 7172
+# 5541473 0-1 -> TAG 8196
+# 5541953 1-1 ITER begin G 5
+# 5542059 0-1 <- TAG 8196
+# 5542265 0-1 ITER end E 4
+# 5543131 0-1 scheduled 1
+# 5545881 0-1 ITER begin H 4
+# 5549283 0-0 -> TAG 3078
+# 5549877 0-0 <- TAG 3078
+# 5550119 0-0 ITER end B 6
+# 5551101 0-0 scheduled 2
+# 5552637 0-1 -> TAG 10244
+# 5553851 0-0 ITER begin D 6
+# 5555091 0-1 ITER end H 4
+# 5555935 0-1 scheduled 2
+# 5557291 0-0 -> TAG 5126
+# TIMER t=5557801 pe=1-0 cyc=2778901
+# 5557885 0-0 <- TAG 5126
+# 5558127 0-0 ITER end D 6
+# 5559109 0-0 scheduled 1
+# 5559793 0-1 ITER begin I 4
+# FLIT TX t=5558561 src=1-0 dst=0-1 tag=4101 size=303 head=2779281 last=2780087 block=501 gap=1
+# FLIT RX t=5560215 src=1-0 dst=0-1 tag=4101 size=303 head=2779299 last=2780108 stall=505 gap=0
+# 5560817 0-1 <- TAG 4101
+# FLIT END t=5560893 src=1-0 dst=0-1 tag=4101 cyc=2780447
+# 5561859 0-0 ITER begin F 6
+# 5565751 0-0 -> TAG 6150
+# 5568205 0-0 ITER end F 6
+# 5569257 0-0 scheduled 0
+# 5573683 0-1 -> TAG 9220
+# 5575697 1-1 -> TAG 11269
+# 5575989 0-1 ITER end I 4
+# 5576275 1-1 <- TAG 11269
+# 5576425 1-1 ITER end G 5
+# 5576973 0-1 scheduled 0
+# 5577341 1-1 scheduled 0
+# TIMER t=5614441 pe=0-1 cyc=2807221
+# TIMER t=5615307 pe=0-1 cyc=2807654
+# FLIT TX t=5615199 src=0-1 dst=1-1 tag=10244 size=2228 head=2807600 last=2810273 block=443 gap=1
+# FLIT RX t=5620573 src=0-1 dst=1-1 tag=10244 size=2228 head=2807612 last=2810287 stall=446 gap=0
+# 5621111 1-1 <- TAG 10244
+# FLIT END t=5621187 src=0-1 dst=1-1 tag=10244 cyc=2810594
+# TIMER t=5665865 pe=0-0 cyc=2832933
+# FLIT TX t=5666625 src=0-0 dst=1-1 tag=6150 size=1698 head=2833313 last=2835290 block=277 gap=1
+# FLIT RX t=5670621 src=0-0 dst=1-1 tag=6150 size=1698 head=2833331 last=2835311 stall=281 gap=0
+# 5671195 1-1 <- TAG 6150
+# FLIT END t=5671271 src=0-0 dst=1-1 tag=6150 cyc=2835636
+# TIMER t=5700969 pe=0-1 cyc=2850485
+# FLIT TX t=5701729 src=0-1 dst=1-1 tag=9220 size=1421 head=2850865 last=2852565 block=277 gap=1
+# FLIT RX t=5705157 src=0-1 dst=1-1 tag=9220 size=1421 head=2850877 last=2852579 stall=280 gap=0
+# 5705695 1-1 <- TAG 9220
+# FLIT END t=5705771 src=0-1 dst=1-1 tag=9220 cyc=2852886
+# TRIGGER-PE 0-1: release acknowledged at 6000279 ns
+# TRIGGER: workflow iteration at 6000281 ns.
+# TRIGGER: next release will be at 6500000 ns
+# TRIGGER-PE 1-0: release acknowledged at 6000283 ns
+# TRIGGER-PE 1-1: release acknowledged at 6000283 ns
+# TIMER t=6003721 pe=0-0 cyc=3001861
+# TIMER t=6003721 pe=0-1 cyc=3001861
+# TIMER t=6003721 pe=1-0 cyc=3001861
+# TIMER t=6003721 pe=1-1 cyc=3001861
+# 6004921 1-0 scheduled 1
+# 6004995 1-1 scheduled 1
+# 6005065 0-1 scheduled 1
+# 6005141 0-0 scheduled 1
+# 6006227 0-1 scheduled 2
+# 6006323 0-0 scheduled 2
+# 6007403 0-1 scheduled 3
+# 6007519 0-0 scheduled 3
+# 6008029 1-0 ITER begin C 6
+# 6008729 0-0 scheduled 4
+# 6010511 0-1 ITER begin E 5
+# 6011001 0-0 ITER begin A 7
+# 6013329 1-1 ITER begin J 4
+# 6014243 0-0 -> TAG 1031
+# 6018655 0-0 -> TAG 2055
+# 6019249 0-0 <- TAG 2055
+# 6019491 0-0 ITER end A 7
+# 6020473 0-0 scheduled 3
+# 6023209 1-1 ITER end J 4
+# 6023223 0-0 ITER begin B 7
+# 6023793 1-0 -> TAG 4102
+# 6024019 1-1 scheduled 2
+# 6026247 1-0 ITER end C 6
+# TIMER t=6026505 pe=0-0 cyc=3013253
+# 6027095 1-0 scheduled 0
+# 6027127 1-1 ITER begin G 6
+# FLIT TX t=6027261 src=0-0 dst=1-0 tag=1031 size=311 head=3013631 last=3014373 block=429 gap=1
+# FLIT RX t=6028773 src=0-0 dst=1-0 tag=1031 size=311 head=3013643 last=3014387 stall=432 gap=0
+# 6029323 1-0 <- TAG 1031
+# FLIT END t=6029399 src=0-0 dst=1-0 tag=1031 cyc=3014700
+# 6043245 0-1 -> TAG 7173
+# 6043831 0-1 <- TAG 7173
+# 6046011 0-1 -> TAG 8197
+# 6046597 0-1 <- TAG 8197
+# 6046803 0-1 ITER end E 5
+# 6047669 0-1 scheduled 1
+# 6050419 0-1 ITER begin H 5
+# 6053729 0-0 -> TAG 3079
+# 6054323 0-0 <- TAG 3079
+# 6054427 1-1 -> TAG 11270
+# 6054565 0-0 ITER end B 7
+# 6055005 1-1 <- TAG 11270
+# 6055155 1-1 ITER end G 6
+# 6055547 0-0 scheduled 2
+# 6056071 1-1 scheduled 0
+# 6057423 0-1 -> TAG 10245
+# TIMER t=6057801 pe=1-0 cyc=3028901
+# 6058297 0-0 ITER begin D 7
+# FLIT TX t=6058557 src=1-0 dst=0-1 tag=4102 size=303 head=3029279 last=3030083 block=499 gap=1
+# FLIT RX t=6060207 src=1-0 dst=0-1 tag=4102 size=303 head=3029297 last=3030104 stall=503 gap=0
+# 6060809 0-1 <- TAG 4102
+# FLIT END t=6060885 src=1-0 dst=0-1 tag=4102 cyc=3030443
+# 6061803 0-1 ITER end H 5
+# 6062349 0-0 -> TAG 5127
+# 6062647 0-1 scheduled 2
+# 6062943 0-0 <- TAG 5127
+# 6063185 0-0 ITER end D 7
+# 6064167 0-0 scheduled 1
+# 6065397 0-1 ITER begin I 5
+# 6066917 0-0 ITER begin F 7
+# 6080529 0-0 -> TAG 6151
+# 6082669 0-1 -> TAG 9221
+# 6082983 0-0 ITER end F 7
+# 6084035 0-0 scheduled 0
+# 6084975 0-1 ITER end I 5
+# 6085959 0-1 scheduled 0
+# TIMER t=6114441 pe=0-1 cyc=3057221
+# TIMER t=6115305 pe=0-1 cyc=3057653
+# FLIT TX t=6115197 src=0-1 dst=1-1 tag=10245 size=2228 head=3057599 last=3060273 block=444 gap=1
+# FLIT RX t=6120573 src=0-1 dst=1-1 tag=10245 size=2228 head=3057611 last=3060287 stall=447 gap=0
+# 6121111 1-1 <- TAG 10245
+# FLIT END t=6121187 src=0-1 dst=1-1 tag=10245 cyc=3060594
+# TIMER t=6165865 pe=0-0 cyc=3082933
+# FLIT TX t=6166625 src=0-0 dst=1-1 tag=6151 size=1698 head=3083313 last=3085290 block=277 gap=1
+# FLIT RX t=6170621 src=0-0 dst=1-1 tag=6151 size=1698 head=3083331 last=3085311 stall=281 gap=0
+# 6171195 1-1 <- TAG 6151
+# FLIT END t=6171271 src=0-0 dst=1-1 tag=6151 cyc=3085636
+# TIMER t=6200969 pe=0-1 cyc=3100485
+# FLIT TX t=6201727 src=0-1 dst=1-1 tag=9221 size=1421 head=3100864 last=3102565 block=278 gap=1
+# FLIT RX t=6205157 src=0-1 dst=1-1 tag=9221 size=1421 head=3100876 last=3102579 stall=281 gap=0
+# 6205695 1-1 <- TAG 9221
+# FLIT END t=6205771 src=0-1 dst=1-1 tag=9221 cyc=3102886
+# TRIGGER-PE 1-0: release acknowledged at 6500279 ns
+# TRIGGER: workflow iteration at 6500281 ns.
+# TRIGGER: next release will be at 7000000 ns
+# TRIGGER-PE 0-1: release acknowledged at 6500283 ns
+# TRIGGER-PE 1-1: release acknowledged at 6500283 ns
+# TIMER t=6503721 pe=0-0 cyc=3251861
+# TIMER t=6503721 pe=0-1 cyc=3251861
+# TIMER t=6503721 pe=1-0 cyc=3251861
+# TIMER t=6503721 pe=1-1 cyc=3251861
+# 6504917 1-0 scheduled 1
+# 6504995 1-1 scheduled 1
+# 6505069 0-1 scheduled 1
+# 6505141 0-0 scheduled 1
+# 6506231 0-1 scheduled 2
+# 6506323 0-0 scheduled 2
+# 6507407 0-1 scheduled 3
+# 6507519 0-0 scheduled 3
+# 6508025 1-0 ITER begin C 7
+# 6508729 0-0 scheduled 4
+# 6510515 0-1 ITER begin E 6
+# 6511001 0-0 ITER begin A 8
+# 6513329 1-1 ITER begin J 5
+# 6514243 0-0 -> TAG 1032
+# 6517069 1-0 -> TAG 4103
+# 6518655 0-0 -> TAG 2056
+# 6519249 0-0 <- TAG 2056
+# 6519491 0-0 ITER end A 8
+# 6519523 1-0 ITER end C 7
+# 6520371 1-0 scheduled 0
+# 6520473 0-0 scheduled 3
+# 6523223 0-0 ITER begin B 8
+# TIMER t=6526505 pe=0-0 cyc=3263253
+# FLIT TX t=6527261 src=0-0 dst=1-0 tag=1032 size=311 head=3263631 last=3264316 block=372 gap=1
+# FLIT RX t=6528659 src=0-0 dst=1-0 tag=1032 size=311 head=3263643 last=3264330 stall=375 gap=0
+# 6529209 1-0 <- TAG 1032
+# FLIT END t=6529285 src=0-0 dst=1-0 tag=1032 cyc=3264643
+# 6543049 1-1 ITER end J 5
+# 6543287 0-1 -> TAG 7174
+# 6543859 1-1 scheduled 2
+# 6543873 0-1 <- TAG 7174
+# 6546053 0-1 -> TAG 8198
+# 6546639 0-1 <- TAG 8198
+# 6546845 0-1 ITER end E 6
+# 6546967 1-1 ITER begin G 7
+# 6547711 0-1 scheduled 1
+# 6550461 0-1 ITER begin H 6
+# 6555757 0-0 -> TAG 3080
+# 6556351 0-0 <- TAG 3080
+# 6556593 0-0 ITER end B 8
+# 6557379 0-1 -> TAG 10246
+# 6557575 0-0 scheduled 2
+# TIMER t=6557801 pe=1-0 cyc=3278901
+# FLIT TX t=6558557 src=1-0 dst=0-1 tag=4103 size=303 head=3279279 last=3280085 block=501 gap=1
+# FLIT RX t=6560211 src=1-0 dst=0-1 tag=4103 size=303 head=3279297 last=3280106 stall=505 gap=0
+# 6560325 0-0 ITER begin D 8
+# 6560813 0-1 <- TAG 4103
+# FLIT END t=6560889 src=1-0 dst=0-1 tag=4103 cyc=3280445
+# 6561759 0-1 ITER end H 6
+# 6562603 0-1 scheduled 2
+# 6564913 0-0 -> TAG 5128
+# 6565353 0-1 ITER begin I 6
+# 6565507 0-0 <- TAG 5128
+# 6565749 0-0 ITER end D 8
+# 6566731 0-0 scheduled 1
+# 6567639 1-1 -> TAG 11271
+# 6568217 1-1 <- TAG 11271
+# 6568367 1-1 ITER end G 7
+# 6569283 1-1 scheduled 0
+# 6569481 0-0 ITER begin F 8
+# 6576385 0-1 -> TAG 9222
+# 6578691 0-1 ITER end I 6
+# 6579675 0-1 scheduled 0
+# 6586633 0-0 -> TAG 6152
+# 6589087 0-0 ITER end F 8
+# 6590139 0-0 scheduled 0
+# TIMER t=6614441 pe=0-1 cyc=3307221
+# TIMER t=6615309 pe=0-1 cyc=3307655
+# FLIT TX t=6615201 src=0-1 dst=1-1 tag=10246 size=2228 head=3307601 last=3310273 block=442 gap=1
+# FLIT RX t=6620573 src=0-1 dst=1-1 tag=10246 size=2228 head=3307613 last=3310287 stall=445 gap=0
+# 6621111 1-1 <- TAG 10246
+# FLIT END t=6621187 src=0-1 dst=1-1 tag=10246 cyc=3310594
+# TIMER t=6665865 pe=0-0 cyc=3332933
+# FLIT TX t=6666621 src=0-0 dst=1-1 tag=6152 size=1698 head=3333311 last=3335287 block=276 gap=1
+# FLIT RX t=6670615 src=0-0 dst=1-1 tag=6152 size=1698 head=3333329 last=3335308 stall=280 gap=0
+# 6671189 1-1 <- TAG 6152
+# FLIT END t=6671265 src=0-0 dst=1-1 tag=6152 cyc=3335633
+# TIMER t=6700969 pe=0-1 cyc=3350485
+# FLIT TX t=6701725 src=0-1 dst=1-1 tag=9222 size=1421 head=3350863 last=3352562 block=276 gap=1
+# FLIT RX t=6705151 src=0-1 dst=1-1 tag=9222 size=1421 head=3350875 last=3352576 stall=279 gap=0
+# 6705689 1-1 <- TAG 9222
+# FLIT END t=6705765 src=0-1 dst=1-1 tag=9222 cyc=3352883
+# TRIGGER-PE 1-0: release acknowledged at 7000279 ns
+# TRIGGER-PE 0-1: release acknowledged at 7000281 ns
+# TRIGGER: workflow iteration at 7000283 ns.
+# TRIGGER: next release will be at 7500000 ns
+# TRIGGER-PE 1-1: release acknowledged at 7000283 ns
+# TIMER t=7003721 pe=0-0 cyc=3501861
+# TIMER t=7003721 pe=0-1 cyc=3501861
+# TIMER t=7003721 pe=1-0 cyc=3501861
+# TIMER t=7003721 pe=1-1 cyc=3501861
+# 7004917 1-0 scheduled 1
+# 7004995 1-1 scheduled 1
+# 7005067 0-1 scheduled 1
+# 7005143 0-0 scheduled 1
+# 7006229 0-1 scheduled 2
+# 7006325 0-0 scheduled 2
+# 7007405 0-1 scheduled 3
+# 7007521 0-0 scheduled 3
+# 7008025 1-0 ITER begin C 8
+# 7008731 0-0 scheduled 4
+# 7010513 0-1 ITER begin E 7
+# 7011003 0-0 ITER begin A 9
+# 7013329 1-1 ITER begin J 6
+# 7014245 0-0 -> TAG 1033
+# 7018657 0-0 -> TAG 2057
+# 7019251 0-0 <- TAG 2057
+# 7019493 0-0 ITER end A 9
+# 7020475 0-0 scheduled 3
+# 7023225 0-0 ITER begin B 9
+# 7025709 1-0 -> TAG 4104
+# 7026233 1-1 ITER end J 6
+# TIMER t=7026505 pe=0-0 cyc=3513253
+# 7027043 1-1 scheduled 2
+# FLIT TX t=7027265 src=0-0 dst=1-0 tag=1033 size=311 head=3513633 last=3514318 block=372 gap=1
+# FLIT RX t=7028663 src=0-0 dst=1-0 tag=1033 size=311 head=3513645 last=3514332 stall=375 gap=0
+# 7029445 1-0 <- TAG 1033
+# FLIT END t=7029577 src=0-0 dst=1-0 tag=1033 cyc=3514789
+# 7029829 1-0 ITER end C 8
+# 7030151 1-1 ITER begin G 8
+# 7030677 1-0 scheduled 0
+# 7038005 0-1 -> TAG 7175
+# 7038591 0-1 <- TAG 7175
+# 7040771 0-1 -> TAG 8199
+# 7041357 0-1 <- TAG 8199
+# 7041563 0-1 ITER end E 7
+# 7042429 0-1 scheduled 1
+# 7044611 1-1 -> TAG 11272
+# 7045179 0-1 ITER begin H 7
+# 7045189 1-1 <- TAG 11272
+# 7045339 1-1 ITER end G 8
+# 7046255 1-1 scheduled 0
+# 7050679 0-1 -> TAG 10247
+# 7053071 0-0 -> TAG 3081
+# 7053133 0-1 ITER end H 7
+# 7053665 0-0 <- TAG 3081
+# 7053907 0-0 ITER end B 9
+# 7053977 0-1 scheduled 2
+# 7054889 0-0 scheduled 2
+# 7056727 0-1 ITER begin I 7
+# 7057639 0-0 ITER begin D 9
+# TIMER t=7057801 pe=1-0 cyc=3528901
+# FLIT TX t=7058559 src=1-0 dst=0-1 tag=4104 size=303 head=3529280 last=3530084 block=499 gap=1
+# FLIT RX t=7060209 src=1-0 dst=0-1 tag=4104 size=303 head=3529298 last=3530105 stall=503 gap=0
+# 7060811 0-1 <- TAG 4104
+# FLIT END t=7060887 src=1-0 dst=0-1 tag=4104 cyc=3530444
+# 7062019 0-0 -> TAG 5129
+# 7062613 0-0 <- TAG 5129
+# 7062855 0-0 ITER end D 9
+# 7063265 0-1 -> TAG 9223
+# 7063837 0-0 scheduled 1
+# 7065571 0-1 ITER end I 7
+# 7066555 0-1 scheduled 0
+# 7066587 0-0 ITER begin F 9
+# 7068979 0-0 -> TAG 6153
+# 7071433 0-0 ITER end F 9
+# 7072485 0-0 scheduled 0
+# TIMER t=7114441 pe=0-1 cyc=3557221
+# TIMER t=7115305 pe=0-1 cyc=3557653
+# FLIT TX t=7115197 src=0-1 dst=1-1 tag=10247 size=2228 head=3557599 last=3560273 block=444 gap=1
+# FLIT RX t=7120573 src=0-1 dst=1-1 tag=10247 size=2228 head=3557611 last=3560287 stall=447 gap=0
+# 7121111 1-1 <- TAG 10247
+# FLIT END t=7121187 src=0-1 dst=1-1 tag=10247 cyc=3560594
+# TIMER t=7165865 pe=0-0 cyc=3582933
+# FLIT TX t=7166625 src=0-0 dst=1-1 tag=6153 size=1698 head=3583313 last=3585290 block=277 gap=1
+# FLIT RX t=7170621 src=0-0 dst=1-1 tag=6153 size=1698 head=3583331 last=3585311 stall=281 gap=0
+# 7171195 1-1 <- TAG 6153
+# FLIT END t=7171271 src=0-0 dst=1-1 tag=6153 cyc=3585636
+# TIMER t=7200969 pe=0-1 cyc=3600485
+# FLIT TX t=7201727 src=0-1 dst=1-1 tag=9223 size=1421 head=3600864 last=3602565 block=278 gap=1
+# FLIT RX t=7205157 src=0-1 dst=1-1 tag=9223 size=1421 head=3600876 last=3602579 stall=281 gap=0
+# 7205695 1-1 <- TAG 9223
+# FLIT END t=7205771 src=0-1 dst=1-1 tag=9223 cyc=3602886
+# TRIGGER: workflow iteration at 7500281 ns.
+# TRIGGER: next release will be at 8000000 ns
+# TRIGGER-PE 1-0: release acknowledged at 7500281 ns
+# TRIGGER-PE 0-1: release acknowledged at 7500283 ns
+# TRIGGER-PE 1-1: release acknowledged at 7500283 ns
+# TIMER t=7503721 pe=0-0 cyc=3751861
+# TIMER t=7503721 pe=0-1 cyc=3751861
+# TIMER t=7503721 pe=1-0 cyc=3751861
+# TIMER t=7503721 pe=1-1 cyc=3751861
+# 7504919 1-0 scheduled 1
+# 7504995 1-1 scheduled 1
+# 7505069 0-1 scheduled 1
+# 7505141 0-0 scheduled 1
+# 7506231 0-1 scheduled 2
+# 7506323 0-0 scheduled 2
+# 7507407 0-1 scheduled 3
+# 7507519 0-0 scheduled 3
+# 7508027 1-0 ITER begin C 9
+# 7508729 0-0 scheduled 4
+# 7510515 0-1 ITER begin E 8
+# 7511001 0-0 ITER begin A 10
+# 7513329 0-0 -> TAG 1034
+# 7513329 1-1 ITER begin J 7
+# 7515151 1-0 -> TAG 4105
+# 7517605 1-0 ITER end C 9
+# 7517741 0-0 -> TAG 2058
+# 7518335 0-0 <- TAG 2058
+# 7518453 1-0 scheduled 0
+# 7518577 0-0 ITER end A 10
+# 7519559 0-0 scheduled 3
+# 7522309 0-0 ITER begin B 10
+# TIMER t=7526505 pe=0-0 cyc=3763253
+# FLIT TX t=7527261 src=0-0 dst=1-0 tag=1034 size=311 head=3763631 last=3764314 block=370 gap=1
+# FLIT RX t=7528655 src=0-0 dst=1-0 tag=1034 size=311 head=3763643 last=3764328 stall=373 gap=0
+# 7529205 1-0 <- TAG 1034
+# FLIT END t=7529281 src=0-0 dst=1-0 tag=1034 cyc=3764641
+# 7532089 1-1 ITER end J 7
+# 7532899 1-1 scheduled 2
+# 7536007 1-1 ITER begin G 9
+# 7538227 0-1 -> TAG 7176
+# 7538813 0-1 <- TAG 7176
+# 7540993 0-1 -> TAG 8200
+# 7541579 0-1 <- TAG 8200
+# 7541785 0-1 ITER end E 8
+# 7542651 0-1 scheduled 1
+# 7545401 0-1 ITER begin H 8
+# 7552405 0-1 -> TAG 10248
+# 7554219 0-0 -> TAG 3082
+# 7554813 0-0 <- TAG 3082
+# 7554859 0-1 ITER end H 8
+# 7555055 0-0 ITER end B 10
+# 7555703 0-1 scheduled 2
+# 7556037 0-0 scheduled 2
+# TIMER t=7557801 pe=1-0 cyc=3778901
+# 7558453 0-1 ITER begin I 8
+# 7558787 0-0 ITER begin D 10
+# FLIT TX t=7558559 src=1-0 dst=0-1 tag=4105 size=303 head=3779280 last=3780084 block=499 gap=1
+# FLIT RX t=7560209 src=1-0 dst=0-1 tag=4105 size=303 head=3779298 last=3780105 stall=503 gap=0
+# 7560811 0-1 <- TAG 4105
+# FLIT END t=7560887 src=1-0 dst=0-1 tag=4105 cyc=3780444
+# 7562393 0-0 -> TAG 5130
+# 7562987 0-0 <- TAG 5130
+# 7563229 0-0 ITER end D 10
+# 7564211 0-0 scheduled 1
+# 7566671 0-1 -> TAG 9224
+# 7566961 0-0 ITER begin F 10
+# 7568951 1-1 -> TAG 11273
+# 7568977 0-1 ITER end I 8
+# 7569529 1-1 <- TAG 11273
+# 7569679 1-1 ITER end G 9
+# 7569961 0-1 scheduled 0
+# 7570595 1-1 scheduled 0
+# 7581953 0-0 -> TAG 6154
+# 7584407 0-0 ITER end F 10
+# 7585459 0-0 scheduled 0
+# TIMER t=7614441 pe=0-1 cyc=3807221
+# TIMER t=7615309 pe=0-1 cyc=3807655
+# FLIT TX t=7615201 src=0-1 dst=1-1 tag=10248 size=2228 head=3807601 last=3810275 block=444 gap=1
+# FLIT RX t=7620577 src=0-1 dst=1-1 tag=10248 size=2228 head=3807613 last=3810289 stall=447 gap=0
+# 7621115 1-1 <- TAG 10248
+# FLIT END t=7621191 src=0-1 dst=1-1 tag=10248 cyc=3810596
+# TIMER t=7665865 pe=0-0 cyc=3832933
+# FLIT TX t=7666621 src=0-0 dst=1-1 tag=6154 size=1698 head=3833311 last=3835286 block=275 gap=1
+# FLIT RX t=7670613 src=0-0 dst=1-1 tag=6154 size=1698 head=3833329 last=3835307 stall=279 gap=0
+# 7671187 1-1 <- TAG 6154
+# FLIT END t=7671263 src=0-0 dst=1-1 tag=6154 cyc=3835632
+# TIMER t=7700969 pe=0-1 cyc=3850485
+# FLIT TX t=7701725 src=0-1 dst=1-1 tag=9224 size=1421 head=3850863 last=3852564 block=278 gap=1
+# FLIT RX t=7705155 src=0-1 dst=1-1 tag=9224 size=1421 head=3850875 last=3852578 stall=281 gap=0
+# 7705693 1-1 <- TAG 9224
+# FLIT END t=7705769 src=0-1 dst=1-1 tag=9224 cyc=3852885
+# TRIGGER-PE 0-1: release acknowledged at 8000281 ns
+# TRIGGER-PE 1-0: release acknowledged at 8000281 ns
+# TRIGGER-PE 1-1: release acknowledged at 8000281 ns
+# TRIGGER: workflow iteration at 8000283 ns.
+# TRIGGER: next release will be at 8500000 ns
+# TIMER t=8003721 pe=0-0 cyc=4001861
+# TIMER t=8003721 pe=0-1 cyc=4001861
+# TIMER t=8003721 pe=1-0 cyc=4001861
+# TIMER t=8003721 pe=1-1 cyc=4001861
+# 8004919 1-0 scheduled 1
+# 8004993 1-1 scheduled 1
+# 8005067 0-1 scheduled 1
+# 8005143 0-0 scheduled 1
+# 8006229 0-1 scheduled 2
+# 8006325 0-0 scheduled 2
+# 8007405 0-1 scheduled 3
+# 8007521 0-0 scheduled 3
+# 8008027 1-0 ITER begin C 10
+# 8008731 0-0 scheduled 4
+# 8010513 0-1 ITER begin E 9
+# 8011003 0-0 ITER begin A 11
+# 8013327 1-1 ITER begin J 8
+# 8013547 0-0 -> TAG 1035
+# 8017959 0-0 -> TAG 2059
+# 8018553 0-0 <- TAG 2059
+# 8018795 0-0 ITER end A 11
+# 8019777 0-0 scheduled 3
+# 8022527 0-0 ITER begin B 11
+# TIMER t=8026505 pe=0-0 cyc=4013253
+# FLIT TX t=8027261 src=0-0 dst=1-0 tag=1035 size=311 head=4013631 last=4014314 block=370 gap=1
+# FLIT RX t=8028655 src=0-0 dst=1-0 tag=1035 size=311 head=4013643 last=4014328 stall=373 gap=0
+# 8029205 1-0 <- TAG 1035
+# FLIT END t=8029337 src=0-0 dst=1-0 tag=1035 cyc=4014669
+# 8032827 1-1 ITER end J 8
+# 8033137 1-0 -> TAG 4106
+# 8033637 1-1 scheduled 2
+# 8035591 1-0 ITER end C 10
+# 8036439 1-0 scheduled 0
+# 8036745 1-1 ITER begin G 10
+# 8042353 0-1 -> TAG 7177
+# 8042939 0-1 <- TAG 7177
+# 8045119 0-1 -> TAG 8201
+# 8045705 0-1 <- TAG 8201
+# 8045911 0-1 ITER end E 9
+# 8046777 0-1 scheduled 1
+# 8049527 0-1 ITER begin H 9
+# 8052445 0-0 -> TAG 3083
+# 8053039 0-0 <- TAG 3083
+# 8053281 0-0 ITER end B 11
+# 8054263 0-0 scheduled 2
+# 8055383 0-1 -> TAG 10249
+# 8057013 0-0 ITER begin D 11
+# TIMER t=8057801 pe=1-0 cyc=4028901
+# 8057837 0-1 ITER end H 9
+# 8058681 0-1 scheduled 2
+# FLIT TX t=8058561 src=1-0 dst=0-1 tag=4106 size=303 head=4029281 last=4030197 block=611 gap=1
+# FLIT RX t=8060435 src=1-0 dst=0-1 tag=4106 size=303 head=4029299 last=4030218 stall=615 gap=0
+# 8061041 0-1 <- TAG 4106
+# 8061065 0-0 -> TAG 5131
+# FLIT END t=8061117 src=1-0 dst=0-1 tag=4106 cyc=4030559
+# 8061659 0-0 <- TAG 5131
+# 8061901 0-0 ITER end D 11
+# 8062883 0-0 scheduled 1
+# 8063357 0-1 ITER begin I 9
+# 8064071 1-1 -> TAG 11274
+# 8064649 1-1 <- TAG 11274
+# 8064799 1-1 ITER end G 10
+# 8065633 0-0 ITER begin F 11
+# 8065689 0-1 -> TAG 9225
+# 8065715 1-1 scheduled 0
+# 8067995 0-1 ITER end I 9
+# 8068979 0-1 scheduled 0
+# 8081885 0-0 -> TAG 6155
+# 8084339 0-0 ITER end F 11
+# 8085391 0-0 scheduled 0
+# TIMER t=8114441 pe=0-1 cyc=4057221
+# TIMER t=8115305 pe=0-1 cyc=4057653
+# FLIT TX t=8115197 src=0-1 dst=1-1 tag=10249 size=2228 head=4057599 last=4060271 block=442 gap=1
+# FLIT RX t=8120569 src=0-1 dst=1-1 tag=10249 size=2228 head=4057611 last=4060285 stall=445 gap=0
+# 8121107 1-1 <- TAG 10249
+# FLIT END t=8121183 src=0-1 dst=1-1 tag=10249 cyc=4060592
+# TIMER t=8165865 pe=0-0 cyc=4082933
+# FLIT TX t=8166625 src=0-0 dst=1-1 tag=6155 size=1698 head=4083313 last=4085288 block=275 gap=1
+# FLIT RX t=8170617 src=0-0 dst=1-1 tag=6155 size=1698 head=4083331 last=4085309 stall=279 gap=0
+# 8171191 1-1 <- TAG 6155
+# FLIT END t=8171267 src=0-0 dst=1-1 tag=6155 cyc=4085634
+# TIMER t=8200969 pe=0-1 cyc=4100485
+# FLIT TX t=8201727 src=0-1 dst=1-1 tag=9225 size=1421 head=4100864 last=4102563 block=276 gap=1
+# FLIT RX t=8205153 src=0-1 dst=1-1 tag=9225 size=1421 head=4100876 last=4102577 stall=279 gap=0
+# 8205691 1-1 <- TAG 9225
+# FLIT END t=8205767 src=0-1 dst=1-1 tag=9225 cyc=4102884
+# TRIGGER-PE 1-1: release acknowledged at 8500279 ns
+# TRIGGER: workflow iteration at 8500281 ns.
+# TRIGGER: next release will be at 9000000 ns
+# TRIGGER-PE 0-1: release acknowledged at 8500283 ns
+# TRIGGER-PE 1-0: release acknowledged at 8500283 ns
+# TIMER t=8503721 pe=0-0 cyc=4251861
+# TIMER t=8503721 pe=0-1 cyc=4251861
+# TIMER t=8503721 pe=1-0 cyc=4251861
+# TIMER t=8503721 pe=1-1 cyc=4251861
+# 8504921 1-0 scheduled 1
+# 8504991 1-1 scheduled 1
+# 8505069 0-1 scheduled 1
+# 8505141 0-0 scheduled 1
+# 8506231 0-1 scheduled 2
+# 8506323 0-0 scheduled 2
+# 8507407 0-1 scheduled 3
+# 8507519 0-0 scheduled 3
+# 8508029 1-0 ITER begin C 11
+# 8508729 0-0 scheduled 4
+# 8510515 0-1 ITER begin E 10
+# 8511001 0-0 ITER begin A 12
+# 8513325 1-1 ITER begin J 9
+# 8514243 0-0 -> TAG 1036
+# 8517073 1-0 -> TAG 4107
+# 8518655 0-0 -> TAG 2060
+# 8519249 0-0 <- TAG 2060
+# 8519491 0-0 ITER end A 12
+# 8519527 1-0 ITER end C 11
+# 8520375 1-0 scheduled 0
+# 8520473 0-0 scheduled 3
+# 8523223 0-0 ITER begin B 12
+# TIMER t=8526505 pe=0-0 cyc=4263253
+# FLIT TX t=8527263 src=0-0 dst=1-0 tag=1036 size=311 head=4263632 last=4264315 block=370 gap=1
+# FLIT RX t=8528657 src=0-0 dst=1-0 tag=1036 size=311 head=4263644 last=4264329 stall=373 gap=0
+# 8529207 1-0 <- TAG 1036
+# FLIT END t=8529283 src=0-0 dst=1-0 tag=1036 cyc=4264642
+# 8532681 1-1 ITER end J 9
+# 8533491 1-1 scheduled 2
+# 8536599 1-1 ITER begin G 11
+# 8536859 0-1 -> TAG 7178
+# 8537445 0-1 <- TAG 7178
+# 8539625 0-1 -> TAG 8202
+# 8540211 0-1 <- TAG 8202
+# 8540417 0-1 ITER end E 10
+# 8541283 0-1 scheduled 1
+# 8544033 0-1 ITER begin H 10
+# 8550161 0-0 -> TAG 3084
+# 8550755 0-0 <- TAG 3084
+# 8550861 0-1 -> TAG 10250
+# 8550997 0-0 ITER end B 12
+# 8551979 0-0 scheduled 2
+# 8553315 0-1 ITER end H 10
+# 8554159 0-1 scheduled 2
+# 8554729 0-0 ITER begin D 12
+# 8556909 0-1 ITER begin I 10
+# 8556939 1-1 -> TAG 11275
+# 8557517 1-1 <- TAG 11275
+# 8557667 1-1 ITER end G 11
+# TIMER t=8557801 pe=1-0 cyc=4278901
+# 8558583 1-1 scheduled 0
+# 8559317 0-0 -> TAG 5132
+# 8559911 0-0 <- TAG 5132
+# 8560153 0-0 ITER end D 12
+# FLIT TX t=8558561 src=1-0 dst=0-1 tag=4107 size=303 head=4279281 last=4280085 block=499 gap=1
+# FLIT RX t=8560211 src=1-0 dst=0-1 tag=4107 size=303 head=4279299 last=4280106 stall=503 gap=0
+# 8560817 0-1 <- TAG 4107
+# FLIT END t=8560893 src=1-0 dst=0-1 tag=4107 cyc=4280447
+# 8561135 0-0 scheduled 1
+# 8563885 0-0 ITER begin F 12
+# 8566747 0-1 -> TAG 9226
+# 8569053 0-1 ITER end I 10
+# 8570037 0-1 scheduled 0
+# 8575397 0-0 -> TAG 6156
+# 8577851 0-0 ITER end F 12
+# 8578903 0-0 scheduled 0
+# TIMER t=8614441 pe=0-1 cyc=4307221
+# TIMER t=8615307 pe=0-1 cyc=4307654
+# FLIT TX t=8615199 src=0-1 dst=1-1 tag=10250 size=2228 head=4307600 last=4310272 block=442 gap=1
+# FLIT RX t=8620571 src=0-1 dst=1-1 tag=10250 size=2228 head=4307612 last=4310286 stall=445 gap=0
+# 8621109 1-1 <- TAG 10250
+# FLIT END t=8621185 src=0-1 dst=1-1 tag=10250 cyc=4310593
+# TIMER t=8665865 pe=0-0 cyc=4332933
+# FLIT TX t=8666623 src=0-0 dst=1-1 tag=6156 size=1698 head=4333312 last=4335289 block=277 gap=1
+# FLIT RX t=8670619 src=0-0 dst=1-1 tag=6156 size=1698 head=4333330 last=4335310 stall=281 gap=0
+# 8671193 1-1 <- TAG 6156
+# FLIT END t=8671269 src=0-0 dst=1-1 tag=6156 cyc=4335635
+# TIMER t=8700969 pe=0-1 cyc=4350485
+# FLIT TX t=8701729 src=0-1 dst=1-1 tag=9226 size=1421 head=4350865 last=4352564 block=276 gap=1
+# FLIT RX t=8705155 src=0-1 dst=1-1 tag=9226 size=1421 head=4350877 last=4352578 stall=279 gap=0
+# 8705693 1-1 <- TAG 9226
+# FLIT END t=8705769 src=0-1 dst=1-1 tag=9226 cyc=4352885
+# TRIGGER: workflow iteration at 9000279 ns.
+# TRIGGER: next release will be at 9500000 ns
+# TRIGGER-PE 0-1: release acknowledged at 9000279 ns
+# TRIGGER-PE 1-1: release acknowledged at 9000281 ns
+# TRIGGER-PE 1-0: release acknowledged at 9000283 ns
+# TIMER t=9003721 pe=0-0 cyc=4501861
+# TIMER t=9003721 pe=0-1 cyc=4501861
+# TIMER t=9003721 pe=1-0 cyc=4501861
+# TIMER t=9003721 pe=1-1 cyc=4501861
+# 9004921 1-0 scheduled 1
+# 9004993 1-1 scheduled 1
+# 9005065 0-1 scheduled 1
+# 9005139 0-0 scheduled 1
+# 9006227 0-1 scheduled 2
+# 9006321 0-0 scheduled 2
+# 9007403 0-1 scheduled 3
+# 9007517 0-0 scheduled 3
+# 9008029 1-0 ITER begin C 12
+# 9008727 0-0 scheduled 4
+# 9010511 0-1 ITER begin E 11
+# 9010999 0-0 ITER begin A 13
+# 9013327 1-1 ITER begin J 10
+# 9014241 0-0 -> TAG 1037
+# 9018653 0-0 -> TAG 2061
+# 9019247 0-0 <- TAG 2061
+# 9019489 0-0 ITER end A 13
+# 9020471 0-0 scheduled 3
+# 9023221 0-0 ITER begin B 13
+# TIMER t=9026505 pe=0-0 cyc=4513253
+# FLIT TX t=9027265 src=0-0 dst=1-0 tag=1037 size=311 head=4513633 last=4514316 block=370 gap=1
+# FLIT RX t=9028659 src=0-0 dst=1-0 tag=1037 size=311 head=4513645 last=4514330 stall=373 gap=0
+# 9029207 1-0 <- TAG 1037
+# FLIT END t=9029339 src=0-0 dst=1-0 tag=1037 cyc=4514670
+# 9032087 1-1 ITER end J 10
+# 9032897 1-1 scheduled 2
+# 9035059 1-0 -> TAG 4108
+# 9036005 1-1 ITER begin G 12
+# 9037513 1-0 ITER end C 12
+# 9037519 0-1 -> TAG 7179
+# 9038105 0-1 <- TAG 7179
+# 9038361 1-0 scheduled 0
+# 9040285 0-1 -> TAG 8203
+# 9040871 0-1 <- TAG 8203
+# 9041077 0-1 ITER end E 11
+# 9041943 0-1 scheduled 1
+# 9044693 0-1 ITER begin H 11
+# 9049197 1-1 -> TAG 11276
+# 9049775 1-1 <- TAG 11276
+# 9049925 1-1 ITER end G 12
+# 9050841 1-1 scheduled 0
+# 9051697 0-1 -> TAG 10251
+# 9052295 0-0 -> TAG 3085
+# 9052889 0-0 <- TAG 3085
+# 9053131 0-0 ITER end B 13
+# 9054113 0-0 scheduled 2
+# 9054151 0-1 ITER end H 11
+# 9054995 0-1 scheduled 2
+# 9056863 0-0 ITER begin D 13
+# 9057745 0-1 ITER begin I 11
+# TIMER t=9057801 pe=1-0 cyc=4528901
+# FLIT TX t=9058557 src=1-0 dst=0-1 tag=4108 size=303 head=4529279 last=4530085 block=501 gap=1
+# FLIT RX t=9060211 src=1-0 dst=0-1 tag=4108 size=303 head=4529297 last=4530106 stall=505 gap=0
+# 9060815 0-1 <- TAG 4108
+# FLIT END t=9060891 src=1-0 dst=0-1 tag=4108 cyc=4530446
+# 9061113 0-0 -> TAG 5133
+# 9061707 0-0 <- TAG 5133
+# 9061949 0-0 ITER end D 13
+# 9062363 0-1 -> TAG 9227
+# 9062931 0-0 scheduled 1
+# 9064669 0-1 ITER end I 11
+# 9065653 0-1 scheduled 0
+# 9065681 0-0 ITER begin F 13
+# 9073353 0-0 -> TAG 6157
+# 9075807 0-0 ITER end F 13
+# 9076859 0-0 scheduled 0
+# TIMER t=9114441 pe=0-1 cyc=4557221
+# TIMER t=9115309 pe=0-1 cyc=4557655
+# FLIT TX t=9115201 src=0-1 dst=1-1 tag=10251 size=2228 head=4557601 last=4560274 block=443 gap=1
+# FLIT RX t=9120575 src=0-1 dst=1-1 tag=10251 size=2228 head=4557613 last=4560288 stall=446 gap=0
+# 9121113 1-1 <- TAG 10251
+# FLIT END t=9121189 src=0-1 dst=1-1 tag=10251 cyc=4560595
+# TIMER t=9165865 pe=0-0 cyc=4582933
+# FLIT TX t=9166625 src=0-0 dst=1-1 tag=6157 size=1698 head=4583313 last=4585288 block=275 gap=1
+# FLIT RX t=9170617 src=0-0 dst=1-1 tag=6157 size=1698 head=4583331 last=4585309 stall=279 gap=0
+# 9171191 1-1 <- TAG 6157
+# FLIT END t=9171267 src=0-0 dst=1-1 tag=6157 cyc=4585634
+# TIMER t=9200969 pe=0-1 cyc=4600485
+# FLIT TX t=9201725 src=0-1 dst=1-1 tag=9227 size=1421 head=4600863 last=4602563 block=277 gap=1
+# FLIT RX t=9205153 src=0-1 dst=1-1 tag=9227 size=1421 head=4600875 last=4602577 stall=280 gap=0
+# 9205691 1-1 <- TAG 9227
+# FLIT END t=9205767 src=0-1 dst=1-1 tag=9227 cyc=4602884
+# TRIGGER-PE 1-0: release acknowledged at 9500279 ns
+# TRIGGER-PE 1-1: release acknowledged at 9500279 ns
+# TRIGGER: workflow iteration at 9500281 ns.
+# TRIGGER: next release will be at 10000000 ns
+# TRIGGER-PE 0-1: release acknowledged at 9500281 ns
+# TIMER t=9503721 pe=0-0 cyc=4751861
+# TIMER t=9503721 pe=0-1 cyc=4751861
+# TIMER t=9503721 pe=1-0 cyc=4751861
+# TIMER t=9503721 pe=1-1 cyc=4751861
+# 9504917 1-0 scheduled 1
+# 9504991 1-1 scheduled 1
+# 9505067 0-1 scheduled 1
+# 9505141 0-0 scheduled 1
+# 9506229 0-1 scheduled 2
+# 9506323 0-0 scheduled 2
+# 9507405 0-1 scheduled 3
+# 9507519 0-0 scheduled 3
+# 9508025 1-0 ITER begin C 13
+# 9508729 0-0 scheduled 4
+# 9510513 0-1 ITER begin E 12
+# 9511001 0-0 ITER begin A 14
+# 9513325 1-1 ITER begin J 11
+# 9514243 0-0 -> TAG 1038
+# 9515149 1-0 -> TAG 4109
+# 9517603 1-0 ITER end C 13
+# 9518451 1-0 scheduled 0
+# 9518655 0-0 -> TAG 2062
+# 9519249 0-0 <- TAG 2062
+# 9519491 0-0 ITER end A 14
+# 9520473 0-0 scheduled 3
+# 9523223 0-0 ITER begin B 14
+# TIMER t=9526505 pe=0-0 cyc=4763253
+# FLIT TX t=9527261 src=0-0 dst=1-0 tag=1038 size=311 head=4763631 last=4764316 block=372 gap=1
+# FLIT RX t=9528659 src=0-0 dst=1-0 tag=1038 size=311 head=4763643 last=4764330 stall=375 gap=0
+# 9529209 1-0 <- TAG 1038
+# FLIT END t=9529285 src=0-0 dst=1-0 tag=1038 cyc=4764643
+# 9538769 0-1 -> TAG 7180
+# 9539355 0-1 <- TAG 7180
+# 9541535 0-1 -> TAG 8204
+# 9542121 0-1 <- TAG 8204
+# 9542327 0-1 ITER end E 12
+# 9543193 0-1 scheduled 1
+# 9545943 0-1 ITER begin H 12
+# 9546929 1-1 ITER end J 11
+# 9547739 1-1 scheduled 2
+# 9550847 1-1 ITER begin G 13
+# 9551445 0-0 -> TAG 3086
+# 9552039 0-0 <- TAG 3086
+# 9552281 0-0 ITER end B 14
+# 9552947 0-1 -> TAG 10252
+# 9553263 0-0 scheduled 2
+# 9555401 0-1 ITER end H 12
+# 9556013 0-0 ITER begin D 14
+# 9556245 0-1 scheduled 2
+# TIMER t=9557801 pe=1-0 cyc=4778901
+# 9560103 0-1 ITER begin I 12
+# FLIT TX t=9558557 src=1-0 dst=0-1 tag=4109 size=303 head=4779279 last=4780084 block=500 gap=1
+# FLIT RX t=9560209 src=1-0 dst=0-1 tag=4109 size=303 head=4779297 last=4780105 stall=504 gap=0
+# 9560601 0-0 -> TAG 5134
+# 9560811 0-1 <- TAG 4109
+# FLIT END t=9560887 src=1-0 dst=0-1 tag=4109 cyc=4780444
+# 9561195 0-0 <- TAG 5134
+# 9561437 0-0 ITER end D 14
+# 9562419 0-0 scheduled 1
+# 9565169 0-0 ITER begin F 14
+# 9576753 0-1 -> TAG 9228
+# 9579059 0-1 ITER end I 12
+# 9580043 0-1 scheduled 0
+# 9580881 0-0 -> TAG 6158
+# 9583335 0-0 ITER end F 14
+# 9584267 1-1 -> TAG 11277
+# 9584387 0-0 scheduled 0
+# 9584845 1-1 <- TAG 11277
+# 9584995 1-1 ITER end G 13
+# 9585911 1-1 scheduled 0
+# TIMER t=9614441 pe=0-1 cyc=4807221
+# TIMER t=9615305 pe=0-1 cyc=4807653
+# FLIT TX t=9615197 src=0-1 dst=1-1 tag=10252 size=2228 head=4807599 last=4810271 block=442 gap=1
+# FLIT RX t=9620569 src=0-1 dst=1-1 tag=10252 size=2228 head=4807611 last=4810285 stall=445 gap=0
+# 9621107 1-1 <- TAG 10252
+# FLIT END t=9621183 src=0-1 dst=1-1 tag=10252 cyc=4810592
+# TIMER t=9665865 pe=0-0 cyc=4832933
+# FLIT TX t=9666623 src=0-0 dst=1-1 tag=6158 size=1698 head=4833312 last=4835288 block=276 gap=1
+# FLIT RX t=9670617 src=0-0 dst=1-1 tag=6158 size=1698 head=4833330 last=4835309 stall=280 gap=0
+# 9671191 1-1 <- TAG 6158
+# FLIT END t=9671267 src=0-0 dst=1-1 tag=6158 cyc=4835634
+# TIMER t=9700969 pe=0-1 cyc=4850485
+# FLIT TX t=9701727 src=0-1 dst=1-1 tag=9228 size=1421 head=4850864 last=4852563 block=276 gap=1
+# FLIT RX t=9705153 src=0-1 dst=1-1 tag=9228 size=1421 head=4850876 last=4852577 stall=279 gap=0
+# 9705691 1-1 <- TAG 9228
+# FLIT END t=9705767 src=0-1 dst=1-1 tag=9228 cyc=4852884
+# TRIGGER: workflow iteration at 10000279 ns.
+# TRIGGER: next release will be at 10500000 ns
+# TRIGGER-PE 1-0: release acknowledged at 10000279 ns
+# TRIGGER-PE 1-1: release acknowledged at 10000279 ns
+# TRIGGER-PE 0-1: release acknowledged at 10000283 ns
+# TIMER t=10003721 pe=0-0 cyc=5001861
+# TIMER t=10003721 pe=0-1 cyc=5001861
+# TIMER t=10003721 pe=1-0 cyc=5001861
+# TIMER t=10003721 pe=1-1 cyc=5001861
+# 10004917 1-0 scheduled 1
+# 10004991 1-1 scheduled 1
+# 10005069 0-1 scheduled 1
+# 10005139 0-0 scheduled 1
+# 10006231 0-1 scheduled 2
+# 10006321 0-0 scheduled 2
+# 10007407 0-1 scheduled 3
+# 10007517 0-0 scheduled 3
+# 10008025 1-0 ITER begin C 14
+# 10008727 0-0 scheduled 4
+# 10010515 0-1 ITER begin E 13
+# 10010999 0-0 ITER begin A 15
+# 10013325 1-1 ITER begin J 12
+# 10014241 0-0 -> TAG 1039
+# 10018653 0-0 -> TAG 2063
+# 10019247 0-0 <- TAG 2063
+# 10019489 0-0 ITER end A 15
+# 10020471 0-0 scheduled 3
+# 10023221 0-0 ITER begin B 15
+# TIMER t=10026505 pe=0-0 cyc=5013253
+# FLIT TX t=10027263 src=0-0 dst=1-0 tag=1039 size=311 head=5013632 last=5014315 block=370 gap=1
+# FLIT RX t=10028657 src=0-0 dst=1-0 tag=1039 size=311 head=5013644 last=5014329 stall=373 gap=0
+# 10029207 1-0 <- TAG 1039
+# FLIT END t=10029339 src=0-0 dst=1-0 tag=1039 cyc=5014670
+# 10034529 1-1 ITER end J 12
+# 10035339 1-1 scheduled 2
+# 10038447 1-1 ITER begin G 14
+# 10040815 1-0 -> TAG 4110
+# 10043269 1-0 ITER end C 14
+# 10043433 0-1 -> TAG 7181
+# 10044019 0-1 <- TAG 7181
+# 10044117 1-0 scheduled 0
+# 10046199 0-1 -> TAG 8205
+# 10046785 0-1 <- TAG 8205
+# 10046991 0-1 ITER end E 13
+# 10047857 0-1 scheduled 1
+# 10050607 0-1 ITER begin H 13
+# 10052487 0-0 -> TAG 3087
+# 10053081 0-0 <- TAG 3087
+# 10053323 0-0 ITER end B 15
+# 10054305 0-0 scheduled 2
+# 10056233 0-1 -> TAG 10253
+# 10057055 0-0 ITER begin D 15
+# TIMER t=10057801 pe=1-0 cyc=5028901
+# 10059795 0-1 ITER end H 13
+# FLIT TX t=10058559 src=1-0 dst=0-1 tag=4110 size=303 head=5029280 last=5030084 block=499 gap=1
+# 10060179 1-1 -> TAG 11278
+# FLIT RX t=10060209 src=1-0 dst=0-1 tag=4110 size=303 head=5029298 last=5030105 stall=503 gap=0
+# 10060639 0-1 scheduled 2
+# 10060757 1-1 <- TAG 11278
+# 10060907 1-1 ITER end G 14
+# 10061385 0-1 <- TAG 4110
+# FLIT END t=10061461 src=1-0 dst=0-1 tag=4110 cyc=5030731
+# 10061643 0-0 -> TAG 5135
+# 10061823 1-1 scheduled 0
+# 10062237 0-0 <- TAG 5135
+# 10062479 0-0 ITER end D 15
+# 10063461 0-0 scheduled 1
+# 10064207 0-1 ITER begin I 13
+# 10066211 0-0 ITER begin F 15
+# 10066899 0-1 -> TAG 9229
+# 10069205 0-1 ITER end I 13
+# 10070189 0-1 scheduled 0
+# 10079763 0-0 -> TAG 6159
+# 10082217 0-0 ITER end F 15
+# 10083269 0-0 scheduled 0
+# TIMER t=10114441 pe=0-1 cyc=5057221
+# TIMER t=10115309 pe=0-1 cyc=5057655
+# FLIT TX t=10115201 src=0-1 dst=1-1 tag=10253 size=2228 head=5057601 last=5060275 block=444 gap=1
+# FLIT RX t=10120577 src=0-1 dst=1-1 tag=10253 size=2228 head=5057613 last=5060289 stall=447 gap=0
+# 10121115 1-1 <- TAG 10253
+# FLIT END t=10121191 src=0-1 dst=1-1 tag=10253 cyc=5060596
+# TIMER t=10165865 pe=0-0 cyc=5082933
+# FLIT TX t=10166621 src=0-0 dst=1-1 tag=6159 size=1698 head=5083311 last=5085286 block=275 gap=1
+# FLIT RX t=10170613 src=0-0 dst=1-1 tag=6159 size=1698 head=5083329 last=5085307 stall=279 gap=0
+# 10171187 1-1 <- TAG 6159
+# FLIT END t=10171263 src=0-0 dst=1-1 tag=6159 cyc=5085632
+# TIMER t=10200969 pe=0-1 cyc=5100485
+# FLIT TX t=10201725 src=0-1 dst=1-1 tag=9229 size=1421 head=5100863 last=5102564 block=278 gap=1
+# FLIT RX t=10205155 src=0-1 dst=1-1 tag=9229 size=1421 head=5100875 last=5102578 stall=281 gap=0
+# 10205693 1-1 <- TAG 9229
+# FLIT END t=10205769 src=0-1 dst=1-1 tag=9229 cyc=5102885
+# END at 10500000000000 (manycore_top time)
+# CHKSUM node 0-0 send_pkts=30 send_ok=30 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 0-1 send_pkts=26 send_ok=26 send_err=0 send_incomplete=0 recv_pkts=14 recv_flits=4270 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 1-0 send_pkts=14 send_ok=14 send_err=0 send_incomplete=0 recv_pkts=15 recv_flits=4695 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 1-1 send_pkts=0 send_ok=0 send_err=0 send_incomplete=0 recv_pkts=41 recv_flits=72989 recv_err=0 recv_spurious=0 recv_missing=0

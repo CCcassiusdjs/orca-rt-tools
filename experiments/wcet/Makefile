@@ -36,6 +36,10 @@
 #                  WCET-E on run W3 (logs/W3.*), flow of E with the static costs of the image of UH;
 #                  into $(BUILD)/r11e (metrics.json, values.tex with the macro names of $(BUILD)/values.tex)
 #   make check-r11e  $(BUILD)/r11e/metrics.json against reference_r11e.json
+#   make analyze-r11f  the same analysis on the runs of tag r11-rc7 (time-triggered injection; config_r11f.json):
+#                  E on run VH (../exp23/logs/VH.*), CAR-V on run VCV (../car-v-rtl/logs/VCV.*), WCET-E on
+#                  run W5 (logs/W5.*), flow of E with the static costs of the image of VH; into $(BUILD)/r11f
+#   make check-r11f  $(BUILD)/r11f/metrics.json against reference_r11f.json
 #   make analyze-tt  the images with the time-triggered injection (config_tt.json; images/tt: riscv64-elf-gcc
 #                  12.2.0, images/tt13: riscv64-unknown-elf-gcc 13.2.0, images/*/BUILD.txt): t(v) of E,
 #                  CAR-V, WCET-E, CARV-E and CAR-FULL (every task of every image of round r11f) with
@@ -58,7 +62,12 @@
 # REF=reference_W2.json.
 # Run W3 (logs/W3.*, reference_W3.json): wcet_e of tag r11-rc5 (as W2, crt0=guard_readback), same tools,
 # clock and duration: make run-analyze check-run LOG=logs/W3.events.txt REF=reference_W3.json
-# (`make check` runs W1, W2, W3, check-r11c and check-r11e).
+# Runs W4 and W5 (logs/W4.*, logs/W5.*, reference_W4.json, reference_W5.json): wcet_e of tag r11-rc7
+# (as W3 with the time-triggered injection, table wcet_e_tt.h of t(v) = max(CSV, static); 10.5 ms at
+# 500 MHz and at 220.416 MHz, the clock of the flow with these costs): make run-analyze check-run
+# LOG=logs/W5.events.txt REF=reference_W5.json SPEC=specs/wcet_e_tt.json; rtlapp of run-log takes the
+# model of the RUN_INFO (network-interface model tt, t(v) = max(CSV, static)).
+# (`make check` runs W1 to W5, check-r11c, check-r11e and check-r11f).
 #
 # SIM_NS: release delay 3 ms + 14 releases of 0.5 ms (rtlapp cpu_windows takes windows of
 # n(J) + 1 = 4 releases from the release of iteration 4) = 10 ms.
@@ -84,6 +93,8 @@ TT_COSTS ?= costs/tt/wcet_e.json
 SIM_NS  ?= 10000000
 LOG     ?= logs/W1.events.txt
 REF     ?= reference_W1.json
+# spec of the image of the run (specs/wcet_e_tt.json for the runs of the time-triggered injection)
+SPEC    ?= specs/wcet_e.json
 OUTDIR  ?= $(BUILD)/run_$(firstword $(subst ., ,$(notdir $(LOG))))
 # image of the run: logs/<run>.image.elf next to a stored log, else the build of simulate.sh
 IMAGE   ?= $(if $(filter logs/%.events.txt,$(LOG)),$(patsubst %.events.txt,%.image.elf,$(LOG)),$(dir $(LOG))pkt-sim/software/ucx-os/build/target/image.elf)
@@ -91,7 +102,8 @@ CC_BODIES ?= riscv64-elf-gcc
 RTL     := ../../pkt-sim/tests/rtl
 UCX_IMG := pkt-sim/software/ucx-os/build/target
 
-.PHONY: all analyze check app csv images bodies trace sim run-analyze check-run analyze-r11c check-r11c analyze-r11e check-r11e clean
+.PHONY: all analyze check app csv images bodies trace sim run-analyze check-run analyze-r11c check-r11c analyze-r11e check-r11e
+.PHONY: analyze-r11f check-r11f clean
 .PHONY: analyze-tt check-tt images-tt costs-tt
 
 all: analyze check
@@ -106,8 +118,11 @@ check:
 	$(MAKE) run-analyze check-run
 	$(MAKE) run-analyze check-run LOG=logs/W2.events.txt REF=reference_W2.json
 	$(MAKE) run-analyze check-run LOG=logs/W3.events.txt REF=reference_W3.json
+	$(MAKE) run-analyze check-run LOG=logs/W4.events.txt REF=reference_W4.json SPEC=specs/wcet_e_tt.json
+	$(MAKE) run-analyze check-run LOG=logs/W5.events.txt REF=reference_W5.json SPEC=specs/wcet_e_tt.json
 	$(MAKE) analyze-r11c check-r11c
 	$(MAKE) analyze-r11e check-r11e
+	$(MAKE) analyze-r11f check-r11f
 	$(MAKE) analyze-tt check-tt
 
 app:
@@ -136,7 +151,7 @@ sim:
 	F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) $(MESH)
 
 run-analyze:
-	$(RUN) run-log $(LOG) --spec specs/wcet_e.json --image $(IMAGE) --manifest $(APP_DIR)/$(NAME).json \
+	$(RUN) run-log $(LOG) --spec $(SPEC) --image $(IMAGE) --manifest $(APP_DIR)/$(NAME).json \
 		--csv $(CSV) --map $(MAP) --arch ../../arch/hermes-2x2.gml --out $(OUTDIR)
 
 check-run:
@@ -153,6 +168,12 @@ analyze-r11e:
 
 check-r11e:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/r11e/metrics.json reference_r11e.json
+
+analyze-r11f:
+	$(RUN) analyze --config config_r11f.json --out $(BUILD)/r11f
+
+check-r11f:
+	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/r11f/metrics.json reference_r11f.json
 
 analyze-tt:
 	$(RUN) analyze --config config_tt.json --out $(BUILD)/tt
