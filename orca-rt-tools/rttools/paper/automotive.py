@@ -14,7 +14,7 @@ III to VII of the paper):
 | Cause-effect chains | `chains` chains; the number of activation patterns (periods) of a chain from Table VI, the runnables per pattern from Table VII; the periods of the time-synchronous patterns of Table III (angle-synchronous and interrupt-driven runnables left out), drawn by their shares; consecutive patterns of a chain have periods that divide one another (the flow period must be a multiple of the period of its source, Section 6.6), and no period repeats in a chain |
 | Tasks | the runnables of one activation pattern of a chain form one task (Section II.A of the paper: runnables with the same activation pattern are mapped to the same task), which runs them in their chain order in one job |
 | Execution times | ACET of each runnable from a Weibull distribution (shape `weibull_shape`) truncated to [min, max] of Table IV, with the scale that gives the average of Table IV; BCET = ACET x U(fmin, fmax) and WCET = ACET x U(fmin, fmax) of Table V |
-| Cost | c(v) = round(WCET(v) x `cycles_per_us`) + t_disp + t_tick + t_rel (`kernel_cycles`: the kernel terms of the image of application E, experiments/wcet/reference_tt.json), WCET(v) the sum of the WCETs of the runnables of task v; BCET(v) the sum of their BCETs; each later dispatch costs `scheduler_cycles` = t_tick + t_rel |
+| Cost | c(v) = round(WCET(v) x `cycles_per_us`) + t_disp + t_tick + t_rel (`kernel_cycles`: the kernel terms of the image of CAR, which runs a tick table, experiments/wcet/reference_tt.json), WCET(v) the sum of the WCETs of the runnables of task v; BCET(v) the sum of their BCETs; each later dispatch costs `scheduler_cycles` = t_tick + t_rel; after the mapping, c(v) adds t_send per outgoing and t_recv per incoming edge between distinct PEs (`packet_cycles`, the handler terms of the same image, Eq. (6) of the paper; the mapping uses the cost without them) |
 | Dispatch order | on each PE, by period, shortest first (sequence rows of the application file); the run also reports the minimum frequency with the creation order of generation and the kernel rule (same-PE predecessors first) |
 | Edges | consecutive tasks of a chain, and one edge from the last task of an earlier chain with a harmonic period to the first task of each other chain (inter-task communication), so the graph is acyclic; payload of each edge: a label size from Table I; period of each flow: the period of its source (every job sends) |
 | End-to-end constraint | the sum of the periods of the activation patterns of the chain (Section IV.E of the paper) |
@@ -30,7 +30,7 @@ rttools/bench/ucx.py (tick_sigma): each tick costs e = t_tick + t_rel to the
 job it dispatches and each job carries its work and the dispatch
 d = t_disp, so c(v) = WCET + d + e and scheduler_cycles = e, the
 conditions (C1) and (C2) of Lemma 6.1 of the paper with the kernel terms of
-the image of application E.
+the image of CAR; the packet terms of v are part of its work in every job.
 
 Chain constraints: the end-to-end constraint of every chain is an input of
 the frequency search (graph.graph["chain_constraints"],
@@ -216,6 +216,22 @@ def mapping(app, cfg):
     return spiral.map_application(tasks, edges, cfg["width"], cfg["height"])
 
 
+def with_packet_terms(app, cfg, task_node):
+    """app with t_send per outgoing and t_recv per incoming edge between
+    distinct PEs added to the cost of each task (Eq. (6) of the paper), and
+    these cycles per task in app["packet_cycles"]."""
+    pc = cfg.get("packet_cycles", {"send": 0, "receive": 0})
+    add = {t: 0 for t, *_ in app["tasks"]}
+    for a, b, _, _ in app["flows"]:
+        if task_node[a] != task_node[b]:
+            add[a] += pc["send"]
+            add[b] += pc["receive"]
+    out = dict(app)
+    out["tasks"] = [(t, T, c + add[t], *r) for t, T, c, *r in app["tasks"]]
+    out["packet_cycles"] = add
+    return out
+
+
 def variation(spec, sched, app, cfg):
     """Simulations of each PE with the tick table of the flow and random
     work in [BCET, WCET] of each runnable: jobs that end after F_j(v)."""
@@ -236,7 +252,8 @@ def variation(spec, sched, app, cfg):
             e, d = kc["tick"] + kc["release"], kc["dispatch"]
             for t in ts:
                 lo, hi = bw[t]
-                work = min(spec.cost[t] - d - e, max(1, round(rnd.uniform(lo, hi) * cyc)))
+                pk = app.get("packet_cycles", {}).get(t, 0)
+                work = min(spec.cost[t] - d - e, max(1, round(rnd.uniform(lo, hi) * cyc)) + pk)
                 tasks.append({"name": t, "cost": work + d, "period": spec.ticks[t], "offset": spec.offsets[t]})
             run = ucx.simulate(tasks, sched.P, 3 * spec.hyper_ticks, e, tail=3 * spec.hyper_ticks,
                                owner_of=owner_of, tick_sigma=True)
@@ -253,6 +270,7 @@ def run(cfg_path, out_dir):
     cfg = json.load(open(cfg_path))
     app = generate(cfg)
     mres = mapping(app, cfg)
+    app = with_packet_terms(app, cfg, mres["mapping"])
     os.makedirs(out_dir, exist_ok=True)
     csv_path = os.path.join(out_dir, "automotive.csv")
     with open(csv_path, "w") as fh:

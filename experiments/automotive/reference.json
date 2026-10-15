@@ -4,7 +4,7 @@
   {
    "chain": "T1",
    "constraint_ms": 100,
-   "data_age_ms": 2.7991747578759196,
+   "data_age_ms": 2.81242563318035,
    "periods_ms": [
     100
    ],
@@ -13,7 +13,7 @@
   {
    "chain": "T2-T3",
    "constraint_ms": 1010,
-   "data_age_ms": 12.038690877034027,
+   "data_age_ms": 12.106651125519049,
    "periods_ms": [
     10,
     1000
@@ -23,7 +23,7 @@
   {
    "chain": "T4",
    "constraint_ms": 100,
-   "data_age_ms": 4.037650141417604,
+   "data_age_ms": 4.092639809620942,
    "periods_ms": [
     100
    ],
@@ -32,7 +32,7 @@
   {
    "chain": "T5",
    "constraint_ms": 10,
-   "data_age_ms": 4.307947546924932,
+   "data_age_ms": 4.360081105364125,
    "periods_ms": [
     10
    ],
@@ -41,7 +41,7 @@
   {
    "chain": "T6-T7",
    "constraint_ms": 1020,
-   "data_age_ms": 1005.3939000648928,
+   "data_age_ms": 1005.4338651319783,
    "periods_ms": [
     1000,
     20
@@ -51,7 +51,7 @@
   {
    "chain": "T8-T9",
    "constraint_ms": 30,
-   "data_age_ms": 23.224823381043922,
+   "data_age_ms": 23.285799276365317,
    "periods_ms": [
     20,
     10
@@ -61,7 +61,7 @@
   {
    "chain": "T10",
    "constraint_ms": 100,
-   "data_age_ms": 1.0515347789355112,
+   "data_age_ms": 1.0535198271047328,
    "periods_ms": [
     100
    ],
@@ -70,7 +70,7 @@
   {
    "chain": "T11",
    "constraint_ms": 10,
-   "data_age_ms": 0.614450307935303,
+   "data_age_ms": 0.6117262815376023,
    "periods_ms": [
     10
    ],
@@ -79,7 +79,7 @@
   {
    "chain": "T12",
    "constraint_ms": 10,
-   "data_age_ms": 2.9377517661895607,
+   "data_age_ms": 2.9927636531410116,
    "periods_ms": [
     10
    ],
@@ -88,7 +88,7 @@
   {
    "chain": "T13",
    "constraint_ms": 10,
-   "data_age_ms": 5.537239969145251,
+   "data_age_ms": 5.583861489521866,
    "periods_ms": [
     10
    ],
@@ -97,7 +97,7 @@
   {
    "chain": "T14",
    "constraint_ms": 10,
-   "data_age_ms": 1.9784628947142873,
+   "data_age_ms": 1.9726937179767368,
    "periods_ms": [
     10
    ],
@@ -106,7 +106,7 @@
   {
    "chain": "T15-T16",
    "constraint_ms": 30,
-   "data_age_ms": 21.297234092050005,
+   "data_age_ms": 21.29716374055997,
    "periods_ms": [
     20,
     10
@@ -116,7 +116,7 @@
   {
    "chain": "T17",
    "constraint_ms": 100,
-   "data_age_ms": 3.362420873483281,
+   "data_age_ms": 3.369357227847794,
    "periods_ms": [
     100
    ],
@@ -125,7 +125,7 @@
   {
    "chain": "T18",
    "constraint_ms": 20,
-   "data_age_ms": 2.827739889559585,
+   "data_age_ms": 2.8984725965858043,
    "periods_ms": [
     20
    ],
@@ -134,7 +134,7 @@
   {
    "chain": "T19",
    "constraint_ms": 100,
-   "data_age_ms": 3.0952334308767893,
+   "data_age_ms": 3.173623758529419,
    "periods_ms": [
     100
    ],
@@ -143,7 +143,7 @@
   {
    "chain": "T20-T21",
    "constraint_ms": 30,
-   "data_age_ms": 12.932695015488594,
+   "data_age_ms": 12.927308710327578,
    "periods_ms": [
     10,
     20
@@ -153,7 +153,7 @@
   {
    "chain": "T22",
    "constraint_ms": 100,
-   "data_age_ms": 1.16403217709647,
+   "data_age_ms": 1.220380758116607,
    "periods_ms": [
     100
    ],
@@ -162,7 +162,7 @@
   {
    "chain": "T23",
    "constraint_ms": 20,
-   "data_age_ms": 2.0768797521824838,
+   "data_age_ms": 2.0786527767659844,
    "periods_ms": [
     20
    ],
@@ -171,7 +171,7 @@
   {
    "chain": "T24",
    "constraint_ms": 100,
-   "data_age_ms": 1.2016088548235035,
+   "data_age_ms": 1.2023384570554383,
    "periods_ms": [
     100
    ],
@@ -180,7 +180,7 @@
   {
    "chain": "T25",
    "constraint_ms": 100,
-   "data_age_ms": 1.8397389590195048,
+   "data_age_ms": 1.8375464413200264,
    "periods_ms": [
     100
    ],
@@ -189,7 +189,7 @@
   {
    "chain": "T26",
    "constraint_ms": 2,
-   "data_age_ms": 0.45867055207963464,
+   "data_age_ms": 0.4672178917461936,
    "periods_ms": [
     2
    ],
@@ -198,7 +198,7 @@
   {
    "chain": "T27",
    "constraint_ms": 10,
-   "data_age_ms": 2.077332778274338,
+   "data_age_ms": 2.1443748330540786,
    "periods_ms": [
     10
    ],
@@ -207,7 +207,7 @@
   {
    "chain": "T28",
    "constraint_ms": 20,
-   "data_age_ms": 1.3207669609295607,
+   "data_age_ms": 1.320499745028047,
    "periods_ms": [
     20
    ],
@@ -216,7 +216,7 @@
   {
    "chain": "T29",
    "constraint_ms": 5,
-   "data_age_ms": 3.6071039388782093,
+   "data_age_ms": 3.646475316286637,
    "periods_ms": [
     5
    ],
@@ -225,7 +225,7 @@
   {
    "chain": "T30-T31",
    "constraint_ms": 1020,
-   "data_age_ms": 1002.2083185385624,
+   "data_age_ms": 1002.2618804788617,
    "periods_ms": [
     1000,
     20
@@ -235,7 +235,7 @@
   {
    "chain": "T32-T33-T34",
    "constraint_ms": 130,
-   "data_age_ms": 122.58901962704934,
+   "data_age_ms": 122.5834972438746,
    "periods_ms": [
     20,
     100,
@@ -246,7 +246,7 @@
   {
    "chain": "T35",
    "constraint_ms": 20,
-   "data_age_ms": 1.6692787089980776,
+   "data_age_ms": 1.666096015152619,
    "periods_ms": [
     20
    ],
@@ -255,7 +255,7 @@
   {
    "chain": "T36",
    "constraint_ms": 10,
-   "data_age_ms": 3.389969757447382,
+   "data_age_ms": 3.3936645540419126,
    "periods_ms": [
     10
    ],
@@ -264,7 +264,7 @@
   {
    "chain": "T37-T38-T39",
    "constraint_ms": 130,
-   "data_age_ms": 122.34010015549815,
+   "data_age_ms": 122.3342439474515,
    "periods_ms": [
     20,
     100,
@@ -275,7 +275,7 @@
   {
    "chain": "T40",
    "constraint_ms": 10,
-   "data_age_ms": 4.9224590746023775,
+   "data_age_ms": 4.927770088147446,
    "periods_ms": [
     10
    ],
@@ -284,7 +284,7 @@
   {
    "chain": "T41",
    "constraint_ms": 20,
-   "data_age_ms": 0.6566796860651624,
+   "data_age_ms": 0.653602389451446,
    "periods_ms": [
     20
    ],
@@ -293,7 +293,7 @@
   {
    "chain": "T42",
    "constraint_ms": 20,
-   "data_age_ms": 1.9408127532966832,
+   "data_age_ms": 1.935358539132124,
    "periods_ms": [
     20
    ],
@@ -302,7 +302,7 @@
   {
    "chain": "T43",
    "constraint_ms": 20,
-   "data_age_ms": 3.379709328664308,
+   "data_age_ms": 3.4309511668002237,
    "periods_ms": [
     20
    ],
@@ -311,7 +311,7 @@
   {
    "chain": "T44",
    "constraint_ms": 100,
-   "data_age_ms": 2.1367159281525105,
+   "data_age_ms": 2.2050824409314975,
    "periods_ms": [
     100
    ],
@@ -320,7 +320,7 @@
   {
    "chain": "T45",
    "constraint_ms": 20,
-   "data_age_ms": 4.309943310518776,
+   "data_age_ms": 4.3635900050994385,
    "periods_ms": [
     20
    ],
@@ -329,7 +329,7 @@
   {
    "chain": "T46-T47-T48",
    "constraint_ms": 130,
-   "data_age_ms": 31.040894787751157,
+   "data_age_ms": 31.042968844855636,
    "periods_ms": [
     10,
     20,
@@ -340,7 +340,7 @@
   {
    "chain": "T49",
    "constraint_ms": 100,
-   "data_age_ms": 3.6579163248564397,
+   "data_age_ms": 3.7340156868458756,
    "periods_ms": [
     100
    ],
@@ -349,7 +349,7 @@
   {
    "chain": "T50-T51-T52",
    "constraint_ms": 130,
-   "data_age_ms": 21.310347360816916,
+   "data_age_ms": 21.31016731016731,
    "periods_ms": [
     20,
     10,
@@ -360,7 +360,7 @@
   {
    "chain": "T53",
    "constraint_ms": 1,
-   "data_age_ms": 0.955701394585726,
+   "data_age_ms": 0.9525387921614337,
    "periods_ms": [
     1
    ],
@@ -369,7 +369,7 @@
   {
    "chain": "T54",
    "constraint_ms": 20,
-   "data_age_ms": 2.368983629840951,
+   "data_age_ms": 2.4157742648308687,
    "periods_ms": [
     20
    ],
@@ -380,16 +380,16 @@
  "chains_with_several_tasks": 10,
  "chains_within_constraint": 40,
  "criterion": "MAX_PROC",
- "data_age_over_constraint_max": 0.9856802941812675,
+ "data_age_over_constraint_max": 0.9857194756195866,
  "edges": 53,
  "edges_on_noc": 15,
- "f_cpu_hz": 81673000.0,
+ "f_cpu_hz": 82362000.0,
  "generation_order": {
-  "f_cpu_hz": 183276000.0,
-  "minimum_hz": 183276000.0
+  "f_cpu_hz": 188676000.0,
+  "minimum_hz": 188676000.0
  },
  "hyperperiod_ms": 1000,
- "minimum_hz": 81673000.0,
+ "minimum_hz": 82362000.0,
  "packets_per_hyperperiod": 832,
  "periods_ms": [
   1,
@@ -402,14 +402,14 @@
  ],
  "runnables": 163,
  "several_tasks_within_constraint": 10,
- "single_task_data_age_ms_max": 5.537239969145251,
+ "single_task_data_age_ms_max": 5.583861489521866,
  "tasks": 54,
  "utilization_at_minimum": {
-  "max": 0.9796315795917867,
-  "mean": 0.3124907519927026,
-  "min": 0.03771038164387252
+  "max": 0.9769133823850805,
+  "mean": 0.3145006336356572,
+  "min": 0.038123042179645954
  },
- "utilization_bound_hz": 80010000.0,
+ "utilization_bound_hz": 80461000.0,
  "variation": {
   "jobs": 260580,
   "late": 0,

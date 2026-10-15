@@ -1,9 +1,9 @@
 {
- "_doc": "experiments/automotive: engine-control workload from the application characteristics of Kramer, Ziegenbein and Hamann, Real World Automotive Benchmarks For Free, WATERS 2015 (Tables I and III to VII; time-synchronous periods only), and the analysis flow with the general phase model on the 4x4 mesh (rttools/paper/automotive.py). Paths relative to this file. kernel_cycles: t_disp, t_tick and t_rel of the image of application E (../wcet/reference_tt.json, ni_images.weird_a_gcc12.kernel); scheduler_cycles = t_tick + t_rel. kernel_cycles: t_disp, t_tick and t_rel of the image of application E (../wcet/reference_tt.json, ni_images.weird_a_gcc12.kernel); scheduler_cycles = t_tick + t_rel.",
+ "_doc": "experiments/automotive: engine-control workload from the application characteristics of Kramer, Ziegenbein and Hamann, Real World Automotive Benchmarks For Free, WATERS 2015 (Tables I and III to VII; time-synchronous periods only), and the analysis flow with the general phase model on the 4x4 mesh (rttools/paper/automotive.py). Paths relative to this file. kernel_cycles: t_disp, t_tick and t_rel of the image of CAR, which runs a tick table (../wcet/reference_tt.json, ni_images.car_full_gcc12.kernel); scheduler_cycles = t_tick + t_rel; packet_cycles: t_send = send_isr and t_recv = receive_isr_size + receive_isr_end of the same image.",
  "seed": 1,
  "chains": 40,
  "cycles_per_us": 300,
- "scheduler_cycles": 1610,
+ "scheduler_cycles": 1852,
  "weibull_shape": 0.8,
  "width": 4,
  "height": 4,
@@ -181,8 +181,12 @@
   "33-64": 0.2
  },
  "kernel_cycles": {
-  "dispatch": 558,
-  "tick": 1361,
+  "dispatch": 515,
+  "tick": 1603,
   "release": 249
+ },
+ "packet_cycles": {
+  "send": 622,
+  "receive": 4803
  }
 }
