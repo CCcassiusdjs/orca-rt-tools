@@ -158,7 +158,7 @@ def test_build_default_and_plain_crt0(tmp_path):
                          env={**os.environ, "PATH": path}).stdout.splitlines()[0]
     same_gcc = gcc.split(" ", 1)[-1].strip() == built.split(" ", 1)[-1].strip()
     for asdefs, guard, stored in ((None, True, "guard"), (PLAIN_ASDEFS, False, "isr")):
-        elf = make(ucx, path, "weird_a", asdefs=asdefs, injection="finish")
+        elf = make(ucx, path, "weird_a", asdefs=asdefs, injection="finish", f_clk="434912000")
         f = disassembly(path, elf)
         isr, di = "\n".join(f["_isr"]), "\n".join(f["_interrupt_set"])
         assert ("lw\ta5,36(sp)" in isr) == guard and ("lw\ta3,0(a1)" in di) == guard

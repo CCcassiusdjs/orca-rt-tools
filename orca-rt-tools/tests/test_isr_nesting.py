@@ -194,13 +194,14 @@ def calls(funcs, fname, target):
     return sum(1 for ln in funcs.get(fname, []) if re.search(rf"\bjal\b.*<{target}>", ln))
 
 
-def make(ucx, path, target, cc=None, asdefs=None, injection=None):
+def make(ucx, path, target, cc=None, asdefs=None, injection=None, f_clk=None):
     env = {**os.environ, "PATH": path}
     extra = ([f"CC={cc}"] if cc else []) + ([f"UCX_ASDEFS={asdefs}"] if asdefs else []) \
         + ([f"INJECTION={injection}"] if injection else [])
     # weird_a: a clock of its injection table (app/weird_a_tt.h, run VH); weird_a_data: the clock of
     # the stored image of images/tick (434.912 MHz)
-    f_clk = "449152000" if target == "weird_a" else "434912000"
+    # the clock of a stored image (BUILD.txt of experiments/wcet/images) when `f_clk` is given
+    f_clk = f_clk or ("449152000" if target == "weird_a" else "434912000")
     for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", "clean"],
                  ["make", "-s", *extra, target, "F_CLK=" + f_clk]):
         r = subprocess.run(args, cwd=ucx, env=env, capture_output=True, text=True, timeout=600)
