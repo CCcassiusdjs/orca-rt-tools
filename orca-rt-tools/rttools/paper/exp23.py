@@ -207,19 +207,12 @@ def clock_of_frequency_run(freq_metrics, cfg, map_name=None):
     return out
 
 
-def snap_to_edges(tr, half_fs):
-    """Trace with each time moved to the rising edge of the simulator
-    clock that it rounds: manycore_pe.sv prints $time (integer, unit of the
-    log) at rising edges, and edge n occurs at (2 n + 1) half fs. With a
-    period that is not a whole number of units (435.2 MHz: 2.297794 ns),
-    the printed value differs from the edge by up to half a unit; the edge
-    is the nearest one while the period exceeds one unit. The cycles
-    between two events are then whole numbers."""
-    unit_fs = round(tr.unit.seconds * 1e15)
+def edge_function(unit_fs, half_fs):
+    """Function from a time of the log (units of unit_fs) to the time of
+    the rising edge of the simulator clock that it rounds (snap_to_edges)."""
     period_fs = 2 * half_fs
     if period_fs <= unit_fs:
         raise ValueError(f"clock period of {period_fs} fs not above the log unit of {unit_fs} fs")
-
     cache = {}
 
     def edge(t):
@@ -232,7 +225,18 @@ def snap_to_edges(tr, half_fs):
             raise ValueError(f"time {t} is not within half a unit of a rising edge")
         cache[t] = e_fs / unit_fs
         return cache[t]
+    return edge
 
+
+def snap_to_edges(tr, half_fs):
+    """Trace with each time moved to the rising edge of the simulator
+    clock that it rounds: manycore_pe.sv prints $time (integer, unit of the
+    log) at rising edges, and edge n occurs at (2 n + 1) half fs. With a
+    period that is not a whole number of units (435.2 MHz: 2.297794 ns),
+    the printed value differs from the edge by up to half a unit; the edge
+    is the nearest one while the period exceeds one unit. The cycles
+    between two events are then whole numbers."""
+    edge = edge_function(round(tr.unit.seconds * 1e15), half_fs)
     from dataclasses import replace
     slices = [replace(s, start=edge(s.start), end=edge(s.end)) for s in tr.slices]
     marks = [replace(m, time=edge(m.time)) for m in tr.marks]
@@ -339,7 +343,10 @@ def load_run(log_path, cfg, unit=None, run_info="auto"):
     run_cfg = dict(cfg, clock_hz=clock["clock_hz"])
     tr = load(log_path, run_cfg, unit, clock)
     clock["edges_snapped"] = tr.meta["edges_snapped"]
-    return tr, run_cfg, Clock(tr.unit, clock["clock_hz"], clock["cycle_hz"]), clock
+    clk = Clock(tr.unit, clock["clock_hz"], clock["cycle_hz"])
+    if tr.meta["edges_snapped"]:
+        clk.edge = edge_function(round(tr.unit.seconds * 1e15), clock["half_period_fs"])
+    return tr, run_cfg, clk, clock
 
 
 class Clock:
@@ -355,6 +362,9 @@ class Clock:
         self.cycle_hz = clock_hz if cycle_hz is None else cycle_hz
         # platform seconds per second of the simulator (1.0 at F_CLK)
         self.scale = self.cycle_hz / self.hz
+        # edge(raw): raw time of the rising edge that a printed time rounds
+        # (snap_to_edges), None when the times of the log fall on the edges
+        self.edge = None
 
     def raw(self, seconds):
         """Raw units of `seconds` of platform time."""
@@ -456,6 +466,28 @@ def phase_windows(cfg):
     }
     win = release.phase_flows(instance, mapping)
     return {f["name"]: win[f["name"]] for f in cfg["flows"]}
+
+
+def config_with_costs(cfg, costs_path):
+    """Config whose characterized costs (estimate.clusters, thesis scale)
+    and scheduler cost take the rule max of a costs file of rttools.wcet
+    (rttools/wcet/costs.py): t(v) = max(cost of the config / scale, static
+    t(v)); the costs of a run with costs=max_csv_static in its RUN_INFO."""
+    from rttools.wcet import costs as wcosts
+    c = wcosts.load(costs_path)
+    est = cfg["estimate"]
+    k = est["scale"]
+    clusters = {}
+    for cluster, tasks in est["clusters"].items():
+        clusters[cluster] = []
+        for n, w in tasks:
+            if n not in c["tasks"]:
+                raise wcosts.CostsError(f"{costs_path}: no cost for task {n}")
+            clusters[cluster].append([n, max(w, c["tasks"][n] * k)])
+    sched = est["scheduler_cycles"] if c["scheduler_cycles"] is None else max(est["scheduler_cycles"],
+                                                                             c["scheduler_cycles"] * k)
+    return dict(cfg, estimate=dict(est, clusters=clusters, scheduler_cycles=sched,
+                                   costs=os.path.basename(costs_path), rule=wcosts.MAX))
 
 
 def estimates(cfg):
@@ -1304,6 +1336,9 @@ def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", list
     rel_rule = phasecheck.release_rule(info, release_rule)
     injection = ttcheck.injection_rule(info)
     costs = ttcheck.costs_of_run(info) if injection == "tt" else None
+    if costs:
+        # the model of the run: t(v) = max(characterized, static t(v) of its image)
+        cfg = config_with_costs(cfg, costs)
     windows = hyperperiods(tr, cfg, clk)
     if not windows:
         raise ValueError("the log has no complete hyperperiod after first_hyperperiod_s")

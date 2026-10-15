@@ -399,7 +399,10 @@ def analyze_run(log_path, clk, releases_raw, table, packets, phase_of, w_h=None,
     if not timers:
         return None
     ns_raw = 1e-9 / clk.unit.seconds
-    c0 = cycle_offset(timers, lambda t: clk.cycles(t * ns_raw))
+    # the TIMER lines on the rising edges of the clock, as the marks of the
+    # trace (exp23.snap_to_edges), so that c0 converts them to whole cycles
+    edge = getattr(clk, "edge", None) or (lambda t: t)
+    c0 = cycle_offset(timers, lambda t: clk.cycles(edge(t * ns_raw)))
     period = table["rows"][0]["period"] if table["rows"] else None
     grids = tick_grid(timers, period)
     unpaired_end = pair_ends(packets, ends)

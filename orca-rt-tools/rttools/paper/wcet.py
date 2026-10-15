@@ -527,15 +527,25 @@ def run_log(log, spec, image, manifest, csv_path, map_path, out_dir, arch=None):
     """Static costs of the image of an RTL run against its log (WCET-E
     after `make sim`): CPU per PE and per task, and the phase-model
     analysis of rtlapp (responses against R_bound and the deadline,
-    packets against [r, d], network, monitor) with the static t(v) of
-    that image in the CSV (a copy in `out_dir`), under the key rtlapp."""
+    packets against [r, d], network, monitor) under the key rtlapp: for a
+    run with a costs file in its RUN_INFO (costs=max_csv_static, the
+    images with the time-triggered injection), the model of the run, t(v)
+    = max(CSV, static t(v) of the costs file), and the check of the
+    injection (tt); otherwise the static t(v) of the image in the CSV (a
+    copy in `out_dir`)."""
     import shutil
+    from rttools.paper import exp23, ttcheck
     res = static(spec, out_dir, image)
     meas = measured_app(log, manifest, csv_path, map_path)
     tasks, pes = compare_app(res, meas)
-    csv_run = os.path.join(out_dir, os.path.basename(csv_path))
-    shutil.copyfile(csv_path, csv_run)
-    set_csv(os.path.join(out_dir, "costs.json"), csv_run)
+    info_path = exp23.run_info_path(log)
+    info = exp23.read_run_info(info_path) if info_path else {}
+    if ttcheck.injection_rule(info) == "tt" and ttcheck.costs_of_run(info):
+        csv_run = csv_path
+    else:
+        csv_run = os.path.join(out_dir, os.path.basename(csv_path))
+        shutil.copyfile(csv_path, csv_run)
+        set_csv(os.path.join(out_dir, "costs.json"), csv_run)
     rt = rtlapp.analyze(log, manifest, csv_run, map_path, os.path.join(out_dir, "rtlapp"), arch=arch)
     resp = rt["responses"]
     m = {"log": os.path.basename(log), "image": res["image"], "clock_hz": meas["clock_hz"], "windows": meas["windows"],
@@ -550,7 +560,8 @@ def run_log(log, spec, image, manifest, csv_path, map_path, out_dir, arch=None):
                      "all_runs_with_receptions_sound": all(x.get("run_with_receptions_sound") is not False
                                                            for x in tasks.values())},
          "rtlapp": {k: rt[k] for k in ("clock", "model", "releases", "markers", "responses", "cpu_windows",
-                                       "cpu_attributed", "packets", "network", "monitor", "phase_conformance") if k in rt}}
+                                       "cpu_attributed", "packets", "network", "monitor", "phase_conformance",
+                                       "injection", "costs", "tt") if k in rt and rt[k] is not None}}
     mdl = rt["model"]
     pk = rt["packets"]
     mon = rt.get("monitor") or {}

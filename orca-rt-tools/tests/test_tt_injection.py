@@ -211,12 +211,15 @@ def synth_log(base_log, base_info, out_dir, packets, pes, period, f_hz, perturb=
     """Copy of a stored log without its FLIT lines, plus TIMER lines (ticks
     of every PE in `pes` and a compare interrupt per packet) and FLIT TX, RX
     and END lines of `packets` ({src, dst (monitor labels), tag, size, hops,
-    tau, s16}); RUN_INFO with injection=tt. cyc = t f_hz / 1e9."""
+    tau, s16}); RUN_INFO with injection=tt. The line of cycle c has the
+    $time (whole ns) of the rising edge (2 c + 1) half fs of the clock of
+    f_hz, as the monitor prints it."""
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(base_log) as f:
         base = [ln for ln in f if "FLIT " not in ln and "TIMER " not in ln]
     rel = [int(m.group(1)) for m in (re.search(r"workflow iteration at (\d+) ns", ln) for ln in base) if m]
-    ns = (lambda c: int(round(c * 1e9 / f_hz)))
+    half = round(5e14 / f_hz)
+    ns = (lambda c: int(round((2 * c + 1) * half / 1e6)))
     first = int(round(rel[0] * f_hz / 1e9)) + DELTA
     last = int(round(rel[-1] * f_hz / 1e9)) + 3 * period
     extra = []
