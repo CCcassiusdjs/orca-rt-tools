@@ -382,6 +382,14 @@
     "f_cpu_hz": 380000000.0,
     "minimum_hz": 393997192.3828125
    },
+   "event_triggered_runs": {
+    "beta": 0.794,
+    "f_cpu_hz": 380000000.0,
+    "minimum_hz": 457218170.1660156,
+    "run": "VCV",
+    "sources": 16,
+    "task": "FDF2"
+   },
    "flow": {
     "f_cpu_hz": 380000000.0,
     "minimum_hz": 441082000.7324219
@@ -444,6 +452,14 @@
    "event_triggered_no_wni": {
     "f_cpu_hz": 443346000.0,
     "minimum_hz": 443347930.9082031
+   },
+   "event_triggered_runs": {
+    "beta": 0.762,
+    "f_cpu_hz": 443346000.0,
+    "minimum_hz": 573894500.7324219,
+    "run": "VMA",
+    "sources": 21,
+    "task": "CARV.FDF2"
    },
    "flow": {
     "f_cpu_hz": 443346000.0,
@@ -555,6 +571,14 @@
     "f_cpu_hz": 434900000.0,
     "minimum_hz": 434902191.1621094
    },
+   "event_triggered_runs": {
+    "beta": 0.587,
+    "f_cpu_hz": 434900000.0,
+    "minimum_hz": 471763610.83984375,
+    "run": "VH",
+    "sources": 5,
+    "task": "A"
+   },
    "flow": {
     "f_cpu_hz": 434900000.0,
     "minimum_hz": 449150085.44921875
@@ -649,6 +673,14 @@
    "event_triggered_no_wni": {
     "f_cpu_hz": 220388000.0,
     "minimum_hz": 220390319.82421875
+   },
+   "event_triggered_runs": {
+    "beta": 0.22,
+    "f_cpu_hz": 220388000.0,
+    "minimum_hz": 280822753.90625,
+    "run": "W5",
+    "sources": 5,
+    "task": "C"
    },
    "flow": {
     "f_cpu_hz": 220388000.0,

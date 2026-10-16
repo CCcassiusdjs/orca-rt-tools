@@ -7,7 +7,7 @@
 #                 CV2, about 1 min)
 #   make <dir>    one directory of DIRS, for example make zll
 # Each directory has its own Makefile with the long targets (CAR, all
-# graphs of Table 7.1, Questa simulation of exp23).
+# random graphs of Section 5 of the paper, Questa simulation of exp23).
 
 PYTHON ?= python3
 GHDL   ?= ghdl
@@ -19,12 +19,13 @@ DIRS   += multiapp
 DIRS   += tt
 # cputime: CPU time of the stored runs with the kernel work in idle slices, seconds
 DIRS   += cputime
-# ablation: terms of the flow and the event-triggered baseline, about 20 s
+# car-v-rtl: analysis of the stored RTL runs of CAR-V (CV, CV2, TCV, UCV, VCV), about 10 s
+DIRS   += car-v-rtl
+# ablation: terms of the flow and the event-triggered baseline (reads the job tables of exp23, wcet,
+# multiapp and car-v-rtl for the beta of the runs), about 1 min
 DIRS   += ablation
 # automotive: engine-control workload (Kramer et al., WATERS 2015), general phase model, about 10 s
 DIRS   += automotive
-# car-v-rtl: analysis of the stored RTL runs of CAR-V (CV, CV2, TCV, UCV, VCV), about 10 s
-DIRS   += car-v-rtl
 
 .PHONY: all clean $(DIRS)
 

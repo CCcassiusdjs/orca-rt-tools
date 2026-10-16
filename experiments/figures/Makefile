@@ -7,7 +7,7 @@
 #   make exp23        Gantt of one hyperperiod, response of each iteration and flow table from $(LOG)
 #   make check        compare the metrics with reference_contraction.json and reference_exp23.json
 #
-# CAR, the criterion of application E and the summary of Table 7.1 come from
+# CAR, the criterion of application E and the summary of the random graphs come from
 # experiments/ch7 (make car, make graphs full stats).
 
 PYTHON  ?= python3

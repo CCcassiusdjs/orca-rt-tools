@@ -1,5 +1,5 @@
 {
- "_doc": "experiments/ablation: the applications of ../tt/config.json (models of the runs of round r11g), the deadline sweep (D of every task, s) and the skew bound sigma added to w_NI and to both ends of the window of each receive handler (cycles; 3,147 cycles: the largest blocking term B of the images of the runs, ../wcet/reference_tt.json ni_images, the delay of the entry of a common interrupt that would start TIMER1 of every PE). et_runs: stored RTL runs with event-triggered injection (reference metrics of experiments/car-v-rtl) whose measured packet latencies the WCTT bound must cover. rttools/paper/ablation.py; paths relative to this file.",
+ "_doc": "experiments/ablation: the applications of ../tt/config.json (models of the runs of round r11g), the deadline sweep (D of every task, s) and the skew bound sigma added to w_NI and to both ends of the window of each receive handler (cycles; 3,147 cycles: the largest blocking term B of the images of the runs, ../wcet/reference_tt.json ni_images, the delay of the entry of a common interrupt that would start TIMER1 of every PE). et_runs: stored RTL runs with event-triggered injection (reference metrics of experiments/car-v-rtl) whose measured packet latencies the WCTT bound must cover. rttools/paper/ablation.py; paths relative to this file. beta_runs: the stored run of each application and the tt_jobs.csv of its pipeline (built by make -C experiments before this directory), from which beta_of_runs takes the beta of the run (event_triggered_runs).",
  "include": "../tt/config.json",
  "deadline_sweep_s": {
   "E": [
@@ -29,5 +29,32 @@
     "clock_hz": 380000000
    }
   ]
+ },
+ "beta_runs": {
+  "E": {
+   "run": "VH",
+   "jobs": {
+    "-": "../exp23/build/results_VH/tt_jobs.csv"
+   }
+  },
+  "CAR-V": {
+   "run": "VCV",
+   "jobs": {
+    "-": "../car-v-rtl/build/results_VCV/tt_jobs.csv"
+   }
+  },
+  "WCET-E": {
+   "run": "W5",
+   "jobs": {
+    "-": "../wcet/build/run_W5/rtlapp/tt_jobs.csv"
+   }
+  },
+  "CARV-E": {
+   "run": "VMA",
+   "jobs": {
+    "CARV": "../multiapp/build/results_VMA/CARV/tt_jobs.csv",
+    "E": "../multiapp/build/results_VMA/E/tt_jobs.csv"
+   }
+  }
  }
 }

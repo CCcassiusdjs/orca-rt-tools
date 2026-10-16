@@ -149,6 +149,22 @@
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "section_max_cycles": 1151,
+      "handler_cycles": {
+       "inject": 626,
+       "rx_size": 3178,
+       "rx_end": 703
+      },
+      "longer_than_lead": [
+       "rx_size"
+      ],
+      "checks": 5,
+      "violations": 0,
+      "margin_min_cycles": 6720,
+      "holds": true
+     },
      "period_cycles": 224576,
      "response_bound": {
       "cycles": 785171,
@@ -253,6 +269,22 @@
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "section_max_cycles": 1151,
+      "handler_cycles": {
+       "inject": 626,
+       "rx_size": 3178,
+       "rx_end": 703
+      },
+      "longer_than_lead": [
+       "rx_size"
+      ],
+      "checks": 5,
+      "violations": 0,
+      "margin_min_cycles": 32144,
+      "holds": true
+     },
      "period_cycles": 250000,
      "response_bound": {
       "cycles": 861443,
@@ -713,6 +745,22 @@
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 16,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "section_max_cycles": 1098,
+      "handler_cycles": {
+       "inject": 626,
+       "rx_size": 2474,
+       "rx_end": 685
+      },
+      "longer_than_lead": [
+       "rx_size"
+      ],
+      "checks": 16,
+      "violations": 0,
+      "margin_min_cycles": 3296,
+      "holds": true
+     },
      "period_cycles": 220544,
      "response_bound": {
       "cycles": 977176,
@@ -1083,6 +1131,22 @@
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "section_max_cycles": 1151,
+      "handler_cycles": {
+       "inject": 626,
+       "rx_size": 3178,
+       "rx_end": 703
+      },
+      "longer_than_lead": [
+       "rx_size"
+      ],
+      "checks": 5,
+      "violations": 0,
+      "margin_min_cycles": 6227,
+      "holds": true
+     },
      "period_cycles": 117328,
      "response_bound": {
       "cycles": 398380,
@@ -1187,6 +1251,22 @@
      "cpu_feasible": true,
      "link_schedule_feasible": true,
      "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "section_max_cycles": 1151,
+      "handler_cycles": {
+       "inject": 626,
+       "rx_size": 3178,
+       "rx_end": 703
+      },
+      "longer_than_lead": [
+       "rx_size"
+      ],
+      "checks": 5,
+      "violations": 0,
+      "margin_min_cycles": 138899,
+      "holds": true
+     },
      "period_cycles": 250000,
      "response_bound": {
       "cycles": 796396,
@@ -2063,6 +2143,22 @@
      },
      "link_schedule_feasible": true,
      "packets_between_pes": 21,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "section_max_cycles": 1151,
+      "handler_cycles": {
+       "inject": 626,
+       "rx_size": 3178,
+       "rx_end": 703
+      },
+      "longer_than_lead": [
+       "rx_size"
+      ],
+      "checks": 21,
+      "violations": 0,
+      "margin_min_cycles": 11526,
+      "holds": true
+     },
      "period_cycles": 228800,
      "sim_ns": 11500000,
      "sim_ns_min": 11207605,
@@ -2549,6 +2645,22 @@
      "periodic_from_hyperperiod": 0,
      "link_schedule_feasible": true,
      "packets_between_pes": 347,
+     "premise_release": {
+      "lead_cycles": 1621,
+      "section_max_cycles": 1191,
+      "handler_cycles": {
+       "inject": 626,
+       "rx_size": 3882,
+       "rx_end": 929
+      },
+      "longer_than_lead": [
+       "rx_size"
+      ],
+      "checks": 347,
+      "violations": 0,
+      "margin_min_cycles": 2940,
+      "holds": true
+     },
      "chains": 34,
      "packets_per_hyperperiod": 347,
      "data_age": {

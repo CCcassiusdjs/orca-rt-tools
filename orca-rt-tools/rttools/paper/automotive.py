@@ -14,7 +14,8 @@ III to VII of the paper):
 | Cause-effect chains | `chains` chains; the number of activation patterns (periods) of a chain from Table VI, the runnables per pattern from Table VII; the periods of the time-synchronous patterns of Table III (angle-synchronous and interrupt-driven runnables left out), drawn by their shares; consecutive patterns of a chain have periods that divide one another (the flow period must be a multiple of the period of its source, Section 6.6), and no period repeats in a chain |
 | Tasks | the runnables of one activation pattern of a chain form one task (Section II.A of the paper: runnables with the same activation pattern are mapped to the same task), which runs them in their chain order in one job |
 | Execution times | ACET of each runnable from a Weibull distribution (shape `weibull_shape`) truncated to [min, max] of Table IV, with the scale that gives the average of Table IV; BCET = ACET x U(fmin, fmax) and WCET = ACET x U(fmin, fmax) of Table V |
-| Cost | c(v) = round(WCET(v) x `cycles_per_us`) + t_disp + t_tick + t_rel (`kernel_cycles`: the kernel terms of the image of CAR, which runs a tick table, experiments/wcet/reference_tt.json), WCET(v) the sum of the WCETs of the runnables of task v; BCET(v) the sum of their BCETs; each later dispatch costs `scheduler_cycles` = t_tick + t_rel; after the mapping, c(v) adds t_send per outgoing and t_recv per incoming edge between distinct PEs (`packet_cycles`, the handler terms of the same image, Eq. (6) of the paper; the mapping uses the cost without them) |
+| Cost | c(v) = round(WCET(v) x `cycles_per_us`) + t_disp + t_tick + t_rel (`kernel_cycles`: the kernel terms of the image of CAR, which runs a tick table, experiments/wcet/reference_tt.json), WCET(v) the sum of the WCETs of the runnables of task v; BCET(v) the sum of their BCETs; each later dispatch costs `scheduler_cycles` = t_tick + t_rel; after the mapping, c(v) adds t_send per outgoing and t_recv per incoming edge between distinct PEs (`packet_cycles`, the handler terms of the same image, Eq. (6) of the paper) and the driver sections of the job in the same image (`driver_cycles`: the release wait per job, the queue insertion per edge between distinct PEs, the local send per edge on one PE, the read per input edge); the mapping uses the cost without them |
+| Handlers | the handler charge of Eq. (7) of the paper (graph attribute `handlers`: inject = t_send, receive = t_recv, budget B_v = the packet cycles of v), as for CAR |
 | Dispatch order | on each PE, by period, shortest first (sequence rows of the application file); the run also reports the minimum frequency with the creation order of generation and the kernel rule (same-PE predecessors first) |
 | Edges | consecutive tasks of a chain, and one edge from the last task of an earlier chain with a harmonic period to the first task of each other chain (inter-task communication), so the graph is acyclic; payload of each edge: a label size from Table I; period of each flow: the period of its source (every job sends) |
 | End-to-end constraint | the sum of the periods of the activation patterns of the chain (Section IV.E of the paper) |
@@ -218,18 +219,38 @@ def mapping(app, cfg):
 
 def with_packet_terms(app, cfg, task_node):
     """app with t_send per outgoing and t_recv per incoming edge between
-    distinct PEs added to the cost of each task (Eq. (6) of the paper), and
-    these cycles per task in app["packet_cycles"]."""
+    distinct PEs (Eq. (6) of the paper) and the driver sections of the job
+    (`driver_cycles`) added to the cost of each task; the packet cycles of
+    each task in app["packet_cycles"] (the budget B_v of the handler charge)
+    and the cycles of both terms in app["platform_cycles"]."""
     pc = cfg.get("packet_cycles", {"send": 0, "receive": 0})
-    add = {t: 0 for t, *_ in app["tasks"]}
+    dc = cfg.get("driver_cycles", {"job": 0, "send_noc": 0, "send_local": 0, "read": 0})
+    pk = {t: 0 for t, *_ in app["tasks"]}
+    drv = {t: dc["job"] for t, *_ in app["tasks"]}
     for a, b, _, _ in app["flows"]:
         if task_node[a] != task_node[b]:
-            add[a] += pc["send"]
-            add[b] += pc["receive"]
+            pk[a] += pc["send"]
+            pk[b] += pc["receive"]
+            drv[a] += dc["send_noc"]
+        else:
+            drv[a] += dc["send_local"]
+        drv[b] += dc["read"]
+    add = {t: pk[t] + drv[t] for t in pk}
     out = dict(app)
     out["tasks"] = [(t, T, c + add[t], *r) for t, T, c, *r in app["tasks"]]
-    out["packet_cycles"] = add
+    out["packet_cycles"] = pk
+    out["platform_cycles"] = add
     return out
+
+
+def set_handlers(g, app, cfg):
+    """Handler charge of Eq. (7) of the paper on graph g: the handler
+    terms of the image and the budget B_v of each task."""
+    pc = cfg.get("packet_cycles")
+    if pc:
+        g.graph["handlers"] = {"inject": pc["send"], "receive": pc["receive"],
+                               "budget": {n: app["packet_cycles"][str(d.get("label", n))]
+                                          for n, d in g.nodes(data=True)}}
 
 
 def variation(spec, sched, app, cfg):
@@ -252,7 +273,7 @@ def variation(spec, sched, app, cfg):
             e, d = kc["tick"] + kc["release"], kc["dispatch"]
             for t in ts:
                 lo, hi = bw[t]
-                pk = app.get("packet_cycles", {}).get(t, 0)
+                pk = app.get("platform_cycles", {}).get(t, 0)
                 work = min(spec.cost[t] - d - e, max(1, round(rnd.uniform(lo, hi) * cyc)) + pk)
                 tasks.append({"name": t, "cost": work + d, "period": spec.ticks[t], "offset": spec.offsets[t]})
             run = ucx.simulate(tasks, sched.P, 3 * spec.hyper_ticks, e, tail=3 * spec.hyper_ticks,
@@ -283,6 +304,7 @@ def run(cfg_path, out_dir):
         noc = nocparser.loadFromFile(os.path.join(base, cfg["arch"]))
     entries = mapfile.from_dict(mres["mapping"])
     g.graph["chain_constraints"] = [(c["tasks"], c["constraint_ms"] / 1000) for c in app["chains"]]
+    set_handlers(g, app, cfg)
     r = multirate.graph_rates(g)
     spec = multirate.spec_from_graph(g, entries, r, noc)
     with tnet.quiet():
@@ -291,6 +313,7 @@ def run(cfg_path, out_dir):
     with tnet.quiet():
         g2, name2 = appparser.loadFromFile(gen_path)
         g2.graph["chain_constraints"] = g.graph["chain_constraints"]
+        set_handlers(g2, app, cfg)
         gen = search.minimum_frequency(g2, noc, entries, name2, search_config(cfg["f0_hz"]))
     out = {"_doc": "rttools.paper.automotive run --config " + os.path.basename(cfg_path),
            "runnables": app["runnables"], "tasks": len(app["tasks"]), "edges": len(app["flows"]),
@@ -298,6 +321,7 @@ def run(cfg_path, out_dir):
            "periods_ms": sorted({int(T * 1000) for _, T, *_ in app["tasks"]}),
            "wcet_us": {"min": min(w for *_, w, _ in app["tasks"]), "max": max(w for *_, w, _ in app["tasks"])},
            "criterion": mres["criterion"], "f_cpu_hz": freq["f_cpu_hz"], "minimum_hz": fmin,
+           "label_bytes": {"min": min(d for *_, d in app["flows"]), "max": max(d for *_, d in app["flows"])},
            "generation_order": {"f_cpu_hz": gen["f_cpu_hz"], "minimum_hz": gen["frequency_hz"]},
            "utilization_bound_hz": multirate.frequency_of(multirate.utilization_bound(spec), spec.phase_s),
            "edges_on_noc": sum(1 for a, b, _, _ in app["flows"] if mres["mapping"][a] != mres["mapping"][b])}

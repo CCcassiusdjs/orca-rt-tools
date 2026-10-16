@@ -52,7 +52,7 @@ def load_config(path):
             (".csv", ".map", ".gml", ".json"))) else v
     for a in cfg["apps"].values():
         a.setdefault("f0_hz", cfg["f0_hz"])
-        for k in ("csv", "map", "arch", "costs", "composition", "manifest", "exp23_config"):
+        for k in ("csv", "map", "arch", "costs", "composition", "manifest", "exp23_config", "terms"):
             if k in a:
                 a[k] = rel(a[k])
     return cfg
@@ -150,6 +150,7 @@ def run_single(name, a):
             rows = tt_rows(g, noc, entries, appname, f)
             r["link_schedule_feasible"] = True
             r["packets_between_pes"] = len(rows["rows"])
+            r["premise_release"] = _premise(a, rows["rows"])
         except ValueError as e:
             r["link_schedule_feasible"] = False
             r["link_schedule_error"] = str(e)
@@ -196,6 +197,7 @@ def run_composition(name, a):
             rows = tt.union(comp, f)
         r["link_schedule_feasible"] = True
         r["packets_between_pes"] = len(rows["rows"])
+        r["premise_release"] = _premise(a, rows["rows"])
     except ValueError as e:
         r["link_schedule_feasible"] = False
         r["link_schedule_error"] = str(e)
@@ -252,6 +254,7 @@ def run_multirate(name, a):
         rows = tt_rows(g, noc, entries, appname, f)
         r["link_schedule_feasible"] = True
         r["packets_between_pes"] = len(rows["rows"])
+        r["premise_release"] = _premise(a, rows["rows"])
     except ValueError as e:
         r["link_schedule_feasible"] = False
         r["link_schedule_error"] = str(e)
@@ -268,6 +271,63 @@ def run_multirate(name, a):
     r["feasible"] = bool(sched.feasible) and r["link_schedule_feasible"]
     out["runs"][a["runs"]["flow"]] = r
     return out
+
+
+def premise_release(rows, lead, terms):
+    """Premise (ii) of the paper on a link schedule: the release handler of
+    each phase runs on every PE before the tick of that phase.
+
+    The release request of the tick kP comes `lead` cycles before it (the
+    generator raises it at a multiple of the phase from reset; the tick
+    timers start `lead` cycles after reset). The CPU enters the interrupt
+    routine for the request as soon as the activity with interrupts disabled
+    in progress at kP - lead ends; the routine reads the pending causes then,
+    before the tick, when that activity ends before kP. The activity is a
+    kernel section (at most max(sections) cycles) or one interrupt routine
+    with the handler of one packet (the network interface of a PE serves one
+    packet at a time in the link schedule): send_isr at the source, and
+    receive_isr_size and receive_isr_end at the target, each plus
+    IRQ_DECISION. A handler shorter than `lead` ends before kP. A longer
+    handler of packet i starts at or after s_i and ends by its latest
+    instant (the size-flit handler by s_i + o_i - NI_RX_END_CYCLES, the
+    end-of-reception handler by s_i + o_i, the injection by s_i +
+    NI_INJECT_CYCLES), so the check requires, for every packet with
+    s_i <= kP - lead, that this instant precede kP.
+
+    `terms`: {"kernel": {...}, "sections": {...}} of the image
+    (experiments/wcet/reference_tt.json, ni_images). Returns the lead, the
+    handlers longer than the lead, the packets checked, the violations and
+    the smallest margin (kP minus the latest end, cycles)."""
+    from rttools.wcet import ucx
+    k = terms["kernel"]
+    dur = {"inject": k["send_isr"] + ucx.IRQ_DECISION, "rx_size": k["receive_isr_size"] + ucx.IRQ_DECISION,
+           "rx_end": k["receive_isr_end"] + ucx.IRQ_DECISION}
+    section = max(v for v in terms["sections"].values())
+    late = {"inject": lambda r: r["s"] + router.NI_INJECT_CYCLES,
+            "rx_size": lambda r: r["s"] + r["occupancy"] - router.NI_RX_END_CYCLES,
+            "rx_end": lambda r: r["s"] + r["occupancy"]}
+    long_ = sorted(h for h, d in dur.items() if d >= lead)
+    checked = violations = 0
+    margin = None
+    for r in rows:
+        P = r["period"]
+        kP = -(-(r["s"] + lead) // P) * P       # first tick whose request comes at or after s
+        for h in long_:
+            checked += 1
+            m = kP - late[h](r)
+            violations += m <= 0
+            margin = m if margin is None else min(margin, m)
+    return {"lead_cycles": lead, "section_max_cycles": section, "handler_cycles": dur,
+            "longer_than_lead": long_, "checks": checked, "violations": violations, "margin_min_cycles": margin,
+            "holds": section < lead and violations == 0}
+
+
+def _premise(a, rows):
+    if "lead_cycles" not in a:
+        return None
+    with open(a["terms"]) as f:
+        img = json.load(f)["ni_images"][a["terms_image"]]
+    return premise_release(rows, a["lead_cycles"], img)
 
 
 KINDS = {"single": run_single, "composition": run_composition, "multirate": run_multirate}
@@ -295,6 +355,8 @@ def run(cfg_path, out_dir):
         for r in m["apps"][name]["runs"].values():
             r["table"] = table_check(a["image"], r["clock_hz"], a["costs"])
             r["feasible"] = r["feasible"] and all(r["table"].values())
+            if r.get("premise_release") is not None:
+                r["feasible"] = r["feasible"] and r["premise_release"]["holds"]
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
         json.dump(m, f, indent=1, default=str)

@@ -1,5 +1,5 @@
 {
- "_doc": "experiments/automotive: engine-control workload from the application characteristics of Kramer, Ziegenbein and Hamann, Real World Automotive Benchmarks For Free, WATERS 2015 (Tables I and III to VII; time-synchronous periods only), and the analysis flow with the general phase model on the 4x4 mesh (rttools/paper/automotive.py). Paths relative to this file. kernel_cycles: t_disp, t_tick and t_rel of the image of CAR, which runs a tick table (../wcet/reference_tt.json, ni_images.car_full_gcc12.kernel); scheduler_cycles = t_tick + t_rel; packet_cycles: t_send = send_isr and t_recv = receive_isr_size + receive_isr_end of the same image.",
+ "_doc": "experiments/automotive: engine-control workload from the application characteristics of Kramer, Ziegenbein and Hamann, Real World Automotive Benchmarks For Free, WATERS 2015 (Tables I and III to VII; time-synchronous periods only), and the analysis flow with the general phase model on the 4x4 mesh (rttools/paper/automotive.py). Paths relative to this file. kernel_cycles: t_disp, t_tick and t_rel of the image of CAR, which runs a tick table (../wcet/reference_tt.json, ni_images.car_full_gcc12.kernel); scheduler_cycles = t_tick + t_rel; packet_cycles: t_send = send_isr and t_recv = receive_isr_size + receive_isr_end of the same image. driver_cycles: sections of the same image (wait_release per job, tt_insert per edge between distinct PEs, send_local per edge on one PE, read_one per input edge). The flow applies the handler charge of Eq. (7) with inject = send and receive of packet_cycles.",
  "seed": 1,
  "chains": 40,
  "cycles_per_us": 300,
@@ -188,5 +188,11 @@
  "packet_cycles": {
   "send": 622,
   "receive": 4803
+ },
+ "driver_cycles": {
+  "job": 1001,
+  "send_noc": 1098,
+  "send_local": 1191,
+  "read": 332
  }
 }

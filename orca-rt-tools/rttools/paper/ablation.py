@@ -15,6 +15,7 @@ compose.minimum_frequency) under each setting:
 | no_wni_schedule_windows | no_wni with the handler windows of the link schedule (compare with event_triggered_no_wni) |
 | schedule_windows | the flow, and a candidate whose tasks fail Eq. (7) with the windows [F(u), a] passes when they fit with the handlers of each packet inside its reservation [s, s + o_i] of the link schedule (search.schedule_windows_fit) |
 | event_triggered | one release period (single applications and the composition): no link schedule; each packet enters the NoC when its job sends it, and a candidate is feasible when F(u) + WCTT_i <= a_{i,j} and F(u) + WCTT_i <= the end of the phase of its release for every packet (rttools/modules/routing/wctt.py: polling arbiter of the Hermes router, DDMA interleaving, every packet of the phase can meet every other) and every task ends within its phase with the handlers of each packet charged inside [earliest release, F(u) + WCTT] (fixed point of the finishes and the windows) |
+| event_triggered_runs | as event_triggered_b50 with the beta of the stored run (beta_of_runs: the smallest ratio of the measured finish of a source task of a flow between PEs to its F(u)) |
 | event_triggered_b50, _b90, _b100 | as event_triggered with the release jitter of each packet limited to [phase start + beta F(u), F(u)] (beta = 1: every job executes for exactly t(v)); two packets meet only when their windows [earliest release, F(u) + WCTT] meet (least fixed point, wctt.wctt) |
 | event_triggered_no_wni | as event_triggered with w_NI = 0 (no injection or receive handlers in the WCTT); compare with no_wni |
 
@@ -307,6 +308,50 @@ def et_run(a, run, base):
             "slack_min": min(v["slack_min"] for v in flows.values())}
 
 
+def _sources(a):
+    """{application name: labels of the tasks with a flow to another PE}."""
+    out = {}
+    if a["kind"] == "composition":
+        from rttools.multiapp import compose
+        spec = compose.read_spec(a["composition"])
+        with tnet.quiet():
+            comp = compose.load(spec)
+        apps = [(x["name"], x["graph"], x["entries"]) for x in comp["apps"]]
+    else:
+        g, appname, _, entries, _ = ttflow.load_app(a["csv"], a["map"], a["arch"], a["costs"])
+        apps = [(None, g, entries)]
+    for name, g, entries in apps:
+        node = {t: str(e["node"]) for e in entries for t in e["tasks"]}
+        lab = {n: str(d.get("label", n)) for n, d in g.nodes(data=True)}
+        key = lambda n: node.get(n, node.get(lab[n]))
+        out[name] = sorted({lab[u] for u, v in g.edges() if key(u) != key(v)})
+    return out
+
+
+def beta_of_runs(a, jobs, base):
+    """Largest beta whose interval [phase start + beta F(u), F(u)] holds the
+    finish of every job of a source task u of a flow between PEs in the
+    stored run: min over those jobs of (end - tick of its phase) / F(u)
+    (tt_jobs.csv of the run: after_tick, bound). `jobs`: {application name
+    (None for one application): path of tt_jobs.csv}."""
+    import csv
+    srcs = _sources(a)
+    ratios = {}
+    for name, path in jobs.items():
+        full = os.path.join(base, path)
+        if not os.path.exists(full):
+            raise SystemExit(f"{full} is missing: run the pipeline of the run first (make -C experiments)")
+        with open(full) as fh:
+            for r in csv.DictReader(fh):
+                t = r["task"]
+                if t in srcs[None if name == "-" else name]:
+                    x = float(r["after_tick"]) / float(r["bound"])
+                    k = t if name == "-" else name + "." + t
+                    ratios[k] = min(ratios.get(k, x), x)
+    b = min(ratios.values())
+    return {"beta": round(b, 3), "task": min(ratios, key=ratios.get), "sources": len(ratios)}
+
+
 def run(cfg_path, out_dir):
     with open(cfg_path) as fh:
         own = json.load(fh)
@@ -315,6 +360,7 @@ def run(cfg_path, out_dir):
         cfg["deadline_sweep_s"] = own.get("deadline_sweep_s", {})
         cfg["skew_sigma_cycles"] = own.get("skew_sigma_cycles")
         cfg["et_runs"] = own.get("et_runs", {})
+        cfg["beta_runs"] = own.get("beta_runs", {})
     else:
         cfg = ttflow.load_config(cfg_path)
     out = {"_doc": "rttools.paper.ablation run --config " + os.path.basename(cfg_path), "apps": {}}
@@ -336,6 +382,14 @@ def run(cfg_path, out_dir):
                     row[key] = {"f_cpu_hz": et["f_cpu_hz"], "minimum_hz": et["frequency_hz"]}
                     if et["frequency_hz"] is not None and a["kind"] == "single" and key == "event_triggered":
                         row[key]["packets"] = wctt_rows(a, et["frequency_hz"])
+            br = cfg.get("beta_runs", {}).get(name)
+            if br:
+                b = beta_of_runs(a, br["jobs"], os.path.dirname(os.path.abspath(cfg_path)))
+                with setting(SETTINGS["flow"]):
+                    et = (_single(a, schedule=event_triggered_jitter(b["beta"])) if a["kind"] == "single"
+                          else _composition(a, et=True, beta=b["beta"]))
+                row["event_triggered_runs"] = dict(b, run=br["run"], f_cpu_hz=et["f_cpu_hz"],
+                                                   minimum_hz=et["frequency_hz"])
         if a["kind"] == "single":
             from rttools.paper import exp23
             with setting(SETTINGS["flow"]):
