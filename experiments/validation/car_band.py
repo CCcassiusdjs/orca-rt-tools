@@ -27,7 +27,7 @@ spec = multirate.spec_from_graph(g, entries, multirate.graph_rates(g), noc)
 
 def deadline_phases(f):
     """Phase index of the deadline (start of the reader job) of every packet, first
-    round of the fixed point (no handler charge), and the period P in cycles."""
+    round of the handler iteration (no handler charge), and the period P in cycles."""
     P = math.floor(spec.phase_s * Fraction(f))
     with tnet.quiet():
         inst = instantiator.createInstance(g, noc, f)

@@ -619,7 +619,7 @@ def _by_flow(rows):
 def timing(cfg_path, out_dir, repeats=5):
     """Wall time of the analysis flow (Section 7.1 of the paper) with time.perf_counter, median of
     `repeats` runs: steps 1 to 6 for E and CAR-V (ORT/GCM and the Spiral Mapping on the task graph,
-    then search.minimum_frequency with the fixed point of the handler charge), steps 3 to 6 for
+    then search.minimum_frequency, which iterates the handler charge until it repeats), steps 3 to 6 for
     CAR-FULL (mapping file of the experiments). Writes timing.json with the CPU model."""
     import platform
     import statistics
