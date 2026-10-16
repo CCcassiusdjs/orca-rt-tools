@@ -8,6 +8,8 @@ needs a higher clock than the event-triggered baseline; the WCTT covers the
 measured latencies of the stored event-triggered runs."""
 import os
 
+import pytest
+
 from rttools.modules.routing import router, wctt
 from rttools.paper import ablation, cputime
 from tests.conftest import REPO_ROOT
@@ -80,7 +82,14 @@ def test_wctt_offsets_remove_packets_that_cannot_meet():
 
 
 def test_reference(tmp_path):
-    m = ablation.run(os.path.join(EXP, "ablation", "config.json"), str(tmp_path))
+    # the ablation reads the job tables of the stored runs, which the pipelines of exp23, wcet,
+    # multiapp and car-v-rtl write (make -C experiments); without them the reference is checked by make
+    try:
+        m = ablation.run(os.path.join(EXP, "ablation", "config.json"), str(tmp_path))
+    except SystemExit as e:
+        if "is missing" in str(e):
+            pytest.skip("run make -C experiments exp23 wcet multiapp car-v-rtl first")
+        raise
     assert cputime.check(os.path.join(tmp_path, "metrics.json"), os.path.join(EXP, "ablation", "reference.json"))
     for name, row in m["apps"].items():
         if "event_triggered" in row:

@@ -616,14 +616,65 @@ def _by_flow(rows):
     return out
 
 
+def timing(cfg_path, out_dir, repeats=5):
+    """Wall time of the analysis flow (Section 7.1 of the paper) with time.perf_counter, median of
+    `repeats` runs: steps 1 to 6 for E and CAR-V (ORT/GCM and the Spiral Mapping on the task graph,
+    then search.minimum_frequency, which iterates the handler charge until it repeats), steps 3 to 6 for
+    CAR-FULL (mapping file of the experiments). Writes timing.json with the CPU model."""
+    import platform
+    import statistics
+    import time
+    from rttools.modules.mapping import mapfile, spiral
+    cfg = load_config(cfg_path)
+    out = {"_doc": "rttools.paper.ttflow timing --config " + os.path.basename(cfg_path),
+           "cpu": _cpu_model(), "python": platform.python_version(), "repeats": repeats, "apps": {}}
+    for name, steps in (("E", "1-6"), ("CAR-V", "1-6"), ("CAR-FULL", "3-6")):
+        a = cfg["apps"][name]
+        times = []
+        for _ in range(repeats):
+            t0 = time.perf_counter()
+            g, appname, noc, entries, costs = load_app(a["csv"], a["map"], a["arch"], a["costs"])
+            if steps == "1-6":
+                xs = [int(d["X"]) for _, d in noc.nodes(data=True)]
+                ys = [int(d["Y"]) for _, d in noc.nodes(data=True)]
+                tasks, edges = spiral.from_networkx(g)
+                res = spiral.map_application(tasks, edges, max(xs) + 1, max(ys) + 1)
+                entries = mapfile.from_dict(res["mapping"])
+            with tnet.quiet():
+                freq = search.minimum_frequency(g, noc, entries, appname, search_config(a["f0_hz"]))
+            times.append(time.perf_counter() - t0)
+        out["apps"][name] = {"steps": steps, "seconds_median": statistics.median(times),
+                             "seconds": times, "minimum_hz": freq["frequency_hz"]}
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "timing.json"), "w") as fh:
+        json.dump(out, fh, indent=1, sort_keys=True)
+    return out
+
+
+def _cpu_model():
+    try:
+        with open("/proc/cpuinfo") as fh:
+            for line in fh:
+                if line.startswith("model name"):
+                    return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    import platform
+    return platform.processor()
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="rttools.paper.ttflow", description=__doc__.split("\n\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
-    for c in ("run", "tables"):
+    for c in ("run", "tables", "timing"):
         a = sub.add_parser(c)
         a.add_argument("--config", required=True)
         a.add_argument("--out", required=True)
     args = p.parse_args(argv)
+    if args.cmd == "timing":
+        m = timing(args.config, args.out)
+        print(json.dumps({k: (v["steps"], round(v["seconds_median"], 2)) for k, v in m["apps"].items()}))
+        return 0
     if args.cmd == "run":
         m = run(args.config, args.out)
         for line in summary_lines(m):
