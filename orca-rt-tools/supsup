@@ -1,0 +1,81 @@
+40001a80:	fec10113          	addi	sp,sp,-20
+40001a84:	00050713          	addi	a4,a0,0
+40001a88:	00112823          	sw	ra,16(sp)
+40001a8c:	00812623          	sw	s0,12(sp)
+40001a90:	00912423          	sw	s1,8(sp)
+40001a94:	00e61123          	sh	a4,2(a2)
+40001a98:	00068513          	addi	a0,a3,0
+40001a9c:	00b61323          	sh	a1,6(a2)
+40001aa0:	00d61523          	sh	a3,10(a2)
+40001aa4:	00e12023          	sw	a4,0(sp)
+40001aa8:	00060413          	addi	s0,a2,0
+40001aac:	00058493          	addi	s1,a1,0
+40001ab0:	11d000ef          	jal	ra,400023cc <set_counter_3>
+40001ab4:	139000ef          	jal	ra,400023ec <_ddma_node_addr>
+40001ab8:	00012703          	lw	a4,0(sp)
+40001abc:	02a70a63          	beq	a4,a0,40001af0 <ucx_noc_send+0x70>
+
+40001af0:	400036b7          	lui	a3,0x40003
+40001af4:	d3068693          	addi	a3,a3,-720 # 40002d30 <pktdrv_ports>
+40001af8:	00000713          	addi	a4,zero,0
+40001afc:	fff00313          	addi	t1,zero,-1
+40001b00:	01000593          	addi	a1,zero,16
+40001b04:	0006d603          	
+
+
+40001b04:	0006d603          	lhu	a2,0(a3)
+40001b08:	00268693          	addi	a3,a3,2
+40001b0c:	00961463          	bne	a2,s1,40001b14 <ucx_noc_send+0x94>
+40001b10:	00070313          	addi	t1,a4,0
+40001b14:	00170713          	addi	a4,a4,1
+40001b18:	feb716e3          	bne	a4,a1,40001b04 <ucx_noc_send+0x84>
+*16
+
+
+
+40001b1c:	fff00713          	addi	a4,zero,-1
+40001b20:	0ae30063          	beq	t1,a4,40001bc0 <ucx_noc_send+0x140>
+40001b24:	400034b7          	lui	s1,0x40003
+40001b28:	cf048493          	addi	s1,s1,-784 # 40002cf0 <pktdrv_tqueue>
+40001b2c:	00231613          	slli	a2,t1,0x2
+40001b30:	00c48733          	add	a4,s1,a2
+40001b34:	00072703          	lw	a4,0(a4)
+40001b38:	06070263          	beq	a4,zero,40001b9c <ucx_noc_send+0x11c>
+40001b3c:	00a45503          	lhu	a0,10(s0)
+40001b40:	00c12223          	sw	a2,4(sp)
+40001b44:	00612023          	sw	t1,0(sp)
+40001b48:	095000ef          	jal	ra,400023dc <set_counter_4>
+40001b4c:	40003737          	lui	a4,0x40003
+40001b50:	c9472703          	lw	a4,-876(a4) # 40002c94 <kcb_p>
+40001b54:	00012303          	lw	t1,0(sp)
+40001b58:	00412603          	lw	a2,4(sp)
+40001b5c:	05072703          	lw	a4,80(a4)
+40001b60:	01031313          	slli	t1,t1,0x10
+40001b64:	01035313          	srli	t1,t1,0x10
+40001b68:	00072703          	lw	a4,0(a4)
+40001b6c:	06075683          	lhu	a3,96(a4)
+40001b70:	fe669ce3          	bne	a3,t1,40001b68 <ucx_noc_send+0xe8>
+40001b74:	00100693          	addi	a3,zero,1
+40001b78:	06d70323          	sb	a3,102(a4)
+40001b7c:	00c484b3          	add	s1,s1,a2
+40001b80:	00040593          	addi	a1,s0,0
+40001b84:	00c12403          	lw	s0,12(sp)
+40001b88:	0004a503          	lw	a0,0(s1)
+40001b8c:	01012083          	lw	ra,16(sp)
+40001b90:	00812483          	lw	s1,8(sp)
+40001b94:	01410113          	addi	sp,sp,20
+40001b98:	0fc0006f          	jal	zero,40001c94 <ucx_queue_enqueue>
+40001b9c:	40003537          	lui	a0,0x40003
+40001ba0:	bac50513          	addi	a0,a0,-1108 # 40002bac <_etext+0x41c>
+40001ba4:	811ff0ef          	jal	ra,400013b4 <ucx_printf>
+40001ba8:	f9d00513          	addi	a0,zero,-99
+40001bac:	01012083          	lw	ra,16(sp)
+40001bb0:	00c12403          	lw	s0,12(sp)
+40001bb4:	00812483          	lw	s1,8(sp)
+40001bb8:	01410113          	addi	sp,sp,20
+40001bbc:	00008067          	jalr	zero,0(ra)
+40001bc0:	40003537          	lui	a0,0x40003
+40001bc4:	b7c50513          	addi	a0,a0,-1156 # 40002b7c <_etext+0x3ec>
+40001bc8:	fecff0ef          	jal	ra,400013b4 <ucx_printf>
+40001bcc:	ff900513          	addi	a0,zero,-7
+40001bd0:	fddff06f          	jal	zero,40001bac <ucx_noc_send+0x12c>

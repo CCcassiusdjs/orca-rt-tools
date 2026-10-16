@@ -1,0 +1,17 @@
+{
+  "_doc": "Bodies of application WCET-E (rttools.ucxgen --bodies): the task graph, payloads and mapping of application E with work whose paths depend on the input data. work_words: words of the work array; count_max: largest count of the count body. sort: insertion sort; search: linear search of a key from the data; count: loop of (w[0] mod count_max) + 1 passes; repeat: passes of the body per iteration.",
+  "work_words": 64,
+  "count_max": 256,
+  "tasks": {
+    "A": {"kind": "search"},
+    "B": {"kind": "sort"},
+    "C": {"kind": "count", "repeat": 4},
+    "D": {"kind": "search", "repeat": 2},
+    "E": {"kind": "sort"},
+    "F": {"kind": "count", "repeat": 2},
+    "G": {"kind": "sort", "repeat": 2},
+    "H": {"kind": "search", "repeat": 4},
+    "I": {"kind": "count", "repeat": 2},
+    "J": {"kind": "sort"}
+  }
+}

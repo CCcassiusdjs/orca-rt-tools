@@ -1,0 +1,13 @@
+#tasks,,,,,
+Task,Period,Data,Deadline,Acronym,Description
+1,0,0,0,Task A,--
+2,0,0,0,Task B,--
+3,0,0,0,Task C,--
+4,0,0,0,Task D,--
+#flows,,,,,
+Flow,Period,Data,Deadline,Source,Target
+1,0.0000275,4096,0.0000275,Task A,Task B
+2,0.0000275,8192,0.0000275,Task A,Task D
+3,0.0000275,65536,0.0000275,Task C,Task D
+4,0.0000275,65536,0.0000275,Task C,Task B
+5,0.0000275,2048,0.0000275,Task D,Task A

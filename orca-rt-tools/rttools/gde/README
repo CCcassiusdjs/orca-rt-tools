@@ -1,0 +1,16 @@
+# ORT/GDE: ORCA-RT-TOOLS/Graph Data Extractor
+
+This module generate data based on graphs.
+
+Usage: `gde <ifile>`
+
+- ifile: a file containing a valid graph description (ORCA format)
+
+
+Included metrics:
+- number of vertices
+- number of edges
+- edge density
+- standard deviation of edge values (M1)
+- standard deviation of vertices values (M2)
+- vertices/edge values balance rating (M3)

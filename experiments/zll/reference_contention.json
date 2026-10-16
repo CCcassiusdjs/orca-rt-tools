@@ -1,0 +1,24 @@
+{
+ "_doc": "Header wait at router 4 (make contention): tb_cont.vhd, GHDL 4.1.0 (mcode), 124 fixed cases and 2500 random cases with seed 1. rttools/modules/routing/router.py takes HEADER_SERVICE_CYCLES, MAX_COMPETING_HEADERS and HEADER_WAIT_CYCLES from these values (tests/test_occupancy.py).",
+ "runs": 2624,
+ "packets": 6769,
+ "flits_with_error": 0,
+ "lost_or_timeout": 0,
+ "service_cycles_per_header": 5,
+ "competing_headers_max": 4,
+ "largest_wait_cycles": 20,
+ "largest_wait_by_headers": {
+  "1": 0,
+  "2": 5,
+  "3": 10,
+  "4": 15,
+  "5": 20
+ },
+ "samples_by_headers": {
+  "1": 432,
+  "2": 1644,
+  "3": 2619,
+  "4": 1644,
+  "5": 430
+ }
+}

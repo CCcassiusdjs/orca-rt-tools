@@ -1,0 +1,116 @@
+# 504937 0-1 scheduled 1
+# 506275 1-1 scheduled 1
+# 507615 1-0 scheduled 1
+# 508957 0-0 scheduled 1
+# Elapsed 1ms. $now is 1000000 ns.
+# 1002347 0-1 scheduled 0
+# 1002365 1-1 scheduled 2
+# 1002385 1-0 scheduled 2
+# 1002409 0-0 scheduled 2
+# 1502397 1-1 scheduled 0
+# 1502417 1-0 scheduled 3
+# 1502441 0-0 scheduled 3
+# 1505017 0-1 scheduled 1
+# Elapsed 1ms. $now is 2000000 ns.
+# 2002413 0-1 scheduled 0
+# 2002449 1-0 scheduled 0
+# 2002473 0-0 scheduled 4
+# 2006389 1-1 scheduled 1
+# 2124063 0-0 -> TAG 4560
+# 2124207 0-0 <- TAG 4560
+# 2158989 0-0 -> TAG 1230
+# 2162387 0-1 <- TAG 1230
+# 2502465 1-1 scheduled 2
+# 2502501 0-0 scheduled 0
+# 2505081 0-1 scheduled 1
+# 2507763 1-0 scheduled 1
+# 2717073 0-1 -> TAG 1200
+# 2720461 1-0 <- TAG 1200
+# Elapsed 1ms. $now is 3000000 ns.
+# 3002473 0-1 scheduled 0
+# 3002495 1-1 scheduled 0
+# 3002517 1-0 scheduled 2
+# 3009137 0-0 scheduled 1
+# 3502547 1-0 scheduled 3
+# 3502565 0-0 scheduled 2
+# 3505149 0-1 scheduled 1
+# 3506487 1-1 scheduled 1
+# 3749259 1-0 -> TAG 3450
+# 3749411 1-0 <- TAG 3450
+# 3803527 1-0 -> TAG 2340
+# 3803679 1-0 <- TAG 2340
+# Elapsed 1ms. $now is 4000000 ns.
+# 4002541 0-1 scheduled 0
+# 4002557 1-1 scheduled 2
+# 4002579 1-0 scheduled 0
+# 4002597 0-0 scheduled 3
+# 4253679 0-0 -> TAG 7890
+# 4253823 0-0 <- TAG 7890
+# 4502589 1-1 scheduled 0
+# 4502633 0-0 scheduled 4
+# 4505211 0-1 scheduled 1
+# 4507893 1-0 scheduled 1
+# 4732315 1-0 -> TAG 8900
+# 4739555 1-1 <- TAG 8900
+# Elapsed 1ms. $now is 5000000 ns.
+# 5002603 0-1 scheduled 0
+# 5002645 1-0 scheduled 2
+# 5002661 0-0 scheduled 0
+# 5006581 1-1 scheduled 1
+# 5243651 1-0 -> TAG 5670
+# 5249533 1-1 <- TAG 5670
+# 5502655 1-1 scheduled 2
+# 5502677 1-0 scheduled 3
+# 5505273 0-1 scheduled 1
+# 5509297 0-0 scheduled 1
+# Elapsed 1ms. $now is 6000000 ns.
+# 6002665 0-1 scheduled 0
+# 6002689 1-1 scheduled 0
+# 6002709 1-0 scheduled 0
+# 6002727 0-0 scheduled 2
+# 6115509 0-0 -> TAG 3450
+# 6115653 0-0 <- TAG 3450
+# 6502757 0-0 scheduled 3
+# 6505341 0-1 scheduled 1
+# 6506681 1-1 scheduled 1
+# 6508017 1-0 scheduled 1
+# Elapsed 1ms. $now is 7000000 ns.
+# 7002733 0-1 scheduled 0
+# 7002749 1-1 scheduled 2
+# 7002769 1-0 scheduled 2
+# 7002793 0-0 scheduled 4
+# 7502785 1-1 scheduled 0
+# 7502801 1-0 scheduled 3
+# 7502821 0-0 scheduled 0
+# 7505403 0-1 scheduled 1
+# Elapsed 1ms. $now is 8000000 ns.
+# 8002795 0-1 scheduled 0
+# 8002833 1-0 scheduled 0
+# 8006777 1-1 scheduled 1
+# 8009457 0-0 scheduled 1
+# 8288827 0-0 -> TAG 6780
+# 8295265 1-1 <- TAG 6780
+# 8502847 1-1 scheduled 2
+# 8502885 0-0 scheduled 2
+# 8505465 0-1 scheduled 1
+# 8508147 1-0 scheduled 1
+# 8737817 1-1 -> TAG 1230
+# 8737969 1-1 <- TAG 1230
+# Elapsed 1ms. $now is 9000000 ns.
+# 9002857 0-1 scheduled 0
+# 9002877 1-1 scheduled 0
+# 9002899 1-0 scheduled 2
+# 9002921 0-0 scheduled 3
+# 9502931 1-0 scheduled 3
+# 9502949 0-0 scheduled 4
+# 9505533 0-1 scheduled 1
+# 9506869 1-1 scheduled 1
+# Elapsed 1ms. $now is 10000000 ns.
+# 10002925 0-1 scheduled 0
+# 10002941 1-1 scheduled 2
+# 10002963 1-0 scheduled 0
+# 10002985 0-0 scheduled 0
+# 10502977 1-1 scheduled 0
+# 10505595 0-1 scheduled 1
+# 10508277 1-0 scheduled 1
+# 10509615 0-0 scheduled 1

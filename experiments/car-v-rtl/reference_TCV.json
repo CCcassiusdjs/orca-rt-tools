@@ -1,0 +1,1899 @@
+{
+ "_doc": "Values of run TCV (logs/TCV.events.txt, logs/TCV.RUN_INFO, logs/TCV.time.txt, logs/TCV.image.elf): simulation (simulate.sh) of a git archive of tag r11-rc3 (commit xxxxxxx, repo_state=archive) of car_v (CAR-V, 23 tasks, 4x4 mesh) with the release by tick (RELEASE_MASK=65535, release=tick) and the UCX-OS kernel without nested interrupts (isr=no_nesting) at F_CLK = 380 MHz, 11.5 ms of platform time, Questa 2025.3, riscv64-elf-gcc 12.2.0, 2026-10-14 (run_r11c.sh: make -C experiments/car-v-rtl sim F_CLK=380000000 SIM_NS=11500000 BUILD=build/tcv). Analysis: make -C experiments/car-v-rtl analyze check-run phase-check LOG=logs/TCV.events.txt REF=reference_TCV.json OUTDIR=build/results_TCV (python -m rttools.paper.rtlapp, release rule tick from the RUN_INFO; link schedule of arch/hermes-4x4.gml with o_i = L0 + 20 (m + 1)).",
+ "inputs": {
+  "csv": "car-v.csv",
+  "map": "car-v-ONTO-hermes4x4.map",
+  "manifest": "car_v.json",
+  "csv_matches_manifest": true,
+  "map_matches_manifest": true
+ },
+ "clock": {
+  "clock_hz": 380000000,
+  "half_period_fs": 1315789,
+  "source": "RUN_INFO",
+  "edges_snapped": true,
+  "isr": "no_nesting",
+  "crt0": "plain"
+ },
+ "model": {
+  "period_cycles": 190000,
+  "response_bound": {
+   "cycles": 855000,
+   "ms": 2.25,
+   "task": "OBMG",
+   "phase": 4
+  },
+  "deadline": {
+   "s": 0.0025,
+   "ms": 2.5,
+   "cycles": 950000
+  },
+  "outputs": {
+   "NAVC": {
+    "phase": 1,
+    "finish": 95000,
+    "bound_cycles": 285000
+   },
+   "OBMG": {
+    "phase": 4,
+    "finish": 95000,
+    "bound_cycles": 855000
+   }
+  },
+  "demand_cycles": {
+   "0-0": 95000,
+   "1-0": 161998,
+   "2-0": 190000,
+   "3-0": 190000,
+   "0-1": 190000,
+   "1-1": 190000,
+   "2-1": 95000,
+   "3-1": 190000,
+   "0-2": 95000,
+   "1-2": 95000,
+   "2-2": 95000,
+   "3-2": 190000,
+   "0-3": 95000,
+   "1-3": 95000,
+   "2-3": 95000,
+   "3-3": 95000
+  },
+  "f_cpu_hz": 380000000,
+  "dispatch_matches_manifest": true,
+  "header_wait_cycles": 20,
+  "flows": {
+   "1": {
+    "release": 95000,
+    "deadline": 296000
+   },
+   "2": {
+    "release": 95000,
+    "deadline": 296000
+   },
+   "3": {
+    "release": 190000,
+    "deadline": 201000
+   },
+   "4": {
+    "release": 190000,
+    "deadline": 201000
+   },
+   "5": {
+    "release": 95000,
+    "deadline": 296000
+   },
+   "6": {
+    "release": 95000,
+    "deadline": 296000
+   },
+   "7": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "8": {
+    "release": 66998,
+    "deadline": 267998
+   },
+   "9": {
+    "release": 95000,
+    "deadline": 296000
+   },
+   "10": {
+    "release": 95000,
+    "deadline": 296000
+   },
+   "11": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "12": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "13": {
+    "release": 190000,
+    "deadline": 201000
+   },
+   "14": {
+    "release": 190000,
+    "deadline": 201000
+   },
+   "15": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "16": {
+    "release": 161998,
+    "deadline": 201000
+   },
+   "17": {
+    "release": 190000,
+    "deadline": 201000
+   },
+   "18": {
+    "release": 190000,
+    "deadline": 201000
+   },
+   "19": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "20": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "21": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "22": {
+    "release": 95000,
+    "deadline": 201000
+   },
+   "23": {
+    "release": 95000,
+    "deadline": 201000
+   }
+  }
+ },
+ "releases": {
+  "count": 17,
+  "first_ms": 3.000351316,
+  "period_cycles_min": 189999,
+  "period_cycles_max": 190002,
+  "release_to_first_dispatch_min_cycles": 1772,
+  "release_to_first_dispatch_max_cycles": 1773,
+  "acks": {
+   "releases": 17,
+   "pes_expected": 16,
+   "pes_min": 16,
+   "pes_max": 16,
+   "spread_ns_max": 6
+  }
+ },
+ "tags": {
+  "unknown_tags": 0,
+  "lane_errors": 0,
+  "repeated": 0,
+  "fifo_mismatch": 0
+ },
+ "markers": 752,
+ "responses": {
+  "complete": 13,
+  "exact": 13,
+  "upper_bound_only": 0,
+  "max_cycles": 846390,
+  "max_ms": 2.227342105,
+  "max_exact_cycles": 846390,
+  "max_upper_cycles": null,
+  "max_lower_cycles": 846390,
+  "above_bound": 0,
+  "exact_above_bound": 0,
+  "lower_above_bound": 0,
+  "margin_bound_exact_cycles": 8610,
+  "margin_bound_all_cycles": 8610,
+  "above_deadline": 0,
+  "margin_deadline_cycles": 103610,
+  "rows": [
+   {
+    "iteration": 1,
+    "task": "OBMG",
+    "response_cycles": 846389,
+    "exact": true,
+    "lower_cycles": 846389
+   },
+   {
+    "iteration": 2,
+    "task": "OBMG",
+    "response_cycles": 846390,
+    "exact": true,
+    "lower_cycles": 846390
+   },
+   {
+    "iteration": 3,
+    "task": "OBMG",
+    "response_cycles": 846389,
+    "exact": true,
+    "lower_cycles": 846389
+   },
+   {
+    "iteration": 4,
+    "task": "OBMG",
+    "response_cycles": 846388,
+    "exact": true,
+    "lower_cycles": 846388
+   },
+   {
+    "iteration": 5,
+    "task": "OBMG",
+    "response_cycles": 846390,
+    "exact": true,
+    "lower_cycles": 846390
+   },
+   {
+    "iteration": 6,
+    "task": "OBMG",
+    "response_cycles": 846389,
+    "exact": true,
+    "lower_cycles": 846389
+   },
+   {
+    "iteration": 7,
+    "task": "OBMG",
+    "response_cycles": 846388,
+    "exact": true,
+    "lower_cycles": 846388
+   },
+   {
+    "iteration": 8,
+    "task": "OBMG",
+    "response_cycles": 846390,
+    "exact": true,
+    "lower_cycles": 846390
+   },
+   {
+    "iteration": 9,
+    "task": "OBMG",
+    "response_cycles": 846389,
+    "exact": true,
+    "lower_cycles": 846389
+   },
+   {
+    "iteration": 10,
+    "task": "OBMG",
+    "response_cycles": 846388,
+    "exact": true,
+    "lower_cycles": 846388
+   },
+   {
+    "iteration": 11,
+    "task": "OBMG",
+    "response_cycles": 846390,
+    "exact": true,
+    "lower_cycles": 846390
+   },
+   {
+    "iteration": 12,
+    "task": "OBMG",
+    "response_cycles": 846389,
+    "exact": true,
+    "lower_cycles": 846389
+   },
+   {
+    "iteration": 13,
+    "task": "OBMG",
+    "response_cycles": 846388,
+    "exact": true,
+    "lower_cycles": 846388
+   }
+  ]
+ },
+ "cpu_windows": {
+  "releases_per_window": 5,
+  "windows": [
+   {
+    "first_release": 5,
+    "start_ms": 5.000351316,
+    "end_ms": 7.500353947
+   },
+   {
+    "first_release": 10,
+    "start_ms": 7.500353947,
+    "end_ms": 10.000348684
+   }
+  ],
+  "phases": 12,
+  "pes": {
+   "0-0": {
+    "estimated": 95000,
+    "per_window": [
+     85370,
+     85370
+    ],
+    "mean": 85370,
+    "overestimation_percent": 11.280309242122526,
+    "phase_busy_max": 85370,
+    "phases_above_estimate": 0
+   },
+   "1-0": {
+    "estimated": 161998,
+    "per_window": [
+     143239,
+     143239
+    ],
+    "mean": 143239,
+    "overestimation_percent": 13.096293607187986,
+    "phase_busy_max": 143239,
+    "phases_above_estimate": 0
+   },
+   "2-0": {
+    "estimated": 190000,
+    "per_window": [
+     171239,
+     171239
+    ],
+    "mean": 171239,
+    "overestimation_percent": 10.956032212288088,
+    "phase_busy_max": 171239,
+    "phases_above_estimate": 0
+   },
+   "3-0": {
+    "estimated": 190000,
+    "per_window": [
+     171239,
+     171239
+    ],
+    "mean": 171239,
+    "overestimation_percent": 10.956032212288088,
+    "phase_busy_max": 171239,
+    "phases_above_estimate": 0
+   },
+   "0-1": {
+    "estimated": 190000,
+    "per_window": [
+     172466,
+     172466
+    ],
+    "mean": 172466,
+    "overestimation_percent": 10.166641540941402,
+    "phase_busy_max": 172466,
+    "phases_above_estimate": 0
+   },
+   "1-1": {
+    "estimated": 190000,
+    "per_window": [
+     172466,
+     172466
+    ],
+    "mean": 172466,
+    "overestimation_percent": 10.166641540941402,
+    "phase_busy_max": 172466,
+    "phases_above_estimate": 0
+   },
+   "2-1": {
+    "estimated": 95000,
+    "per_window": [
+     86100,
+     86100
+    ],
+    "mean": 86100,
+    "overestimation_percent": 10.336817653890824,
+    "phase_busy_max": 86100,
+    "phases_above_estimate": 0
+   },
+   "3-1": {
+    "estimated": 190000,
+    "per_window": [
+     171239,
+     171239
+    ],
+    "mean": 171239,
+    "overestimation_percent": 10.956032212288088,
+    "phase_busy_max": 171239,
+    "phases_above_estimate": 0
+   },
+   "0-2": {
+    "estimated": 95000,
+    "per_window": [
+     85751,
+     85751
+    ],
+    "mean": 85751,
+    "overestimation_percent": 10.785880048046087,
+    "phase_busy_max": 85751,
+    "phases_above_estimate": 0
+   },
+   "1-2": {
+    "estimated": 95000,
+    "per_window": [
+     86100,
+     86100
+    ],
+    "mean": 86100,
+    "overestimation_percent": 10.336817653890824,
+    "phase_busy_max": 86100,
+    "phases_above_estimate": 0
+   },
+   "2-2": {
+    "estimated": 95000,
+    "per_window": [
+     86504,
+     86504
+    ],
+    "mean": 86504,
+    "overestimation_percent": 9.821511143993341,
+    "phase_busy_max": 86504,
+    "phases_above_estimate": 0
+   },
+   "3-2": {
+    "estimated": 190000,
+    "per_window": [
+     171239,
+     171239
+    ],
+    "mean": 171239,
+    "overestimation_percent": 10.956032212288088,
+    "phase_busy_max": 171239,
+    "phases_above_estimate": 0
+   },
+   "0-3": {
+    "estimated": 95000,
+    "per_window": [
+     86455,
+     86455
+    ],
+    "mean": 86455,
+    "overestimation_percent": 9.883754554392459,
+    "phase_busy_max": 86455,
+    "phases_above_estimate": 0
+   },
+   "1-3": {
+    "estimated": 95000,
+    "per_window": [
+     88814.8,
+     88834.8
+    ],
+    "mean": 88824.8,
+    "overestimation_percent": 6.952112473093098,
+    "phase_busy_max": 88858,
+    "phases_above_estimate": 0
+   },
+   "2-3": {
+    "estimated": 95000,
+    "per_window": [
+     88065.6,
+     88100.8
+    ],
+    "mean": 88083.2,
+    "overestimation_percent": 7.8525757465668855,
+    "phase_busy_max": 88128,
+    "phases_above_estimate": 0
+   },
+   "3-3": {
+    "estimated": 95000,
+    "per_window": [
+     85015,
+     85015
+    ],
+    "mean": 85015,
+    "overestimation_percent": 11.744986178909604,
+    "phase_busy_max": 85015,
+    "phases_above_estimate": 0
+   }
+  },
+  "mean_overestimation_percent": 10.390529389570549,
+  "min_overestimation_percent": 6.952112473093098
+ },
+ "cpu_attributed": {
+  "0-0": {
+   "measured": 85370,
+   "estimated": 95000,
+   "overestimation_percent": 11.280309242122526
+  },
+  "1-0": {
+   "measured": 143239,
+   "estimated": 161998,
+   "overestimation_percent": 13.096293607187986
+  },
+  "2-0": {
+   "measured": 171239,
+   "estimated": 190000,
+   "overestimation_percent": 10.956032212288088
+  },
+  "3-0": {
+   "measured": 171239,
+   "estimated": 190000,
+   "overestimation_percent": 10.956032212288088
+  },
+  "0-1": {
+   "measured": 172466,
+   "estimated": 190000,
+   "overestimation_percent": 10.166641540941402
+  },
+  "1-1": {
+   "measured": 172466,
+   "estimated": 190000,
+   "overestimation_percent": 10.166641540941402
+  },
+  "2-1": {
+   "measured": 86100,
+   "estimated": 95000,
+   "overestimation_percent": 10.336817653890824
+  },
+  "3-1": {
+   "measured": 171239,
+   "estimated": 190000,
+   "overestimation_percent": 10.956032212288088
+  },
+  "0-2": {
+   "measured": 85751,
+   "estimated": 95000,
+   "overestimation_percent": 10.785880048046087
+  },
+  "1-2": {
+   "measured": 86100,
+   "estimated": 95000,
+   "overestimation_percent": 10.336817653890824
+  },
+  "2-2": {
+   "measured": 86504,
+   "estimated": 95000,
+   "overestimation_percent": 9.821511143993341
+  },
+  "3-2": {
+   "measured": 171239,
+   "estimated": 190000,
+   "overestimation_percent": 10.956032212288088
+  },
+  "0-3": {
+   "measured": 86455,
+   "estimated": 95000,
+   "overestimation_percent": 9.883754554392459
+  },
+  "1-3": {
+   "measured": 88821.466667,
+   "estimated": 95000,
+   "overestimation_percent": 6.956126221337798
+  },
+  "2-3": {
+   "measured": 88081.733333,
+   "estimated": 95000,
+   "overestimation_percent": 7.854371621917279
+  },
+  "3-3": {
+   "measured": 85015,
+   "estimated": 95000,
+   "overestimation_percent": 11.744986178909604
+  }
+ },
+ "tasks": {
+  "FBU1": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -8430,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 85138
+  },
+  "FBU2": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -8430,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 85138
+  },
+  "FBU3": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -7358,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86210
+  },
+  "FBU4": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -8429,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 57138
+  },
+  "FBU5": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -8430,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 85138
+  },
+  "FBU6": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -8430,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 85138
+  },
+  "FBU7": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -7874,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 85751
+  },
+  "FBU8": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -7360,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86210
+  },
+  "NAVC": {
+   "source": "markers",
+   "iterations": 16,
+   "same_run_as_previous": [],
+   "phase_model": 1,
+   "phase_observed": {
+    "1": 16
+   },
+   "end_minus_model_finish_max": -8254,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 85370
+  },
+  "BFE1": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -17382,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86101
+  },
+  "BFE2": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -17382,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86101
+  },
+  "BFE3": {
+   "source": "markers",
+   "iterations": 16,
+   "same_run_as_previous": [],
+   "phase_model": 1,
+   "phase_observed": {
+    "1": 16
+   },
+   "end_minus_model_finish_max": -7524,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86100
+  },
+  "BFE4": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -17381,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86101
+  },
+  "BFE5": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -17382,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86101
+  },
+  "BFE6": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -17382,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86101
+  },
+  "BFE7": {
+   "source": "markers",
+   "iterations": 16,
+   "same_run_as_previous": [],
+   "phase_model": 1,
+   "phase_observed": {
+    "1": 16
+   },
+   "end_minus_model_finish_max": -7121,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86504
+  },
+  "BFE8": {
+   "source": "markers",
+   "iterations": 16,
+   "same_run_as_previous": [],
+   "phase_model": 1,
+   "phase_observed": {
+    "1": 16
+   },
+   "end_minus_model_finish_max": -7524,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86100
+  },
+  "FDF1": {
+   "source": "markers",
+   "iterations": 15,
+   "same_run_as_previous": [],
+   "phase_model": 2,
+   "phase_observed": {
+    "2": 15
+   },
+   "end_minus_model_finish_max": -5496,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 88081.733333
+  },
+  "FDF2": {
+   "source": "markers",
+   "iterations": 15,
+   "same_run_as_previous": [],
+   "phase_model": 2,
+   "phase_observed": {
+    "2": 15
+   },
+   "end_minus_model_finish_max": -4766,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 88821.466667
+  },
+  "STPH": {
+   "source": "markers",
+   "iterations": 14,
+   "same_run_as_previous": [],
+   "phase_model": 3,
+   "phase_observed": {
+    "3": 14
+   },
+   "end_minus_model_finish_max": -7170,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86455
+  },
+  "VOD1": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -16155,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86256
+  },
+  "VOD2": {
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -16157,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 86256
+  },
+  "OBMG": {
+   "source": "markers",
+   "iterations": 13,
+   "same_run_as_previous": [],
+   "phase_model": 4,
+   "phase_observed": {
+    "4": 13
+   },
+   "end_minus_model_finish_max": -8610,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 85015
+  }
+ },
+ "packets": {
+  "packets": 381,
+  "remote_packets": 262,
+  "late": 0,
+  "min_slack_remote_cycles": 25724,
+  "flows": [
+   {
+    "flow": 1,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86135,
+    "send_max": 86137,
+    "arrival_max": 86498,
+    "min_slack_cycles": 209502,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": null
+   },
+   {
+    "flow": 2,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86133,
+    "send_max": 86135,
+    "arrival_max": 86496,
+    "min_slack_cycles": 209504,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": null
+   },
+   {
+    "flow": 3,
+    "packets": 17,
+    "received": 17,
+    "send_min": 172815,
+    "send_max": 172817,
+    "arrival_max": 174541,
+    "min_slack_cycles": 26459,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 192000
+   },
+   {
+    "flow": 4,
+    "packets": 17,
+    "received": 17,
+    "send_min": 172813,
+    "send_max": 172815,
+    "arrival_max": 175276,
+    "min_slack_cycles": 25724,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 190000
+   },
+   {
+    "flow": 5,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86135,
+    "send_max": 86137,
+    "arrival_max": 86498,
+    "min_slack_cycles": 209502,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": null
+   },
+   {
+    "flow": 6,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86135,
+    "send_max": 86137,
+    "arrival_max": 86498,
+    "min_slack_cycles": 209502,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": null
+   },
+   {
+    "flow": 7,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86613,
+    "send_max": 86615,
+    "arrival_max": 91114,
+    "min_slack_cycles": 109886,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 95000
+   },
+   {
+    "flow": 8,
+    "packets": 17,
+    "received": 17,
+    "send_min": 58133,
+    "send_max": 58136,
+    "arrival_max": 58497,
+    "min_slack_cycles": 209501,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": null
+   },
+   {
+    "flow": 9,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86135,
+    "send_max": 86137,
+    "arrival_max": 86498,
+    "min_slack_cycles": 209502,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": null
+   },
+   {
+    "flow": 10,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86135,
+    "send_max": 86137,
+    "arrival_max": 86498,
+    "min_slack_cycles": 209502,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": null
+   },
+   {
+    "flow": 11,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86098,
+    "send_max": 86099,
+    "arrival_max": 90788,
+    "min_slack_cycles": 110212,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 95000
+   },
+   {
+    "flow": 12,
+    "packets": 17,
+    "received": 17,
+    "send_min": 86611,
+    "send_max": 86613,
+    "arrival_max": 91114,
+    "min_slack_cycles": 109886,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 95000
+   },
+   {
+    "flow": 13,
+    "packets": 17,
+    "received": 17,
+    "send_min": 171590,
+    "send_max": 171592,
+    "arrival_max": 173374,
+    "min_slack_cycles": 27626,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 192000
+   },
+   {
+    "flow": 14,
+    "packets": 17,
+    "received": 17,
+    "send_min": 171590,
+    "send_max": 171592,
+    "arrival_max": 174187,
+    "min_slack_cycles": 26813,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 190000
+   },
+   {
+    "flow": 15,
+    "packets": 16,
+    "received": 16,
+    "send_min": 86446,
+    "send_max": 86450,
+    "arrival_max": 88344,
+    "min_slack_cycles": 112656,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 95000
+   },
+   {
+    "flow": 16,
+    "packets": 17,
+    "received": 17,
+    "send_min": 143588,
+    "send_max": 143591,
+    "arrival_max": 145389,
+    "min_slack_cycles": 55611,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 161998
+   },
+   {
+    "flow": 17,
+    "packets": 17,
+    "received": 17,
+    "send_min": 171590,
+    "send_max": 171592,
+    "arrival_max": 174185,
+    "min_slack_cycles": 26815,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 190000
+   },
+   {
+    "flow": 18,
+    "packets": 17,
+    "received": 17,
+    "send_min": 171590,
+    "send_max": 171592,
+    "arrival_max": 173372,
+    "min_slack_cycles": 27628,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 192000
+   },
+   {
+    "flow": 19,
+    "packets": 16,
+    "received": 16,
+    "send_min": 86447,
+    "send_max": 86449,
+    "arrival_max": 89268,
+    "min_slack_cycles": 111732,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 95000
+   },
+   {
+    "flow": 20,
+    "packets": 16,
+    "received": 16,
+    "send_min": 86446,
+    "send_max": 86450,
+    "arrival_max": 88281,
+    "min_slack_cycles": 112719,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 97000
+   },
+   {
+    "flow": 21,
+    "packets": 15,
+    "received": 15,
+    "send_min": 87944,
+    "send_max": 88027,
+    "arrival_max": 90681,
+    "min_slack_cycles": 110319,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 95000
+   },
+   {
+    "flow": 22,
+    "packets": 15,
+    "received": 15,
+    "send_min": 87905,
+    "send_max": 87953,
+    "arrival_max": 91878,
+    "min_slack_cycles": 109122,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 97000
+   },
+   {
+    "flow": 23,
+    "packets": 14,
+    "received": 14,
+    "send_min": 86801,
+    "send_max": 86804,
+    "arrival_max": 88734,
+    "min_slack_cycles": 112266,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "schedule_start": 95000
+   }
+  ]
+ },
+ "network": {
+  "model": "L0 = 6 (m + 1) + p + 1; header 6 (m + 1); o_i = L0 + w_h (m + 1)",
+  "header_wait_cycles": 20,
+  "tx": 262,
+  "rx": 262,
+  "packets": 262,
+  "unpaired_tx": 0,
+  "unpaired_rx": 0,
+  "outside_flows": 0,
+  "identity_errors": 0,
+  "header_waits": 98,
+  "header_waits_above_bound": 81,
+  "above_occupancy": 262,
+  "flows": [
+   {
+    "flow": 3,
+    "source": "VOD1",
+    "target": "NAVC",
+    "src_pe": "0-1",
+    "dst_pe": "0-0",
+    "hops": 1,
+    "flits": 35,
+    "L0": 48,
+    "header_model": 12,
+    "occupancy": 88,
+    "header_wait_bound": 40,
+    "window": 11000,
+    "schedule_start": 192000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "latency_min": 310,
+    "latency_max": 403,
+    "latency_minus_L0_min": 262,
+    "latency_minus_L0_max": 355,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 262,
+    "stall_max": 355,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 259,
+    "tx_block_max": 352,
+    "software_latency_min": 1630,
+    "software_latency_max": 1725,
+    "driver_min": 1320,
+    "driver_max": 1322
+   },
+   {
+    "flow": 4,
+    "source": "VOD2",
+    "target": "NAVC",
+    "src_pe": "1-1",
+    "dst_pe": "0-0",
+    "hops": 2,
+    "flits": 35,
+    "L0": 54,
+    "header_model": 18,
+    "occupancy": 114,
+    "header_wait_bound": 60,
+    "window": 11000,
+    "schedule_start": 190000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 17,
+    "header_waits_above_bound": 17,
+    "above_occupancy": 17,
+    "contender_flows": [
+     3
+    ],
+    "latency_min": 1050,
+    "latency_max": 1145,
+    "latency_minus_L0_min": 996,
+    "latency_minus_L0_max": 1091,
+    "header_minus_model_min": 300,
+    "header_minus_model_max": 393,
+    "stall_min": 696,
+    "stall_max": 698,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 992,
+    "tx_block_max": 1087,
+    "software_latency_min": 2367,
+    "software_latency_max": 2462,
+    "driver_min": 1317,
+    "driver_max": 1317
+   },
+   {
+    "flow": 7,
+    "source": "FBU3",
+    "target": "BFE3",
+    "src_pe": "0-1",
+    "dst_pe": "2-1",
+    "hops": 2,
+    "flits": 2403,
+    "L0": 2422,
+    "header_model": 18,
+    "occupancy": 2482,
+    "header_wait_bound": 60,
+    "window": 106000,
+    "schedule_start": 95000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "latency_min": 2684,
+    "latency_max": 3197,
+    "latency_minus_L0_min": 262,
+    "latency_minus_L0_max": 775,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 262,
+    "stall_max": 775,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 258,
+    "tx_block_max": 771,
+    "software_latency_min": 3987,
+    "software_latency_max": 4500,
+    "driver_min": 1303,
+    "driver_max": 1303
+   },
+   {
+    "flow": 11,
+    "source": "FBU7",
+    "target": "BFE7",
+    "src_pe": "0-2",
+    "dst_pe": "2-2",
+    "hops": 2,
+    "flits": 2403,
+    "L0": 2422,
+    "header_model": 18,
+    "occupancy": 2482,
+    "header_wait_bound": 60,
+    "window": 106000,
+    "schedule_start": 95000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "latency_min": 2684,
+    "latency_max": 3387,
+    "latency_minus_L0_min": 262,
+    "latency_minus_L0_max": 965,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 262,
+    "stall_max": 965,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 258,
+    "tx_block_max": 961,
+    "software_latency_min": 3987,
+    "software_latency_max": 4690,
+    "driver_min": 1303,
+    "driver_max": 1304
+   },
+   {
+    "flow": 12,
+    "source": "FBU8",
+    "target": "BFE8",
+    "src_pe": "1-1",
+    "dst_pe": "1-2",
+    "hops": 1,
+    "flits": 2403,
+    "L0": 2416,
+    "header_model": 12,
+    "occupancy": 2456,
+    "header_wait_bound": 40,
+    "window": 106000,
+    "schedule_start": 95000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "latency_min": 2677,
+    "latency_max": 3199,
+    "latency_minus_L0_min": 261,
+    "latency_minus_L0_max": 783,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 261,
+    "stall_max": 783,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 258,
+    "tx_block_max": 780,
+    "software_latency_min": 3980,
+    "software_latency_max": 4502,
+    "driver_min": 1303,
+    "driver_max": 1303
+   },
+   {
+    "flow": 13,
+    "source": "BFE1",
+    "target": "FDF1",
+    "src_pe": "2-0",
+    "dst_pe": "2-3",
+    "hops": 3,
+    "flits": 131,
+    "L0": 156,
+    "header_model": 24,
+    "occupancy": 236,
+    "header_wait_bound": 80,
+    "window": 11000,
+    "schedule_start": 192000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 17,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [
+     14
+    ],
+    "latency_min": 412,
+    "latency_max": 485,
+    "latency_minus_L0_min": 256,
+    "latency_minus_L0_max": 329,
+    "header_minus_model_min": 5,
+    "header_minus_model_max": 5,
+    "stall_min": 251,
+    "stall_max": 324,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 251,
+    "tx_block_max": 324,
+    "software_latency_min": 1709,
+    "software_latency_max": 1782,
+    "driver_min": 1297,
+    "driver_max": 1297
+   },
+   {
+    "flow": 14,
+    "source": "BFE2",
+    "target": "FDF1",
+    "src_pe": "3-0",
+    "dst_pe": "2-3",
+    "hops": 4,
+    "flits": 131,
+    "L0": 162,
+    "header_model": 30,
+    "occupancy": 262,
+    "header_wait_bound": 100,
+    "window": 11000,
+    "schedule_start": 190000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 17,
+    "header_waits_above_bound": 17,
+    "above_occupancy": 17,
+    "contender_flows": [
+     13
+    ],
+    "latency_min": 1217,
+    "latency_max": 1298,
+    "latency_minus_L0_min": 1055,
+    "latency_minus_L0_max": 1136,
+    "header_minus_model_min": 388,
+    "header_minus_model_max": 461,
+    "stall_min": 667,
+    "stall_max": 735,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 1049,
+    "tx_block_max": 1130,
+    "software_latency_min": 2514,
+    "software_latency_max": 2595,
+    "driver_min": 1297,
+    "driver_max": 1297
+   },
+   {
+    "flow": 15,
+    "source": "BFE3",
+    "target": "FDF1",
+    "src_pe": "2-1",
+    "dst_pe": "2-3",
+    "hops": 2,
+    "flits": 131,
+    "L0": 150,
+    "header_model": 18,
+    "occupancy": 210,
+    "header_wait_bound": 60,
+    "window": 106000,
+    "schedule_start": 95000,
+    "packets": 16,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 16,
+    "contender_flows": [],
+    "latency_min": 409,
+    "latency_max": 599,
+    "latency_minus_L0_min": 259,
+    "latency_minus_L0_max": 449,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 259,
+    "stall_max": 449,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 255,
+    "tx_block_max": 445,
+    "software_latency_min": 1706,
+    "software_latency_max": 1896,
+    "driver_min": 1297,
+    "driver_max": 1297
+   },
+   {
+    "flow": 16,
+    "source": "BFE4",
+    "target": "FDF1",
+    "src_pe": "1-0",
+    "dst_pe": "2-3",
+    "hops": 4,
+    "flits": 131,
+    "L0": 162,
+    "header_model": 30,
+    "occupancy": 262,
+    "header_wait_bound": 100,
+    "window": 39002,
+    "schedule_start": 161998,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "latency_min": 416,
+    "latency_max": 500,
+    "latency_minus_L0_min": 254,
+    "latency_minus_L0_max": 338,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 254,
+    "stall_max": 338,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 248,
+    "tx_block_max": 332,
+    "software_latency_min": 1714,
+    "software_latency_max": 1798,
+    "driver_min": 1297,
+    "driver_max": 1303
+   },
+   {
+    "flow": 17,
+    "source": "BFE5",
+    "target": "FDF2",
+    "src_pe": "3-1",
+    "dst_pe": "1-3",
+    "hops": 4,
+    "flits": 131,
+    "L0": 162,
+    "header_model": 30,
+    "occupancy": 262,
+    "header_wait_bound": 100,
+    "window": 11000,
+    "schedule_start": 190000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 17,
+    "header_waits_above_bound": 17,
+    "above_occupancy": 17,
+    "contender_flows": [
+     18
+    ],
+    "latency_min": 1217,
+    "latency_max": 1296,
+    "latency_minus_L0_min": 1055,
+    "latency_minus_L0_max": 1134,
+    "header_minus_model_min": 385,
+    "header_minus_model_max": 458,
+    "stall_min": 668,
+    "stall_max": 726,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 1049,
+    "tx_block_max": 1128,
+    "software_latency_min": 2514,
+    "software_latency_max": 2593,
+    "driver_min": 1297,
+    "driver_max": 1297
+   },
+   {
+    "flow": 18,
+    "source": "BFE6",
+    "target": "FDF2",
+    "src_pe": "3-2",
+    "dst_pe": "1-3",
+    "hops": 3,
+    "flits": 131,
+    "L0": 156,
+    "header_model": 24,
+    "occupancy": 236,
+    "header_wait_bound": 80,
+    "window": 11000,
+    "schedule_start": 192000,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "latency_min": 409,
+    "latency_max": 482,
+    "latency_minus_L0_min": 253,
+    "latency_minus_L0_max": 326,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 253,
+    "stall_max": 326,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 248,
+    "tx_block_max": 321,
+    "software_latency_min": 1707,
+    "software_latency_max": 1780,
+    "driver_min": 1297,
+    "driver_max": 1303
+   },
+   {
+    "flow": 19,
+    "source": "BFE7",
+    "target": "FDF2",
+    "src_pe": "2-2",
+    "dst_pe": "1-3",
+    "hops": 2,
+    "flits": 131,
+    "L0": 150,
+    "header_model": 18,
+    "occupancy": 210,
+    "header_wait_bound": 60,
+    "window": 106000,
+    "schedule_start": 95000,
+    "packets": 16,
+    "size_mismatch": 0,
+    "header_waits": 15,
+    "header_waits_above_bound": 15,
+    "above_occupancy": 16,
+    "contender_flows": [
+     20
+    ],
+    "latency_min": 917,
+    "latency_max": 1118,
+    "latency_minus_L0_min": 767,
+    "latency_minus_L0_max": 968,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 121,
+    "stall_min": 662,
+    "stall_max": 788,
+    "gap_min": 105,
+    "gap_max": 117,
+    "tx_block_min": 634,
+    "tx_block_max": 845,
+    "software_latency_min": 2618,
+    "software_latency_max": 2820,
+    "driver_min": 1700,
+    "driver_max": 1702
+   },
+   {
+    "flow": 20,
+    "source": "BFE8",
+    "target": "FDF2",
+    "src_pe": "1-2",
+    "dst_pe": "1-3",
+    "hops": 1,
+    "flits": 131,
+    "L0": 144,
+    "header_model": 12,
+    "occupancy": 184,
+    "header_wait_bound": 40,
+    "window": 106000,
+    "schedule_start": 97000,
+    "packets": 16,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 16,
+    "contender_flows": [],
+    "latency_min": 404,
+    "latency_max": 535,
+    "latency_minus_L0_min": 260,
+    "latency_minus_L0_max": 391,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 260,
+    "stall_max": 391,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 257,
+    "tx_block_max": 388,
+    "software_latency_min": 1701,
+    "software_latency_max": 1831,
+    "driver_min": 1296,
+    "driver_max": 1297
+   },
+   {
+    "flow": 21,
+    "source": "FDF1",
+    "target": "STPH",
+    "src_pe": "2-3",
+    "dst_pe": "0-3",
+    "hops": 2,
+    "flits": 515,
+    "L0": 534,
+    "header_model": 18,
+    "occupancy": 594,
+    "header_wait_bound": 60,
+    "window": 106000,
+    "schedule_start": 95000,
+    "packets": 15,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 15,
+    "contender_flows": [],
+    "latency_min": 795,
+    "latency_max": 901,
+    "latency_minus_L0_min": 261,
+    "latency_minus_L0_max": 367,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 261,
+    "stall_max": 367,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 257,
+    "tx_block_max": 363,
+    "software_latency_min": 2549,
+    "software_latency_max": 2655,
+    "driver_min": 1754,
+    "driver_max": 1754
+   },
+   {
+    "flow": 22,
+    "source": "FDF2",
+    "target": "STPH",
+    "src_pe": "1-3",
+    "dst_pe": "0-3",
+    "hops": 1,
+    "flits": 515,
+    "L0": 528,
+    "header_model": 12,
+    "occupancy": 568,
+    "header_wait_bound": 40,
+    "window": 106000,
+    "schedule_start": 97000,
+    "packets": 15,
+    "size_mismatch": 0,
+    "header_waits": 15,
+    "header_waits_above_bound": 15,
+    "above_occupancy": 15,
+    "contender_flows": [
+     21
+    ],
+    "latency_min": 1257,
+    "latency_max": 1378,
+    "latency_minus_L0_min": 729,
+    "latency_minus_L0_max": 850,
+    "header_minus_model_min": 48,
+    "header_minus_model_max": 169,
+    "stall_min": 681,
+    "stall_max": 681,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 726,
+    "tx_block_max": 847,
+    "software_latency_min": 3760,
+    "software_latency_max": 3970,
+    "driver_min": 2503,
+    "driver_max": 2597
+   },
+   {
+    "flow": 23,
+    "source": "STPH",
+    "target": "OBMG",
+    "src_pe": "0-3",
+    "dst_pe": "3-3",
+    "hops": 3,
+    "flits": 259,
+    "L0": 284,
+    "header_model": 24,
+    "occupancy": 364,
+    "header_wait_bound": 80,
+    "window": 106000,
+    "schedule_start": 95000,
+    "packets": 14,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 14,
+    "contender_flows": [],
+    "latency_min": 546,
+    "latency_max": 627,
+    "latency_minus_L0_min": 262,
+    "latency_minus_L0_max": 343,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 262,
+    "stall_max": 343,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 257,
+    "tx_block_max": 338,
+    "software_latency_min": 1847,
+    "software_latency_max": 1930,
+    "driver_min": 1301,
+    "driver_max": 1303
+   }
+  ]
+ },
+ "link_schedule": {
+  "feasible": true,
+  "skipped": 0,
+  "starts": {
+   "11": 95000,
+   "12": 95000,
+   "13": 192000,
+   "14": 190000,
+   "15": 95000,
+   "16": 161998,
+   "17": 190000,
+   "18": 192000,
+   "19": 95000,
+   "20": 97000,
+   "21": 95000,
+   "22": 97000,
+   "23": 95000,
+   "3": 192000,
+   "4": 190000,
+   "7": 95000
+  }
+ },
+ "monitor": {
+  "send_err": 0,
+  "send_incomplete": 0,
+  "recv_err": 0,
+  "recv_spurious": 0,
+  "recv_missing": 0,
+  "send_pkts": 262,
+  "recv_pkts": 262,
+  "nodes": 16,
+  "errors": 0
+ },
+ "phase_conformance": {
+  "release": "tick",
+  "phases": 16,
+  "jobs": 353,
+  "phases_with_a_task_twice": 0,
+  "early_jobs": 0,
+  "late_jobs": 0,
+  "phases_cpu_above": 0,
+  "conforms": true,
+  "pes": {
+   "0-0": {
+    "busy_max": 85370,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "0-1": {
+    "busy_max": 172466,
+    "bound_max": 190000,
+    "phases_above": 0
+   },
+   "0-2": {
+    "busy_max": 85751,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "0-3": {
+    "busy_max": 86455,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "1-0": {
+    "busy_max": 143239,
+    "bound_max": 161998,
+    "phases_above": 0
+   },
+   "1-1": {
+    "busy_max": 172466,
+    "bound_max": 190000,
+    "phases_above": 0
+   },
+   "1-2": {
+    "busy_max": 86100,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "1-3": {
+    "busy_max": 88858,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "2-0": {
+    "busy_max": 171239,
+    "bound_max": 190000,
+    "phases_above": 0
+   },
+   "2-1": {
+    "busy_max": 86100,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "2-2": {
+    "busy_max": 86504,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "2-3": {
+    "busy_max": 88128,
+    "bound_max": 95000,
+    "phases_above": 0
+   },
+   "3-0": {
+    "busy_max": 171239,
+    "bound_max": 190000,
+    "phases_above": 0
+   },
+   "3-1": {
+    "busy_max": 171239,
+    "bound_max": 190000,
+    "phases_above": 0
+   },
+   "3-2": {
+    "busy_max": 171239,
+    "bound_max": 190000,
+    "phases_above": 0
+   },
+   "3-3": {
+    "busy_max": 85015,
+    "bound_max": 95000,
+    "phases_above": 0
+   }
+  }
+ }
+}

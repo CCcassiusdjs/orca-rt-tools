@@ -1,0 +1,110 @@
+{
+ "_doc": "static t(v) (rttools.wcet) of the image; the analysis flow takes max(t(v) of the CSV, this t(v)) (rttools/wcet/costs.py, rule max)",
+ "image": {
+  "file": "car_full.elf",
+  "kind": "elf",
+  "sha256": "a84ad666ab192cc3e6230755f0d6f5bf195a6087a4654fa5a60fd044d00dffbd"
+ },
+ "scheduler_cycles": 1852,
+ "tasks": {
+  "TPMS": {
+   "t": 474662
+  },
+  "VIBS": {
+   "t": 147992
+  },
+  "SPES": {
+   "t": 152974
+  },
+  "POSI": {
+   "t": 712974
+  },
+  "USOS": {
+   "t": 101322
+  },
+  "FBU1": {
+   "t": 63992
+  },
+  "FBU2": {
+   "t": 63992
+  },
+  "FBU3": {
+   "t": 68974
+  },
+  "FBU4": {
+   "t": 45322
+  },
+  "FBU5": {
+   "t": 63992
+  },
+  "FBU6": {
+   "t": 63992
+  },
+  "FBU7": {
+   "t": 63992
+  },
+  "FBU8": {
+   "t": 68974
+  },
+  "STAC": {
+   "t": 168470
+  },
+  "TPRC": {
+   "t": 1408005
+  },
+  "DIRC": {
+   "t": 148005
+  },
+  "NAVC": {
+   "t": 183740
+  },
+  "OBDB": {
+   "t": 723326
+  },
+  "BFE1": {
+   "t": 69000
+  },
+  "BFE2": {
+   "t": 69000
+  },
+  "BFE3": {
+   "t": 69000
+  },
+  "BFE4": {
+   "t": 69000
+  },
+  "BFE5": {
+   "t": 69000
+  },
+  "BFE6": {
+   "t": 69000
+  },
+  "BFE7": {
+   "t": 69000
+  },
+  "BFE8": {
+   "t": 69000
+  },
+  "FDF1": {
+   "t": 84632
+  },
+  "FDF2": {
+   "t": 84632
+  },
+  "STPH": {
+   "t": 74344
+  },
+  "THRC": {
+   "t": 153349
+  },
+  "VOD1": {
+   "t": 69000
+  },
+  "VOD2": {
+   "t": 69000
+  },
+  "OBMG": {
+   "t": 1428632
+  }
+ }
+}

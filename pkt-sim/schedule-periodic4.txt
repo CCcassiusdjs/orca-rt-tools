@@ -1,0 +1,432 @@
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 251153 0-1 scheduled 1
+# 251162 1-1 scheduled 1
+# 251173 1-0 scheduled 1
+# 251183 0-0 scheduled 1
+# 255551 1-1 scheduled 2
+# 268982 0-1 scheduled 0
+# 273729 1-1 scheduled 0
+# 330389 0-0 scheduled 2
+# 353698 1-0 scheduled 2
+# 372958 0-0 scheduled 3
+# 420676 1-0 scheduled 3
+# 464374 0-0 scheduled 4
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 501206 0-1 scheduled 0
+# 501239 1-1 scheduled 0
+# 501266 1-0 scheduled 3
+# 501298 0-0 scheduled 4
+# 517471 0-0 scheduled 0
+# 551411 1-0 scheduled 0
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 751221 0-1 scheduled 0
+# 751256 1-1 scheduled 0
+# 751288 0-0 scheduled 4
+# 751289 1-0 scheduled 0
+# 770558 0-0 -> TAG 4560
+# 770824 0-0 <- TAG 4560
+# 777786 0-0 -> TAG 1230
+# 779097 0-0 scheduled 3
+# 779635 0-1 <- TAG 1230
+# 842040 0-0 -> TAG 7890
+# 842306 0-0 <- TAG 7890
+# 842797 0-0 scheduled 2
+# 871973 0-0 -> TAG 3450
+# 872239 0-0 <- TAG 3450
+# 872730 0-0 scheduled 1
+# 958539 0-0 -> TAG 6780
+# 959945 0-0 scheduled 0
+# 961792 1-1 <- TAG 6780
+# Elapsed 1M time units. $time is 1000000.
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 1001202 0-1 scheduled 1
+# 1001237 1-1 scheduled 2
+# 1001304 1-0 scheduled 0
+# 1001306 0-0 scheduled 4
+# 1020576 0-0 -> TAG 4560
+# 1020842 0-0 <- TAG 4560
+# 1027804 0-0 -> TAG 1230
+# 1029115 0-0 scheduled 3
+# 1029741 0-1 <- TAG 1230
+# 1092058 0-0 -> TAG 7890
+# 1092324 0-0 <- TAG 7890
+# 1092815 0-0 scheduled 2
+# 1097271 0-1 -> TAG 1200
+# 1099136 1-0 <- TAG 1200
+# 1106903 1-1 -> TAG 1230
+# 1107173 1-1 <- TAG 1230
+# 1107578 1-1 scheduled 1
+# 1119890 1-1 scheduled 0
+# 1121991 0-0 -> TAG 3450
+# 1122257 0-0 <- TAG 3450
+# 1122748 0-0 scheduled 1
+# 1196128 0-1 -> TAG 1200
+# 1197432 0-1 scheduled 0
+# 1197985 1-0 <- TAG 1200
+# 1208557 0-0 -> TAG 6780
+# 1209963 0-0 scheduled 0
+# 1211947 1-1 <- TAG 6780
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 1251252 0-1 scheduled 0
+# 1251254 1-1 scheduled 2
+# 1251288 1-0 scheduled 3
+# 1251321 0-0 scheduled 4
+# 1270591 0-0 -> TAG 4560
+# 1270857 0-0 <- TAG 4560
+# 1277819 0-0 -> TAG 1230
+# 1279130 0-0 scheduled 3
+# 1279758 0-1 <- TAG 1230
+# 1302196 1-0 -> TAG 3450
+# 1302466 1-0 <- TAG 3450
+# 1309421 1-0 -> TAG 2340
+# 1309691 1-0 <- TAG 2340
+# 1342073 0-0 -> TAG 7890
+# 1342339 0-0 <- TAG 7890
+# 1342830 0-0 scheduled 2
+# 1356920 1-1 -> TAG 1230
+# 1357190 1-1 <- TAG 1230
+# 1357595 1-1 scheduled 1
+# 1363101 1-0 -> TAG 3450
+# 1363371 1-0 <- TAG 3450
+# 1369907 1-1 scheduled 0
+# 1371150 1-0 -> TAG 2340
+# 1371420 1-0 <- TAG 2340
+# 1371830 1-0 scheduled 1
+# 1372006 0-0 -> TAG 3450
+# 1372272 0-0 <- TAG 3450
+# 1372763 0-0 scheduled 1
+# 1414919 1-0 -> TAG 8900
+# 1418830 1-1 <- TAG 8900
+# 1458572 0-0 -> TAG 6780
+# 1459105 1-0 -> TAG 8900
+# 1459978 0-0 scheduled 0
+# 1460411 1-0 scheduled 2
+# 1461821 1-1 <- TAG 6780
+# 1464688 1-1 <- TAG 8900
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 1501235 0-1 scheduled 1
+# 1501244 1-1 scheduled 1
+# 1501332 1-0 scheduled 2
+# 1501336 0-0 scheduled 4
+# 1520606 0-0 -> TAG 4560
+# 1520872 0-0 <- TAG 4560
+# 1527834 0-0 -> TAG 1230
+# 1529145 0-0 scheduled 3
+# 1529771 0-1 <- TAG 1230
+# 1537108 1-0 -> TAG 5670
+# 1540186 1-1 <- TAG 5670
+# 1592088 0-0 -> TAG 7890
+# 1592354 0-0 <- TAG 7890
+# 1592845 0-0 scheduled 2
+# 1597304 0-1 -> TAG 1200
+# 1599406 1-0 <- TAG 1200
+# 1614698 1-0 -> TAG 5670
+# 1616004 1-0 scheduled 3
+# 1617852 1-1 <- TAG 5670
+# 1622021 0-0 -> TAG 3450
+# 1622287 0-0 <- TAG 3450
+# 1622778 0-0 scheduled 1
+# 1670362 1-0 -> TAG 3450
+# 1670632 1-0 <- TAG 3450
+# 1678422 1-0 -> TAG 2340
+# 1678692 1-0 <- TAG 2340
+# 1679107 1-0 scheduled 1
+# 1696161 0-1 -> TAG 1200
+# 1697465 0-1 scheduled 0
+# 1698247 1-0 <- TAG 1200
+# 1708587 0-0 -> TAG 6780
+# 1709993 0-0 scheduled 0
+# 1711966 1-1 <- TAG 6780
+# 1723129 1-0 -> TAG 8900
+# 1724428 1-0 scheduled 2
+# 1726952 1-1 <- TAG 8900
+# 1739244 1-1 scheduled 2
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 1751278 1-0 scheduled 3
+# 1751285 0-1 scheduled 0
+# 1751312 1-1 scheduled 2
+# 1751354 0-0 scheduled 4
+# 1770624 0-0 -> TAG 4560
+# 1770890 0-0 <- TAG 4560
+# 1777852 0-0 -> TAG 1230
+# 1779163 0-0 scheduled 3
+# 1779791 0-1 <- TAG 1230
+# 1802185 1-0 -> TAG 3450
+# 1802455 1-0 <- TAG 3450
+# 1809409 1-0 -> TAG 2340
+# 1809679 1-0 <- TAG 2340
+# 1810094 1-0 scheduled 1
+# 1842106 0-0 -> TAG 7890
+# 1842372 0-0 <- TAG 7890
+# 1842863 0-0 scheduled 2
+# 1848329 1-1 -> TAG 1230
+# 1848599 1-1 <- TAG 1230
+# 1851520 1-0 -> TAG 8900
+# 1852826 1-0 scheduled 2
+# 1855460 1-1 <- TAG 8900
+# 1872039 0-0 -> TAG 3450
+# 1872305 0-0 <- TAG 3450
+# 1872796 0-0 scheduled 1
+# 1903564 1-0 -> TAG 5670
+# 1906643 1-1 <- TAG 5670
+# 1958449 1-1 -> TAG 1230
+# 1958605 0-0 -> TAG 6780
+# 1958719 1-1 <- TAG 1230
+# 1959119 1-1 scheduled 1
+# 1960011 0-0 scheduled 0
+# 1961895 1-1 <- TAG 6780
+# 1981045 1-0 -> TAG 5670
+# 1982421 1-0 scheduled 0
+# 1984002 1-1 <- TAG 5670
+# Elapsed 1M time units. $time is 2000000.
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 2001268 0-1 scheduled 1
+# 2001275 1-1 scheduled 2
+# 2001369 0-0 scheduled 4
+# 2001369 1-0 scheduled 0
+# 2020639 0-0 -> TAG 4560
+# 2020905 0-0 <- TAG 4560
+# 2027867 0-0 -> TAG 1230
+# 2029178 0-0 scheduled 3
+# 2029804 0-1 <- TAG 1230
+# 2092121 0-0 -> TAG 7890
+# 2092387 0-0 <- TAG 7890
+# 2092878 0-0 scheduled 2
+# 2097337 0-1 -> TAG 1200
+# 2099426 1-0 <- TAG 1200
+# 2106943 1-1 -> TAG 1230
+# 2107213 1-1 <- TAG 1230
+# 2107613 1-1 scheduled 1
+# 2122054 0-0 -> TAG 3450
+# 2122320 0-0 <- TAG 3450
+# 2122811 0-0 scheduled 1
+# 2196194 0-1 -> TAG 1200
+# 2197498 0-1 scheduled 0
+# 2198053 1-0 <- TAG 1200
+# 2208620 0-0 -> TAG 6780
+# 2210026 0-0 scheduled 0
+# 2212027 1-1 <- TAG 6780
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 2251294 1-1 scheduled 2
+# 2251318 0-1 scheduled 0
+# 2251350 1-0 scheduled 3
+# 2251384 0-0 scheduled 4
+# 2270654 0-0 -> TAG 4560
+# 2270920 0-0 <- TAG 4560
+# 2277882 0-0 -> TAG 1230
+# 2279193 0-0 scheduled 3
+# 2279821 0-1 <- TAG 1230
+# 2302258 1-0 -> TAG 3450
+# 2302528 1-0 <- TAG 3450
+# 2309483 1-0 -> TAG 2340
+# 2309753 1-0 <- TAG 2340
+# 2342136 0-0 -> TAG 7890
+# 2342402 0-0 <- TAG 7890
+# 2342893 0-0 scheduled 2
+# 2356961 1-1 -> TAG 1230
+# 2357231 1-1 <- TAG 1230
+# 2357631 1-1 scheduled 1
+# 2363163 1-0 -> TAG 3450
+# 2363433 1-0 <- TAG 3450
+# 2371212 1-0 -> TAG 2340
+# 2371482 1-0 <- TAG 2340
+# 2371892 1-0 scheduled 1
+# 2372069 0-0 -> TAG 3450
+# 2372335 0-0 <- TAG 3450
+# 2372826 0-0 scheduled 1
+# 2414981 1-0 -> TAG 8900
+# 2418910 1-1 <- TAG 8900
+# 2458635 0-0 -> TAG 6780
+# 2459167 1-0 -> TAG 8900
+# 2460041 0-0 scheduled 0
+# 2460473 1-0 scheduled 2
+# 2462028 1-1 <- TAG 6780
+# 2464890 1-1 <- TAG 8900
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 2501298 0-1 scheduled 1
+# 2501308 1-1 scheduled 2
+# 2501394 1-0 scheduled 2
+# 2501402 0-0 scheduled 4
+# 2521507 0-0 -> TAG 4560
+# 2521773 0-0 <- TAG 4560
+# 2529573 0-0 -> TAG 1230
+# 2530884 0-0 scheduled 3
+# 2531509 0-1 <- TAG 1230
+# 2538005 1-0 -> TAG 5670
+# 2541084 1-1 <- TAG 5670
+# 2595492 0-0 -> TAG 7890
+# 2595758 0-0 <- TAG 7890
+# 2596249 0-0 scheduled 2
+# 2599038 0-1 -> TAG 1200
+# 2601137 1-0 <- TAG 1200
+# 2610294 1-1 -> TAG 1230
+# 2610564 1-1 <- TAG 1230
+# 2610964 1-1 scheduled 1
+# 2617264 1-0 -> TAG 5670
+# 2618570 1-0 scheduled 3
+# 2620259 1-1 <- TAG 5670
+# 2627094 0-0 -> TAG 3450
+# 2627360 0-0 <- TAG 3450
+# 2627851 0-0 scheduled 1
+# 2674606 1-0 -> TAG 3450
+# 2674876 1-0 <- TAG 3450
+# 2683494 1-0 -> TAG 2340
+# 2683764 1-0 <- TAG 2340
+# 2684179 1-0 scheduled 1
+# 2699559 0-1 -> TAG 1200
+# 2700863 0-1 scheduled 0
+# 2701645 1-0 <- TAG 1200
+# 2715338 0-0 -> TAG 6780
+# 2716744 0-0 scheduled 0
+# 2718734 1-1 <- TAG 6780
+# 2729878 1-0 -> TAG 8900
+# 2731177 1-0 scheduled 2
+# 2733681 1-1 <- TAG 8900
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 2751322 1-1 scheduled 2
+# 2751343 1-0 scheduled 3
+# 2751350 0-1 scheduled 0
+# 2751418 0-0 scheduled 4
+# 2771523 0-0 -> TAG 4560
+# 2771789 0-0 <- TAG 4560
+# 2779589 0-0 -> TAG 1230
+# 2780900 0-0 scheduled 3
+# 2781530 0-1 <- TAG 1230
+# 2803921 1-0 -> TAG 3450
+# 2804191 1-0 <- TAG 3450
+# 2811976 1-0 -> TAG 2340
+# 2812246 1-0 <- TAG 2340
+# 2812661 1-0 scheduled 1
+# 2845508 0-0 -> TAG 7890
+# 2845774 0-0 <- TAG 7890
+# 2846265 0-0 scheduled 2
+# 2855759 1-0 -> TAG 8900
+# 2857065 1-0 scheduled 2
+# 2859079 1-1 -> TAG 1230
+# 2859349 1-1 <- TAG 1230
+# 2859655 1-1 <- TAG 8900
+# 2860153 1-1 scheduled 1
+# 2877110 0-0 -> TAG 3450
+# 2877376 0-0 <- TAG 3450
+# 2877867 0-0 scheduled 1
+# 2916152 1-0 -> TAG 5670
+# 2919285 1-1 <- TAG 5670
+# 2965354 0-0 -> TAG 6780
+# 2966760 0-0 scheduled 0
+# 2968726 1-1 <- TAG 6780
+# 2995298 1-0 -> TAG 5670
+# 2996674 1-0 scheduled 0
+# 2998295 1-1 <- TAG 5670
+# Elapsed 1M time units. $time is 3000000.
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# Released workflow iteration...
+# 3001330 0-1 scheduled 1
+# 3001340 1-1 scheduled 2
+# 3001432 1-0 scheduled 0
+# 3001434 0-0 scheduled 4
+# 3021539 0-0 -> TAG 4560
+# 3021805 0-0 <- TAG 4560
+# 3029605 0-0 -> TAG 1230
+# 3030916 0-0 scheduled 3
+# 3031541 0-1 <- TAG 1230
+# 3095524 0-0 -> TAG 7890
+# 3095790 0-0 <- TAG 7890
+# 3096281 0-0 scheduled 2
+# 3099070 0-1 -> TAG 1200
+# 3101157 1-0 <- TAG 1200
+# 3108675 1-1 -> TAG 1230
+# 3108945 1-1 <- TAG 1230
+# 3109345 1-1 scheduled 1
+# 3127126 0-0 -> TAG 3450
+# 3127392 0-0 <- TAG 3450
+# 3127883 0-0 scheduled 1
+# 3199591 0-1 -> TAG 1200
+# 3200895 0-1 scheduled 0
+# 3201449 1-0 <- TAG 1200
+# 3215370 0-0 -> TAG 6780
+# 3216776 0-0 scheduled 0
+# 3218800 1-1 <- TAG 6780
+# Released workflow iteration...

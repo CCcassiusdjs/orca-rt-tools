@@ -1,0 +1,46 @@
+{
+ "_doc": "make (CAR-full): generation of apps/car-full/car-full.{csv,map} from apps/shi-2010 and the analysis flow of the paper with the general phase model (rttools/paper/carfull.py, rttools/bench_t/multirate.py). Paths relative to apps/.",
+ "source": {
+  "graph": "shi-2010/shi-2010.txt",
+  "flows": "shi-2010/SHI2010.csv",
+  "reference_period_s": 0.04,
+  "_doc": "reference_period_s: the period of SHI2010.csv that maps to scale.period_s (the shortest period of CAR, the period of CAR-V); every period divides by the same ratio"
+ },
+ "scale": {
+  "_doc": "Periods: T / ratio, ratio = reference_period_s / period_s (80). c^(v) = cost_factor round(w(v) T_v / hyperperiod_s) + scheduler_cycles, T_v the task period before the scale, w(v) in cycles per hyperperiod_s on the base_hz basis of shi-2010.txt; payload = floor(bytes / payload_divisor). The run evaluates every pair of cost_factor_candidates x payload_divisor_candidates; cost_factor follows carfull.choose (carv.choose).",
+  "period_s": 0.0005,
+  "hyperperiod_s": 1,
+  "base_hz": 1000000,
+  "cost_factor": 4,
+  "cost_factor_candidates": [3, 4, 5, 6],
+  "payload_divisor": 16,
+  "payload_divisor_candidates": [8, 16],
+  "scheduler_cycles": 11000
+ },
+ "mapping": {
+  "_doc": "Spiral Mapping of the clusters of CAR on the width x height mesh, the mapping of Figure 4 (rttools.paper.car run_spiral; ORT/GCM on the weights of shi-2010.txt, smallest M2)",
+  "graph": "shi-2010/shi-2010.txt",
+  "width": 4,
+  "height": 4,
+  "criterion": "MAX_PROC"
+ },
+ "app": {
+  "dir": "car-full",
+  "csv": "car-full.csv",
+  "map": "car-full-ONTO-hermes4x4.map"
+ },
+ "platform": {
+  "_doc": "clock of the ORCA2 platform (500 MHz, as CAR-V); f0_hz: first frequency of the search; max_utilization: limit of f_CPU / clock for the choice of the cost factor (the utilization of application E, as CAR-V)",
+  "clock_hz": 500000000,
+  "f0_hz": 500000000,
+  "max_utilization": 0.8698
+ },
+ "memory": {
+  "_doc": "Heap model of rttools/ucxgen/memory.py (pe_demand) with in_flight received packets per input edge between PEs. heap_bytes: _heap_size of the car_full image (make car_full, ARCH=riscv/hf-riscv-e, riscv64-unknown-elf-gcc 13.2, build/target/image.map); ram_bytes: RAM of a PE (manycore_top.sv RAM_MSIZE)",
+  "heap_bytes": 48168,
+  "ram_bytes": 65536,
+  "in_flight": 2,
+  "max_payload_bytes": 65532,
+  "max_tasks": 16
+ }
+}

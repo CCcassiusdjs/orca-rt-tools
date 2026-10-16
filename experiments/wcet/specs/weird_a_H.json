@@ -1,0 +1,10 @@
+{
+ "_doc": "rttools.wcet spec of application E on the image of run H (experiments/exp23/logs/H.image.lst, riscv64-elf-gcc 12.2.0, tag r10-rc1).",
+ "image": "../../exp23/logs/H.image.lst",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../annotations/weird_a.json",
+  "../annotations/H.image.json"
+ ],
+ "app": "../../../apps/synthetic-app-e/synthetic-app-e.csv"
+}

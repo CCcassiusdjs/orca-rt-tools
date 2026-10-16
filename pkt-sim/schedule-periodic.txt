@@ -1,0 +1,155 @@
+# 251153 0-1 scheduled 1
+# 251164 1-1 scheduled 1
+# 251173 1-0 scheduled 1
+# 251184 0-0 scheduled 1
+# 255553 1-1 scheduled 2
+# 268982 0-1 scheduled 0
+# 273731 1-1 scheduled 0
+# 330390 0-0 scheduled 2
+# 353698 1-0 scheduled 2
+# 372959 0-0 scheduled 3
+# 420676 1-0 scheduled 3
+# 464375 0-0 scheduled 4
+# 501204 0-1 scheduled 0
+# 501238 1-1 scheduled 0
+# 501268 1-0 scheduled 3
+# 501300 0-0 scheduled 4
+# 536011 0-0 -> TAG 4560
+# 536277 0-0 <- TAG 4560
+# 543237 0-0 -> TAG 1230
+# 544545 0-0 scheduled 3
+# 545086 0-1 <- TAG 1230
+# 551153 1-0 scheduled 0
+# 607481 0-0 -> TAG 7890
+# 607747 0-0 <- TAG 7890
+# 608238 0-0 scheduled 2
+# 638254 0-0 -> TAG 3450
+# 638520 0-0 <- TAG 3450
+# 639011 0-0 scheduled 1
+# 724821 0-0 -> TAG 6780
+# 726227 0-0 scheduled 0
+# 728073 1-1 <- TAG 6780
+# 751186 0-1 scheduled 1
+# 751222 1-1 scheduled 2
+# 751289 1-0 scheduled 0
+# 751323 0-0 scheduled 0
+# 846487 0-1 -> TAG 1200
+# 847791 0-1 scheduled 0
+# 848353 1-0 <- TAG 1200
+# 856888 1-1 -> TAG 1230
+# 857158 1-1 <- TAG 1230
+# 857563 1-1 scheduled 1
+# 869875 1-1 scheduled 0
+# Elapsed 1M time units. $time is 1000000.
+# 1001238 0-1 scheduled 0
+# 1001271 1-0 scheduled 3
+# 1001271 1-1 scheduled 0
+# 1001305 0-0 scheduled 4
+# 1020578 0-0 -> TAG 4560
+# 1020844 0-0 <- TAG 4560
+# 1027806 0-0 -> TAG 1230
+# 1029114 0-0 scheduled 3
+# 1029747 0-1 <- TAG 1230
+# 1052179 1-0 -> TAG 3450
+# 1052449 1-0 <- TAG 3450
+# 1059404 1-0 -> TAG 2340
+# 1059674 1-0 <- TAG 2340
+# 1060089 1-0 scheduled 1
+# 1092057 0-0 -> TAG 7890
+# 1092323 0-0 <- TAG 7890
+# 1092814 0-0 scheduled 2
+# 1101514 1-0 -> TAG 8900
+# 1102820 1-0 scheduled 2
+# 1105425 1-1 <- TAG 8900
+# 1121990 0-0 -> TAG 3450
+# 1122256 0-0 <- TAG 3450
+# 1122747 0-0 scheduled 1
+# 1179360 1-0 -> TAG 5670
+# 1180736 1-0 scheduled 0
+# 1182317 1-1 <- TAG 5670
+# 1208556 0-0 -> TAG 6780
+# 1209962 0-0 scheduled 0
+# 1211805 1-1 <- TAG 6780
+# 1251219 0-1 scheduled 1
+# 1251229 1-1 scheduled 1
+# 1251320 1-0 scheduled 0
+# 1251354 0-0 scheduled 0
+# 1346520 0-1 -> TAG 1200
+# 1347824 0-1 scheduled 0
+# 1348609 1-0 <- TAG 1200
+# 1360344 1-1 scheduled 2
+# 1469323 1-1 -> TAG 1230
+# 1469593 1-1 <- TAG 1230
+# 1469998 1-1 scheduled 1
+# 1482305 1-1 scheduled 0
+# 1501269 0-1 scheduled 0
+# 1501302 1-0 scheduled 3
+# 1501303 1-1 scheduled 0
+# 1501370 0-0 scheduled 0
+# 1552210 1-0 -> TAG 3450
+# 1552480 1-0 <- TAG 3450
+# 1559435 1-0 -> TAG 2340
+# 1559705 1-0 <- TAG 2340
+# 1560120 1-0 scheduled 1
+# 1601545 1-0 -> TAG 8900
+# 1602851 1-0 scheduled 2
+# 1605481 1-1 <- TAG 8900
+# 1679391 1-0 -> TAG 5670
+# 1680767 1-0 scheduled 0
+# 1682349 1-1 <- TAG 5670
+# 1751267 1-1 scheduled 1
+# 1751285 0-1 scheduled 0
+# 1751354 1-0 scheduled 0
+# 1751386 0-0 scheduled 0
+# 1860435 1-1 scheduled 0
+# Elapsed 1M time units. $time is 2000000.
+# 2001300 0-1 scheduled 0
+# 2001335 1-1 scheduled 0
+# 2001368 0-0 scheduled 4
+# 2001369 1-0 scheduled 0
+# 2020641 0-0 -> TAG 4560
+# 2020907 0-0 <- TAG 4560
+# 2027869 0-0 -> TAG 1230
+# 2029177 0-0 scheduled 3
+# 2029809 0-1 <- TAG 1230
+# 2092120 0-0 -> TAG 7890
+# 2092386 0-0 <- TAG 7890
+# 2092877 0-0 scheduled 2
+# 2122053 0-0 -> TAG 3450
+# 2122319 0-0 <- TAG 3450
+# 2122810 0-0 scheduled 1
+# 2208619 0-0 -> TAG 6780
+# 2210025 0-0 scheduled 0
+# 2212022 1-1 <- TAG 6780
+# 2251284 0-1 scheduled 1
+# 2251317 1-1 scheduled 2
+# 2251384 1-0 scheduled 0
+# 2251420 0-0 scheduled 0
+# 2346585 0-1 -> TAG 1200
+# 2347889 0-1 scheduled 0
+# 2348673 1-0 <- TAG 1200
+# 2356983 1-1 -> TAG 1230
+# 2357253 1-1 <- TAG 1230
+# 2357658 1-1 scheduled 1
+# 2369970 1-1 scheduled 0
+# 2501334 0-1 scheduled 0
+# 2501366 1-0 scheduled 3
+# 2501366 1-1 scheduled 0
+# 2501436 0-0 scheduled 0
+# 2553943 1-0 -> TAG 3450
+# 2554213 1-0 <- TAG 3450
+# 2562001 1-0 -> TAG 2340
+# 2562271 1-0 <- TAG 2340
+# 2562686 1-0 scheduled 1
+# 2605781 1-0 -> TAG 8900
+# 2607087 1-0 scheduled 2
+# 2609693 1-1 <- TAG 8900
+# 2685301 1-0 -> TAG 5670
+# 2686677 1-0 scheduled 0
+# 2688259 1-1 <- TAG 5670
+# 2751333 1-1 scheduled 1
+# 2751350 0-1 scheduled 0
+# 2751417 1-0 scheduled 0
+# 2751452 0-0 scheduled 0
+# 2863006 1-1 scheduled 0
+# Elapsed 1M time units. $time is 3000000.

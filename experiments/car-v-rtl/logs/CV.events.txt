@@ -1,0 +1,2192 @@
+# Time scale of (manycore_top) is  1ns /  1fs
+# Time scale of (manycore_top.pe_x[0].pe_y[0].pe_mod) is  1ns /  1fs
+# 504204 0-0 scheduled 1
+# 504204 1-3 scheduled 1
+# 504204 2-2 scheduled 1
+# 504206 0-3 scheduled 1
+# 504206 1-2 scheduled 1
+# 504206 2-3 scheduled 1
+# 504206 3-3 scheduled 1
+# 504209 0-2 scheduled 1
+# 504209 2-1 scheduled 1
+# 504230 0-1 scheduled 1
+# 504230 1-0 scheduled 1
+# 504233 2-0 scheduled 1
+# 504235 1-1 scheduled 1
+# 504235 3-0 scheduled 1
+# 504235 3-1 scheduled 1
+# 504235 3-2 scheduled 1
+# 516206 0-0 scheduled 0
+# 518406 3-3 scheduled 0
+# 529977 2-2 scheduled 0
+# 529980 1-2 scheduled 0
+# 529983 2-1 scheduled 0
+# 540759 0-3 scheduled 0
+# 562314 1-3 scheduled 0
+# 562317 2-3 scheduled 0
+# 718898 1-0 scheduled 2
+# 718901 2-0 scheduled 2
+# 718904 3-0 scheduled 2
+# 718904 3-1 scheduled 2
+# 718904 3-2 scheduled 2
+# 718927 0-2 scheduled 0
+# 744717 1-0 scheduled 0
+# 744719 2-0 scheduled 0
+# 744722 3-0 scheduled 0
+# 744722 3-1 scheduled 0
+# 744722 3-2 scheduled 0
+# 921790 0-1 scheduled 2
+# 921796 1-1 scheduled 2
+# 939525 0-1 scheduled 0
+# 939530 1-1 scheduled 0
+# 1004306 1-3 scheduled 0
+# 1004306 2-2 scheduled 0
+# 1004309 1-2 scheduled 0
+# 1004309 2-3 scheduled 0
+# 1004309 3-3 scheduled 0
+# 1004311 0-0 scheduled 0
+# 1004311 0-2 scheduled 0
+# 1004311 0-3 scheduled 0
+# 1004311 2-1 scheduled 0
+# 1004396 0-1 scheduled 0
+# 1004396 3-0 scheduled 0
+# 1004396 3-1 scheduled 0
+# 1004396 3-2 scheduled 0
+# 1004398 1-0 scheduled 0
+# 1004401 1-1 scheduled 0
+# 1004401 2-0 scheduled 0
+# 1504306 1-2 scheduled 0
+# 1504306 2-3 scheduled 0
+# 1504306 3-3 scheduled 0
+# 1504309 0-0 scheduled 0
+# 1504309 0-2 scheduled 0
+# 1504309 0-3 scheduled 0
+# 1504309 2-1 scheduled 0
+# 1504311 1-3 scheduled 0
+# 1504311 2-2 scheduled 0
+# 1504396 0-1 scheduled 0
+# 1504396 3-0 scheduled 0
+# 1504396 3-1 scheduled 0
+# 1504396 3-2 scheduled 0
+# 1504398 1-0 scheduled 0
+# 1504401 1-1 scheduled 0
+# 1504401 2-0 scheduled 0
+# 2004306 0-0 scheduled 0
+# 2004306 0-2 scheduled 0
+# 2004306 0-3 scheduled 0
+# 2004306 2-1 scheduled 0
+# 2004308 1-3 scheduled 0
+# 2004308 2-2 scheduled 0
+# 2004311 1-2 scheduled 0
+# 2004311 2-3 scheduled 0
+# 2004311 3-3 scheduled 0
+# 2004395 0-1 scheduled 0
+# 2004395 3-0 scheduled 0
+# 2004395 3-1 scheduled 0
+# 2004395 3-2 scheduled 0
+# 2004398 1-0 scheduled 0
+# 2004401 1-1 scheduled 0
+# 2004401 2-0 scheduled 0
+# 2504306 1-3 scheduled 0
+# 2504306 2-2 scheduled 0
+# 2504308 1-2 scheduled 0
+# 2504308 2-3 scheduled 0
+# 2504308 3-3 scheduled 0
+# 2504311 0-0 scheduled 0
+# 2504311 0-2 scheduled 0
+# 2504311 0-3 scheduled 0
+# 2504311 2-1 scheduled 0
+# 2504395 0-1 scheduled 0
+# 2504395 3-0 scheduled 0
+# 2504395 3-1 scheduled 0
+# 2504395 3-2 scheduled 0
+# 2504398 1-0 scheduled 0
+# 2504400 1-1 scheduled 0
+# 2504400 2-0 scheduled 0
+# TRIGGER-PE 1-1: release acknowledged at 3000424 ns
+# TRIGGER-PE 2-0: release acknowledged at 3000424 ns
+# TRIGGER-PE 0-1: release acknowledged at 3000427 ns
+# TRIGGER-PE 3-0: release acknowledged at 3000427 ns
+# TRIGGER-PE 3-1: release acknowledged at 3000427 ns
+# TRIGGER-PE 3-2: release acknowledged at 3000427 ns
+# TRIGGER-PE 0-2: release acknowledged at 3000429 ns
+# TRIGGER: workflow iteration at 3000429 ns.
+# TRIGGER: next release will be at 3499998 ns
+# 3004219 0-2 scheduled 1
+# 3004261 0-1 scheduled 1
+# 3004261 3-0 scheduled 1
+# 3004261 3-1 scheduled 1
+# 3004261 3-2 scheduled 1
+# 3004263 1-0 scheduled 1
+# 3004266 1-1 scheduled 1
+# 3004266 2-0 scheduled 1
+# 3004305 1-2 scheduled 0
+# 3004305 2-3 scheduled 0
+# 3004305 3-3 scheduled 0
+# 3004308 0-0 scheduled 0
+# 3004308 0-3 scheduled 0
+# 3004308 2-1 scheduled 0
+# 3004311 1-3 scheduled 0
+# 3004311 2-2 scheduled 0
+# 3152224 1-0 -> TAG 8193
+# 3153161 1-0 <- TAG 8193
+# 3154026 1-0 scheduled 2
+# 3225863 0-2 -> TAG 11265
+# 3225905 0-1 -> TAG 1025
+# 3225905 3-0 -> TAG 6145
+# 3225905 3-1 -> TAG 9217
+# 3225905 3-2 -> TAG 10241
+# 3225911 1-1 -> TAG 2049
+# 3225911 2-0 -> TAG 5121
+# 3226842 0-1 <- TAG 1025
+# 3226842 3-0 <- TAG 6145
+# 3226842 3-1 <- TAG 9217
+# 3226842 3-2 <- TAG 10241
+# 3226848 1-1 <- TAG 2049
+# 3226848 2-0 <- TAG 5121
+# 3227166 0-1 -> TAG 7169
+# 3227171 1-1 -> TAG 12289
+# 3227708 3-0 scheduled 2
+# 3227708 3-1 scheduled 2
+# 3227708 3-2 scheduled 2
+# 3227713 2-0 scheduled 2
+# 3229276 0-2 scheduled 0
+# 3230529 0-1 scheduled 2
+# 3230534 1-1 scheduled 2
+# FLIT TX t=3228448 src=0-2 dst=2-2 tag=11265 size=2403 head=1226811 last=1229466 block=250 gap=1
+# FLIT RX t=3235490 src=0-2 dst=2-2 tag=11265 size=2403 head=1226829 last=1229487 stall=254 gap=0
+# 3236332 2-2 <- TAG 11265
+# FLIT TX t=3229750 src=0-1 dst=2-1 tag=7169 size=2403 head=1227306 last=1229963 block=252 gap=1
+# FLIT TX t=3229755 src=1-1 dst=1-2 tag=12289 size=2403 head=1227308 last=1229966 block=253 gap=1
+# FLIT RX t=3236787 src=1-1 dst=1-2 tag=12289 size=2403 head=1227320 last=1229980 stall=256 gap=0
+# FLIT RX t=3236798 src=0-1 dst=2-1 tag=7169 size=2403 head=1227325 last=1229984 stall=255 gap=0
+# 3237629 1-2 <- TAG 12289
+# 3237640 2-1 <- TAG 7169
+# 3376392 1-0 -> TAG 16385
+# FLIT TX t=3378974 src=1-0 dst=2-3 tag=16385 size=131 head=1284011 last=1284394 block=250 gap=1
+# FLIT RX t=3380074 src=1-0 dst=2-3 tag=16385 size=131 head=1284041 last=1284429 stall=256 gap=0
+# 3380479 1-0 scheduled 0
+# 3380919 2-3 <- TAG 16385
+# 3450074 3-0 -> TAG 14337
+# 3450074 3-1 -> TAG 17409
+# 3450074 3-2 -> TAG 18433
+# 3450079 2-0 -> TAG 13313
+# 3453297 0-1 -> TAG 3073
+# 3453303 1-1 -> TAG 4097
+# FLIT TX t=3452655 src=3-2 dst=1-3 tag=18433 size=131 head=1312010 last=1312393 block=250 gap=1
+# FLIT TX t=3452661 src=2-0 dst=2-3 tag=13313 size=131 head=1312012 last=1312397 block=252 gap=1
+# FLIT RX t=3453737 src=3-2 dst=1-3 tag=18433 size=131 head=1312034 last=1312421 stall=255 gap=0
+# FLIT RX t=3453747 src=2-0 dst=2-3 tag=13313 size=131 head=1312039 last=1312425 stall=254 gap=0
+# 3453758 3-0 scheduled 0
+# 3453758 3-1 scheduled 0
+# 3454161 3-2 scheduled 0
+# 3454166 2-0 scheduled 0
+# 3454576 2-3 <- TAG 13313
+# 3454582 1-3 <- TAG 18433
+# FLIT TX t=3452655 src=3-0 dst=2-3 tag=14337 size=131 head=1312010 last=1313154 block=1011 gap=1
+# FLIT TX t=3452655 src=3-1 dst=1-3 tag=17409 size=131 head=1312010 last=1313156 block=1013 gap=1
+# FLIT RX t=3455758 src=3-0 dst=2-3 tag=14337 size=131 head=1312431 last=1313189 stall=626 gap=0
+# FLIT RX t=3455763 src=3-1 dst=1-3 tag=17409 size=131 head=1312427 last=1313191 stall=632 gap=0
+# 3456590 2-3 <- TAG 14337
+# 3456595 1-3 <- TAG 17409
+# FLIT TX t=3455884 src=0-1 dst=0-0 tag=3073 size=35 head=1313237 last=1313525 block=251 gap=1
+# FLIT RX t=3456679 src=0-1 dst=0-0 tag=3073 size=35 head=1313249 last=1313539 stall=254 gap=0
+# 3456992 1-1 scheduled 0
+# 3457390 0-1 scheduled 0
+# 3457521 0-0 <- TAG 3073
+# FLIT TX t=3455890 src=1-1 dst=0-0 tag=4097 size=35 head=1313239 last=1314191 block=915 gap=1
+# FLIT RX t=3458450 src=1-1 dst=0-0 tag=4097 size=35 head=1313545 last=1314212 stall=631 gap=0
+# 3459284 0-0 <- TAG 4097
+# TRIGGER-PE 0-2: release acknowledged at 3500424 ns
+# TRIGGER-PE 1-1: release acknowledged at 3500424 ns
+# TRIGGER-PE 2-0: release acknowledged at 3500424 ns
+# TRIGGER-PE 0-1: release acknowledged at 3500426 ns
+# TRIGGER: workflow iteration at 3500426 ns.
+# TRIGGER: next release will be at 3999998 ns
+# TRIGGER-PE 3-0: release acknowledged at 3500426 ns
+# TRIGGER-PE 3-1: release acknowledged at 3500426 ns
+# TRIGGER-PE 3-2: release acknowledged at 3500426 ns
+# 3504216 1-3 scheduled 1
+# 3504216 2-2 scheduled 1
+# 3504218 1-2 scheduled 1
+# 3504218 2-3 scheduled 1
+# 3504221 0-0 scheduled 1
+# 3504221 0-2 scheduled 1
+# 3504221 2-1 scheduled 1
+# 3504261 0-1 scheduled 1
+# 3504261 1-0 scheduled 1
+# 3504261 3-0 scheduled 1
+# 3504261 3-1 scheduled 1
+# 3504261 3-2 scheduled 1
+# 3504266 1-1 scheduled 1
+# 3504266 2-0 scheduled 1
+# 3504305 0-3 scheduled 0
+# 3504311 3-3 scheduled 0
+# 3507095 1-3 scheduled 0
+# 3508034 2-3 scheduled 0
+# 3652221 1-0 -> TAG 8194
+# 3653158 1-0 <- TAG 8194
+# 3654024 1-0 scheduled 2
+# 3725866 0-2 -> TAG 11266
+# 3725905 0-1 -> TAG 1026
+# 3725905 3-0 -> TAG 6146
+# 3725905 3-1 -> TAG 9218
+# 3725905 3-2 -> TAG 10242
+# 3725911 1-1 -> TAG 2050
+# 3725911 2-0 -> TAG 5122
+# 3726718 2-2 -> TAG 19457
+# 3726721 1-2 -> TAG 20481
+# 3726724 2-1 -> TAG 15361
+# 3726842 0-1 <- TAG 1026
+# 3726842 3-0 <- TAG 6146
+# 3726842 3-1 <- TAG 9218
+# 3726842 3-2 <- TAG 10242
+# 3726847 1-1 <- TAG 2050
+# 3726847 2-0 <- TAG 5122
+# 3727166 0-1 -> TAG 7170
+# 3727171 1-1 -> TAG 12290
+# 3727708 3-0 scheduled 2
+# 3727708 3-1 scheduled 2
+# 3727708 3-2 scheduled 2
+# 3727713 2-0 scheduled 2
+# 3728395 0-0 scheduled 0
+# 3729279 0-2 scheduled 0
+# 3730529 0-1 scheduled 2
+# 3730534 1-1 scheduled 2
+# FLIT TX t=3729303 src=1-2 dst=1-3 tag=20481 size=131 head=1417136 last=1417622 block=353 gap=1
+# FLIT RX t=3730618 src=1-2 dst=1-3 tag=20481 size=131 head=1417148 last=1417636 stall=356 gap=0
+# FLIT TX t=3729305 src=2-1 dst=2-3 tag=15361 size=131 head=1417137 last=1417636 block=366 gap=1
+# FLIT RX t=3730674 src=2-1 dst=2-3 tag=15361 size=131 head=1417155 last=1417657 stall=370 gap=0
+# 3731418 2-2 scheduled 0
+# 3731460 1-3 <- TAG 20481
+# 3731516 2-3 <- TAG 15361
+# 3731824 1-2 scheduled 0
+# 3731826 2-1 scheduled 0
+# FLIT TX t=3730405 src=2-2 dst=1-3 tag=19457 size=131 head=1417555 last=1418507 block=676 gap=144
+# FLIT RX t=3732926 src=2-2 dst=1-3 tag=19457 size=131 head=1417642 last=1418513 stall=631 gap=108
+# 3733758 1-3 <- TAG 19457
+# FLIT TX t=3729750 src=0-1 dst=2-1 tag=7170 size=2403 head=1417306 last=1420054 block=343 gap=1
+# FLIT TX t=3729755 src=1-1 dst=1-2 tag=12290 size=2403 head=1417308 last=1420056 block=343 gap=1
+# FLIT RX t=3737024 src=1-1 dst=1-2 tag=12290 size=2403 head=1417320 last=1420070 stall=346 gap=0
+# FLIT RX t=3737037 src=0-1 dst=2-1 tag=7170 size=2403 head=1417325 last=1420075 stall=346 gap=0
+# FLIT TX t=3728450 src=0-2 dst=2-2 tag=11266 size=2403 head=1416812 last=1420085 block=868 gap=1
+# FLIT RX t=3737118 src=0-2 dst=2-2 tag=11266 size=2403 head=1416830 last=1420106 stall=872 gap=0
+# 3737868 1-2 <- TAG 12290
+# 3737879 2-1 <- TAG 7170
+# 3737960 2-2 <- TAG 11266
+# 3876389 1-0 -> TAG 16386
+# FLIT TX t=3878971 src=1-0 dst=2-3 tag=16386 size=131 head=1474010 last=1474390 block=247 gap=1
+# FLIT RX t=3880063 src=1-0 dst=2-3 tag=16386 size=131 head=1474040 last=1474425 stall=253 gap=0
+# 3880476 1-0 scheduled 0
+# 3880892 2-3 <- TAG 16386
+# 3950074 3-0 -> TAG 14338
+# 3950074 3-1 -> TAG 17410
+# 3950074 3-2 -> TAG 18434
+# 3950079 2-0 -> TAG 13314
+# 3953297 0-1 -> TAG 3074
+# 3953303 1-1 -> TAG 4098
+# FLIT TX t=3952655 src=3-2 dst=1-3 tag=18434 size=131 head=1502010 last=1502390 block=247 gap=1
+# FLIT TX t=3952660 src=2-0 dst=2-3 tag=13314 size=131 head=1502012 last=1502396 block=251 gap=1
+# FLIT RX t=3953729 src=3-2 dst=1-3 tag=18434 size=131 head=1502034 last=1502418 stall=252 gap=0
+# FLIT RX t=3953745 src=2-0 dst=2-3 tag=13314 size=131 head=1502039 last=1502424 stall=253 gap=0
+# 3953758 3-0 scheduled 0
+# 3953758 3-1 scheduled 0
+# 3954160 3-2 scheduled 0
+# 3954166 2-0 scheduled 0
+# 3954558 1-3 <- TAG 18434
+# 3954574 2-3 <- TAG 13314
+# FLIT TX t=3952655 src=3-1 dst=1-3 tag=17410 size=131 head=1502010 last=1503147 block=1004 gap=1
+# FLIT TX t=3952655 src=3-0 dst=2-3 tag=14338 size=131 head=1502010 last=1503153 block=1010 gap=1
+# FLIT RX t=3955739 src=3-1 dst=1-3 tag=17410 size=131 head=1502424 last=1503182 stall=626 gap=0
+# FLIT RX t=3955755 src=3-0 dst=2-3 tag=14338 size=131 head=1502430 last=1503188 stall=626 gap=0
+# 3956571 1-3 <- TAG 17410
+# 3956587 2-3 <- TAG 14338
+# FLIT TX t=3955884 src=0-1 dst=0-0 tag=3074 size=35 head=1503237 last=1503617 block=343 gap=1
+# FLIT RX t=3956921 src=0-1 dst=0-0 tag=3074 size=35 head=1503249 last=1503631 stall=346 gap=0
+# 3956992 1-1 scheduled 0
+# 3957389 0-1 scheduled 0
+# 3957768 0-0 <- TAG 3074
+# FLIT TX t=3955889 src=1-1 dst=0-0 tag=4098 size=35 head=1503239 last=1504285 block=1009 gap=1
+# FLIT RX t=3958697 src=1-1 dst=0-0 tag=4098 size=35 head=1503637 last=1504306 stall=633 gap=0
+# 3959531 0-0 <- TAG 4098
+# TRIGGER: workflow iteration at 4000424 ns.
+# TRIGGER: next release will be at 4499998 ns
+# TRIGGER-PE 1-1: release acknowledged at 4000424 ns
+# TRIGGER-PE 2-0: release acknowledged at 4000424 ns
+# TRIGGER-PE 0-1: release acknowledged at 4000426 ns
+# TRIGGER-PE 0-2: release acknowledged at 4000426 ns
+# TRIGGER-PE 3-0: release acknowledged at 4000426 ns
+# TRIGGER-PE 3-1: release acknowledged at 4000426 ns
+# TRIGGER-PE 3-2: release acknowledged at 4000426 ns
+# 4004216 0-0 scheduled 1
+# 4004216 0-2 scheduled 1
+# 4004216 1-3 scheduled 1
+# 4004216 2-1 scheduled 1
+# 4004216 2-3 scheduled 1
+# 4004218 2-2 scheduled 1
+# 4004221 1-2 scheduled 1
+# 4004260 0-1 scheduled 1
+# 4004260 3-0 scheduled 1
+# 4004260 3-1 scheduled 1
+# 4004260 3-2 scheduled 1
+# 4004266 1-0 scheduled 1
+# 4004266 1-1 scheduled 1
+# 4004266 2-0 scheduled 1
+# 4004308 3-3 scheduled 0
+# 4004310 0-3 scheduled 0
+# 4152226 1-0 -> TAG 8195
+# 4153163 1-0 <- TAG 8195
+# 4154029 1-0 scheduled 2
+# 4225860 0-2 -> TAG 11267
+# 4225905 0-1 -> TAG 1027
+# 4225905 3-0 -> TAG 6147
+# 4225905 3-1 -> TAG 9219
+# 4225905 3-2 -> TAG 10243
+# 4225910 1-1 -> TAG 2051
+# 4225910 2-0 -> TAG 5123
+# 4226718 2-1 -> TAG 15362
+# 4226721 2-2 -> TAG 19458
+# 4226723 1-2 -> TAG 20482
+# 4226808 2-3 -> TAG 21505
+# 4226842 0-1 <- TAG 1027
+# 4226842 3-0 <- TAG 6147
+# 4226842 3-1 <- TAG 9219
+# 4226842 3-2 <- TAG 10243
+# 4226847 1-1 <- TAG 2051
+# 4226847 2-0 <- TAG 5123
+# 4227166 0-1 -> TAG 7171
+# 4227171 1-1 -> TAG 12291
+# 4227708 3-0 scheduled 2
+# 4227708 3-1 scheduled 2
+# 4227708 3-2 scheduled 2
+# 4227713 1-3 -> TAG 22529
+# 4227713 2-0 scheduled 2
+# 4228389 0-0 scheduled 0
+# 4229273 0-2 scheduled 0
+# 4230529 0-1 scheduled 2
+# FLIT TX t=4229305 src=1-2 dst=1-3 tag=20482 size=131 head=1607137 last=1607603 block=333 gap=1
+# 4230534 1-1 scheduled 2
+# FLIT RX t=4230568 src=1-2 dst=1-3 tag=20482 size=131 head=1607149 last=1607617 stall=336 gap=0
+# FLIT TX t=4229300 src=2-1 dst=2-3 tag=15362 size=131 head=1607135 last=1607690 block=413 gap=10
+# FLIT RX t=4230887 src=2-1 dst=2-3 tag=15362 size=131 head=1607153 last=1607738 stall=453 gap=0
+# 4231397 1-3 <- TAG 20482
+# 4231421 2-2 scheduled 0
+# 4231721 2-3 <- TAG 15362
+# 4231821 2-1 scheduled 0
+# 4231826 1-2 scheduled 0
+# FLIT TX t=4230621 src=2-3 dst=0-3 tag=21505 size=515 head=1607637 last=1608406 block=228 gap=25
+# FLIT RX t=4232700 src=2-3 dst=0-3 tag=21505 size=515 head=1607655 last=1608427 stall=256 gap=0
+# FLIT TX t=4230408 src=2-2 dst=1-3 tag=19458 size=131 head=1607556 last=1608551 block=714 gap=149
+# FLIT RX t=4233042 src=2-2 dst=1-3 tag=19458 size=131 head=1607623 last=1608557 stall=685 gap=117
+# 4233545 0-3 <- TAG 21505
+# 4233871 1-3 <- TAG 19458
+# FLIT TX t=4234721 src=1-3 dst=0-3 tag=22529 size=515 head=1609195 last=1609961 block=249 gap=1
+# FLIT RX t=4236773 src=1-3 dst=0-3 tag=22529 size=515 head=1609207 last=1609975 stall=252 gap=0
+# FLIT TX t=4229755 src=1-1 dst=1-2 tag=12291 size=2403 head=1607308 last=1610056 block=343 gap=1
+# FLIT TX t=4229750 src=0-1 dst=2-1 tag=7171 size=2403 head=1607306 last=1610067 block=356 gap=1
+# FLIT RX t=4237023 src=1-1 dst=1-2 tag=12291 size=2403 head=1607320 last=1610070 stall=346 gap=0
+# FLIT RX t=4237071 src=0-1 dst=2-1 tag=7171 size=2403 head=1607325 last=1610088 stall=359 gap=0
+# FLIT TX t=4228445 src=0-2 dst=2-2 tag=11267 size=2403 head=1606810 last=1610109 block=894 gap=1
+# FLIT RX t=4237181 src=0-2 dst=2-2 tag=11267 size=2403 head=1606828 last=1610130 stall=898 gap=0
+# 4237602 0-3 <- TAG 22529
+# 4237871 1-2 <- TAG 12291
+# 4237913 2-1 <- TAG 7171
+# 4238026 2-2 <- TAG 11267
+# 4376394 1-0 -> TAG 16387
+# 4380079 1-0 scheduled 0
+# FLIT TX t=4378976 src=1-0 dst=2-3 tag=16387 size=131 head=1664012 last=1664534 block=389 gap=1
+# FLIT RX t=4380442 src=1-0 dst=2-3 tag=16387 size=131 head=1664042 last=1664569 stall=395 gap=0
+# 4381287 2-3 <- TAG 16387
+# 4450073 3-0 -> TAG 14339
+# 4450073 3-1 -> TAG 17411
+# 4450073 3-2 -> TAG 18435
+# 4450079 2-0 -> TAG 13315
+# 4453297 0-1 -> TAG 3075
+# 4453302 1-1 -> TAG 4099
+# FLIT TX t=4452660 src=2-0 dst=2-3 tag=13315 size=131 head=1692012 last=1692395 block=250 gap=1
+# FLIT RX t=4453742 src=2-0 dst=2-3 tag=13315 size=131 head=1692039 last=1692423 stall=252 gap=0
+# 4453758 3-0 scheduled 0
+# 4453758 3-1 scheduled 0
+# 4453758 3-2 scheduled 0
+# FLIT TX t=4452655 src=3-2 dst=1-3 tag=18435 size=131 head=1692010 last=1692532 block=389 gap=1
+# FLIT RX t=4454102 src=3-2 dst=1-3 tag=18435 size=131 head=1692034 last=1692560 stall=394 gap=0
+# 4454166 2-0 scheduled 0
+# 4454571 2-3 <- TAG 13315
+# 4454944 1-3 <- TAG 18435
+# FLIT TX t=4452655 src=3-0 dst=2-3 tag=14339 size=131 head=1692010 last=1693161 block=1018 gap=1
+# FLIT RX t=4455776 src=3-0 dst=2-3 tag=14339 size=131 head=1692429 last=1693196 stall=635 gap=0
+# FLIT TX t=4452655 src=3-1 dst=1-3 tag=17411 size=131 head=1692010 last=1693303 block=1160 gap=1
+# FLIT RX t=4456150 src=3-1 dst=1-3 tag=17411 size=131 head=1692566 last=1693338 stall=640 gap=0
+# 4456608 2-3 <- TAG 14339
+# FLIT TX t=4455884 src=0-1 dst=0-0 tag=3075 size=35 head=1693237 last=1693618 block=344 gap=1
+# FLIT RX t=4456923 src=0-1 dst=0-0 tag=3075 size=35 head=1693249 last=1693632 stall=347 gap=0
+# 4456981 1-3 <- TAG 17411
+# 4456992 1-1 scheduled 0
+# 4457389 0-1 scheduled 0
+# 4457771 0-0 <- TAG 3075
+# FLIT TX t=4455889 src=1-1 dst=0-0 tag=4099 size=35 head=1693239 last=1694286 block=1010 gap=1
+# FLIT RX t=4458700 src=1-1 dst=0-0 tag=4099 size=35 head=1693638 last=1694307 stall=633 gap=0
+# 4459534 0-0 <- TAG 4099
+# 4463968 2-3 -> TAG 21506
+# 4464826 1-3 -> TAG 22530
+# FLIT TX t=4466550 src=2-3 dst=0-3 tag=21506 size=515 head=1697290 last=1698055 block=248 gap=1
+# FLIT RX t=4468618 src=2-3 dst=0-3 tag=21506 size=515 head=1697308 last=1698076 stall=252 gap=0
+# 4469447 0-3 <- TAG 21506
+# 4470229 1-3 scheduled 0
+# 4470710 2-3 scheduled 0
+# FLIT TX t=4467408 src=1-3 dst=0-3 tag=22530 size=515 head=1697616 last=1699210 block=1077 gap=1
+# FLIT RX t=4471639 src=1-3 dst=0-3 tag=22530 size=515 head=1698082 last=1699224 stall=626 gap=0
+# 4472471 0-3 <- TAG 22530
+# TRIGGER-PE 1-1: release acknowledged at 4500423 ns
+# TRIGGER-PE 2-0: release acknowledged at 4500423 ns
+# TRIGGER-PE 0-1: release acknowledged at 4500426 ns
+# TRIGGER-PE 3-0: release acknowledged at 4500426 ns
+# TRIGGER-PE 3-1: release acknowledged at 4500426 ns
+# TRIGGER-PE 3-2: release acknowledged at 4500426 ns
+# TRIGGER-PE 0-2: release acknowledged at 4500429 ns
+# TRIGGER: workflow iteration at 4500429 ns.
+# TRIGGER: next release will be at 4999998 ns
+# 4504215 0-3 scheduled 1
+# 4504215 1-2 scheduled 1
+# 4504218 0-0 scheduled 1
+# 4504218 0-2 scheduled 1
+# 4504218 2-1 scheduled 1
+# 4504221 2-2 scheduled 1
+# 4504260 0-1 scheduled 1
+# 4504260 3-0 scheduled 1
+# 4504260 3-1 scheduled 1
+# 4504260 3-2 scheduled 1
+# 4504263 1-0 scheduled 1
+# 4504265 1-1 scheduled 1
+# 4504265 2-0 scheduled 1
+# 4504305 3-3 scheduled 0
+# 4504308 1-3 scheduled 0
+# 4504308 2-3 scheduled 0
+# 4652223 1-0 -> TAG 8196
+# 4653160 1-0 <- TAG 8196
+# 4654026 1-0 scheduled 2
+# 4725863 0-2 -> TAG 11268
+# 4725905 0-1 -> TAG 1028
+# 4725905 3-0 -> TAG 6148
+# 4725905 3-1 -> TAG 9220
+# 4725905 3-2 -> TAG 10244
+# 4725910 1-1 -> TAG 2052
+# 4725910 2-0 -> TAG 5124
+# 4726718 1-2 -> TAG 20483
+# 4726721 2-1 -> TAG 15363
+# 4726723 2-2 -> TAG 19459
+# 4726842 0-1 <- TAG 1028
+# 4726842 3-0 <- TAG 6148
+# 4726842 3-1 <- TAG 9220
+# 4726842 3-2 <- TAG 10244
+# 4726847 1-1 <- TAG 2052
+# 4726847 2-0 <- TAG 5124
+# 4727165 0-1 -> TAG 7172
+# 4727171 1-1 -> TAG 12292
+# 4727650 0-3 -> TAG 23553
+# 4727708 3-0 scheduled 2
+# 4727708 3-1 scheduled 2
+# 4727708 3-2 scheduled 2
+# 4727713 2-0 scheduled 2
+# 4728392 0-0 scheduled 0
+# 4729276 0-2 scheduled 0
+# 4730529 0-1 scheduled 2
+# 4730534 1-1 scheduled 2
+# FLIT TX t=4729300 src=1-2 dst=1-3 tag=20483 size=131 head=1797135 last=1797625 block=357 gap=1
+# FLIT TX t=4729302 src=2-1 dst=2-3 tag=15363 size=131 head=1797136 last=1797636 block=367 gap=1
+# FLIT RX t=4730626 src=1-2 dst=1-3 tag=20483 size=131 head=1797147 last=1797639 stall=360 gap=0
+# FLIT RX t=4730673 src=2-1 dst=2-3 tag=15363 size=131 head=1797154 last=1797657 stall=371 gap=0
+# 4731423 2-2 scheduled 0
+# 4731471 1-3 <- TAG 20483
+# 4731518 2-3 <- TAG 15363
+# FLIT TX t=4730231 src=0-3 dst=3-3 tag=23553 size=259 head=1797489 last=1798000 block=250 gap=1
+# FLIT RX t=4731650 src=0-3 dst=3-3 tag=23553 size=259 head=1797513 last=1798028 stall=255 gap=0
+# 4731821 1-2 scheduled 0
+# 4731823 2-1 scheduled 0
+# 4732497 3-3 <- TAG 23553
+# FLIT TX t=4730410 src=2-2 dst=1-3 tag=19459 size=131 head=1797557 last=1798509 block=681 gap=139
+# FLIT RX t=4732931 src=2-2 dst=1-3 tag=19459 size=131 head=1797645 last=1798515 stall=632 gap=106
+# 4733760 1-3 <- TAG 19459
+# FLIT TX t=4729750 src=0-1 dst=2-1 tag=7172 size=2403 head=1797306 last=1800056 block=345 gap=1
+# FLIT TX t=4729755 src=1-1 dst=1-2 tag=12292 size=2403 head=1797308 last=1800058 block=345 gap=1
+# FLIT RX t=4737029 src=1-1 dst=1-2 tag=12292 size=2403 head=1797320 last=1800072 stall=348 gap=0
+# FLIT RX t=4737042 src=0-1 dst=2-1 tag=7172 size=2403 head=1797325 last=1800077 stall=348 gap=0
+# FLIT TX t=4728447 src=0-2 dst=2-2 tag=11268 size=2403 head=1796811 last=1800086 block=870 gap=1
+# FLIT RX t=4737121 src=0-2 dst=2-2 tag=11268 size=2403 head=1796829 last=1800107 stall=874 gap=0
+# 4737873 1-2 <- TAG 12292
+# 4737884 2-1 <- TAG 7172
+# 4737965 2-2 <- TAG 11268
+# 4876392 1-0 -> TAG 16388
+# FLIT TX t=4878973 src=1-0 dst=2-3 tag=16388 size=131 head=1854011 last=1854391 block=247 gap=1
+# FLIT RX t=4880065 src=1-0 dst=2-3 tag=16388 size=131 head=1854041 last=1854426 stall=253 gap=0
+# 4880479 1-0 scheduled 0
+# 4880894 2-3 <- TAG 16388
+# 4950073 3-0 -> TAG 14340
+# 4950073 3-1 -> TAG 17412
+# 4950073 3-2 -> TAG 18436
+# 4950078 2-0 -> TAG 13316
+# 4953297 0-1 -> TAG 3076
+# 4953302 1-1 -> TAG 4100
+# FLIT TX t=4952655 src=3-2 dst=1-3 tag=18436 size=131 head=1882010 last=1882391 block=248 gap=1
+# FLIT TX t=4952660 src=2-0 dst=2-3 tag=13316 size=131 head=1882012 last=1882397 block=252 gap=1
+# FLIT RX t=4953731 src=3-2 dst=1-3 tag=18436 size=131 head=1882034 last=1882419 stall=253 gap=0
+# FLIT RX t=4953747 src=2-0 dst=2-3 tag=13316 size=131 head=1882039 last=1882425 stall=254 gap=0
+# 4953757 3-0 scheduled 0
+# 4953757 3-1 scheduled 0
+# 4954010 0-3 -> TAG 23554
+# 4954160 3-2 scheduled 0
+# 4954165 2-0 scheduled 0
+# 4954560 1-3 <- TAG 18436
+# 4954576 2-3 <- TAG 13316
+# FLIT TX t=4952655 src=3-1 dst=1-3 tag=17412 size=131 head=1882010 last=1883148 block=1005 gap=1
+# FLIT TX t=4952655 src=3-0 dst=2-3 tag=14340 size=131 head=1882010 last=1883154 block=1011 gap=1
+# FLIT RX t=4955742 src=3-1 dst=1-3 tag=17412 size=131 head=1882425 last=1883183 stall=626 gap=0
+# FLIT RX t=4955757 src=3-0 dst=2-3 tag=14340 size=131 head=1882431 last=1883189 stall=626 gap=0
+# 4956573 1-3 <- TAG 17412
+# 4956589 2-3 <- TAG 14340
+# FLIT TX t=4955884 src=0-1 dst=0-0 tag=3076 size=35 head=1883237 last=1883619 block=345 gap=1
+# FLIT RX t=4956926 src=0-1 dst=0-0 tag=3076 size=35 head=1883249 last=1883633 stall=348 gap=0
+# 4956992 1-1 scheduled 0
+# 4957389 0-1 scheduled 0
+# 4957605 0-3 scheduled 0
+# 4957773 0-0 <- TAG 3076
+# FLIT TX t=4956592 src=0-3 dst=3-3 tag=23554 size=259 head=1883506 last=1884016 block=249 gap=1
+# FLIT RX t=4958007 src=0-3 dst=3-3 tag=23554 size=259 head=1883530 last=1884044 stall=254 gap=0
+# FLIT TX t=4955889 src=1-1 dst=0-0 tag=4100 size=35 head=1883239 last=1884287 block=1011 gap=1
+# FLIT RX t=4958702 src=1-1 dst=0-0 tag=4100 size=35 head=1883639 last=1884308 stall=633 gap=0
+# 4958839 3-3 <- TAG 23554
+# 4959536 0-0 <- TAG 4100
+# TRIGGER-PE 0-2: release acknowledged at 5000423 ns
+# TRIGGER-PE 1-1: release acknowledged at 5000423 ns
+# TRIGGER-PE 2-0: release acknowledged at 5000423 ns
+# TRIGGER-PE 0-1: release acknowledged at 5000426 ns
+# TRIGGER: workflow iteration at 5000426 ns.
+# TRIGGER: next release will be at 5499998 ns
+# TRIGGER-PE 3-0: release acknowledged at 5000426 ns
+# TRIGGER-PE 3-1: release acknowledged at 5000426 ns
+# TRIGGER-PE 3-2: release acknowledged at 5000426 ns
+# 5004215 2-2 scheduled 1
+# 5004218 1-2 scheduled 1
+# 5004218 1-3 scheduled 1
+# 5004218 2-3 scheduled 1
+# 5004218 3-3 scheduled 1
+# 5004221 0-0 scheduled 1
+# 5004221 0-2 scheduled 1
+# 5004221 2-1 scheduled 1
+# 5004260 0-1 scheduled 1
+# 5004260 1-0 scheduled 1
+# 5004260 3-0 scheduled 1
+# 5004260 3-1 scheduled 1
+# 5004260 3-2 scheduled 1
+# 5004265 1-1 scheduled 1
+# 5004265 2-0 scheduled 1
+# 5004307 0-3 scheduled 0
+# 5152221 1-0 -> TAG 8197
+# 5153157 1-0 <- TAG 8197
+# 5154023 1-0 scheduled 2
+# 5225865 0-2 -> TAG 11269
+# 5225905 0-1 -> TAG 1029
+# 5225905 3-0 -> TAG 6149
+# 5225905 3-1 -> TAG 9221
+# 5225905 3-2 -> TAG 10245
+# 5225910 1-1 -> TAG 2053
+# 5225910 2-0 -> TAG 5125
+# 5226718 2-2 -> TAG 19460
+# 5226720 1-2 -> TAG 20484
+# 5226723 2-1 -> TAG 15364
+# 5226810 2-3 -> TAG 21507
+# 5226842 0-1 <- TAG 1029
+# 5226842 3-0 <- TAG 6149
+# 5226842 3-1 <- TAG 9221
+# 5226842 3-2 <- TAG 10245
+# 5226847 1-1 <- TAG 2053
+# 5226847 2-0 <- TAG 5125
+# 5227165 0-1 -> TAG 7173
+# 5227170 1-1 -> TAG 12293
+# 5227707 3-0 scheduled 2
+# 5227707 3-1 scheduled 2
+# 5227707 3-2 scheduled 2
+# 5227713 2-0 scheduled 2
+# 5227715 1-3 -> TAG 22531
+# 5228394 0-0 scheduled 0
+# 5229278 0-2 scheduled 0
+# 5230528 0-1 scheduled 2
+# FLIT TX t=5229302 src=1-2 dst=1-3 tag=20484 size=131 head=1987136 last=1987602 block=333 gap=1
+# 5230534 1-1 scheduled 2
+# FLIT RX t=5230565 src=1-2 dst=1-3 tag=20484 size=131 head=1987148 last=1987616 stall=336 gap=0
+# FLIT TX t=5229305 src=2-1 dst=2-3 tag=15364 size=131 head=1987137 last=1987689 block=412 gap=8
+# FLIT RX t=5230889 src=2-1 dst=2-3 tag=15364 size=131 head=1987155 last=1987739 stall=452 gap=0
+# 5231397 1-3 <- TAG 20484
+# 5231418 2-2 scheduled 0
+# 5231723 2-3 <- TAG 15364
+# 5231823 1-2 scheduled 0
+# 5231826 2-1 scheduled 0
+# FLIT TX t=5230623 src=2-3 dst=0-3 tag=21507 size=515 head=1987638 last=1988533 block=354 gap=25
+# FLIT TX t=5230405 src=2-2 dst=1-3 tag=19460 size=131 head=1987555 last=1988551 block=715 gap=149
+# FLIT RX t=5233034 src=2-3 dst=0-3 tag=21507 size=515 head=1987656 last=1988554 stall=382 gap=0
+# FLIT RX t=5233042 src=2-2 dst=1-3 tag=19460 size=131 head=1987622 last=1988557 stall=686 gap=117
+# 5233870 1-3 <- TAG 19460
+# 5233878 0-3 <- TAG 21507
+# FLIT TX t=5234723 src=1-3 dst=0-3 tag=22531 size=515 head=1989196 last=1989962 block=249 gap=1
+# FLIT RX t=5236776 src=1-3 dst=0-3 tag=22531 size=515 head=1989208 last=1989976 stall=252 gap=0
+# FLIT TX t=5229755 src=1-1 dst=1-2 tag=12293 size=2403 head=1987308 last=1990056 block=343 gap=1
+# FLIT TX t=5229749 src=0-1 dst=2-1 tag=7173 size=2403 head=1987306 last=1990066 block=355 gap=1
+# FLIT RX t=5237023 src=1-1 dst=1-2 tag=12293 size=2403 head=1987320 last=1990070 stall=346 gap=0
+# FLIT RX t=5237068 src=0-1 dst=2-1 tag=7173 size=2403 head=1987325 last=1990087 stall=358 gap=0
+# FLIT TX t=5228449 src=0-2 dst=2-2 tag=11269 size=2403 head=1986812 last=1990109 block=892 gap=1
+# FLIT RX t=5237181 src=0-2 dst=2-2 tag=11269 size=2403 head=1986830 last=1990130 stall=896 gap=0
+# 5237605 0-3 <- TAG 22531
+# 5237868 1-2 <- TAG 12293
+# 5237910 2-1 <- TAG 7173
+# 5238023 2-2 <- TAG 11269
+# 5376389 1-0 -> TAG 16389
+# 5380073 1-0 scheduled 0
+# FLIT TX t=5378970 src=1-0 dst=2-3 tag=16389 size=131 head=2044010 last=2044532 block=389 gap=1
+# FLIT RX t=5380436 src=1-0 dst=2-3 tag=16389 size=131 head=2044040 last=2044567 stall=395 gap=0
+# 5381281 2-3 <- TAG 16389
+# 5449631 3-3 scheduled 0
+# 5450073 3-0 -> TAG 14341
+# 5450073 3-1 -> TAG 17413
+# 5450073 3-2 -> TAG 18437
+# 5450078 2-0 -> TAG 13317
+# 5453297 0-1 -> TAG 3077
+# 5453302 1-1 -> TAG 4101
+# FLIT TX t=5452660 src=2-0 dst=2-3 tag=13317 size=131 head=2072012 last=2072396 block=251 gap=1
+# FLIT RX t=5453744 src=2-0 dst=2-3 tag=13317 size=131 head=2072039 last=2072424 stall=253 gap=0
+# 5453757 3-0 scheduled 0
+# 5453757 3-1 scheduled 0
+# 5453757 3-2 scheduled 0
+# FLIT TX t=5452655 src=3-2 dst=1-3 tag=18437 size=131 head=2072010 last=2072532 block=389 gap=1
+# FLIT RX t=5454102 src=3-2 dst=1-3 tag=18437 size=131 head=2072034 last=2072560 stall=394 gap=0
+# 5454165 2-0 scheduled 0
+# 5454573 2-3 <- TAG 13317
+# 5454947 1-3 <- TAG 18437
+# FLIT TX t=5452655 src=3-0 dst=2-3 tag=14341 size=131 head=2072010 last=2073162 block=1019 gap=1
+# FLIT RX t=5455778 src=3-0 dst=2-3 tag=14341 size=131 head=2072430 last=2073197 stall=635 gap=0
+# FLIT TX t=5452655 src=3-1 dst=1-3 tag=17413 size=131 head=2072010 last=2073304 block=1161 gap=1
+# FLIT RX t=5456152 src=3-1 dst=1-3 tag=17413 size=131 head=2072566 last=2073339 stall=641 gap=0
+# 5456610 2-3 <- TAG 14341
+# FLIT TX t=5455884 src=0-1 dst=0-0 tag=3077 size=35 head=2073237 last=2073617 block=343 gap=1
+# FLIT RX t=5456920 src=0-1 dst=0-0 tag=3077 size=35 head=2073249 last=2073631 stall=346 gap=0
+# 5456984 1-3 <- TAG 17413
+# 5456991 1-1 scheduled 0
+# 5457389 0-1 scheduled 0
+# 5457768 0-0 <- TAG 3077
+# FLIT TX t=5455889 src=1-1 dst=0-0 tag=4101 size=35 head=2073239 last=2074285 block=1009 gap=1
+# FLIT RX t=5458697 src=1-1 dst=0-0 tag=4101 size=35 head=2073637 last=2074306 stall=633 gap=0
+# 5459531 0-0 <- TAG 4101
+# 5463970 2-3 -> TAG 21508
+# 5464828 1-3 -> TAG 22532
+# FLIT TX t=5466552 src=2-3 dst=0-3 tag=21508 size=515 head=2077291 last=2078056 block=248 gap=1
+# FLIT RX t=5468620 src=2-3 dst=0-3 tag=21508 size=515 head=2077309 last=2078077 stall=252 gap=0
+# 5469449 0-3 <- TAG 21508
+# 5470231 1-3 scheduled 0
+# 5470713 2-3 scheduled 0
+# FLIT TX t=5467410 src=1-3 dst=0-3 tag=22532 size=515 head=2077617 last=2079211 block=1077 gap=1
+# FLIT RX t=5471641 src=1-3 dst=0-3 tag=22532 size=515 head=2078083 last=2079225 stall=626 gap=0
+# 5472473 0-3 <- TAG 22532
+# TRIGGER: workflow iteration at 5500423 ns.
+# TRIGGER: next release will be at 5999997 ns
+# TRIGGER-PE 1-1: release acknowledged at 5500423 ns
+# TRIGGER-PE 2-0: release acknowledged at 5500423 ns
+# TRIGGER-PE 0-1: release acknowledged at 5500426 ns
+# TRIGGER-PE 0-2: release acknowledged at 5500426 ns
+# TRIGGER-PE 3-0: release acknowledged at 5500426 ns
+# TRIGGER-PE 3-1: release acknowledged at 5500426 ns
+# TRIGGER-PE 3-2: release acknowledged at 5500426 ns
+# 5504215 0-0 scheduled 1
+# 5504215 0-2 scheduled 1
+# 5504215 2-1 scheduled 1
+# 5504218 0-3 scheduled 1
+# 5504218 2-2 scheduled 1
+# 5504220 1-2 scheduled 1
+# 5504260 0-1 scheduled 1
+# 5504260 3-0 scheduled 1
+# 5504260 3-1 scheduled 1
+# 5504260 3-2 scheduled 1
+# 5504265 1-0 scheduled 1
+# 5504265 1-1 scheduled 1
+# 5504265 2-0 scheduled 1
+# 5504307 3-3 scheduled 0
+# 5504310 1-3 scheduled 0
+# 5504310 2-3 scheduled 0
+# 5652226 1-0 -> TAG 8198
+# 5653162 1-0 <- TAG 8198
+# 5654028 1-0 scheduled 2
+# 5725860 0-2 -> TAG 11270
+# 5725905 0-1 -> TAG 1030
+# 5725905 3-0 -> TAG 6150
+# 5725905 3-1 -> TAG 9222
+# 5725905 3-2 -> TAG 10246
+# 5725910 1-1 -> TAG 2054
+# 5725910 2-0 -> TAG 5126
+# 5726718 2-1 -> TAG 15365
+# 5726720 2-2 -> TAG 19461
+# 5726723 1-2 -> TAG 20485
+# 5726841 0-1 <- TAG 1030
+# 5726841 3-0 <- TAG 6150
+# 5726841 3-1 <- TAG 9222
+# 5726841 3-2 <- TAG 10246
+# 5726847 1-1 <- TAG 2054
+# 5726847 2-0 <- TAG 5126
+# 5727165 0-1 -> TAG 7174
+# 5727170 1-1 -> TAG 12294
+# 5727652 0-3 -> TAG 23555
+# 5727707 3-0 scheduled 2
+# 5727707 3-1 scheduled 2
+# 5727707 3-2 scheduled 2
+# 5727712 2-0 scheduled 2
+# 5728389 0-0 scheduled 0
+# 5729273 0-2 scheduled 0
+# 5730528 0-1 scheduled 2
+# 5730533 1-1 scheduled 2
+# FLIT TX t=5729305 src=1-2 dst=1-3 tag=20485 size=131 head=2177137 last=2177626 block=356 gap=1
+# FLIT TX t=5729299 src=2-1 dst=2-3 tag=15365 size=131 head=2177135 last=2177634 block=366 gap=1
+# FLIT RX t=5730628 src=1-2 dst=1-3 tag=20485 size=131 head=2177149 last=2177640 stall=359 gap=0
+# FLIT RX t=5730668 src=2-1 dst=2-3 tag=15365 size=131 head=2177153 last=2177655 stall=370 gap=0
+# 5731420 2-2 scheduled 0
+# 5731473 1-3 <- TAG 20485
+# 5731512 2-3 <- TAG 15365
+# FLIT TX t=5730233 src=0-3 dst=3-3 tag=23555 size=259 head=2177490 last=2178093 block=342 gap=1
+# 5731820 2-1 scheduled 0
+# 5731826 1-2 scheduled 0
+# FLIT RX t=5731894 src=0-3 dst=3-3 tag=23555 size=259 head=2177514 last=2178121 stall=347 gap=0
+# 5732739 3-3 <- TAG 23555
+# FLIT TX t=5730407 src=2-2 dst=1-3 tag=19461 size=131 head=2177556 last=2178509 block=683 gap=138
+# FLIT RX t=5732931 src=2-2 dst=1-3 tag=19461 size=131 head=2177646 last=2178515 stall=632 gap=105
+# 5733762 1-3 <- TAG 19461
+# FLIT TX t=5729749 src=0-1 dst=2-1 tag=7174 size=2403 head=2177306 last=2180055 block=344 gap=1
+# FLIT TX t=5729755 src=1-1 dst=1-2 tag=12294 size=2403 head=2177308 last=2180056 block=343 gap=1
+# FLIT RX t=5737023 src=1-1 dst=1-2 tag=12294 size=2403 head=2177320 last=2180070 stall=346 gap=0
+# FLIT RX t=5737039 src=0-1 dst=2-1 tag=7174 size=2403 head=2177325 last=2180076 stall=347 gap=0
+# FLIT TX t=5728444 src=0-2 dst=2-2 tag=11270 size=2403 head=2176810 last=2180085 block=870 gap=1
+# FLIT RX t=5737118 src=0-2 dst=2-2 tag=11270 size=2403 head=2176828 last=2180106 stall=874 gap=0
+# 5737870 1-2 <- TAG 12294
+# 5737881 2-1 <- TAG 7174
+# 5737962 2-2 <- TAG 11270
+# 5876394 1-0 -> TAG 16390
+# FLIT TX t=5878976 src=1-0 dst=2-3 tag=16390 size=131 head=2234012 last=2234392 block=247 gap=1
+# FLIT RX t=5880068 src=1-0 dst=2-3 tag=16390 size=131 head=2234042 last=2234427 stall=253 gap=0
+# 5880481 1-0 scheduled 0
+# 5880897 2-3 <- TAG 16390
+# 5950073 3-0 -> TAG 14342
+# 5950073 3-1 -> TAG 17414
+# 5950073 3-2 -> TAG 18438
+# 5950078 2-0 -> TAG 13318
+# 5953297 0-1 -> TAG 3078
+# 5953302 1-1 -> TAG 4102
+# FLIT TX t=5952654 src=3-2 dst=1-3 tag=18438 size=131 head=2262010 last=2262392 block=249 gap=1
+# FLIT TX t=5952660 src=2-0 dst=2-3 tag=13318 size=131 head=2262012 last=2262395 block=250 gap=1
+# FLIT RX t=5953733 src=3-2 dst=1-3 tag=18438 size=131 head=2262034 last=2262420 stall=254 gap=0
+# FLIT RX t=5953741 src=2-0 dst=2-3 tag=13318 size=131 head=2262039 last=2262423 stall=252 gap=0
+# 5953757 3-0 scheduled 0
+# 5953757 3-1 scheduled 0
+# 5954012 0-3 -> TAG 23556
+# 5954160 3-2 scheduled 0
+# 5954165 2-0 scheduled 0
+# 5954562 1-3 <- TAG 18438
+# 5954570 2-3 <- TAG 13318
+# FLIT TX t=5952654 src=3-1 dst=1-3 tag=17414 size=131 head=2262010 last=2263149 block=1006 gap=1
+# FLIT TX t=5952654 src=3-0 dst=2-3 tag=14342 size=131 head=2262010 last=2263152 block=1009 gap=1
+# FLIT RX t=5955744 src=3-1 dst=1-3 tag=17414 size=131 head=2262426 last=2263184 stall=626 gap=0
+# FLIT RX t=5955752 src=3-0 dst=2-3 tag=14342 size=131 head=2262429 last=2263187 stall=626 gap=0
+# 5956575 1-3 <- TAG 17414
+# 5956583 2-3 <- TAG 14342
+# FLIT TX t=5955883 src=0-1 dst=0-0 tag=3078 size=35 head=2263237 last=2263618 block=344 gap=1
+# FLIT RX t=5956923 src=0-1 dst=0-0 tag=3078 size=35 head=2263249 last=2263632 stall=347 gap=0
+# 5956991 1-1 scheduled 0
+# 5957389 0-1 scheduled 0
+# 5957607 0-3 scheduled 0
+# 5957770 0-0 <- TAG 3078
+# FLIT TX t=5956594 src=0-3 dst=3-3 tag=23556 size=259 head=2263507 last=2264015 block=247 gap=1
+# FLIT RX t=5958004 src=0-3 dst=3-3 tag=23556 size=259 head=2263531 last=2264043 stall=252 gap=0
+# FLIT TX t=5955889 src=1-1 dst=0-0 tag=4102 size=35 head=2263239 last=2264286 block=1010 gap=1
+# FLIT RX t=5958699 src=1-1 dst=0-0 tag=4102 size=35 head=2263638 last=2264307 stall=633 gap=0
+# 5958836 3-3 <- TAG 23556
+# 5959533 0-0 <- TAG 4102
+# TRIGGER-PE 1-1: release acknowledged at 6000423 ns
+# TRIGGER-PE 2-0: release acknowledged at 6000423 ns
+# TRIGGER-PE 0-1: release acknowledged at 6000425 ns
+# TRIGGER-PE 3-0: release acknowledged at 6000425 ns
+# TRIGGER-PE 3-1: release acknowledged at 6000425 ns
+# TRIGGER-PE 3-2: release acknowledged at 6000425 ns
+# TRIGGER-PE 0-2: release acknowledged at 6000428 ns
+# TRIGGER: workflow iteration at 6000428 ns.
+# TRIGGER: next release will be at 6499997 ns
+# 6004215 1-2 scheduled 1
+# 6004215 3-3 scheduled 1
+# 6004218 0-0 scheduled 1
+# 6004218 0-2 scheduled 1
+# 6004218 2-1 scheduled 1
+# 6004220 1-3 scheduled 1
+# 6004220 2-2 scheduled 1
+# 6004220 2-3 scheduled 1
+# 6004260 0-1 scheduled 1
+# 6004260 3-0 scheduled 1
+# 6004260 3-1 scheduled 1
+# 6004260 3-2 scheduled 1
+# 6004262 1-0 scheduled 1
+# 6004265 1-1 scheduled 1
+# 6004265 2-0 scheduled 1
+# 6004310 0-3 scheduled 0
+# 6152223 1-0 -> TAG 8199
+# 6153160 1-0 <- TAG 8199
+# 6154025 1-0 scheduled 2
+# 6225862 0-2 -> TAG 11271
+# 6225904 0-1 -> TAG 1031
+# 6225904 3-0 -> TAG 6151
+# 6225904 3-1 -> TAG 9223
+# 6225904 3-2 -> TAG 10247
+# 6225910 1-1 -> TAG 2055
+# 6225910 2-0 -> TAG 5127
+# 6226717 1-2 -> TAG 20486
+# 6226720 2-1 -> TAG 15366
+# 6226723 2-2 -> TAG 19462
+# 6226812 2-3 -> TAG 21509
+# 6226841 0-1 <- TAG 1031
+# 6226841 3-0 <- TAG 6151
+# 6226841 3-1 <- TAG 9223
+# 6226841 3-2 <- TAG 10247
+# 6226846 1-1 <- TAG 2055
+# 6226846 2-0 <- TAG 5127
+# 6227165 0-1 -> TAG 7175
+# 6227170 1-1 -> TAG 12295
+# 6227707 3-0 scheduled 2
+# 6227707 3-1 scheduled 2
+# 6227707 3-2 scheduled 2
+# 6227712 2-0 scheduled 2
+# 6227717 1-3 -> TAG 22533
+# 6228391 0-0 scheduled 0
+# 6229275 0-2 scheduled 0
+# 6230528 0-1 scheduled 2
+# FLIT TX t=6229299 src=1-2 dst=1-3 tag=20486 size=131 head=2367135 last=2367603 block=335 gap=1
+# 6230533 1-1 scheduled 2
+# FLIT RX t=6230567 src=1-2 dst=1-3 tag=20486 size=131 head=2367147 last=2367617 stall=338 gap=0
+# FLIT TX t=6229302 src=2-1 dst=2-3 tag=15366 size=131 head=2367136 last=2367691 block=414 gap=9
+# FLIT RX t=6230891 src=2-1 dst=2-3 tag=15366 size=131 head=2367154 last=2367740 stall=454 gap=0
+# 6231399 1-3 <- TAG 20486
+# 6231423 2-2 scheduled 0
+# 6231725 2-3 <- TAG 15366
+# 6231820 1-2 scheduled 0
+# 6231823 2-1 scheduled 0
+# FLIT TX t=6230625 src=2-3 dst=0-3 tag=21509 size=515 head=2367639 last=2368534 block=354 gap=25
+# FLIT TX t=6230410 src=2-2 dst=1-3 tag=19462 size=131 head=2367557 last=2368552 block=711 gap=152
+# FLIT RX t=6233036 src=2-3 dst=0-3 tag=21509 size=515 head=2367657 last=2368555 stall=382 gap=0
+# FLIT RX t=6233044 src=2-2 dst=1-3 tag=19462 size=131 head=2367623 last=2368558 stall=686 gap=117
+# 6233873 1-3 <- TAG 19462
+# 6233881 0-3 <- TAG 21509
+# FLIT TX t=6234725 src=1-3 dst=0-3 tag=22533 size=515 head=2369197 last=2369963 block=249 gap=1
+# FLIT RX t=6236778 src=1-3 dst=0-3 tag=22533 size=515 head=2369209 last=2369977 stall=252 gap=0
+# FLIT TX t=6229754 src=1-1 dst=1-2 tag=12295 size=2403 head=2367308 last=2370058 block=345 gap=1
+# FLIT TX t=6229749 src=0-1 dst=2-1 tag=7175 size=2403 head=2367306 last=2370068 block=357 gap=1
+# FLIT RX t=6237028 src=1-1 dst=1-2 tag=12295 size=2403 head=2367320 last=2370072 stall=348 gap=0
+# FLIT RX t=6237073 src=0-1 dst=2-1 tag=7175 size=2403 head=2367325 last=2370089 stall=360 gap=0
+# FLIT TX t=6228446 src=0-2 dst=2-2 tag=11271 size=2403 head=2366811 last=2370110 block=894 gap=1
+# FLIT RX t=6237183 src=0-2 dst=2-2 tag=11271 size=2403 head=2366829 last=2370131 stall=898 gap=0
+# 6237607 0-3 <- TAG 22533
+# 6237873 1-2 <- TAG 12295
+# 6237915 2-1 <- TAG 7175
+# 6238028 2-2 <- TAG 11271
+# 6376391 1-0 -> TAG 16391
+# 6380075 1-0 scheduled 0
+# FLIT TX t=6378973 src=1-0 dst=2-3 tag=16391 size=131 head=2424011 last=2424533 block=389 gap=1
+# FLIT RX t=6380438 src=1-0 dst=2-3 tag=16391 size=131 head=2424041 last=2424568 stall=395 gap=0
+# 6381283 2-3 <- TAG 16391
+# 6449628 3-3 scheduled 0
+# 6450073 3-0 -> TAG 14343
+# 6450073 3-1 -> TAG 17415
+# 6450073 3-2 -> TAG 18439
+# 6450078 2-0 -> TAG 13319
+# 6453296 0-1 -> TAG 3079
+# 6453302 1-1 -> TAG 4103
+# FLIT TX t=6452660 src=2-0 dst=2-3 tag=13319 size=131 head=2452012 last=2452397 block=252 gap=1
+# FLIT RX t=6453746 src=2-0 dst=2-3 tag=13319 size=131 head=2452039 last=2452425 stall=254 gap=0
+# 6453757 3-0 scheduled 0
+# 6453757 3-1 scheduled 0
+# 6453757 3-2 scheduled 0
+# FLIT TX t=6452654 src=3-2 dst=1-3 tag=18439 size=131 head=2452010 last=2452533 block=390 gap=1
+# FLIT RX t=6454104 src=3-2 dst=1-3 tag=18439 size=131 head=2452034 last=2452561 stall=395 gap=0
+# 6454165 2-0 scheduled 0
+# 6454575 2-3 <- TAG 13319
+# 6454949 1-3 <- TAG 18439
+# FLIT TX t=6452654 src=3-0 dst=2-3 tag=14343 size=131 head=2452010 last=2453163 block=1020 gap=1
+# FLIT RX t=6455781 src=3-0 dst=2-3 tag=14343 size=131 head=2452431 last=2453198 stall=635 gap=0
+# FLIT TX t=6452654 src=3-1 dst=1-3 tag=17415 size=131 head=2452010 last=2453305 block=1162 gap=1
+# FLIT RX t=6456154 src=3-1 dst=1-3 tag=17415 size=131 head=2452567 last=2453340 stall=641 gap=0
+# 6456612 2-3 <- TAG 14343
+# FLIT TX t=6455883 src=0-1 dst=0-0 tag=3079 size=35 head=2453237 last=2453619 block=345 gap=1
+# FLIT RX t=6456925 src=0-1 dst=0-0 tag=3079 size=35 head=2453249 last=2453633 stall=348 gap=0
+# 6456986 1-3 <- TAG 17415
+# 6456991 1-1 scheduled 0
+# 6457388 0-1 scheduled 0
+# 6457773 0-0 <- TAG 3079
+# FLIT TX t=6455888 src=1-1 dst=0-0 tag=4103 size=35 head=2453239 last=2454287 block=1011 gap=1
+# FLIT RX t=6458702 src=1-1 dst=0-0 tag=4103 size=35 head=2453639 last=2454308 stall=633 gap=0
+# 6459536 0-0 <- TAG 4103
+# 6463973 2-3 -> TAG 21510
+# 6464831 1-3 -> TAG 22534
+# FLIT TX t=6466554 src=2-3 dst=0-3 tag=21510 size=515 head=2457292 last=2458057 block=248 gap=1
+# FLIT RX t=6468623 src=2-3 dst=0-3 tag=21510 size=515 head=2457310 last=2458078 stall=252 gap=0
+# 6469452 0-3 <- TAG 21510
+# 6470233 1-3 scheduled 0
+# 6470715 2-3 scheduled 0
+# FLIT TX t=6467412 src=1-3 dst=0-3 tag=22534 size=515 head=2457618 last=2459212 block=1077 gap=1
+# FLIT RX t=6471644 src=1-3 dst=0-3 tag=22534 size=515 head=2458084 last=2459226 stall=626 gap=0
+# 6472475 0-3 <- TAG 22534
+# TRIGGER-PE 0-2: release acknowledged at 6500423 ns
+# TRIGGER-PE 1-1: release acknowledged at 6500423 ns
+# TRIGGER-PE 2-0: release acknowledged at 6500423 ns
+# TRIGGER-PE 0-1: release acknowledged at 6500425 ns
+# TRIGGER: workflow iteration at 6500425 ns.
+# TRIGGER: next release will be at 6999997 ns
+# TRIGGER-PE 3-0: release acknowledged at 6500425 ns
+# TRIGGER-PE 3-1: release acknowledged at 6500425 ns
+# TRIGGER-PE 3-2: release acknowledged at 6500425 ns
+# 6504215 2-2 scheduled 1
+# 6504217 1-2 scheduled 1
+# 6504220 0-0 scheduled 1
+# 6504220 0-2 scheduled 1
+# 6504220 0-3 scheduled 1
+# 6504220 2-1 scheduled 1
+# 6504260 0-1 scheduled 1
+# 6504260 1-0 scheduled 1
+# 6504260 3-0 scheduled 1
+# 6504260 3-1 scheduled 1
+# 6504260 3-2 scheduled 1
+# 6504265 1-1 scheduled 1
+# 6504265 2-0 scheduled 1
+# 6504304 1-3 scheduled 0
+# 6504304 2-3 scheduled 0
+# 6504304 3-3 scheduled 0
+# 6652220 1-0 -> TAG 8200
+# 6653157 1-0 <- TAG 8200
+# 6654023 1-0 scheduled 2
+# 6725865 0-2 -> TAG 11272
+# 6725904 0-1 -> TAG 1032
+# 6725904 3-0 -> TAG 6152
+# 6725904 3-1 -> TAG 9224
+# 6725904 3-2 -> TAG 10248
+# 6725909 1-1 -> TAG 2056
+# 6725909 2-0 -> TAG 5128
+# 6726717 2-2 -> TAG 19463
+# 6726720 1-2 -> TAG 20487
+# 6726723 2-1 -> TAG 15367
+# 6726841 0-1 <- TAG 1032
+# 6726841 3-0 <- TAG 6152
+# 6726841 3-1 <- TAG 9224
+# 6726841 3-2 <- TAG 10248
+# 6726846 1-1 <- TAG 2056
+# 6726846 2-0 <- TAG 5128
+# 6727165 0-1 -> TAG 7176
+# 6727170 1-1 -> TAG 12296
+# 6727654 0-3 -> TAG 23557
+# 6727707 3-0 scheduled 2
+# 6727707 3-1 scheduled 2
+# 6727707 3-2 scheduled 2
+# 6727712 2-0 scheduled 2
+# 6728394 0-0 scheduled 0
+# 6729278 0-2 scheduled 0
+# 6730528 0-1 scheduled 2
+# 6730533 1-1 scheduled 2
+# FLIT TX t=6729302 src=1-2 dst=1-3 tag=20487 size=131 head=2557136 last=2557624 block=355 gap=1
+# FLIT RX t=6730623 src=1-2 dst=1-3 tag=20487 size=131 head=2557148 last=2557638 stall=358 gap=0
+# FLIT TX t=6729304 src=2-1 dst=2-3 tag=15367 size=131 head=2557137 last=2557638 block=368 gap=1
+# FLIT RX t=6730678 src=2-1 dst=2-3 tag=15367 size=131 head=2557155 last=2557659 stall=372 gap=0
+# 6731417 2-2 scheduled 0
+# 6731467 1-3 <- TAG 20487
+# 6731523 2-3 <- TAG 15367
+# 6731823 1-2 scheduled 0
+# FLIT TX t=6730236 src=0-3 dst=3-3 tag=23557 size=259 head=2557491 last=2558095 block=343 gap=1
+# 6731825 2-1 scheduled 0
+# FLIT RX t=6731899 src=0-3 dst=3-3 tag=23557 size=259 head=2557515 last=2558123 stall=348 gap=0
+# 6732744 3-3 <- TAG 23557
+# FLIT TX t=6730404 src=2-2 dst=1-3 tag=19463 size=131 head=2557555 last=2558507 block=682 gap=138
+# FLIT RX t=6732925 src=2-2 dst=1-3 tag=19463 size=131 head=2557644 last=2558513 stall=632 gap=105
+# 6733757 1-3 <- TAG 19463
+# FLIT TX t=6729749 src=0-1 dst=2-1 tag=7176 size=2403 head=2557306 last=2560054 block=343 gap=1
+# FLIT TX t=6729754 src=1-1 dst=1-2 tag=12296 size=2403 head=2557308 last=2560056 block=343 gap=1
+# FLIT RX t=6737023 src=1-1 dst=1-2 tag=12296 size=2403 head=2557320 last=2560070 stall=346 gap=0
+# FLIT RX t=6737036 src=0-1 dst=2-1 tag=7176 size=2403 head=2557325 last=2560075 stall=346 gap=0
+# FLIT TX t=6728449 src=0-2 dst=2-2 tag=11272 size=2403 head=2556812 last=2560085 block=868 gap=1
+# FLIT RX t=6737117 src=0-2 dst=2-2 tag=11272 size=2403 head=2556830 last=2560106 stall=872 gap=0
+# 6737867 1-2 <- TAG 12296
+# 6737878 2-1 <- TAG 7176
+# 6737959 2-2 <- TAG 11272
+# 6876388 1-0 -> TAG 16392
+# FLIT TX t=6878970 src=1-0 dst=2-3 tag=16392 size=131 head=2614010 last=2614390 block=247 gap=1
+# FLIT RX t=6880062 src=1-0 dst=2-3 tag=16392 size=131 head=2614040 last=2614425 stall=253 gap=0
+# 6880475 1-0 scheduled 0
+# 6880891 2-3 <- TAG 16392
+# 6950072 3-0 -> TAG 14344
+# 6950072 3-1 -> TAG 17416
+# 6950072 3-2 -> TAG 18440
+# 6950078 2-0 -> TAG 13320
+# 6953296 0-1 -> TAG 3080
+# 6953301 1-1 -> TAG 4104
+# FLIT TX t=6952654 src=3-2 dst=1-3 tag=18440 size=131 head=2642010 last=2642390 block=247 gap=1
+# FLIT TX t=6952659 src=2-0 dst=2-3 tag=13320 size=131 head=2642012 last=2642396 block=251 gap=1
+# FLIT RX t=6953728 src=3-2 dst=1-3 tag=18440 size=131 head=2642034 last=2642418 stall=252 gap=0
+# FLIT RX t=6953744 src=2-0 dst=2-3 tag=13320 size=131 head=2642039 last=2642424 stall=253 gap=0
+# 6953757 3-0 scheduled 0
+# 6953757 3-1 scheduled 0
+# 6954015 0-3 -> TAG 23558
+# 6954159 3-2 scheduled 0
+# 6954165 2-0 scheduled 0
+# 6954557 1-3 <- TAG 18440
+# 6954572 2-3 <- TAG 13320
+# FLIT TX t=6952654 src=3-1 dst=1-3 tag=17416 size=131 head=2642010 last=2643147 block=1004 gap=1
+# FLIT TX t=6952654 src=3-0 dst=2-3 tag=14344 size=131 head=2642010 last=2643153 block=1010 gap=1
+# FLIT RX t=6955738 src=3-1 dst=1-3 tag=17416 size=131 head=2642424 last=2643182 stall=626 gap=0
+# FLIT RX t=6955754 src=3-0 dst=2-3 tag=14344 size=131 head=2642430 last=2643188 stall=626 gap=0
+# 6956570 1-3 <- TAG 17416
+# 6956586 2-3 <- TAG 14344
+# FLIT TX t=6955883 src=0-1 dst=0-0 tag=3080 size=35 head=2643237 last=2643617 block=343 gap=1
+# FLIT RX t=6956920 src=0-1 dst=0-0 tag=3080 size=35 head=2643249 last=2643631 stall=346 gap=0
+# 6956991 1-1 scheduled 0
+# 6957388 0-1 scheduled 0
+# 6957609 0-3 scheduled 0
+# 6957767 0-0 <- TAG 3080
+# FLIT TX t=6956596 src=0-3 dst=3-3 tag=23558 size=259 head=2643508 last=2644017 block=248 gap=1
+# FLIT RX t=6958009 src=0-3 dst=3-3 tag=23558 size=259 head=2643532 last=2644045 stall=253 gap=0
+# FLIT TX t=6955888 src=1-1 dst=0-0 tag=4104 size=35 head=2643239 last=2644285 block=1009 gap=1
+# FLIT RX t=6958696 src=1-1 dst=0-0 tag=4104 size=35 head=2643637 last=2644306 stall=633 gap=0
+# 6958841 3-3 <- TAG 23558
+# 6959530 0-0 <- TAG 4104
+# TRIGGER: workflow iteration at 7000422 ns.
+# TRIGGER: next release will be at 7499997 ns
+# TRIGGER-PE 1-1: release acknowledged at 7000422 ns
+# TRIGGER-PE 2-0: release acknowledged at 7000422 ns
+# TRIGGER-PE 0-1: release acknowledged at 7000425 ns
+# TRIGGER-PE 0-2: release acknowledged at 7000425 ns
+# TRIGGER-PE 3-0: release acknowledged at 7000425 ns
+# TRIGGER-PE 3-1: release acknowledged at 7000425 ns
+# TRIGGER-PE 3-2: release acknowledged at 7000425 ns
+# 7004215 0-0 scheduled 1
+# 7004215 0-2 scheduled 1
+# 7004215 1-3 scheduled 1
+# 7004215 2-1 scheduled 1
+# 7004215 2-3 scheduled 1
+# 7004217 2-2 scheduled 1
+# 7004220 1-2 scheduled 1
+# 7004220 3-3 scheduled 1
+# 7004259 0-1 scheduled 1
+# 7004259 3-0 scheduled 1
+# 7004259 3-1 scheduled 1
+# 7004259 3-2 scheduled 1
+# 7004265 1-0 scheduled 1
+# 7004265 1-1 scheduled 1
+# 7004265 2-0 scheduled 1
+# 7004304 0-3 scheduled 0
+# 7152225 1-0 -> TAG 8201
+# 7153162 1-0 <- TAG 8201
+# 7154028 1-0 scheduled 2
+# 7225859 0-2 -> TAG 11273
+# 7225904 0-1 -> TAG 1033
+# 7225904 3-0 -> TAG 6153
+# 7225904 3-1 -> TAG 9225
+# 7225904 3-2 -> TAG 10249
+# 7225909 1-1 -> TAG 2057
+# 7225909 2-0 -> TAG 5129
+# 7226717 2-1 -> TAG 15368
+# 7226720 2-2 -> TAG 19464
+# 7226722 1-2 -> TAG 20488
+# 7226807 2-3 -> TAG 21511
+# 7226841 0-1 <- TAG 1033
+# 7226841 3-0 <- TAG 6153
+# 7226841 3-1 <- TAG 9225
+# 7226841 3-2 <- TAG 10249
+# 7226846 1-1 <- TAG 2057
+# 7226846 2-0 <- TAG 5129
+# 7227165 0-1 -> TAG 7177
+# 7227170 1-1 -> TAG 12297
+# 7227707 3-0 scheduled 2
+# 7227707 3-1 scheduled 2
+# 7227707 3-2 scheduled 2
+# 7227712 1-3 -> TAG 22535
+# 7227712 2-0 scheduled 2
+# 7228388 0-0 scheduled 0
+# 7229272 0-2 scheduled 0
+# 7230528 0-1 scheduled 2
+# FLIT TX t=7229304 src=1-2 dst=1-3 tag=20488 size=131 head=2747137 last=2747603 block=333 gap=1
+# 7230533 1-1 scheduled 2
+# FLIT RX t=7230567 src=1-2 dst=1-3 tag=20488 size=131 head=2747149 last=2747617 stall=336 gap=0
+# FLIT TX t=7229299 src=2-1 dst=2-3 tag=15368 size=131 head=2747135 last=2747690 block=413 gap=10
+# FLIT RX t=7230886 src=2-1 dst=2-3 tag=15368 size=131 head=2747153 last=2747738 stall=453 gap=0
+# 7231396 1-3 <- TAG 20488
+# 7231420 2-2 scheduled 0
+# 7231720 2-3 <- TAG 15368
+# 7231820 2-1 scheduled 0
+# 7231825 1-2 scheduled 0
+# FLIT TX t=7230620 src=2-3 dst=0-3 tag=21511 size=515 head=2747637 last=2748532 block=354 gap=25
+# FLIT TX t=7230407 src=2-2 dst=1-3 tag=19464 size=131 head=2747556 last=2748551 block=714 gap=149
+# FLIT RX t=7233030 src=2-3 dst=0-3 tag=21511 size=515 head=2747655 last=2748553 stall=382 gap=0
+# FLIT RX t=7233041 src=2-2 dst=1-3 tag=19464 size=131 head=2747623 last=2748557 stall=685 gap=117
+# 7233870 1-3 <- TAG 19464
+# 7233875 0-3 <- TAG 21511
+# FLIT TX t=7234720 src=1-3 dst=0-3 tag=22535 size=515 head=2749195 last=2749961 block=249 gap=1
+# FLIT RX t=7236772 src=1-3 dst=0-3 tag=22535 size=515 head=2749207 last=2749975 stall=252 gap=0
+# FLIT TX t=7229754 src=1-1 dst=1-2 tag=12297 size=2403 head=2747308 last=2750056 block=343 gap=1
+# FLIT TX t=7229749 src=0-1 dst=2-1 tag=7177 size=2403 head=2747306 last=2750067 block=356 gap=1
+# FLIT RX t=7237022 src=1-1 dst=1-2 tag=12297 size=2403 head=2747320 last=2750070 stall=346 gap=0
+# FLIT RX t=7237070 src=0-1 dst=2-1 tag=7177 size=2403 head=2747325 last=2750088 stall=359 gap=0
+# FLIT TX t=7228443 src=0-2 dst=2-2 tag=11273 size=2403 head=2746810 last=2750109 block=894 gap=1
+# FLIT RX t=7237180 src=0-2 dst=2-2 tag=11273 size=2403 head=2746828 last=2750130 stall=898 gap=0
+# 7237601 0-3 <- TAG 22535
+# 7237870 1-2 <- TAG 12297
+# 7237912 2-1 <- TAG 7177
+# 7238025 2-2 <- TAG 11273
+# 7376393 1-0 -> TAG 16393
+# 7380078 1-0 scheduled 0
+# FLIT TX t=7378975 src=1-0 dst=2-3 tag=16393 size=131 head=2804012 last=2804534 block=389 gap=1
+# FLIT RX t=7380441 src=1-0 dst=2-3 tag=16393 size=131 head=2804042 last=2804569 stall=395 gap=0
+# 7381286 2-3 <- TAG 16393
+# 7449633 3-3 scheduled 0
+# 7450072 3-0 -> TAG 14345
+# 7450072 3-1 -> TAG 17417
+# 7450072 3-2 -> TAG 18441
+# 7450078 2-0 -> TAG 13321
+# 7453296 0-1 -> TAG 3081
+# 7453301 1-1 -> TAG 4105
+# FLIT TX t=7452659 src=2-0 dst=2-3 tag=13321 size=131 head=2832012 last=2832395 block=250 gap=1
+# FLIT RX t=7453741 src=2-0 dst=2-3 tag=13321 size=131 head=2832039 last=2832423 stall=252 gap=0
+# 7453757 3-0 scheduled 0
+# 7453757 3-1 scheduled 0
+# 7453757 3-2 scheduled 0
+# FLIT TX t=7452654 src=3-2 dst=1-3 tag=18441 size=131 head=2832010 last=2832532 block=389 gap=1
+# FLIT RX t=7454101 src=3-2 dst=1-3 tag=18441 size=131 head=2832034 last=2832560 stall=394 gap=0
+# 7454164 2-0 scheduled 0
+# 7454570 2-3 <- TAG 13321
+# 7454943 1-3 <- TAG 18441
+# FLIT TX t=7452654 src=3-0 dst=2-3 tag=14345 size=131 head=2832010 last=2833161 block=1018 gap=1
+# FLIT RX t=7455775 src=3-0 dst=2-3 tag=14345 size=131 head=2832429 last=2833196 stall=635 gap=0
+# FLIT TX t=7452654 src=3-1 dst=1-3 tag=17417 size=131 head=2832010 last=2833303 block=1160 gap=1
+# FLIT RX t=7456149 src=3-1 dst=1-3 tag=17417 size=131 head=2832566 last=2833338 stall=640 gap=0
+# 7456607 2-3 <- TAG 14345
+# FLIT TX t=7455883 src=0-1 dst=0-0 tag=3081 size=35 head=2833237 last=2833618 block=344 gap=1
+# FLIT RX t=7456922 src=0-1 dst=0-0 tag=3081 size=35 head=2833249 last=2833632 stall=347 gap=0
+# 7456980 1-3 <- TAG 17417
+# 7456991 1-1 scheduled 0
+# 7457388 0-1 scheduled 0
+# 7457770 0-0 <- TAG 3081
+# FLIT TX t=7455888 src=1-1 dst=0-0 tag=4105 size=35 head=2833239 last=2834286 block=1010 gap=1
+# FLIT RX t=7458699 src=1-1 dst=0-0 tag=4105 size=35 head=2833638 last=2834307 stall=633 gap=0
+# 7459533 0-0 <- TAG 4105
+# 7463967 2-3 -> TAG 21512
+# 7464825 1-3 -> TAG 22536
+# FLIT TX t=7466549 src=2-3 dst=0-3 tag=21512 size=515 head=2837290 last=2838055 block=248 gap=1
+# FLIT RX t=7468617 src=2-3 dst=0-3 tag=21512 size=515 head=2837308 last=2838076 stall=252 gap=0
+# 7469446 0-3 <- TAG 21512
+# 7470228 1-3 scheduled 0
+# 7470709 2-3 scheduled 0
+# FLIT TX t=7467407 src=1-3 dst=0-3 tag=22536 size=515 head=2837616 last=2839210 block=1077 gap=1
+# FLIT RX t=7471638 src=1-3 dst=0-3 tag=22536 size=515 head=2838082 last=2839224 stall=626 gap=0
+# 7472470 0-3 <- TAG 22536
+# TRIGGER-PE 1-1: release acknowledged at 7500422 ns
+# TRIGGER-PE 2-0: release acknowledged at 7500422 ns
+# TRIGGER-PE 0-1: release acknowledged at 7500425 ns
+# TRIGGER-PE 3-0: release acknowledged at 7500425 ns
+# TRIGGER-PE 3-1: release acknowledged at 7500425 ns
+# TRIGGER-PE 3-2: release acknowledged at 7500425 ns
+# TRIGGER-PE 0-2: release acknowledged at 7500428 ns
+# TRIGGER: workflow iteration at 7500428 ns.
+# TRIGGER: next release will be at 7999997 ns
+# 7504214 0-3 scheduled 1
+# 7504214 1-2 scheduled 1
+# 7504217 0-0 scheduled 1
+# 7504217 0-2 scheduled 1
+# 7504217 2-1 scheduled 1
+# 7504220 2-2 scheduled 1
+# 7504259 0-1 scheduled 1
+# 7504259 3-0 scheduled 1
+# 7504259 3-1 scheduled 1
+# 7504259 3-2 scheduled 1
+# 7504262 1-0 scheduled 1
+# 7504264 1-1 scheduled 1
+# 7504264 2-0 scheduled 1
+# 7504307 1-3 scheduled 0
+# 7504307 2-3 scheduled 0
+# 7504309 3-3 scheduled 0
+# 7652222 1-0 -> TAG 8202
+# 7653159 1-0 <- TAG 8202
+# 7654025 1-0 scheduled 2
+# 7725862 0-2 -> TAG 11274
+# 7725904 0-1 -> TAG 1034
+# 7725904 3-0 -> TAG 6154
+# 7725904 3-1 -> TAG 9226
+# 7725904 3-2 -> TAG 10250
+# 7725909 1-1 -> TAG 2058
+# 7725909 2-0 -> TAG 5130
+# 7726717 1-2 -> TAG 20489
+# 7726720 2-1 -> TAG 15369
+# 7726722 2-2 -> TAG 19465
+# 7726841 0-1 <- TAG 1034
+# 7726841 3-0 <- TAG 6154
+# 7726841 3-1 <- TAG 9226
+# 7726841 3-2 <- TAG 10250
+# 7726846 1-1 <- TAG 2058
+# 7726846 2-0 <- TAG 5130
+# 7727164 0-1 -> TAG 7178
+# 7727170 1-1 -> TAG 12298
+# 7727649 0-3 -> TAG 23559
+# 7727706 3-0 scheduled 2
+# 7727706 3-1 scheduled 2
+# 7727706 3-2 scheduled 2
+# 7727712 2-0 scheduled 2
+# 7728391 0-0 scheduled 0
+# 7729275 0-2 scheduled 0
+# 7730527 0-1 scheduled 2
+# 7730533 1-1 scheduled 2
+# FLIT TX t=7729299 src=1-2 dst=1-3 tag=20489 size=131 head=2937135 last=2937625 block=357 gap=1
+# FLIT TX t=7729301 src=2-1 dst=2-3 tag=15369 size=131 head=2937136 last=2937636 block=367 gap=1
+# FLIT RX t=7730625 src=1-2 dst=1-3 tag=20489 size=131 head=2937147 last=2937639 stall=360 gap=0
+# FLIT RX t=7730672 src=2-1 dst=2-3 tag=15369 size=131 head=2937154 last=2937657 stall=371 gap=0
+# 7731422 2-2 scheduled 0
+# 7731470 1-3 <- TAG 20489
+# 7731517 2-3 <- TAG 15369
+# FLIT TX t=7730230 src=0-3 dst=3-3 tag=23559 size=259 head=2937489 last=2938091 block=341 gap=1
+# 7731820 1-2 scheduled 0
+# 7731822 2-1 scheduled 0
+# FLIT RX t=7731888 src=0-3 dst=3-3 tag=23559 size=259 head=2937513 last=2938119 stall=346 gap=0
+# 7732733 3-3 <- TAG 23559
+# FLIT TX t=7730409 src=2-2 dst=1-3 tag=19465 size=131 head=2937557 last=2938509 block=681 gap=139
+# FLIT RX t=7732930 src=2-2 dst=1-3 tag=19465 size=131 head=2937645 last=2938515 stall=632 gap=106
+# 7733759 1-3 <- TAG 19465
+# FLIT TX t=7729749 src=0-1 dst=2-1 tag=7178 size=2403 head=2937306 last=2940056 block=345 gap=1
+# FLIT TX t=7729754 src=1-1 dst=1-2 tag=12298 size=2403 head=2937308 last=2940058 block=345 gap=1
+# FLIT RX t=7737027 src=1-1 dst=1-2 tag=12298 size=2403 head=2937320 last=2940072 stall=348 gap=0
+# FLIT RX t=7737041 src=0-1 dst=2-1 tag=7178 size=2403 head=2937325 last=2940077 stall=348 gap=0
+# FLIT TX t=7728446 src=0-2 dst=2-2 tag=11274 size=2403 head=2936811 last=2940086 block=870 gap=1
+# FLIT RX t=7737120 src=0-2 dst=2-2 tag=11274 size=2403 head=2936829 last=2940107 stall=874 gap=0
+# 7737872 1-2 <- TAG 12298
+# 7737883 2-1 <- TAG 7178
+# 7737964 2-2 <- TAG 11274
+# 7876391 1-0 -> TAG 16394
+# FLIT TX t=7878972 src=1-0 dst=2-3 tag=16394 size=131 head=2994011 last=2994391 block=247 gap=1
+# FLIT RX t=7880064 src=1-0 dst=2-3 tag=16394 size=131 head=2994041 last=2994426 stall=253 gap=0
+# 7880477 1-0 scheduled 0
+# 7880893 2-3 <- TAG 16394
+# 7950072 3-0 -> TAG 14346
+# 7950072 3-1 -> TAG 17418
+# 7950072 3-2 -> TAG 18442
+# 7950077 2-0 -> TAG 13322
+# 7953296 0-1 -> TAG 3082
+# 7953301 1-1 -> TAG 4106
+# FLIT TX t=7952654 src=3-2 dst=1-3 tag=18442 size=131 head=3022010 last=3022391 block=248 gap=1
+# FLIT TX t=7952659 src=2-0 dst=2-3 tag=13322 size=131 head=3022012 last=3022397 block=252 gap=1
+# FLIT RX t=7953730 src=3-2 dst=1-3 tag=18442 size=131 head=3022034 last=3022419 stall=253 gap=0
+# FLIT RX t=7953746 src=2-0 dst=2-3 tag=13322 size=131 head=3022039 last=3022425 stall=254 gap=0
+# 7953756 3-0 scheduled 0
+# 7953756 3-1 scheduled 0
+# 7954009 0-3 -> TAG 23560
+# 7954159 3-2 scheduled 0
+# 7954164 2-0 scheduled 0
+# 7954559 1-3 <- TAG 18442
+# 7954575 2-3 <- TAG 13322
+# FLIT TX t=7952654 src=3-1 dst=1-3 tag=17418 size=131 head=3022010 last=3023148 block=1005 gap=1
+# FLIT TX t=7952654 src=3-0 dst=2-3 tag=14346 size=131 head=3022010 last=3023154 block=1011 gap=1
+# FLIT RX t=7955741 src=3-1 dst=1-3 tag=17418 size=131 head=3022425 last=3023183 stall=626 gap=0
+# FLIT RX t=7955756 src=3-0 dst=2-3 tag=14346 size=131 head=3022431 last=3023189 stall=626 gap=0
+# 7956572 1-3 <- TAG 17418
+# 7956588 2-3 <- TAG 14346
+# FLIT TX t=7955883 src=0-1 dst=0-0 tag=3082 size=35 head=3023237 last=3023619 block=345 gap=1
+# FLIT RX t=7956925 src=0-1 dst=0-0 tag=3082 size=35 head=3023249 last=3023633 stall=348 gap=0
+# 7956991 1-1 scheduled 0
+# 7957388 0-1 scheduled 0
+# 7957604 0-3 scheduled 0
+# 7957772 0-0 <- TAG 3082
+# FLIT TX t=7956591 src=0-3 dst=3-3 tag=23560 size=259 head=3023506 last=3024016 block=249 gap=1
+# FLIT RX t=7958006 src=0-3 dst=3-3 tag=23560 size=259 head=3023530 last=3024044 stall=254 gap=0
+# FLIT TX t=7955888 src=1-1 dst=0-0 tag=4106 size=35 head=3023239 last=3024287 block=1011 gap=1
+# FLIT RX t=7958701 src=1-1 dst=0-0 tag=4106 size=35 head=3023639 last=3024308 stall=633 gap=0
+# 7958838 3-3 <- TAG 23560
+# 7959535 0-0 <- TAG 4106
+# TRIGGER-PE 0-2: release acknowledged at 8000422 ns
+# TRIGGER-PE 1-1: release acknowledged at 8000422 ns
+# TRIGGER-PE 2-0: release acknowledged at 8000422 ns
+# TRIGGER-PE 0-1: release acknowledged at 8000425 ns
+# TRIGGER: workflow iteration at 8000425 ns.
+# TRIGGER: next release will be at 8499996 ns
+# TRIGGER-PE 3-0: release acknowledged at 8000425 ns
+# TRIGGER-PE 3-1: release acknowledged at 8000425 ns
+# TRIGGER-PE 3-2: release acknowledged at 8000425 ns
+# 8004214 2-2 scheduled 1
+# 8004217 1-2 scheduled 1
+# 8004217 1-3 scheduled 1
+# 8004217 2-3 scheduled 1
+# 8004217 3-3 scheduled 1
+# 8004219 0-0 scheduled 1
+# 8004219 0-2 scheduled 1
+# 8004219 2-1 scheduled 1
+# 8004259 0-1 scheduled 1
+# 8004259 1-0 scheduled 1
+# 8004259 3-0 scheduled 1
+# 8004259 3-1 scheduled 1
+# 8004259 3-2 scheduled 1
+# 8004264 1-1 scheduled 1
+# 8004264 2-0 scheduled 1
+# 8004306 0-3 scheduled 0
+# 8152219 1-0 -> TAG 8203
+# 8153156 1-0 <- TAG 8203
+# 8154022 1-0 scheduled 2
+# 8225864 0-2 -> TAG 11275
+# 8225904 0-1 -> TAG 1035
+# 8225904 3-0 -> TAG 6155
+# 8225904 3-1 -> TAG 9227
+# 8225904 3-2 -> TAG 10251
+# 8225909 1-1 -> TAG 2059
+# 8225909 2-0 -> TAG 5131
+# 8226717 2-2 -> TAG 19466
+# 8226719 1-2 -> TAG 20490
+# 8226722 2-1 -> TAG 15370
+# 8226809 2-3 -> TAG 21513
+# 8226840 0-1 <- TAG 1035
+# 8226840 3-0 <- TAG 6155
+# 8226840 3-1 <- TAG 9227
+# 8226840 3-2 <- TAG 10251
+# 8226846 1-1 <- TAG 2059
+# 8226846 2-0 <- TAG 5131
+# 8227164 0-1 -> TAG 7179
+# 8227169 1-1 -> TAG 12299
+# 8227706 3-0 scheduled 2
+# 8227706 3-1 scheduled 2
+# 8227706 3-2 scheduled 2
+# 8227712 2-0 scheduled 2
+# 8227714 1-3 -> TAG 22537
+# 8228393 0-0 scheduled 0
+# 8229277 0-2 scheduled 0
+# 8230527 0-1 scheduled 2
+# FLIT TX t=8229301 src=1-2 dst=1-3 tag=20490 size=131 head=3127136 last=3127602 block=333 gap=1
+# 8230533 1-1 scheduled 2
+# FLIT RX t=8230564 src=1-2 dst=1-3 tag=20490 size=131 head=3127148 last=3127616 stall=336 gap=0
+# FLIT TX t=8229304 src=2-1 dst=2-3 tag=15370 size=131 head=3127137 last=3127689 block=412 gap=8
+# FLIT RX t=8230888 src=2-1 dst=2-3 tag=15370 size=131 head=3127155 last=3127739 stall=452 gap=0
+# 8231396 1-3 <- TAG 20490
+# 8231417 2-2 scheduled 0
+# 8231722 2-3 <- TAG 15370
+# 8231822 1-2 scheduled 0
+# 8231825 2-1 scheduled 0
+# FLIT TX t=8230622 src=2-3 dst=0-3 tag=21513 size=515 head=3127638 last=3128533 block=354 gap=25
+# FLIT TX t=8230404 src=2-2 dst=1-3 tag=19466 size=131 head=3127555 last=3128551 block=715 gap=149
+# FLIT RX t=8233033 src=2-3 dst=0-3 tag=21513 size=515 head=3127656 last=3128554 stall=382 gap=0
+# FLIT RX t=8233040 src=2-2 dst=1-3 tag=19466 size=131 head=3127622 last=3128557 stall=686 gap=117
+# 8233869 1-3 <- TAG 19466
+# 8233877 0-3 <- TAG 21513
+# FLIT TX t=8234722 src=1-3 dst=0-3 tag=22537 size=515 head=3129196 last=3129962 block=249 gap=1
+# FLIT RX t=8236775 src=1-3 dst=0-3 tag=22537 size=515 head=3129208 last=3129976 stall=252 gap=0
+# FLIT TX t=8229754 src=1-1 dst=1-2 tag=12299 size=2403 head=3127308 last=3130056 block=343 gap=1
+# FLIT TX t=8229748 src=0-1 dst=2-1 tag=7179 size=2403 head=3127306 last=3130066 block=355 gap=1
+# FLIT RX t=8237022 src=1-1 dst=1-2 tag=12299 size=2403 head=3127320 last=3130070 stall=346 gap=0
+# FLIT RX t=8237067 src=0-1 dst=2-1 tag=7179 size=2403 head=3127325 last=3130087 stall=358 gap=0
+# FLIT TX t=8228448 src=0-2 dst=2-2 tag=11275 size=2403 head=3126812 last=3130109 block=892 gap=1
+# FLIT RX t=8237180 src=0-2 dst=2-2 tag=11275 size=2403 head=3126830 last=3130130 stall=896 gap=0
+# 8237604 0-3 <- TAG 22537
+# 8237867 1-2 <- TAG 12299
+# 8237909 2-1 <- TAG 7179
+# 8238022 2-2 <- TAG 11275
+# 8376388 1-0 -> TAG 16395
+# 8380072 1-0 scheduled 0
+# FLIT TX t=8378969 src=1-0 dst=2-3 tag=16395 size=131 head=3184010 last=3184532 block=389 gap=1
+# FLIT RX t=8380435 src=1-0 dst=2-3 tag=16395 size=131 head=3184040 last=3184567 stall=395 gap=0
+# 8381280 2-3 <- TAG 16395
+# 8449630 3-3 scheduled 0
+# 8450072 3-0 -> TAG 14347
+# 8450072 3-1 -> TAG 17419
+# 8450072 3-2 -> TAG 18443
+# 8450077 2-0 -> TAG 13323
+# 8453296 0-1 -> TAG 3083
+# 8453301 1-1 -> TAG 4107
+# FLIT TX t=8452659 src=2-0 dst=2-3 tag=13323 size=131 head=3212012 last=3212396 block=251 gap=1
+# FLIT RX t=8453743 src=2-0 dst=2-3 tag=13323 size=131 head=3212039 last=3212424 stall=253 gap=0
+# 8453756 3-0 scheduled 0
+# 8453756 3-1 scheduled 0
+# 8453756 3-2 scheduled 0
+# FLIT TX t=8452654 src=3-2 dst=1-3 tag=18443 size=131 head=3212010 last=3212532 block=389 gap=1
+# FLIT RX t=8454101 src=3-2 dst=1-3 tag=18443 size=131 head=3212034 last=3212560 stall=394 gap=0
+# 8454164 2-0 scheduled 0
+# 8454572 2-3 <- TAG 13323
+# 8454946 1-3 <- TAG 18443
+# FLIT TX t=8452654 src=3-0 dst=2-3 tag=14347 size=131 head=3212010 last=3213162 block=1019 gap=1
+# FLIT RX t=8455777 src=3-0 dst=2-3 tag=14347 size=131 head=3212430 last=3213197 stall=635 gap=0
+# FLIT TX t=8452654 src=3-1 dst=1-3 tag=17419 size=131 head=3212010 last=3213304 block=1161 gap=1
+# FLIT RX t=8456151 src=3-1 dst=1-3 tag=17419 size=131 head=3212566 last=3213339 stall=641 gap=0
+# 8456609 2-3 <- TAG 14347
+# FLIT TX t=8455882 src=0-1 dst=0-0 tag=3083 size=35 head=3213237 last=3213617 block=343 gap=1
+# FLIT RX t=8456919 src=0-1 dst=0-0 tag=3083 size=35 head=3213249 last=3213631 stall=346 gap=0
+# 8456982 1-3 <- TAG 17419
+# 8456990 1-1 scheduled 0
+# 8457388 0-1 scheduled 0
+# 8457767 0-0 <- TAG 3083
+# FLIT TX t=8455888 src=1-1 dst=0-0 tag=4107 size=35 head=3213239 last=3214285 block=1009 gap=1
+# FLIT RX t=8458696 src=1-1 dst=0-0 tag=4107 size=35 head=3213637 last=3214306 stall=633 gap=0
+# 8459530 0-0 <- TAG 4107
+# 8463969 2-3 -> TAG 21514
+# 8464827 1-3 -> TAG 22538
+# FLIT TX t=8466551 src=2-3 dst=0-3 tag=21514 size=515 head=3217291 last=3218056 block=248 gap=1
+# FLIT RX t=8468619 src=2-3 dst=0-3 tag=21514 size=515 head=3217309 last=3218077 stall=252 gap=0
+# 8469448 0-3 <- TAG 21514
+# 8470230 1-3 scheduled 0
+# 8470711 2-3 scheduled 0
+# FLIT TX t=8467409 src=1-3 dst=0-3 tag=22538 size=515 head=3217617 last=3219211 block=1077 gap=1
+# FLIT RX t=8471640 src=1-3 dst=0-3 tag=22538 size=515 head=3218083 last=3219225 stall=626 gap=0
+# 8472472 0-3 <- TAG 22538
+# TRIGGER: workflow iteration at 8500422 ns.
+# TRIGGER: next release will be at 8999996 ns
+# TRIGGER-PE 1-1: release acknowledged at 8500422 ns
+# TRIGGER-PE 2-0: release acknowledged at 8500422 ns
+# TRIGGER-PE 0-1: release acknowledged at 8500425 ns
+# TRIGGER-PE 0-2: release acknowledged at 8500425 ns
+# TRIGGER-PE 3-0: release acknowledged at 8500425 ns
+# TRIGGER-PE 3-1: release acknowledged at 8500425 ns
+# TRIGGER-PE 3-2: release acknowledged at 8500425 ns
+# 8504214 0-0 scheduled 1
+# 8504214 0-2 scheduled 1
+# 8504214 2-1 scheduled 1
+# 8504217 0-3 scheduled 1
+# 8504217 2-2 scheduled 1
+# 8504219 1-2 scheduled 1
+# 8504259 0-1 scheduled 1
+# 8504259 3-0 scheduled 1
+# 8504259 3-1 scheduled 1
+# 8504259 3-2 scheduled 1
+# 8504264 1-0 scheduled 1
+# 8504264 1-1 scheduled 1
+# 8504264 2-0 scheduled 1
+# 8504306 3-3 scheduled 0
+# 8504309 1-3 scheduled 0
+# 8504309 2-3 scheduled 0
+# 8652225 1-0 -> TAG 8204
+# 8653161 1-0 <- TAG 8204
+# 8654027 1-0 scheduled 2
+# 8725859 0-2 -> TAG 11276
+# 8725903 0-1 -> TAG 1036
+# 8725903 3-0 -> TAG 6156
+# 8725903 3-1 -> TAG 9228
+# 8725903 3-2 -> TAG 10252
+# 8725909 1-1 -> TAG 2060
+# 8725909 2-0 -> TAG 5132
+# 8726717 2-1 -> TAG 15371
+# 8726719 2-2 -> TAG 19467
+# 8726722 1-2 -> TAG 20491
+# 8726840 0-1 <- TAG 1036
+# 8726840 3-0 <- TAG 6156
+# 8726840 3-1 <- TAG 9228
+# 8726840 3-2 <- TAG 10252
+# 8726846 1-1 <- TAG 2060
+# 8726846 2-0 <- TAG 5132
+# 8727164 0-1 -> TAG 7180
+# 8727169 1-1 -> TAG 12300
+# 8727651 0-3 -> TAG 23561
+# 8727706 3-0 scheduled 2
+# 8727706 3-1 scheduled 2
+# 8727706 3-2 scheduled 2
+# 8727711 2-0 scheduled 2
+# 8728388 0-0 scheduled 0
+# 8729272 0-2 scheduled 0
+# 8730527 0-1 scheduled 2
+# 8730532 1-1 scheduled 2
+# FLIT TX t=8729303 src=1-2 dst=1-3 tag=20491 size=131 head=3317137 last=3317626 block=356 gap=1
+# FLIT TX t=8729298 src=2-1 dst=2-3 tag=15371 size=131 head=3317135 last=3317634 block=366 gap=1
+# FLIT RX t=8730627 src=1-2 dst=1-3 tag=20491 size=131 head=3317149 last=3317640 stall=359 gap=0
+# FLIT RX t=8730667 src=2-1 dst=2-3 tag=15371 size=131 head=3317153 last=3317655 stall=370 gap=0
+# 8731419 2-2 scheduled 0
+# 8731472 1-3 <- TAG 20491
+# 8731511 2-3 <- TAG 15371
+# FLIT TX t=8730232 src=0-3 dst=3-3 tag=23561 size=259 head=3317490 last=3318093 block=342 gap=1
+# 8731819 2-1 scheduled 0
+# 8731824 1-2 scheduled 0
+# FLIT RX t=8731893 src=0-3 dst=3-3 tag=23561 size=259 head=3317514 last=3318121 stall=347 gap=0
+# 8732738 3-3 <- TAG 23561
+# FLIT TX t=8730406 src=2-2 dst=1-3 tag=19467 size=131 head=3317556 last=3318509 block=683 gap=138
+# FLIT RX t=8732930 src=2-2 dst=1-3 tag=19467 size=131 head=3317646 last=3318515 stall=632 gap=105
+# 8733761 1-3 <- TAG 19467
+# FLIT TX t=8729748 src=0-1 dst=2-1 tag=7180 size=2403 head=3317306 last=3320055 block=344 gap=1
+# FLIT TX t=8729753 src=1-1 dst=1-2 tag=12300 size=2403 head=3317308 last=3320056 block=343 gap=1
+# FLIT RX t=8737022 src=1-1 dst=1-2 tag=12300 size=2403 head=3317320 last=3320070 stall=346 gap=0
+# FLIT RX t=8737038 src=0-1 dst=2-1 tag=7180 size=2403 head=3317325 last=3320076 stall=347 gap=0
+# FLIT TX t=8728443 src=0-2 dst=2-2 tag=11276 size=2403 head=3316810 last=3320085 block=870 gap=1
+# FLIT RX t=8737117 src=0-2 dst=2-2 tag=11276 size=2403 head=3316828 last=3320106 stall=874 gap=0
+# 8737869 1-2 <- TAG 12300
+# 8737880 2-1 <- TAG 7180
+# 8737961 2-2 <- TAG 11276
+# 8876393 1-0 -> TAG 16396
+# FLIT TX t=8878974 src=1-0 dst=2-3 tag=16396 size=131 head=3374012 last=3374392 block=247 gap=1
+# FLIT RX t=8880067 src=1-0 dst=2-3 tag=16396 size=131 head=3374042 last=3374427 stall=253 gap=0
+# 8880480 1-0 scheduled 0
+# 8880895 2-3 <- TAG 16396
+# 8950072 3-0 -> TAG 14348
+# 8950072 3-1 -> TAG 17420
+# 8950072 3-2 -> TAG 18444
+# 8950077 2-0 -> TAG 13324
+# 8953295 0-1 -> TAG 3084
+# 8953301 1-1 -> TAG 4108
+# FLIT TX t=8952653 src=3-2 dst=1-3 tag=18444 size=131 head=3402010 last=3402392 block=249 gap=1
+# FLIT TX t=8952659 src=2-0 dst=2-3 tag=13324 size=131 head=3402012 last=3402395 block=250 gap=1
+# FLIT RX t=8953732 src=3-2 dst=1-3 tag=18444 size=131 head=3402034 last=3402420 stall=254 gap=0
+# FLIT RX t=8953740 src=2-0 dst=2-3 tag=13324 size=131 head=3402039 last=3402423 stall=252 gap=0
+# 8953756 3-0 scheduled 0
+# 8953756 3-1 scheduled 0
+# 8954011 0-3 -> TAG 23562
+# 8954159 3-2 scheduled 0
+# 8954164 2-0 scheduled 0
+# 8954561 1-3 <- TAG 18444
+# 8954569 2-3 <- TAG 13324
+# FLIT TX t=8952653 src=3-1 dst=1-3 tag=17420 size=131 head=3402010 last=3403149 block=1006 gap=1
+# FLIT TX t=8952653 src=3-0 dst=2-3 tag=14348 size=131 head=3402010 last=3403152 block=1009 gap=1
+# FLIT RX t=8955743 src=3-1 dst=1-3 tag=17420 size=131 head=3402426 last=3403184 stall=626 gap=0
+# FLIT RX t=8955751 src=3-0 dst=2-3 tag=14348 size=131 head=3402429 last=3403187 stall=626 gap=0
+# 8956574 1-3 <- TAG 17420
+# 8956582 2-3 <- TAG 14348
+# FLIT TX t=8955882 src=0-1 dst=0-0 tag=3084 size=35 head=3403237 last=3403618 block=344 gap=1
+# FLIT RX t=8956922 src=0-1 dst=0-0 tag=3084 size=35 head=3403249 last=3403632 stall=347 gap=0
+# 8956990 1-1 scheduled 0
+# 8957388 0-1 scheduled 0
+# 8957606 0-3 scheduled 0
+# 8957769 0-0 <- TAG 3084
+# FLIT TX t=8956593 src=0-3 dst=3-3 tag=23562 size=259 head=3403507 last=3404015 block=247 gap=1
+# FLIT RX t=8958003 src=0-3 dst=3-3 tag=23562 size=259 head=3403531 last=3404043 stall=252 gap=0
+# FLIT TX t=8955888 src=1-1 dst=0-0 tag=4108 size=35 head=3403239 last=3404286 block=1010 gap=1
+# FLIT RX t=8958698 src=1-1 dst=0-0 tag=4108 size=35 head=3403638 last=3404307 stall=633 gap=0
+# 8958835 3-3 <- TAG 23562
+# 8959532 0-0 <- TAG 4108
+# TRIGGER-PE 1-1: release acknowledged at 9000422 ns
+# TRIGGER-PE 2-0: release acknowledged at 9000422 ns
+# TRIGGER-PE 0-1: release acknowledged at 9000424 ns
+# TRIGGER-PE 3-0: release acknowledged at 9000424 ns
+# TRIGGER-PE 3-1: release acknowledged at 9000424 ns
+# TRIGGER-PE 3-2: release acknowledged at 9000424 ns
+# TRIGGER-PE 0-2: release acknowledged at 9000427 ns
+# TRIGGER: workflow iteration at 9000427 ns.
+# TRIGGER: next release will be at 9499996 ns
+# 9004214 1-2 scheduled 1
+# 9004214 3-3 scheduled 1
+# 9004216 0-0 scheduled 1
+# 9004216 0-2 scheduled 1
+# 9004216 2-1 scheduled 1
+# 9004219 1-3 scheduled 1
+# 9004219 2-2 scheduled 1
+# 9004219 2-3 scheduled 1
+# 9004259 0-1 scheduled 1
+# 9004259 3-0 scheduled 1
+# 9004259 3-1 scheduled 1
+# 9004259 3-2 scheduled 1
+# 9004261 1-0 scheduled 1
+# 9004264 1-1 scheduled 1
+# 9004264 2-0 scheduled 1
+# 9004309 0-3 scheduled 0
+# 9152222 1-0 -> TAG 8205
+# 9153159 1-0 <- TAG 8205
+# 9154024 1-0 scheduled 2
+# 9225861 0-2 -> TAG 11277
+# 9225903 0-1 -> TAG 1037
+# 9225903 3-0 -> TAG 6157
+# 9225903 3-1 -> TAG 9229
+# 9225903 3-2 -> TAG 10253
+# 9225909 1-1 -> TAG 2061
+# 9225909 2-0 -> TAG 5133
+# 9226716 1-2 -> TAG 20492
+# 9226719 2-1 -> TAG 15372
+# 9226722 2-2 -> TAG 19468
+# 9226811 2-3 -> TAG 21515
+# 9226840 0-1 <- TAG 1037
+# 9226840 3-0 <- TAG 6157
+# 9226840 3-1 <- TAG 9229
+# 9226840 3-2 <- TAG 10253
+# 9226845 1-1 <- TAG 2061
+# 9226845 2-0 <- TAG 5133
+# 9227164 0-1 -> TAG 7181
+# 9227169 1-1 -> TAG 12301
+# 9227706 3-0 scheduled 2
+# 9227706 3-1 scheduled 2
+# 9227706 3-2 scheduled 2
+# 9227711 2-0 scheduled 2
+# 9227716 1-3 -> TAG 22539
+# 9228390 0-0 scheduled 0
+# 9229274 0-2 scheduled 0
+# 9230527 0-1 scheduled 2
+# FLIT TX t=9229298 src=1-2 dst=1-3 tag=20492 size=131 head=3507135 last=3507603 block=335 gap=1
+# 9230532 1-1 scheduled 2
+# FLIT RX t=9230566 src=1-2 dst=1-3 tag=20492 size=131 head=3507147 last=3507617 stall=338 gap=0
+# FLIT TX t=9229301 src=2-1 dst=2-3 tag=15372 size=131 head=3507136 last=3507691 block=414 gap=9
+# FLIT RX t=9230890 src=2-1 dst=2-3 tag=15372 size=131 head=3507154 last=3507740 stall=454 gap=0
+# 9231398 1-3 <- TAG 20492
+# 9231422 2-2 scheduled 0
+# 9231724 2-3 <- TAG 15372
+# 9231819 1-2 scheduled 0
+# 9231822 2-1 scheduled 0
+# FLIT TX t=9230624 src=2-3 dst=0-3 tag=21515 size=515 head=3507639 last=3508534 block=354 gap=25
+# FLIT TX t=9230409 src=2-2 dst=1-3 tag=19468 size=131 head=3507557 last=3508552 block=711 gap=152
+# FLIT RX t=9233035 src=2-3 dst=0-3 tag=21515 size=515 head=3507657 last=3508555 stall=382 gap=0
+# FLIT RX t=9233043 src=2-2 dst=1-3 tag=19468 size=131 head=3507623 last=3508558 stall=686 gap=117
+# 9233872 1-3 <- TAG 19468
+# 9233880 0-3 <- TAG 21515
+# FLIT TX t=9234724 src=1-3 dst=0-3 tag=22539 size=515 head=3509197 last=3509963 block=249 gap=1
+# FLIT RX t=9236777 src=1-3 dst=0-3 tag=22539 size=515 head=3509209 last=3509977 stall=252 gap=0
+# FLIT TX t=9229753 src=1-1 dst=1-2 tag=12301 size=2403 head=3507308 last=3510058 block=345 gap=1
+# FLIT TX t=9229748 src=0-1 dst=2-1 tag=7181 size=2403 head=3507306 last=3510068 block=357 gap=1
+# FLIT RX t=9237027 src=1-1 dst=1-2 tag=12301 size=2403 head=3507320 last=3510072 stall=348 gap=0
+# FLIT RX t=9237072 src=0-1 dst=2-1 tag=7181 size=2403 head=3507325 last=3510089 stall=360 gap=0
+# FLIT TX t=9228445 src=0-2 dst=2-2 tag=11277 size=2403 head=3506811 last=3510110 block=894 gap=1
+# FLIT RX t=9237182 src=0-2 dst=2-2 tag=11277 size=2403 head=3506829 last=3510131 stall=898 gap=0
+# 9237606 0-3 <- TAG 22539
+# 9237872 1-2 <- TAG 12301
+# 9237914 2-1 <- TAG 7181
+# 9238027 2-2 <- TAG 11277
+# 9376390 1-0 -> TAG 16397
+# 9380074 1-0 scheduled 0
+# FLIT TX t=9378972 src=1-0 dst=2-3 tag=16397 size=131 head=3564011 last=3564533 block=389 gap=1
+# FLIT RX t=9380437 src=1-0 dst=2-3 tag=16397 size=131 head=3564041 last=3564568 stall=395 gap=0
+# 9381282 2-3 <- TAG 16397
+# 9449627 3-3 scheduled 0
+# 9450072 3-0 -> TAG 14349
+# 9450072 3-1 -> TAG 17421
+# 9450072 3-2 -> TAG 18445
+# 9450077 2-0 -> TAG 13325
+# 9453295 0-1 -> TAG 3085
+# 9453301 1-1 -> TAG 4109
+# FLIT TX t=9452658 src=2-0 dst=2-3 tag=13325 size=131 head=3592012 last=3592397 block=252 gap=1
+# FLIT RX t=9453745 src=2-0 dst=2-3 tag=13325 size=131 head=3592039 last=3592425 stall=254 gap=0
+# 9453756 3-0 scheduled 0
+# 9453756 3-1 scheduled 0
+# 9453756 3-2 scheduled 0
+# FLIT TX t=9452653 src=3-2 dst=1-3 tag=18445 size=131 head=3592010 last=3592533 block=390 gap=1
+# FLIT RX t=9454103 src=3-2 dst=1-3 tag=18445 size=131 head=3592034 last=3592561 stall=395 gap=0
+# 9454164 2-0 scheduled 0
+# 9454574 2-3 <- TAG 13325
+# 9454948 1-3 <- TAG 18445
+# FLIT TX t=9452653 src=3-0 dst=2-3 tag=14349 size=131 head=3592010 last=3593163 block=1020 gap=1
+# FLIT RX t=9455779 src=3-0 dst=2-3 tag=14349 size=131 head=3592431 last=3593198 stall=635 gap=0
+# FLIT TX t=9452653 src=3-1 dst=1-3 tag=17421 size=131 head=3592010 last=3593305 block=1162 gap=1
+# FLIT RX t=9456153 src=3-1 dst=1-3 tag=17421 size=131 head=3592567 last=3593340 stall=641 gap=0
+# 9456611 2-3 <- TAG 14349
+# FLIT TX t=9455882 src=0-1 dst=0-0 tag=3085 size=35 head=3593237 last=3593619 block=345 gap=1
+# FLIT RX t=9456924 src=0-1 dst=0-0 tag=3085 size=35 head=3593249 last=3593633 stall=348 gap=0
+# 9456985 1-3 <- TAG 17421
+# 9456990 1-1 scheduled 0
+# 9457387 0-1 scheduled 0
+# 9457772 0-0 <- TAG 3085
+# FLIT TX t=9455887 src=1-1 dst=0-0 tag=4109 size=35 head=3593239 last=3594287 block=1011 gap=1
+# FLIT RX t=9458701 src=1-1 dst=0-0 tag=4109 size=35 head=3593639 last=3594308 stall=633 gap=0
+# 9459535 0-0 <- TAG 4109
+# 9463972 2-3 -> TAG 21516
+# 9464829 1-3 -> TAG 22540
+# FLIT TX t=9466553 src=2-3 dst=0-3 tag=21516 size=515 head=3597292 last=3598057 block=248 gap=1
+# FLIT RX t=9468622 src=2-3 dst=0-3 tag=21516 size=515 head=3597310 last=3598078 stall=252 gap=0
+# 9469451 0-3 <- TAG 21516
+# 9470232 1-3 scheduled 0
+# 9470714 2-3 scheduled 0
+# FLIT TX t=9467411 src=1-3 dst=0-3 tag=22540 size=515 head=3597618 last=3599212 block=1077 gap=1
+# FLIT RX t=9471643 src=1-3 dst=0-3 tag=22540 size=515 head=3598084 last=3599226 stall=626 gap=0
+# 9472474 0-3 <- TAG 22540
+# TRIGGER-PE 0-2: release acknowledged at 9500422 ns
+# TRIGGER-PE 1-1: release acknowledged at 9500422 ns
+# TRIGGER-PE 2-0: release acknowledged at 9500422 ns
+# TRIGGER-PE 0-1: release acknowledged at 9500424 ns
+# TRIGGER: workflow iteration at 9500424 ns.
+# TRIGGER: next release will be at 9999996 ns
+# TRIGGER-PE 3-0: release acknowledged at 9500424 ns
+# TRIGGER-PE 3-1: release acknowledged at 9500424 ns
+# TRIGGER-PE 3-2: release acknowledged at 9500424 ns
+# 9504214 2-2 scheduled 1
+# 9504216 1-2 scheduled 1
+# 9504219 0-0 scheduled 1
+# 9504219 0-2 scheduled 1
+# 9504219 0-3 scheduled 1
+# 9504219 2-1 scheduled 1
+# 9504258 0-1 scheduled 1
+# 9504258 1-0 scheduled 1
+# 9504258 3-0 scheduled 1
+# 9504258 3-1 scheduled 1
+# 9504258 3-2 scheduled 1
+# 9504264 1-1 scheduled 1
+# 9504264 2-0 scheduled 1
+# 9504303 1-3 scheduled 0
+# 9504303 2-3 scheduled 0
+# 9504303 3-3 scheduled 0
+# 9652219 1-0 -> TAG 8206
+# 9653156 1-0 <- TAG 8206
+# 9654022 1-0 scheduled 2
+# 9725864 0-2 -> TAG 11278
+# 9725903 0-1 -> TAG 1038
+# 9725903 3-0 -> TAG 6158
+# 9725903 3-1 -> TAG 9230
+# 9725903 3-2 -> TAG 10254
+# 9725908 1-1 -> TAG 2062
+# 9725908 2-0 -> TAG 5134
+# 9726716 2-2 -> TAG 19469
+# 9726719 1-2 -> TAG 20493
+# 9726721 2-1 -> TAG 15373
+# 9726840 0-1 <- TAG 1038
+# 9726840 3-0 <- TAG 6158
+# 9726840 3-1 <- TAG 9230
+# 9726840 3-2 <- TAG 10254
+# 9726845 1-1 <- TAG 2062
+# 9726845 2-0 <- TAG 5134
+# 9727164 0-1 -> TAG 7182
+# 9727169 1-1 -> TAG 12302
+# 9727653 0-3 -> TAG 23563
+# 9727706 3-0 scheduled 2
+# 9727706 3-1 scheduled 2
+# 9727706 3-2 scheduled 2
+# 9727711 2-0 scheduled 2
+# 9728393 0-0 scheduled 0
+# 9729277 0-2 scheduled 0
+# 9730527 0-1 scheduled 2
+# 9730532 1-1 scheduled 2
+# FLIT TX t=9729300 src=1-2 dst=1-3 tag=20493 size=131 head=3697136 last=3697624 block=355 gap=1
+# FLIT RX t=9730621 src=1-2 dst=1-3 tag=20493 size=131 head=3697148 last=3697638 stall=358 gap=0
+# FLIT TX t=9729303 src=2-1 dst=2-3 tag=15373 size=131 head=3697137 last=3697638 block=368 gap=1
+# FLIT RX t=9730677 src=2-1 dst=2-3 tag=15373 size=131 head=3697155 last=3697659 stall=372 gap=0
+# 9731416 2-2 scheduled 0
+# 9731466 1-3 <- TAG 20493
+# 9731521 2-3 <- TAG 15373
+# 9731821 1-2 scheduled 0
+# FLIT TX t=9730235 src=0-3 dst=3-3 tag=23563 size=259 head=3697491 last=3698095 block=343 gap=1
+# 9731824 2-1 scheduled 0
+# FLIT RX t=9731898 src=0-3 dst=3-3 tag=23563 size=259 head=3697515 last=3698123 stall=348 gap=0
+# 9732743 3-3 <- TAG 23563
+# FLIT TX t=9730403 src=2-2 dst=1-3 tag=19469 size=131 head=3697555 last=3698507 block=682 gap=138
+# FLIT RX t=9732924 src=2-2 dst=1-3 tag=19469 size=131 head=3697644 last=3698513 stall=632 gap=105
+# 9733756 1-3 <- TAG 19469
+# FLIT TX t=9729748 src=0-1 dst=2-1 tag=7182 size=2403 head=3697306 last=3700054 block=343 gap=1
+# FLIT TX t=9729753 src=1-1 dst=1-2 tag=12302 size=2403 head=3697308 last=3700056 block=343 gap=1
+# FLIT RX t=9737021 src=1-1 dst=1-2 tag=12302 size=2403 head=3697320 last=3700070 stall=346 gap=0
+# FLIT RX t=9737035 src=0-1 dst=2-1 tag=7182 size=2403 head=3697325 last=3700075 stall=346 gap=0
+# FLIT TX t=9728448 src=0-2 dst=2-2 tag=11278 size=2403 head=3696812 last=3700085 block=868 gap=1
+# FLIT RX t=9737116 src=0-2 dst=2-2 tag=11278 size=2403 head=3696830 last=3700106 stall=872 gap=0
+# 9737866 1-2 <- TAG 12302
+# 9737877 2-1 <- TAG 7182
+# 9737958 2-2 <- TAG 11278
+# 9876387 1-0 -> TAG 16398
+# FLIT TX t=9878969 src=1-0 dst=2-3 tag=16398 size=131 head=3754010 last=3754390 block=247 gap=1
+# FLIT RX t=9880061 src=1-0 dst=2-3 tag=16398 size=131 head=3754040 last=3754425 stall=253 gap=0
+# 9880474 1-0 scheduled 0
+# 9880890 2-3 <- TAG 16398
+# 9950071 3-0 -> TAG 14350
+# 9950071 3-1 -> TAG 17422
+# 9950071 3-2 -> TAG 18446
+# 9950077 2-0 -> TAG 13326
+# 9953295 0-1 -> TAG 3086
+# 9953300 1-1 -> TAG 4110
+# FLIT TX t=9952653 src=3-2 dst=1-3 tag=18446 size=131 head=3782010 last=3782390 block=247 gap=1
+# FLIT TX t=9952658 src=2-0 dst=2-3 tag=13326 size=131 head=3782012 last=3782396 block=251 gap=1
+# FLIT RX t=9953727 src=3-2 dst=1-3 tag=18446 size=131 head=3782034 last=3782418 stall=252 gap=0
+# FLIT RX t=9953742 src=2-0 dst=2-3 tag=13326 size=131 head=3782039 last=3782424 stall=253 gap=0
+# 9953756 3-0 scheduled 0
+# 9953756 3-1 scheduled 0
+# 9954014 0-3 -> TAG 23564
+# 9954158 3-2 scheduled 0
+# 9954164 2-0 scheduled 0
+# 9954556 1-3 <- TAG 18446
+# 9954571 2-3 <- TAG 13326
+# FLIT TX t=9952653 src=3-1 dst=1-3 tag=17422 size=131 head=3782010 last=3783147 block=1004 gap=1
+# FLIT TX t=9952653 src=3-0 dst=2-3 tag=14350 size=131 head=3782010 last=3783153 block=1010 gap=1
+# FLIT RX t=9955737 src=3-1 dst=1-3 tag=17422 size=131 head=3782424 last=3783182 stall=626 gap=0
+# FLIT RX t=9955753 src=3-0 dst=2-3 tag=14350 size=131 head=3782430 last=3783188 stall=626 gap=0
+# 9956569 1-3 <- TAG 17422
+# 9956585 2-3 <- TAG 14350
+# FLIT TX t=9955882 src=0-1 dst=0-0 tag=3086 size=35 head=3783237 last=3783617 block=343 gap=1
+# FLIT RX t=9956919 src=0-1 dst=0-0 tag=3086 size=35 head=3783249 last=3783631 stall=346 gap=0
+# 9956990 1-1 scheduled 0
+# 9957387 0-1 scheduled 0
+# 9957608 0-3 scheduled 0
+# 9957766 0-0 <- TAG 3086
+# FLIT TX t=9956595 src=0-3 dst=3-3 tag=23564 size=259 head=3783508 last=3784017 block=248 gap=1
+# FLIT RX t=9958008 src=0-3 dst=3-3 tag=23564 size=259 head=3783532 last=3784045 stall=253 gap=0
+# FLIT TX t=9955887 src=1-1 dst=0-0 tag=4110 size=35 head=3783239 last=3784285 block=1009 gap=1
+# FLIT RX t=9958695 src=1-1 dst=0-0 tag=4110 size=35 head=3783637 last=3784306 stall=633 gap=0
+# 9958840 3-3 <- TAG 23564
+# 9959529 0-0 <- TAG 4110
+# TRIGGER: workflow iteration at 10000421 ns.
+# TRIGGER: next release will be at 10499996 ns
+# TRIGGER-PE 1-1: release acknowledged at 10000421 ns
+# TRIGGER-PE 2-0: release acknowledged at 10000421 ns
+# TRIGGER-PE 0-1: release acknowledged at 10000424 ns
+# TRIGGER-PE 0-2: release acknowledged at 10000424 ns
+# TRIGGER-PE 3-0: release acknowledged at 10000424 ns
+# TRIGGER-PE 3-1: release acknowledged at 10000424 ns
+# TRIGGER-PE 3-2: release acknowledged at 10000424 ns
+# 10004214 0-0 scheduled 1
+# 10004214 0-2 scheduled 1
+# 10004214 1-3 scheduled 1
+# 10004214 2-1 scheduled 1
+# 10004214 2-3 scheduled 1
+# 10004216 2-2 scheduled 1
+# 10004219 1-2 scheduled 1
+# 10004219 3-3 scheduled 1
+# 10004258 0-1 scheduled 1
+# 10004258 3-0 scheduled 1
+# 10004258 3-1 scheduled 1
+# 10004258 3-2 scheduled 1
+# 10004264 1-0 scheduled 1
+# 10004264 1-1 scheduled 1
+# 10004264 2-0 scheduled 1
+# 10004303 0-3 scheduled 0
+# 10152224 1-0 -> TAG 8207
+# 10153161 1-0 <- TAG 8207
+# 10154027 1-0 scheduled 2
+# 10225858 0-2 -> TAG 11279
+# 10225903 0-1 -> TAG 1039
+# 10225903 3-0 -> TAG 6159
+# 10225903 3-1 -> TAG 9231
+# 10225903 3-2 -> TAG 10255
+# 10225908 1-1 -> TAG 2063
+# 10225908 2-0 -> TAG 5135
+# 10226716 2-1 -> TAG 15374
+# 10226719 2-2 -> TAG 19470
+# 10226721 1-2 -> TAG 20494
+# 10226806 2-3 -> TAG 21517
+# 10226840 0-1 <- TAG 1039
+# 10226840 3-0 <- TAG 6159
+# 10226840 3-1 <- TAG 9231
+# 10226840 3-2 <- TAG 10255
+# 10226845 1-1 <- TAG 2063
+# 10226845 2-0 <- TAG 5135
+# 10227163 0-1 -> TAG 7183
+# 10227169 1-1 -> TAG 12303
+# 10227706 3-0 scheduled 2
+# 10227706 3-1 scheduled 2
+# 10227706 3-2 scheduled 2
+# 10227711 1-3 -> TAG 22541
+# 10227711 2-0 scheduled 2
+# 10228387 0-0 scheduled 0
+# 10229271 0-2 scheduled 0
+# 10230527 0-1 scheduled 2
+# FLIT TX t=10229303 src=1-2 dst=1-3 tag=20494 size=131 head=3887137 last=3887603 block=333 gap=1
+# 10230532 1-1 scheduled 2
+# FLIT RX t=10230566 src=1-2 dst=1-3 tag=20494 size=131 head=3887149 last=3887617 stall=336 gap=0
+# FLIT TX t=10229298 src=2-1 dst=2-3 tag=15374 size=131 head=3887135 last=3887690 block=413 gap=10
+# FLIT RX t=10230884 src=2-1 dst=2-3 tag=15374 size=131 head=3887153 last=3887738 stall=453 gap=0
+# 10231395 1-3 <- TAG 20494
+# 10231419 2-2 scheduled 0
+# 10231719 2-3 <- TAG 15374
+# 10231819 2-1 scheduled 0
+# 10231824 1-2 scheduled 0
+# FLIT TX t=10230619 src=2-3 dst=0-3 tag=21517 size=515 head=3887637 last=3888532 block=354 gap=25
+# FLIT TX t=10230406 src=2-2 dst=1-3 tag=19470 size=131 head=3887556 last=3888551 block=714 gap=149
+# FLIT RX t=10233029 src=2-3 dst=0-3 tag=21517 size=515 head=3887655 last=3888553 stall=382 gap=0
+# FLIT RX t=10233040 src=2-2 dst=1-3 tag=19470 size=131 head=3887623 last=3888557 stall=685 gap=117
+# 10233869 1-3 <- TAG 19470
+# 10233874 0-3 <- TAG 21517
+# FLIT TX t=10234719 src=1-3 dst=0-3 tag=22541 size=515 head=3889195 last=3889961 block=249 gap=1
+# FLIT RX t=10236771 src=1-3 dst=0-3 tag=22541 size=515 head=3889207 last=3889975 stall=252 gap=0
+# FLIT TX t=10229753 src=1-1 dst=1-2 tag=12303 size=2403 head=3887308 last=3890056 block=343 gap=1
+# FLIT TX t=10229748 src=0-1 dst=2-1 tag=7183 size=2403 head=3887306 last=3890067 block=356 gap=1
+# FLIT RX t=10237021 src=1-1 dst=1-2 tag=12303 size=2403 head=3887320 last=3890070 stall=346 gap=0
+# FLIT RX t=10237069 src=0-1 dst=2-1 tag=7183 size=2403 head=3887325 last=3890088 stall=359 gap=0
+# FLIT TX t=10228442 src=0-2 dst=2-2 tag=11279 size=2403 head=3886810 last=3890109 block=894 gap=1
+# FLIT RX t=10237179 src=0-2 dst=2-2 tag=11279 size=2403 head=3886828 last=3890130 stall=898 gap=0
+# 10237600 0-3 <- TAG 22541
+# 10237869 1-2 <- TAG 12303
+# 10237911 2-1 <- TAG 7183
+# 10238024 2-2 <- TAG 11279
+# 10376392 1-0 -> TAG 16399
+# 10380077 1-0 scheduled 0
+# FLIT TX t=10378974 src=1-0 dst=2-3 tag=16399 size=131 head=3944012 last=3944534 block=389 gap=1
+# FLIT RX t=10380440 src=1-0 dst=2-3 tag=16399 size=131 head=3944042 last=3944569 stall=395 gap=0
+# 10381284 2-3 <- TAG 16399
+# 10449632 3-3 scheduled 0
+# 10450071 3-0 -> TAG 14351
+# 10450071 3-1 -> TAG 17423
+# 10450071 3-2 -> TAG 18447
+# 10450077 2-0 -> TAG 13327
+# 10453295 0-1 -> TAG 3087
+# 10453300 1-1 -> TAG 4111
+# FLIT TX t=10452658 src=2-0 dst=2-3 tag=13327 size=131 head=3972012 last=3972395 block=250 gap=1
+# FLIT RX t=10453740 src=2-0 dst=2-3 tag=13327 size=131 head=3972039 last=3972423 stall=252 gap=0
+# 10453755 3-0 scheduled 0
+# 10453755 3-1 scheduled 0
+# 10453755 3-2 scheduled 0
+# FLIT TX t=10452653 src=3-2 dst=1-3 tag=18447 size=131 head=3972010 last=3972532 block=389 gap=1
+# FLIT RX t=10454100 src=3-2 dst=1-3 tag=18447 size=131 head=3972034 last=3972560 stall=394 gap=0
+# 10454163 2-0 scheduled 0
+# 10454569 2-3 <- TAG 13327
+# 10454942 1-3 <- TAG 18447
+# FLIT TX t=10452653 src=3-0 dst=2-3 tag=14351 size=131 head=3972010 last=3973161 block=1018 gap=1
+# FLIT RX t=10455774 src=3-0 dst=2-3 tag=14351 size=131 head=3972429 last=3973196 stall=635 gap=0
+# FLIT TX t=10452653 src=3-1 dst=1-3 tag=17423 size=131 head=3972010 last=3973303 block=1160 gap=1
+# FLIT RX t=10456148 src=3-1 dst=1-3 tag=17423 size=131 head=3972566 last=3973338 stall=640 gap=0
+# 10456605 2-3 <- TAG 14351
+# FLIT TX t=10455882 src=0-1 dst=0-0 tag=3087 size=35 head=3973237 last=3973618 block=344 gap=1
+# FLIT RX t=10456921 src=0-1 dst=0-0 tag=3087 size=35 head=3973249 last=3973632 stall=347 gap=0
+# 10456979 1-3 <- TAG 17423
+# 10456990 1-1 scheduled 0
+# 10457387 0-1 scheduled 0
+# 10457769 0-0 <- TAG 3087
+# FLIT TX t=10455887 src=1-1 dst=0-0 tag=4111 size=35 head=3973239 last=3974286 block=1010 gap=1
+# FLIT RX t=10458698 src=1-1 dst=0-0 tag=4111 size=35 head=3973638 last=3974307 stall=633 gap=0
+# 10459532 0-0 <- TAG 4111
+# 10463966 2-3 -> TAG 21518
+# 10464824 1-3 -> TAG 22542
+# FLIT TX t=10466548 src=2-3 dst=0-3 tag=21518 size=515 head=3977290 last=3978055 block=248 gap=1
+# FLIT RX t=10468616 src=2-3 dst=0-3 tag=21518 size=515 head=3977308 last=3978076 stall=252 gap=0
+# 10469445 0-3 <- TAG 21518
+# 10470226 1-3 scheduled 0
+# 10470708 2-3 scheduled 0
+# FLIT TX t=10467405 src=1-3 dst=0-3 tag=22542 size=515 head=3977616 last=3979210 block=1077 gap=1
+# FLIT RX t=10471637 src=1-3 dst=0-3 tag=22542 size=515 head=3978082 last=3979224 stall=626 gap=0
+# 10472469 0-3 <- TAG 22542
+# TRIGGER-PE 1-1: release acknowledged at 10500421 ns
+# TRIGGER-PE 2-0: release acknowledged at 10500421 ns
+# TRIGGER-PE 0-1: release acknowledged at 10500424 ns
+# TRIGGER-PE 3-0: release acknowledged at 10500424 ns
+# TRIGGER-PE 3-1: release acknowledged at 10500424 ns
+# TRIGGER-PE 3-2: release acknowledged at 10500424 ns
+# TRIGGER-PE 0-2: release acknowledged at 10500426 ns
+# TRIGGER: workflow iteration at 10500426 ns.
+# TRIGGER: next release will be at 10999996 ns
+# 10504213 0-3 scheduled 1
+# 10504213 1-2 scheduled 1
+# 10504216 0-0 scheduled 1
+# 10504216 0-2 scheduled 1
+# 10504216 2-1 scheduled 1
+# 10504219 2-2 scheduled 1
+# 10504258 0-1 scheduled 1
+# 10504258 3-0 scheduled 1
+# 10504258 3-1 scheduled 1
+# 10504258 3-2 scheduled 1
+# 10504261 1-0 scheduled 1
+# 10504263 1-1 scheduled 1
+# 10504263 2-0 scheduled 1
+# 10504305 1-3 scheduled 0
+# 10504305 2-3 scheduled 0
+# 10504308 3-3 scheduled 0
+# 10652221 1-0 -> TAG 8208
+# 10653158 1-0 <- TAG 8208
+# 10654024 1-0 scheduled 2
+# 10725861 0-2 -> TAG 11280
+# 10725903 0-1 -> TAG 1040
+# 10725903 3-0 -> TAG 6160
+# 10725903 3-1 -> TAG 9232
+# 10725903 3-2 -> TAG 10256
+# 10725908 1-1 -> TAG 2064
+# 10725908 2-0 -> TAG 5136
+# 10726716 1-2 -> TAG 20495
+# 10726719 2-1 -> TAG 15375
+# 10726721 2-2 -> TAG 19471
+# 10726840 0-1 <- TAG 1040
+# 10726840 3-0 <- TAG 6160
+# 10726840 3-1 <- TAG 9232
+# 10726840 3-2 <- TAG 10256
+# 10726845 1-1 <- TAG 2064
+# 10726845 2-0 <- TAG 5136
+# 10727163 0-1 -> TAG 7184
+# 10727169 1-1 -> TAG 12304
+# 10727647 0-3 -> TAG 23565
+# 10727705 3-0 scheduled 2
+# 10727705 3-1 scheduled 2
+# 10727705 3-2 scheduled 2
+# 10727711 2-0 scheduled 2
+# 10728390 0-0 scheduled 0
+# 10729274 0-2 scheduled 0
+# 10730526 0-1 scheduled 2
+# 10730532 1-1 scheduled 2
+# FLIT TX t=10729297 src=1-2 dst=1-3 tag=20495 size=131 head=4077135 last=4077625 block=357 gap=1
+# FLIT TX t=10729300 src=2-1 dst=2-3 tag=15375 size=131 head=4077136 last=4077636 block=367 gap=1
+# FLIT RX t=10730624 src=1-2 dst=1-3 tag=20495 size=131 head=4077147 last=4077639 stall=360 gap=0
+# FLIT RX t=10730671 src=2-1 dst=2-3 tag=15375 size=131 head=4077154 last=4077657 stall=371 gap=0
+# 10731421 2-2 scheduled 0
+# 10731469 1-3 <- TAG 20495
+# 10731516 2-3 <- TAG 15375
+# FLIT TX t=10730229 src=0-3 dst=3-3 tag=23565 size=259 head=4077489 last=4078091 block=341 gap=1
+# 10731819 1-2 scheduled 0
+# 10731821 2-1 scheduled 0
+# FLIT RX t=10731887 src=0-3 dst=3-3 tag=23565 size=259 head=4077513 last=4078119 stall=346 gap=0
+# 10732732 3-3 <- TAG 23565
+# FLIT TX t=10730408 src=2-2 dst=1-3 tag=19471 size=131 head=4077557 last=4078509 block=681 gap=139
+# FLIT RX t=10732929 src=2-2 dst=1-3 tag=19471 size=131 head=4077645 last=4078515 stall=632 gap=106
+# 10733758 1-3 <- TAG 19471
+# FLIT TX t=10729747 src=0-1 dst=2-1 tag=7184 size=2403 head=4077306 last=4080056 block=345 gap=1
+# FLIT TX t=10729753 src=1-1 dst=1-2 tag=12304 size=2403 head=4077308 last=4080058 block=345 gap=1
+# FLIT RX t=10737026 src=1-1 dst=1-2 tag=12304 size=2403 head=4077320 last=4080072 stall=348 gap=0
+# FLIT RX t=10737040 src=0-1 dst=2-1 tag=7184 size=2403 head=4077325 last=4080077 stall=348 gap=0
+# FLIT TX t=10728445 src=0-2 dst=2-2 tag=11280 size=2403 head=4076811 last=4080086 block=870 gap=1
+# FLIT RX t=10737119 src=0-2 dst=2-2 tag=11280 size=2403 head=4076829 last=4080107 stall=874 gap=0
+# 10737871 1-2 <- TAG 12304
+# 10737882 2-1 <- TAG 7184
+# 10737963 2-2 <- TAG 11280
+# 10876390 1-0 -> TAG 16400
+# FLIT TX t=10878971 src=1-0 dst=2-3 tag=16400 size=131 head=4134011 last=4134391 block=247 gap=1
+# FLIT RX t=10880063 src=1-0 dst=2-3 tag=16400 size=131 head=4134041 last=4134426 stall=253 gap=0
+# 10880476 1-0 scheduled 0
+# 10880892 2-3 <- TAG 16400
+# 10950071 3-0 -> TAG 14352
+# 10950071 3-1 -> TAG 17424
+# 10950071 3-2 -> TAG 18448
+# 10950076 2-0 -> TAG 13328
+# 10953295 0-1 -> TAG 3088
+# 10953300 1-1 -> TAG 4112
+# FLIT TX t=10952653 src=3-2 dst=1-3 tag=18448 size=131 head=4162010 last=4162391 block=248 gap=1
+# FLIT TX t=10952658 src=2-0 dst=2-3 tag=13328 size=131 head=4162012 last=4162397 block=252 gap=1
+# FLIT RX t=10953729 src=3-2 dst=1-3 tag=18448 size=131 head=4162034 last=4162419 stall=253 gap=0
+# FLIT RX t=10953745 src=2-0 dst=2-3 tag=13328 size=131 head=4162039 last=4162425 stall=254 gap=0
+# 10953755 3-0 scheduled 0
+# 10953755 3-1 scheduled 0
+# 10954008 0-3 -> TAG 23566
+# 10954158 3-2 scheduled 0
+# 10954163 2-0 scheduled 0
+# 10954558 1-3 <- TAG 18448
+# 10954574 2-3 <- TAG 13328
+# FLIT TX t=10952653 src=3-1 dst=1-3 tag=17424 size=131 head=4162010 last=4163148 block=1005 gap=1
+# FLIT TX t=10952653 src=3-0 dst=2-3 tag=14352 size=131 head=4162010 last=4163154 block=1011 gap=1
+# FLIT RX t=10955739 src=3-1 dst=1-3 tag=17424 size=131 head=4162425 last=4163183 stall=626 gap=0
+# FLIT RX t=10955755 src=3-0 dst=2-3 tag=14352 size=131 head=4162431 last=4163189 stall=626 gap=0
+# 10956571 1-3 <- TAG 17424
+# 10956587 2-3 <- TAG 14352
+# FLIT TX t=10955882 src=0-1 dst=0-0 tag=3088 size=35 head=4163237 last=4163619 block=345 gap=1
+# FLIT RX t=10956924 src=0-1 dst=0-0 tag=3088 size=35 head=4163249 last=4163633 stall=348 gap=0
+# 10956989 1-1 scheduled 0
+# 10957387 0-1 scheduled 0
+# 10957603 0-3 scheduled 0
+# 10957771 0-0 <- TAG 3088
+# FLIT TX t=10956589 src=0-3 dst=3-3 tag=23566 size=259 head=4163506 last=4164016 block=249 gap=1
+# FLIT RX t=10958005 src=0-3 dst=3-3 tag=23566 size=259 head=4163530 last=4164044 stall=254 gap=0
+# FLIT TX t=10955887 src=1-1 dst=0-0 tag=4112 size=35 head=4163239 last=4164287 block=1011 gap=1
+# FLIT RX t=10958700 src=1-1 dst=0-0 tag=4112 size=35 head=4163639 last=4164308 stall=633 gap=0
+# 10958837 3-3 <- TAG 23566
+# 10959534 0-0 <- TAG 4112
+# TRIGGER-PE 0-2: release acknowledged at 11000421 ns
+# TRIGGER-PE 1-1: release acknowledged at 11000421 ns
+# TRIGGER-PE 2-0: release acknowledged at 11000421 ns
+# TRIGGER-PE 0-1: release acknowledged at 11000424 ns
+# TRIGGER: workflow iteration at 11000424 ns.
+# TRIGGER: next release will be at 11499995 ns
+# TRIGGER-PE 3-0: release acknowledged at 11000424 ns
+# TRIGGER-PE 3-1: release acknowledged at 11000424 ns
+# TRIGGER-PE 3-2: release acknowledged at 11000424 ns
+# 11004213 2-2 scheduled 1
+# 11004216 1-2 scheduled 1
+# 11004216 1-3 scheduled 1
+# 11004216 2-3 scheduled 1
+# 11004216 3-3 scheduled 1
+# 11004218 0-0 scheduled 1
+# 11004218 0-2 scheduled 1
+# 11004218 2-1 scheduled 1
+# 11004258 0-1 scheduled 1
+# 11004258 1-0 scheduled 1
+# 11004258 3-0 scheduled 1
+# 11004258 3-1 scheduled 1
+# 11004258 3-2 scheduled 1
+# 11004263 1-1 scheduled 1
+# 11004263 2-0 scheduled 1
+# 11004305 0-3 scheduled 0
+# 11152218 1-0 -> TAG 8209
+# 11153155 1-0 <- TAG 8209
+# 11154021 1-0 scheduled 2
+# 11225863 0-2 -> TAG 11281
+# 11225903 0-1 -> TAG 1041
+# 11225903 3-0 -> TAG 6161
+# 11225903 3-1 -> TAG 9233
+# 11225903 3-2 -> TAG 10257
+# 11225908 1-1 -> TAG 2065
+# 11225908 2-0 -> TAG 5137
+# 11226716 2-2 -> TAG 19472
+# 11226718 1-2 -> TAG 20496
+# 11226721 2-1 -> TAG 15376
+# 11226808 2-3 -> TAG 21519
+# 11226839 0-1 <- TAG 1041
+# 11226839 3-0 <- TAG 6161
+# 11226839 3-1 <- TAG 9233
+# 11226839 3-2 <- TAG 10257
+# 11226845 1-1 <- TAG 2065
+# 11226845 2-0 <- TAG 5137
+# 11227163 0-1 -> TAG 7185
+# 11227168 1-1 -> TAG 12305
+# 11227705 3-0 scheduled 2
+# 11227705 3-1 scheduled 2
+# 11227705 3-2 scheduled 2
+# 11227710 2-0 scheduled 2
+# 11227713 1-3 -> TAG 22543
+# 11228392 0-0 scheduled 0
+# 11229276 0-2 scheduled 0
+# 11230526 0-1 scheduled 2
+# FLIT TX t=11229300 src=1-2 dst=1-3 tag=20496 size=131 head=4267136 last=4267602 block=333 gap=1
+# 11230531 1-1 scheduled 2
+# FLIT RX t=11230563 src=1-2 dst=1-3 tag=20496 size=131 head=4267148 last=4267616 stall=336 gap=0
+# FLIT TX t=11229303 src=2-1 dst=2-3 tag=15376 size=131 head=4267137 last=4267689 block=412 gap=8
+# FLIT RX t=11230887 src=2-1 dst=2-3 tag=15376 size=131 head=4267155 last=4267739 stall=452 gap=0
+# 11231395 1-3 <- TAG 20496
+# 11231416 2-2 scheduled 0
+# 11231721 2-3 <- TAG 15376
+# 11231821 1-2 scheduled 0
+# 11231824 2-1 scheduled 0
+# FLIT TX t=11230621 src=2-3 dst=0-3 tag=21519 size=515 head=4267638 last=4268533 block=354 gap=25
+# FLIT TX t=11230403 src=2-2 dst=1-3 tag=19472 size=131 head=4267555 last=4268551 block=715 gap=149
+# FLIT RX t=11233031 src=2-3 dst=0-3 tag=21519 size=515 head=4267656 last=4268554 stall=382 gap=0
+# FLIT RX t=11233039 src=2-2 dst=1-3 tag=19472 size=131 head=4267622 last=4268557 stall=686 gap=117
+# 11233868 1-3 <- TAG 19472
+# 11233876 0-3 <- TAG 21519
+# FLIT TX t=11234721 src=1-3 dst=0-3 tag=22543 size=515 head=4269196 last=4269962 block=249 gap=1
+# FLIT RX t=11236774 src=1-3 dst=0-3 tag=22543 size=515 head=4269208 last=4269976 stall=252 gap=0
+# FLIT TX t=11229753 src=1-1 dst=1-2 tag=12305 size=2403 head=4267308 last=4270056 block=343 gap=1
+# FLIT TX t=11229747 src=0-1 dst=2-1 tag=7185 size=2403 head=4267306 last=4270066 block=355 gap=1
+# FLIT RX t=11237021 src=1-1 dst=1-2 tag=12305 size=2403 head=4267320 last=4270070 stall=346 gap=0
+# FLIT RX t=11237066 src=0-1 dst=2-1 tag=7185 size=2403 head=4267325 last=4270087 stall=358 gap=0
+# FLIT TX t=11228447 src=0-2 dst=2-2 tag=11281 size=2403 head=4266812 last=4270109 block=892 gap=1
+# FLIT RX t=11237179 src=0-2 dst=2-2 tag=11281 size=2403 head=4266830 last=4270130 stall=896 gap=0
+# 11237603 0-3 <- TAG 22543
+# 11237866 1-2 <- TAG 12305
+# 11237908 2-1 <- TAG 7185
+# 11238021 2-2 <- TAG 11281
+# 11376387 1-0 -> TAG 16401
+# 11380071 1-0 scheduled 0
+# FLIT TX t=11378968 src=1-0 dst=2-3 tag=16401 size=131 head=4324010 last=4324532 block=389 gap=1
+# FLIT RX t=11380434 src=1-0 dst=2-3 tag=16401 size=131 head=4324040 last=4324567 stall=395 gap=0
+# 11381279 2-3 <- TAG 16401
+# 11449629 3-3 scheduled 0
+# 11450071 3-0 -> TAG 14353
+# 11450071 3-1 -> TAG 17425
+# 11450071 3-2 -> TAG 18449
+# 11450076 2-0 -> TAG 13329
+# 11453295 0-1 -> TAG 3089
+# 11453300 1-1 -> TAG 4113
+# FLIT TX t=11452658 src=2-0 dst=2-3 tag=13329 size=131 head=4352012 last=4352396 block=251 gap=1
+# FLIT RX t=11453742 src=2-0 dst=2-3 tag=13329 size=131 head=4352039 last=4352424 stall=253 gap=0
+# 11453755 3-0 scheduled 0
+# 11453755 3-1 scheduled 0
+# 11453755 3-2 scheduled 0
+# FLIT TX t=11452652 src=3-2 dst=1-3 tag=18449 size=131 head=4352010 last=4352532 block=389 gap=1
+# FLIT RX t=11454100 src=3-2 dst=1-3 tag=18449 size=131 head=4352034 last=4352560 stall=394 gap=0
+# 11454163 2-0 scheduled 0
+# 11454571 2-3 <- TAG 13329
+# 11454945 1-3 <- TAG 18449
+# FLIT TX t=11452652 src=3-0 dst=2-3 tag=14353 size=131 head=4352010 last=4353162 block=1019 gap=1
+# FLIT RX t=11455776 src=3-0 dst=2-3 tag=14353 size=131 head=4352430 last=4353197 stall=635 gap=0
+# FLIT TX t=11452652 src=3-1 dst=1-3 tag=17425 size=131 head=4352010 last=4353304 block=1161 gap=1
+# FLIT RX t=11456150 src=3-1 dst=1-3 tag=17425 size=131 head=4352566 last=4353339 stall=641 gap=0
+# 11456608 2-3 <- TAG 14353
+# FLIT TX t=11455881 src=0-1 dst=0-0 tag=3089 size=35 head=4353237 last=4353617 block=343 gap=1
+# FLIT RX t=11456918 src=0-1 dst=0-0 tag=3089 size=35 head=4353249 last=4353631 stall=346 gap=0
+# 11456981 1-3 <- TAG 17425
+# 11456989 1-1 scheduled 0
+# 11457387 0-1 scheduled 0
+# 11457766 0-0 <- TAG 3089
+# FLIT TX t=11455887 src=1-1 dst=0-0 tag=4113 size=35 head=4353239 last=4354285 block=1009 gap=1
+# FLIT RX t=11458695 src=1-1 dst=0-0 tag=4113 size=35 head=4353637 last=4354306 stall=633 gap=0
+# 11459529 0-0 <- TAG 4113
+# 11463968 2-3 -> TAG 21520
+# 11464826 1-3 -> TAG 22544
+# FLIT TX t=11466550 src=2-3 dst=0-3 tag=21520 size=515 head=4357291 last=4358056 block=248 gap=1
+# FLIT RX t=11468618 src=2-3 dst=0-3 tag=21520 size=515 head=4357309 last=4358077 stall=252 gap=0
+# 11469447 0-3 <- TAG 21520
+# 11470229 1-3 scheduled 0
+# 11470710 2-3 scheduled 0
+# FLIT TX t=11467408 src=1-3 dst=0-3 tag=22544 size=515 head=4357617 last=4359211 block=1077 gap=1
+# FLIT RX t=11471639 src=1-3 dst=0-3 tag=22544 size=515 head=4358083 last=4359225 stall=626 gap=0
+# 11472471 0-3 <- TAG 22544
+# END at 11500000000000 (manycore_top time)
+# CHKSUM node 0-0 send_pkts=0 send_ok=0 send_err=0 send_incomplete=0 recv_pkts=34 recv_flits=1258 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 0-1 send_pkts=34 send_ok=34 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 0-2 send_pkts=17 send_ok=17 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 0-3 send_pkts=14 send_ok=14 send_err=0 send_incomplete=0 recv_pkts=32 recv_flits=16544 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 1-0 send_pkts=17 send_ok=17 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 1-1 send_pkts=34 send_ok=34 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 1-2 send_pkts=16 send_ok=16 send_err=0 send_incomplete=0 recv_pkts=17 recv_flits=40885 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 1-3 send_pkts=16 send_ok=16 send_err=0 send_incomplete=0 recv_pkts=66 recv_flits=8778 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 2-0 send_pkts=17 send_ok=17 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 2-1 send_pkts=16 send_ok=16 send_err=0 send_incomplete=0 recv_pkts=17 recv_flits=40885 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 2-2 send_pkts=16 send_ok=16 send_err=0 send_incomplete=0 recv_pkts=17 recv_flits=40885 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 2-3 send_pkts=16 send_ok=16 send_err=0 send_incomplete=0 recv_pkts=67 recv_flits=8911 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 3-0 send_pkts=17 send_ok=17 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 3-1 send_pkts=17 send_ok=17 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 3-2 send_pkts=17 send_ok=17 send_err=0 send_incomplete=0 recv_pkts=0 recv_flits=0 recv_err=0 recv_spurious=0 recv_missing=0
+# CHKSUM node 3-3 send_pkts=0 send_ok=0 send_err=0 send_incomplete=0 recv_pkts=14 recv_flits=3654 recv_err=0 recv_spurious=0 recv_missing=0

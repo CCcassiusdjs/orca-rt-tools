@@ -1,0 +1,62 @@
+# modelsim files
+transcript
+work/
+.vscode/
+*.wlf
+*.dbg
+
+# sim logs
+pkt-sim/logs/output*
+
+# rttols results
+rttools/**/*.svg
+
+# python
+**/__pycache__
+
+# application-specific
+**/packets/**
+
+# C/C++ 
+**/hfrisc-software/*.o
+**/hfrisc-software/*.elf
+**/hfrisc-software/*.bin
+**/hfrisc-software/*.lst
+**/hfrisc-software/*.map
+**/hfrisc-software/*.sec
+**/hfrisc-software/*.cnt
+**/hfrisc-software/**boot**.txt
+
+**/ucx-os/*.o
+**/ucx-os/*.elf
+**/ucx-os/*.bin
+**/ucx-os/*.lst
+**/ucx-os/*.map
+**/ucx-os/*.sec
+**/ucx-os/*.cnt
+**/ucx-os/*.a
+**/ucx-os/build/target/*.a
+
+
+# Vivado
+**/manycore_vivado/*.cache
+**/manycore_vivado/*.hw
+**/manycore_vivado/*.ip_user_files
+**/manycore_vivado/*.runs
+**/manycore_vivado/*.sim
+**/*vivado.jou
+**/*vivado.log
+
+# XCelium
+**/manycore_xcelium/*.d
+**/manycore_xcelium/*.log
+**/manycore_xcelium/*.history
+
+# resulting graphs
+**/*.max_proc
+**/*.min_comm
+**/*.mpmc
+
+**/var-gdensity/**
+**/var-nnodes/**
+**/*.log

@@ -1,0 +1,11 @@
+#tasks,,,,,
+Task,Period,Capacity,Deadline,Acronym,Description
+1,0.063,61760,0.063,CMPX,Complex source 14
+2,0.063,361,0.063,SASC,Square and Scale 16
+3,0.063,202,0.063,GATH,CFAR gather 17
+4,0.063,6,0.063,ANON,Anon Filter A0 18
+#flows,,,,,
+Flow,Period,Data,Deadline,Source,Target
+1,0.063,1600,0.063,CMPX,SASC
+2,0.063,1024,0.063,SASC,GATH
+3,0.063,1024,0.063,GATH,ANON

@@ -1,0 +1,202 @@
+/* file:          hal.c
+ * description:   hardware abstraction layer for HF-RISC
+ * date:          04/2021
+ * author:        Sergio Johann Filho <sergio.johann@acad.pucrs.br>
+ */
+
+#include <hal.h>
+#include <lib/libc.h>
+
+/*
+libc basic I/O support
+*/
+
+#ifndef DEBUG_PORT
+void _putchar(char value){		// polled putchar()
+	while (UARTCAUSE & MASK_UART0_WRITEBUSY);
+	UART0 = value;
+}
+
+int32_t _kbhit(void){
+	return UARTCAUSE & MASK_UART0_DATAAVAIL;
+}
+
+int32_t _getchar(void){			// polled getch()
+	while (!_kbhit());
+	return UART0;
+}
+#else
+void _putchar(char value){		// polled putchar()
+	DEBUG_ADDR = value;
+}
+
+int32_t _kbhit(void){
+	return 0;
+}
+
+int32_t _getchar(void){			// polled getch()
+	return DEBUG_ADDR;
+}
+#endif
+
+
+/* delay routines */
+
+void _delay_ms(uint32_t msec)
+{
+	volatile uint32_t cur, last, delta, msecs;
+	uint32_t cycles_per_msec;
+
+	last = TIMER0;
+	delta = msecs = 0;
+	cycles_per_msec = F_CPU / 1000;
+	while (msec > msecs) {
+		cur = TIMER0;
+		if (cur < last)
+			delta += (cur + (F_CPU - last));
+		else
+			delta += (cur - last);
+		last = cur;
+		if (delta >= cycles_per_msec) {
+			msecs += delta / cycles_per_msec;
+			delta %= cycles_per_msec;
+		}
+	}
+}
+
+void _delay_us(uint32_t usec)
+{
+	volatile uint32_t cur, last, delta, usecs;
+	uint32_t cycles_per_usec;
+
+	last = TIMER0;
+	delta = usecs = 0;
+	cycles_per_usec = F_CPU / 1000000;
+	while (usec > usecs) {
+		cur = TIMER0;
+		if (cur < last)
+			delta += (cur + (F_CPU - last));
+		else
+			delta += (cur - last);
+		last = cur;
+		if (delta >= cycles_per_usec) {
+			usecs += delta / cycles_per_usec;
+			delta %= cycles_per_usec;
+		}
+	}
+}
+
+uint64_t _read_us(void)
+{
+	static uint64_t timeref = 0;
+	static uint32_t tval2 = 0, tref = 0;
+
+	if (tref == 0) TIMER0;
+	if (TIMER0 < tref) tval2++;
+	tref = TIMER0;
+	timeref = ((uint64_t)tval2 << 32) + (uint64_t)TIMER0;
+
+	return (timeref / (F_CPU / 1000000));
+}
+
+/* kernel auxiliary routines */
+
+#if F_TIMER > 0
+void timer1ctc_handler(void)
+{
+	krnl_dispatcher();
+}
+
+#else
+
+void timer0b_handler(void)
+{
+	krnl_dispatcher();
+}
+#endif
+
+void _hardware_init(void)
+{
+	_di();
+	
+#ifndef DEBUG_PORT
+	uint16_t d;
+
+	d = (uint16_t)(F_CPU / USART_BAUD);
+	UART0DIV = d;
+	UART0 = 0;
+
+	PAALTCFG0 |= MASK_UART0;
+#endif
+
+#if F_TIMER > 0
+	TIMER1PRE = TIMERPRE_DIV16;
+
+	/* unlock TIMER1 for reset */
+	TIMER1 = TIMERSET;
+	TIMER1 = 0;
+
+	/* TIMER1 counts from 0 to TIMER1CTC inclusive, one step per 16 cycles
+	 * (hw/peripherals/peripherals_minimal.vhd, TIMER1 process), so one tick
+	 * lasts 16 * (TIMER1CTC + 1) cycles. TIMER1CTC = F_CPU / F_TIMER / 16 - 1
+	 * gives a tick of F_CPU / F_TIMER cycles (250000 at 500 MHz and 2 kHz). */
+#if (F_CPU % (16 * F_TIMER)) != 0 || (F_CPU / F_TIMER / 16) > 65536
+#error "TIMER1: F_CPU / F_TIMER must be a multiple of 16 and at most 16 * 65536"
+#endif
+	TIMER1CTC = (F_CPU / F_TIMER) / 16 - 1;
+#endif
+}
+
+void _timer_enable(void)
+{
+#if F_TIMER > 0
+	TIMERMASK |= MASK_TIMER1CTC;		/* enable interrupt mask for TIMER1 CTC events */
+#else
+	TIMERMASK |= MASK_TIMER0B;		/* enable interrupt mask for TIMER0B events */
+#endif
+}
+
+void _timer_disable(void)
+{
+#if F_TIMER > 0
+	TIMERMASK &= ~MASK_TIMER1CTC;		/* disable interrupt mask for TIMER1 CTC events */
+#else
+	TIMERMASK &= ~MASK_TIMER0B;		/* disable interrupt mask for TIMER0B events */
+#endif
+}
+
+void _interrupt_tick(void)
+{
+	_ei();
+}
+
+#ifndef UCX_ISR_NESTING
+/* First entry of a task: the context of _context_init returns here (ra)
+ * with the task function in s0. dispatch() of the tick and yield() switch
+ * with interrupts disabled (kernel/sched.c), so a task that starts there
+ * enables them before its first instruction, as the first task does after
+ * _dispatch_init. The task returns to the jump below (ra), the address of
+ * the task in the context of the previous kernel. */
+static void __attribute__((naked, used)) _task_start(void)
+{
+	__asm__ volatile(
+		"li	a0, 1\n\t"
+		"jal	ra, _interrupt_set\n\t"
+		"jalr	zero, 0(s0)\n\t");
+}
+#endif
+
+void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra)
+{
+	uint32_t *ctx_p;
+	
+	ctx_p = (uint32_t *)ctx;
+	
+	ctx_p[CONTEXT_SP] = sp + ss;
+#ifdef UCX_ISR_NESTING
+	ctx_p[CONTEXT_RA] = ra;
+#else
+	ctx_p[CONTEXT_S0] = ra;
+	ctx_p[CONTEXT_RA] = (uint32_t)_task_start;
+#endif
+}
