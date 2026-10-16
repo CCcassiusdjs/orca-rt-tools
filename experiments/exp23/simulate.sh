@@ -14,8 +14,12 @@
 #           (vsim -g).
 # <mesh>:   WxH of manycore_top (NOC_DIM_X x NOC_DIM_Y); default MESH of
 #           app/<app>.sim, otherwise 2x2.
-# With the defaults (weird_a, 2x2, no app/weird_a.sim) the vsim command is
-# the one of run F (tag exp23-F): no -g option.
+# app/weird_a.sim (release by tick: RELEASE_MASK=15) gives the default
+# application its mask; the application of runs A to H is weird_a_data
+# (no setup file: 2x2, no -g option at 500 MHz, the vsim command of run F,
+# tag exp23-F). TICK_RELEASE=1 in app/<app>.sim marks an application with
+# the release by tick (pkt-sim/software/ucx-os/lib/tick_release.c);
+# RUN_INFO then has release=tick, otherwise release=data.
 # The script copies pkt-sim to <out_dir>/pkt-sim, builds the software there
 # (build_sw.sh: riscv64-elf toolchain, ARCH=riscv/hf-riscv-e), adds the packet monitor
 # (rtl/pe_checker.sv, rtl/chk_binds.sv) and runs vsim in batch mode.
@@ -47,6 +51,37 @@
 #               overrides the value of app/<app>.sim (release generator of
 #               manycore_pe.sv: bit k of the mask, decimal, = PE with node
 #               index k = y * W + x)
+#   RUN_DO      optional .do file that vsim runs after it loads the design,
+#               in place of `run -all` (diagnostic runs that stop at chosen
+#               instants and examine signals, e.g.
+#               experiments/multiapp/diag_pe.do); RUN_INFO records it
+#   VSIM_OPTS   extra options of the vsim command (e.g. -voptargs=+acc,
+#               which keeps the internal signals that a RUN_DO examines);
+#               RUN_INFO records them
+#   ISR_NESTING 1 builds the kernel with -DUCX_ISR_NESTING (build_sw.sh):
+#               the handlers enable interrupts before the return of _isr,
+#               the image of the runs up to r11; 0 (default) the kernel that
+#               leaves them disabled in every handler. RUN_INFO has
+#               isr=nesting or isr=no_nesting (a RUN_INFO without the line
+#               is of the runs up to r11, isr=nesting)
+#   CRT0        _isr and _interrupt_set of crt0.s (build_sw.sh):
+#               guard_readback (default, the crt0.s of this tree), guard
+#               (car_full of tag r11-rc4, run CF3) or plain (the crt0.s up
+#               to tag r11-rc3; default with ISR_NESTING=1). RUN_INFO has
+#               crt0=<value> (a RUN_INFO without the line is of a run up to
+#               tag r11-rc4: plain, or guard for car_full of r11-rc4)
+#   INJECTION   injection of the packets between PEs (build_sw.sh): tt
+#               (default) at the instants of the link schedule
+#               (lib/noc_tt.c), finish when the job sends it (the images up
+#               to tag r11-rc5). RUN_INFO has injection=tt when the image
+#               has the time-triggered injection (timer1ocr_handler in
+#               image.lst), otherwise injection=finish (a RUN_INFO without
+#               the line is of a run up to tag r11-rc5, finish);
+#               RUN_INFO has deadline=tick when the table of the image has the
+#               line "Deadline: tick" (rttools.ucxgen tt from tag r11-rc9:
+#               deadline of each packet at the tick of the release of the job
+#               that reads it), otherwise deadline=start (a RUN_INFO without
+#               the line is of a run up to tag r11-rc8, start)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -73,6 +108,16 @@
 # and the clock of the run (read by rttools.paper.exp23):
 #   f_clk_hz, f_tick_hz, clock_half_period_fs, clock_hz_exact,
 #   release_cycles, warmup_cycles
+# and the release rule of the tasks (rttools.paper.phasecheck):
+#   release      tick (TICK_RELEASE=1 in app/<app>.sim) or data
+# and the crt0.s of the image (rttools.paper.exp23.crt0_rule):
+#   crt0         guard_readback, guard or plain (CRT0 above)
+# and the injection of the packets between PEs (rttools.paper.ttcheck):
+#   injection    tt or finish (INJECTION above)
+#   costs        costs of the link schedule of the injection table of the image:
+#                max_csv_static (t(v) = max of the CSV and the static t(v) of the
+#                image, experiments/wcet costs/tt; costs_file and costs_sha256
+#                name the file) or csv
 set -euo pipefail
 
 OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]}
@@ -85,6 +130,16 @@ REPO=$(cd "$HERE/../.." && pwd)
 F_CLK=${F_CLK:-500000000}
 RELEASE_NS=${RELEASE_NS:-500000}
 WARMUP_NS=${WARMUP_NS:-3000000}
+if [ "${ISR_NESTING:-0}" = 1 ]; then CRT0=${CRT0:-plain}; else CRT0=${CRT0:-guard_readback}; fi
+case $CRT0 in
+	guard_readback|guard|plain) export CRT0 ;;
+	*) echo "CRT0 must be guard_readback, guard or plain: $CRT0" >&2; exit 2 ;;
+esac
+INJECTION=${INJECTION:-tt}
+case $INJECTION in
+	tt|finish) export INJECTION ;;
+	*) echo "INJECTION must be tt or finish: $INJECTION" >&2; exit 2 ;;
+esac
 
 # clock of the run (before any tool check, so a wrong value stops at once)
 for v in F_CLK RELEASE_NS WARMUP_NS; do
@@ -137,6 +192,14 @@ APP_GENERICS=""
 [ "$DIM_Y" != 2 ] && APP_GENERICS="$APP_GENERICS -gNOC_DIM_Y=$DIM_Y"
 [ -n "$R_MASK" ] && [ "$R_MASK" != 1 ] && APP_GENERICS="$APP_GENERICS -gRELEASE_MASK=$R_MASK"
 
+RUN_CMD="run -all"
+VSIM_EXTRA=${VSIM_OPTS:+ $VSIM_OPTS}
+if [ -n "${RUN_DO:-}" ]; then
+	[ -f "$RUN_DO" ] || { echo "RUN_DO: no file $RUN_DO" >&2; exit 2; }
+	RUN_DO=$(cd "$(dirname "$RUN_DO")" && pwd)/$(basename "$RUN_DO")
+	RUN_CMD="do $RUN_DO"
+fi
+
 if [ -n "${ENV_SETUP:-}" ]; then
 	set +u
 	eval "$ENV_SETUP" > /dev/null 2>&1
@@ -173,15 +236,15 @@ if [ "$MONITOR" = 1 ]; then
 	cat >> run.do <<EOD
 vlog -mixedsvvh -sv -work work $HERE/rtl/pe_checker.sv
 vlog -mixedsvvh -sv -work work $HERE/rtl/chk_binds.sv
-vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$GENERICS$APP_GENERICS
+vsim -c work.manycore_top work.chk_binds +RUN_NS=$SIM_NS$GENERICS$APP_GENERICS$VSIM_EXTRA
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
-run -all
+$RUN_CMD
 quit -f
 EOD
 else
 	cat >> run.do <<EOD
-vsim -c work.manycore_top$GENERICS$APP_GENERICS
+vsim -c work.manycore_top$GENERICS$APP_GENERICS$VSIM_EXTRA
 quietly set StdArithNoWarnings 1
 quietly set StdVitalGlitchNoWarnings 1
 run ${SIM_NS}ns
@@ -193,6 +256,8 @@ fi
 	echo "sim_ns=$SIM_NS monitor=$MONITOR"
 	ALL_GENERICS="$GENERICS$APP_GENERICS"
 	echo "app=$APP mesh=${DIM_X}x${DIM_Y} generics=${ALL_GENERICS# }"
+	if [ -n "${RUN_DO:-}" ]; then echo "run_do=$RUN_DO"; fi
+	if [ -n "${VSIM_OPTS:-}" ]; then echo "vsim_opts=$VSIM_OPTS"; fi
 	echo "vsim=$(vsim -version 2>/dev/null | head -1)"
 	echo "gcc=$(riscv64-elf-gcc --version | head -1)"
 	echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -202,6 +267,26 @@ fi
 	echo "clock_hz_exact=$F_EXACT"
 	echo "release_cycles=$RELEASE_CYCLES"
 	echo "warmup_cycles=$WARMUP_CYCLES"
+	if [ "${ISR_NESTING:-0}" = 1 ]; then echo "isr=nesting"; else echo "isr=no_nesting"; fi
+	echo "crt0=$CRT0"
+	LST="$OUT/pkt-sim/software/ucx-os/build/target/image.lst"
+	if [ -f "$LST" ] && grep -q "<timer1ocr_handler>:" "$LST"; then
+		echo "injection=tt"
+	else
+		echo "injection=finish"
+	fi
+	# costs of the link schedule of the table of the image (line "Costs:" of app/<app>_tt.h,
+	# rttools.ucxgen tt --costs); the images without a table take the costs of the CSV
+	TT_H="$UCX_APP/${APP}_tt.h"
+	if [ -f "$TT_H" ] && grep -q "^ \* Costs: max(CSV, static) " "$TT_H"; then
+		sed -n 's/^ \* Costs: max(CSV, static) \([^ ]*\) sha256 \([0-9a-f]*\)$/costs=max_csv_static costs_file=\1 costs_sha256=\2/p' "$TT_H" | head -1
+	else
+		echo "costs=csv"
+	fi
+	if [ "$(setup TICK_RELEASE)" = 1 ]; then echo "release=tick"; else echo "release=data"; fi
+	# deadline model of the link schedule (line "Deadline:" of app/<app>_tt.h, rttools.ucxgen tt):
+	# tick from tag r11-rc9, start for the tables before it and the images without a table
+	if [ -f "$TT_H" ] && grep -q "^ \* Deadline: tick " "$TT_H"; then echo "deadline=tick"; else echo "deadline=start"; fi
 } >> "$OUT/RUN_INFO"
 
 if command -v /usr/bin/time > /dev/null; then
@@ -210,7 +295,7 @@ else
 	vsim -batch -do run.do > "$OUT/sim.log" 2> "$OUT/time.log"
 fi
 
-grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG| ITER (begin|end) |CHKSUM|FLIT (TX|RX) |^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
+grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG| ITER (begin|end) |CHKSUM|FLIT (TX|RX|END) |TIMER t=|^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
 if grep -qE "\*\* (Error|Fatal)" "$OUT/sim.log"; then
 	grep -E "\*\* (Error|Fatal)" "$OUT/sim.log" | head -5 >&2
 	exit 1

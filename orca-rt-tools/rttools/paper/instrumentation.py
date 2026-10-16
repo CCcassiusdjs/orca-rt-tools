@@ -34,6 +34,7 @@ register, in this order):
 | Case | Charge |
 |---|---|
 | A call to a writer lies on every path from the entry to a return of the function (first such kind) | The whole cost of the function (all unmatched instructions, also those of paths that exclude each other, and all instrumentation calls) to each event of that kind: each call of the function that returns logs one such event |
+| Every path from the entry to an exit passes through a call to a writer of a kind or ends with a tail call (jal zero) of a function charged whole to that kind (ucx_noc_send_at of lib/noc_tt.c: set_counter_3 for a remote target, the tail call of ucx_noc_send for a local one) | The whole cost of the function plus the largest charge of those tail-called functions to that kind: each call logs one such event, and an event of the tail-call path runs the instrumentation of both functions |
 | Otherwise | Each unmatched instruction must lie in a basic block with a call to a writer (it runs if and only if that call runs); the cost of the unmatched instructions and calls of those blocks goes to each event of the kind of the writer |
 
 The cost of an event kind is the largest charge of the functions to it. The
@@ -198,7 +199,14 @@ def blocks(insns):
 def on_every_return_path(insns, k):
     """True when every path from the entry to an exit passes through
     instruction k (no exit is reachable from the entry without k)."""
-    if k == 0:
+    return covers_every_exit(insns, {k})
+
+
+def covers_every_exit(insns, ks):
+    """True when every path from the entry to an exit (return, indirect
+    jump or jump out of the function) passes through an instruction of
+    `ks`."""
+    if 0 in ks:
         return True
     seen, stack = {0}, [0]
     while stack:
@@ -206,10 +214,22 @@ def on_every_return_path(insns, k):
         if is_exit(insns[n]) or not successors(insns, n):
             return False
         for s in successors(insns, n):
-            if s != k and s not in seen:
+            if s not in ks and s not in seen:
                 seen.add(s)
                 stack.append(s)
     return True
+
+
+def tail_callee(insns, k):
+    """Symbol of a jump out of the function (jal zero, j, tail) at
+    instruction k, else None."""
+    i = insns[k]
+    if not (i.mnemonic in ("j", "tail") or (i.mnemonic == "jal" and i.operands.startswith("zero,"))):
+        return None
+    if i.target() in {x.addr for x in insns}:
+        return None
+    m = re.search(r"<([^>+]+)>", i.operands)
+    return m.group(1) if m else None
 
 
 def unmatched(on, off):
@@ -259,7 +279,12 @@ def function_costs(on_funcs, off_funcs, callees, writers, cyc):
         return n, c
 
     out = {}
-    for name, on in callers.items():
+    # the functions whose paths end in a tail call of another caller come
+    # after it (their charge adds the charge of the tail-called function)
+    tails = {n: {tail_callee(on, k) for k in range(len(on))} & set(callers) - {n} for n, on in callers.items()}
+    order = sorted(callers, key=lambda n: (bool(tails[n]), n))
+    for name in order:
+        on = callers[name]
         if name not in off_funcs:
             raise ValueError(f"function {name} missing in the listing without instrumentation")
         off = off_funcs[name]
@@ -278,9 +303,25 @@ def function_costs(on_funcs, off_funcs, callees, writers, cyc):
         charges = {}
         whole = next((kind for kind, w in writers.items()
                       if any(on[k].callee() == w and on_every_return_path(on, k) for k in calls)), None)
+        tail = None
+        if whole is None:
+            for kind, w in writers.items():
+                via = {k: tail_callee(on, k) for k in range(len(on))}
+                via = {k: t for k, t in via.items() if t in out and out[t]["rule"].startswith("every_return_path")
+                       and kind in out[t]["charges"]}
+                ks = {k for k in calls if on[k].callee() == w} | set(via)
+                if via and covers_every_exit(on, ks):
+                    tail = (kind, sorted(set(via.values())))
+                    break
         if whole is not None:
             rule = "every_return_path"
             charges[whole] = {"instructions": n_all, "cycles": c_all}
+        elif tail is not None:
+            kind, targets = tail
+            rule = "every_return_path_with_tail_call"
+            worst = max(targets, key=lambda t: (out[t]["charges"][kind]["cycles"], t))
+            charges[kind] = {"instructions": n_all + out[worst]["charges"][kind]["instructions"],
+                             "cycles": c_all + out[worst]["charges"][kind]["cycles"]}
         else:
             rule = "block"
             blk = blocks(on)
@@ -306,6 +347,7 @@ def function_costs(on_funcs, off_funcs, callees, writers, cyc):
             "instructions_with": len(on),
             "instructions_without": len(off),
             "rule": rule,
+            "tail_calls": tail[1] if tail is not None else [],
             "charges": charges,
             "caller_code": [i.text() for i in caller],
         }

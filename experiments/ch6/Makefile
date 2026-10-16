@@ -7,7 +7,12 @@ PYTHON  ?= python3
 RTTOOLS := $(abspath ../../orca-rt-tools)
 BUILD   ?= build
 JOBS    ?= 4
-RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.ch6
+# network-interface model of the link schedule (RTTOOLS_NI,
+# orca-rt-tools/rttools/modules/routing/router.py): off, the model of the
+# stored references (runs up to tag r11-rc5); the default of rttools (tt)
+# is the model of experiments/tt
+NI      ?= off
+RUN      = RTTOOLS_NI=$(NI) PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.ch6
 
 .PHONY: all run check car clean
 

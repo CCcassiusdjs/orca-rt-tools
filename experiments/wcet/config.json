@@ -1,0 +1,40 @@
+{
+ "_doc": "experiments/wcet: static t(v) (rttools.wcet) against the stored RTL runs; rttools/paper/wcet.py. Paths relative to this file.",
+ "apps": {
+  "E": {
+   "spec": "specs/weird_a_H.json",
+   "measured": "exp23",
+   "log": "../exp23/logs/H.events.txt",
+   "exp23_config": "../exp23/config.json"
+  },
+  "CAR-V": {
+   "spec": "specs/car_v.json",
+   "measured": "rtlapp",
+   "log": "../car-v-rtl/logs/CV2.events.txt",
+   "manifest": "../../pkt-sim/software/ucx-os/app/car_v.json",
+   "csv": "../../apps/car-v/car-v.csv",
+   "map": "../../apps/car-v/car-v-ONTO-hermes4x4.map"
+  },
+  "WCET-E": {
+   "spec": "specs/wcet_e.json",
+   "csv": "../../apps/wcet-e/wcet-e.csv",
+   "csv_costs": true
+  }
+ },
+ "bodies": {
+  "elf": "../../pkt-sim/tests/rtl/wcet_bodies.elf",
+  "trace": "logs/bodies.trace.txt"
+ },
+ "flow": {
+  "app": "../../apps/synthetic-app-e/synthetic-app-e.csv",
+  "arch": "../../arch/hermes-2x2.gml",
+  "maps": [
+   "../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map",
+   "spiral"
+  ],
+  "f0": 500000000,
+  "header_wait": "bound",
+  "ni": "off",
+  "costs_of": "E"
+ }
+}

@@ -7,6 +7,7 @@
 
 #define TASK_READY   1
 #define TASK_BLOCKED 2
+#define TASK_RUNNING 3
 
 struct tcb_s {
 	struct tcb_s *tcb_next;
@@ -16,6 +17,7 @@ struct tcb_s {
 
 struct kcb_s {
 	struct tcb_s *tcb_p;
+	struct tcb_s *tcb_first;
 };
 
 extern struct kcb_s *kcb_p;
@@ -24,4 +26,6 @@ uint16_t ucx_task_id(void);
 #include <device/ddma.h>
 #include <device/cacc.h>   /* set_iter_mark and the ITER_* macros */
 #include <lib/noc.h>
+#include <lib/tick_release.h>
+#include <lib/noc_tt.h>
 #endif

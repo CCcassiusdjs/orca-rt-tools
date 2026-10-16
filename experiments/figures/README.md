@@ -21,4 +21,4 @@
 | `exp23/iterations.csv`, `fig-iterations-coords.tex` | Release instant of A and response of each iteration; maximum and its share of the deadline |
 | `exp23/flows.csv`, `tab-flows-rows.tex` | Per flow: payload, hops $m$ (XY routing), flits $p$, $L_0$, latency min and max (packets paired per flow in send order), model release and deadline, send offsets and maximum arrival offset from the start of the phase of the send |
 
-The CAR table, the choice of the criterion of application E, the Spiral Mapping of CAR (`python -m rttools.paper.figures spiral` on the output of `make car`) and the summary of Table 7.1 come from `experiments/ch7` (`make car`, `make graphs full stats`).
+The CAR table, the choice of the criterion of application E, the Spiral Mapping of CAR (`python -m rttools.paper.figures spiral` on the output of `make car`) and the summary of the random graphs come from `experiments/ch7` (`make car`, `make graphs full stats`).

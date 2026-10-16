@@ -55,7 +55,8 @@ def test_simulate_carv_4x4(tmp_path):
     r = subprocess.run(["bash", sh, str(tmp_path / "o"), "11500000", "car_v", "4x4"],
                        capture_output=True, text=True, env=env)
     assert r.returncode == 0, r.stdout + r.stderr
-    g = "-gNOC_DIM_X=4 -gNOC_DIM_Y=4 -gRELEASE_MASK=2494"
+    # car_v.sim of the release by tick: the release generator on the 16 PEs
+    g = "-gNOC_DIM_X=4 -gNOC_DIM_Y=4 -gRELEASE_MASK=65535"
     assert f"vsim -c work.manycore_top work.chk_binds +RUN_NS=11500000 {g}\n" in run_do(tmp_path / "o")
     assert "-s car_v" in log.read_text()
     assert f"app=car_v mesh=4x4 generics={g}\n" in (tmp_path / "o" / "RUN_INFO").read_text()
@@ -91,4 +92,4 @@ def test_simulate_clock_generics(tmp_path):
                        env={**env, "F_CLK": "380000000"})
     assert r.returncode == 0, r.stdout + r.stderr
     assert ("+RUN_NS=1000 -gCLOCK_HALF_PERIOD_FS=1315789 -gRELEASE_CYCLES=190000 -gWARMUP_CYCLES=1140000 "
-            "-gNOC_DIM_X=4 -gNOC_DIM_Y=4 -gRELEASE_MASK=2494\n") in run_do(tmp_path / "o2")
+            "-gNOC_DIM_X=4 -gNOC_DIM_Y=4 -gRELEASE_MASK=65535\n") in run_do(tmp_path / "o2")

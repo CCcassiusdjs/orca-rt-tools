@@ -27,10 +27,12 @@ def test_app_e_matches_weird_a():
     # PEs of weird_a.c (CPU_* defines)
     cpu = {"A": 0, "B": 0, "D": 0, "F": 0, "C": 1, "E": 2, "H": 2, "I": 2, "G": 3, "J": 3}
     assert {n: x["pe"] for n, x in t.items()} == cpu
-    # one source (A), released on PE 0: mask 1, as the default of manycore_top.sv
+    # one source (A), released on PE 0: mask 1, as the default of manycore_top.sv;
+    # release by tick: the release generator on the four PEs (app/weird_a.sim)
     assert [n for n, x in t.items() if x["source"]] == ["A"]
     assert m["release"] == {"period_ns": 500000, "delay_ns": 3000000, "pes": [0],
-                            "pe_labels": ["0-0"], "mask": 1}
+                            "pe_labels": ["0-0"], "mask": 1, "rule": "tick", "tick_pes": [0, 1, 2, 3],
+                            "tick_pe_labels": ["0-0", "1-0", "0-1", "1-1"], "tick_mask": 15}
     # creation order = creation rows of the CSV (ucx_task_add in app_main of
     # weird_a.c); the kernel dispatches it in the order of the model
     assert m["pe_tasks"] == {"0-0": ["IDLE", "F", "D", "B", "A"], "1-0": ["IDLE", "C"],

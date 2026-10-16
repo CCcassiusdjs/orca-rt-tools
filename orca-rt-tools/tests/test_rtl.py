@@ -19,6 +19,9 @@ TESTS = {
     "tb_release": "verilator",       # release generator in cycles, clock half period in fs
     "tb_cpu_cycles": "ghdl",         # cycles per instruction (bound of the instrumentation writes)
     "tb_release_mask": "verilator",  # release generator on the PEs of RELEASE_MASK (4x4 and 2x2)
+    "tb_release_mask_4x5": "verilator",  # the same on the 4x5 mesh of experiments/multiapp
+    "tb_cpu_irq": "ghdl",            # _isr and _interrupt_set: nested interrupts, resume by yield(), _di
+    "tb_timer1_ocr": "ghdl",         # compare interrupt of TIMER1 16 OCR cycles after the tick (lib/noc_tt.c)
 }
 
 
@@ -34,6 +37,28 @@ def test_rtl(name, tmp_path):
     assert r.returncode == 0, out[-4000:]
     assert ("PASS " + name) in r.stdout, out[-4000:]
     assert "FAIL" not in r.stdout, out[-4000:]
+    if name == "tb_cpu_irq":
+        # cpu_irq.hex (crt0.s up to tag r11-rc3): a handler that enables
+        # interrupts before it returns lets a second interrupt corrupt the
+        # return of _isr (the kernel built without UCX_ISR_NESTING leaves
+        # interrupts disabled in every handler)
+        assert "NESTED tb_cpu_irq MODE=1" in r.stdout, out[-4000:]
+        # the return of _isr with interrupts disabled and an interrupt
+        # pending (yield() that resumes a task preempted by the tick) stops
+        # on the jalr of the return
+        assert "RESUME tb_cpu_irq MODE=2 main loop stalled" in r.stdout, out[-4000:]
+        # an interrupt raised before the store of _interrupt_set(0) is taken
+        # after it, and the return of _isr enables interrupts again
+        assert "DISABLE tb_cpu_irq MODE=3 interrupts enabled after _interrupt_set(0)" in r.stdout, out[-4000:]
+        # cpu_irq_guard.hex (crt0.s of this tree: return test of _isr, read
+        # back of IRQ_STATUS in _interrupt_set(0)) passes modes 0, 2 and 3
+        for m in (0, 2, 3):
+            assert f"PASS tb_cpu_irq GUARD MODE={m}" in r.stdout, out[-4000:]
+    if name == "tb_timer1_ocr":
+        # steps 1, 5 and 15 of a tick of 16 steps, and step 0
+        assert r.stdout.count("PASS tb_timer1_ocr") == 4, out[-4000:]
+        for o in (1, 5, 15):
+            assert f"{16 * o} cycles after the tick" in r.stdout, out[-4000:]
     if name == "tb_manycore_pe":
         # the printed iteration markers have the format of the trace parser
         from rttools.tui.model import parsers

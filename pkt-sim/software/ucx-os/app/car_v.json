@@ -42,7 +42,45 @@
    "0-2",
    "3-2"
   ],
-  "mask": 2494
+  "mask": 2494,
+  "rule": "tick",
+  "tick_pes": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15
+  ],
+  "tick_pe_labels": [
+   "0-0",
+   "1-0",
+   "2-0",
+   "3-0",
+   "0-1",
+   "1-1",
+   "2-1",
+   "3-1",
+   "0-2",
+   "1-2",
+   "2-2",
+   "3-2",
+   "0-3",
+   "1-3",
+   "2-3",
+   "3-3"
+  ],
+  "tick_mask": 65535
  },
  "pe_tasks": {
   "0-0": [
@@ -190,7 +228,8 @@
    "outputs": [
     5
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "FBU2",
@@ -207,7 +246,8 @@
    "outputs": [
     6
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "FBU3",
@@ -225,7 +265,8 @@
     1,
     7
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "FBU4",
@@ -242,7 +283,8 @@
    "outputs": [
     8
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "FBU5",
@@ -259,7 +301,8 @@
    "outputs": [
     9
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "FBU6",
@@ -276,7 +319,8 @@
    "outputs": [
     10
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "FBU7",
@@ -293,7 +337,8 @@
    "outputs": [
     11
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "FBU8",
@@ -311,7 +356,8 @@
     2,
     12
    ],
-   "source": true
+   "source": true,
+   "phase": 0
   },
   {
    "name": "NAVC",
@@ -329,7 +375,8 @@
     4
    ],
    "outputs": [],
-   "source": false
+   "source": false,
+   "phase": 1
   },
   {
    "name": "BFE1",
@@ -348,7 +395,8 @@
    "outputs": [
     13
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "BFE2",
@@ -367,7 +415,8 @@
    "outputs": [
     14
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "BFE3",
@@ -386,7 +435,8 @@
    "outputs": [
     15
    ],
-   "source": false
+   "source": false,
+   "phase": 1
   },
   {
    "name": "BFE4",
@@ -405,7 +455,8 @@
    "outputs": [
     16
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "BFE5",
@@ -424,7 +475,8 @@
    "outputs": [
     17
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "BFE6",
@@ -443,7 +495,8 @@
    "outputs": [
     18
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "BFE7",
@@ -462,7 +515,8 @@
    "outputs": [
     19
    ],
-   "source": false
+   "source": false,
+   "phase": 1
   },
   {
    "name": "BFE8",
@@ -481,7 +535,8 @@
    "outputs": [
     20
    ],
-   "source": false
+   "source": false,
+   "phase": 1
   },
   {
    "name": "FDF1",
@@ -503,7 +558,8 @@
    "outputs": [
     21
    ],
-   "source": false
+   "source": false,
+   "phase": 2
   },
   {
    "name": "FDF2",
@@ -525,7 +581,8 @@
    "outputs": [
     22
    ],
-   "source": false
+   "source": false,
+   "phase": 2
   },
   {
    "name": "STPH",
@@ -545,7 +602,8 @@
    "outputs": [
     23
    ],
-   "source": false
+   "source": false,
+   "phase": 3
   },
   {
    "name": "VOD1",
@@ -564,7 +622,8 @@
    "outputs": [
     3
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "VOD2",
@@ -583,7 +642,8 @@
    "outputs": [
     4
    ],
-   "source": false
+   "source": false,
+   "phase": 0
   },
   {
    "name": "OBMG",
@@ -600,7 +660,8 @@
     23
    ],
    "outputs": [],
-   "source": false
+   "source": false,
+   "phase": 4
   }
  ],
  "flows": [

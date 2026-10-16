@@ -1,0 +1,450 @@
+{
+ "name": "e_ucx",
+ "generator": "rttools.ucxgen",
+ "inputs": {
+  "csv": {
+   "file": "synthetic-app-e.csv",
+   "sha256": "522dcca19a8df3bc57c2ad86f28a9d9e51f81075906bbb1179a28b057fa1efe5"
+  },
+  "map": {
+   "file": "synthetic-app-e-ONTO-hermes2x2.map",
+   "sha256": "1290bf43b88419d1e9ca087590124bc07c320e3cbbd98eee0143b0564241f8a5"
+  }
+ },
+ "mesh": [
+  2,
+  2
+ ],
+ "cycles_per_count": 10,
+ "reserve_cycles": 11000,
+ "payload_divisor": 1,
+ "tag_mod": 1024,
+ "release": {
+  "period_ns": 500000,
+  "delay_ns": 3000000,
+  "pes": [
+   0
+  ],
+  "pe_labels": [
+   "0-0"
+  ],
+  "mask": 1,
+  "rule": "tick",
+  "tick_pes": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "tick_pe_labels": [
+   "0-0",
+   "1-0",
+   "0-1",
+   "1-1"
+  ],
+  "tick_mask": 15
+ },
+ "pe_tasks": {
+  "0-0": [
+   "IDLE",
+   "F",
+   "D",
+   "B",
+   "A"
+  ],
+  "1-0": [
+   "IDLE",
+   "C"
+  ],
+  "0-1": [
+   "IDLE",
+   "H",
+   "I",
+   "E"
+  ],
+  "1-1": [
+   "IDLE",
+   "J",
+   "G"
+  ]
+ },
+ "pe_dispatch": {
+  "0-0": [
+   "A",
+   "B",
+   "D",
+   "F"
+  ],
+  "1-0": [
+   "C"
+  ],
+  "0-1": [
+   "E",
+   "H",
+   "I"
+  ],
+  "1-1": [
+   "J",
+   "G"
+  ]
+ },
+ "tasks": [
+  {
+   "name": "A",
+   "ident": "A",
+   "port": 1,
+   "pe": 0,
+   "pe_label": "0-0",
+   "order": 3,
+   "kernel_id": 4,
+   "iter_letter": "A",
+   "wcet": 28530,
+   "workload": 1753,
+   "inputs": [],
+   "outputs": [
+    1,
+    2
+   ],
+   "source": true,
+   "phase": 0
+  },
+  {
+   "name": "B",
+   "ident": "B",
+   "port": 2,
+   "pe": 0,
+   "pe_label": "0-0",
+   "order": 2,
+   "kernel_id": 3,
+   "iter_letter": "B",
+   "wcet": 58600,
+   "workload": 4760,
+   "inputs": [
+    2
+   ],
+   "outputs": [
+    3
+   ],
+   "source": false,
+   "phase": 0
+  },
+  {
+   "name": "C",
+   "ident": "C",
+   "port": 3,
+   "pe": 1,
+   "pe_label": "1-0",
+   "order": 0,
+   "kernel_id": 1,
+   "iter_letter": "C",
+   "wcet": 96330,
+   "workload": 8533,
+   "inputs": [
+    1
+   ],
+   "outputs": [
+    4
+   ],
+   "source": false,
+   "phase": 1
+  },
+  {
+   "name": "D",
+   "ident": "D",
+   "port": 4,
+   "pe": 0,
+   "pe_label": "0-0",
+   "order": 1,
+   "kernel_id": 2,
+   "iter_letter": "D",
+   "wcet": 14000,
+   "workload": 300,
+   "inputs": [
+    3
+   ],
+   "outputs": [
+    5
+   ],
+   "source": false,
+   "phase": 0
+  },
+  {
+   "name": "E",
+   "ident": "E",
+   "port": 5,
+   "pe": 2,
+   "pe_label": "0-1",
+   "order": 2,
+   "kernel_id": 3,
+   "iter_letter": "E",
+   "wcet": 52700,
+   "workload": 4170,
+   "inputs": [
+    4
+   ],
+   "outputs": [
+    7,
+    8
+   ],
+   "source": false,
+   "phase": 2
+  },
+  {
+   "name": "F",
+   "ident": "F",
+   "port": 6,
+   "pe": 0,
+   "pe_label": "0-0",
+   "order": 0,
+   "kernel_id": 1,
+   "iter_letter": "F",
+   "wcet": 80800,
+   "workload": 6980,
+   "inputs": [
+    5
+   ],
+   "outputs": [
+    6
+   ],
+   "source": false,
+   "phase": 0
+  },
+  {
+   "name": "G",
+   "ident": "G",
+   "port": 7,
+   "pe": 3,
+   "pe_label": "1-1",
+   "order": 1,
+   "kernel_id": 2,
+   "iter_letter": "G",
+   "wcet": 109880,
+   "workload": 9888,
+   "inputs": [
+    6
+   ],
+   "outputs": [
+    11
+   ],
+   "source": false,
+   "phase": 1
+  },
+  {
+   "name": "H",
+   "ident": "H",
+   "port": 8,
+   "pe": 2,
+   "pe_label": "0-1",
+   "order": 0,
+   "kernel_id": 1,
+   "iter_letter": "H",
+   "wcet": 45300,
+   "workload": 3430,
+   "inputs": [
+    8
+   ],
+   "outputs": [
+    10
+   ],
+   "source": false,
+   "phase": 2
+  },
+  {
+   "name": "I",
+   "ident": "I",
+   "port": 9,
+   "pe": 2,
+   "pe_label": "0-1",
+   "order": 1,
+   "kernel_id": 2,
+   "iter_letter": "I",
+   "wcet": 75370,
+   "workload": 6437,
+   "inputs": [
+    7
+   ],
+   "outputs": [
+    9
+   ],
+   "source": false,
+   "phase": 2
+  },
+  {
+   "name": "J",
+   "ident": "J",
+   "port": 10,
+   "pe": 3,
+   "pe_label": "1-1",
+   "order": 0,
+   "kernel_id": 1,
+   "iter_letter": "J",
+   "wcet": 107570,
+   "workload": 9657,
+   "inputs": [
+    9,
+    10,
+    11
+   ],
+   "outputs": [],
+   "source": false,
+   "phase": 3
+  }
+ ],
+ "flows": [
+  {
+   "id": 1,
+   "csv_id": "1",
+   "source": "A",
+   "target": "C",
+   "src_pe": 0,
+   "dst_pe": 1,
+   "src_label": "0-0",
+   "dst_label": "1-0",
+   "local": false,
+   "csv_bytes": 1230,
+   "bytes": 1230,
+   "tag_base": 1024
+  },
+  {
+   "id": 2,
+   "csv_id": "2",
+   "source": "A",
+   "target": "B",
+   "src_pe": 0,
+   "dst_pe": 0,
+   "src_label": "0-0",
+   "dst_label": "0-0",
+   "local": true,
+   "csv_bytes": 4560,
+   "bytes": 4560,
+   "tag_base": 2048
+  },
+  {
+   "id": 3,
+   "csv_id": "3",
+   "source": "B",
+   "target": "D",
+   "src_pe": 0,
+   "dst_pe": 0,
+   "src_label": "0-0",
+   "dst_label": "0-0",
+   "local": true,
+   "csv_bytes": 7890,
+   "bytes": 7890,
+   "tag_base": 3072
+  },
+  {
+   "id": 4,
+   "csv_id": "4",
+   "source": "C",
+   "target": "E",
+   "src_pe": 1,
+   "dst_pe": 2,
+   "src_label": "1-0",
+   "dst_label": "0-1",
+   "local": false,
+   "csv_bytes": 1200,
+   "bytes": 1200,
+   "tag_base": 4096
+  },
+  {
+   "id": 5,
+   "csv_id": "5",
+   "source": "D",
+   "target": "F",
+   "src_pe": 0,
+   "dst_pe": 0,
+   "src_label": "0-0",
+   "dst_label": "0-0",
+   "local": true,
+   "csv_bytes": 3450,
+   "bytes": 3450,
+   "tag_base": 5120
+  },
+  {
+   "id": 6,
+   "csv_id": "6",
+   "source": "F",
+   "target": "G",
+   "src_pe": 0,
+   "dst_pe": 3,
+   "src_label": "0-0",
+   "dst_label": "1-1",
+   "local": false,
+   "csv_bytes": 6780,
+   "bytes": 6780,
+   "tag_base": 6144
+  },
+  {
+   "id": 7,
+   "csv_id": "7",
+   "source": "E",
+   "target": "I",
+   "src_pe": 2,
+   "dst_pe": 2,
+   "src_label": "0-1",
+   "dst_label": "0-1",
+   "local": true,
+   "csv_bytes": 9010,
+   "bytes": 9010,
+   "tag_base": 7168
+  },
+  {
+   "id": 8,
+   "csv_id": "8",
+   "source": "E",
+   "target": "H",
+   "src_pe": 2,
+   "dst_pe": 2,
+   "src_label": "0-1",
+   "dst_label": "0-1",
+   "local": true,
+   "csv_bytes": 2340,
+   "bytes": 2340,
+   "tag_base": 8192
+  },
+  {
+   "id": 9,
+   "csv_id": "9",
+   "source": "I",
+   "target": "J",
+   "src_pe": 2,
+   "dst_pe": 3,
+   "src_label": "0-1",
+   "dst_label": "1-1",
+   "local": false,
+   "csv_bytes": 5670,
+   "bytes": 5670,
+   "tag_base": 9216
+  },
+  {
+   "id": 10,
+   "csv_id": "10",
+   "source": "H",
+   "target": "J",
+   "src_pe": 2,
+   "dst_pe": 3,
+   "src_label": "0-1",
+   "dst_label": "1-1",
+   "local": false,
+   "csv_bytes": 8900,
+   "bytes": 8900,
+   "tag_base": 10240
+  },
+  {
+   "id": 11,
+   "csv_id": "11",
+   "source": "G",
+   "target": "J",
+   "src_pe": 3,
+   "dst_pe": 3,
+   "src_label": "1-1",
+   "dst_label": "1-1",
+   "local": true,
+   "csv_bytes": 1230,
+   "bytes": 1230,
+   "tag_base": 11264
+  }
+ ],
+ "warnings": []
+}

@@ -67,6 +67,20 @@ void ucx_free(void *ptr)
 
 void _di(void) { host_irq_enabled = 0; }
 void _ei(void) { host_irq_enabled = 1; }
+
+/* interrupt entry and return of _isr (arch/riscv/hf-riscv-e/crt0.s): the
+ * core disables interrupts on entry and the return enables them; a handler
+ * that enables them before the return counts in host_isr_nested */
+int host_isr_nested = 0;
+void host_isr(void (*handler)(void))
+{
+	host_irq_enabled = 0;
+	handler();
+	if (host_irq_enabled)
+		host_isr_nested++;
+	host_irq_enabled = 1;
+}
+volatile uint32_t host_timer1, host_timer1ocr, host_timercauseinv, host_timermask, host_irq_cause;
 void set_counter_3(uint32_t v) { host_counter3 = v; }
 void set_counter_4(uint32_t v) { host_counter4 = v; }
 /* iteration markers (device/cacc.c), in the order of the writes */
@@ -89,9 +103,17 @@ void host_tasks_init(int n)
 		tcbs[i].tcb_next = &tcbs[(i + 1) % n];
 	}
 	kcb.tcb_p = &tcbs[0];
+	kcb.tcb_first = &tcbs[0];
 }
 
 uint8_t host_task_state(int id) { return tcbs[id].state; }
+
+/* task `id` runs: ucx_task_id() and kcb_p->tcb_p */
+void host_set_current(int id)
+{
+	host_current_task = id;
+	kcb.tcb_p = &tcbs[id];
+}
 
 /* DDMA registers (0x20000000 + 4*i) */
 uint32_t host_ddma_regs[16];

@@ -1,6 +1,6 @@
-"""Pipelines of the visuals of the article: stored graphs of Table 7.1
+"""Pipelines of the visuals of the article: stored graphs of the table of the random graphs
 (rttools/paper/graphs.py), CAR and criterion of application E
-(rttools/paper/car.py), contraction example, Table 7.1 summary and the
+(rttools/paper/car.py), contraction example, the table of the random graphs summary and the
 figures of application E (rttools/paper/figures.py)."""
 import json
 import os
@@ -119,7 +119,7 @@ def test_table71_summary_and_cluster_sizes(tmp_path):
     assert len(lines) == 1 + 6 and lines[1].count("&") == 7
 
 
-def test_figures_of_application_e(tmp_path):
+def test_figures_of_application_e(tmp_path, deadline_start):
     cfg = load_config(os.path.join(EXP, "exp23", "config.json"))
     fcfg = load(os.path.join(FIG, "config.json"))
     # run F (tag exp23-F), join rule per_producer (default of the config)

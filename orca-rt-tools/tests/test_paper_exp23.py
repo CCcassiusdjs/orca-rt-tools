@@ -11,6 +11,9 @@ import pytest
 from tests.conftest import REPO_ROOT
 from rttools.paper import exp23
 
+# the model of the ORCA RT-Tools reference of the phase windows: deadline at the start of the reader
+pytestmark = pytest.mark.usefixtures("deadline_start")
+
 EXP = os.path.join(REPO_ROOT, "experiments", "exp23")
 
 
@@ -474,7 +477,7 @@ def test_cycles_at_another_clock_equal_run_f(run_f, tmp_path):
     a = run_f[0]
     assert m["clock"] == {"clock_hz": F_SYNTH, "cycle_hz": pytest.approx(1e15 / 2_297_794),
                           "half_period_fs": 1_148_897, "source": "RUN_INFO", "run_info": "RUN_INFO",
-                          "edges_snapped": True}
+                          "isr": "nesting", "crt0": "plain", "edges_snapped": True}
     for r, s in zip(a["tab83"]["rows"], m["tab83"]["rows"]):
         assert (r["cluster"], r["estimated"]) == (s["cluster"], s["estimated"])
         assert close(r["measured"], s["measured"])

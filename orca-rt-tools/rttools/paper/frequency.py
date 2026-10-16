@@ -1,7 +1,8 @@
 """Minimum frequency of application E with the analysis flow of the paper.
 
     python -m rttools.paper.frequency run --app <app.csv> --arch <arch.gml> --map <file.map|spiral> [--map ...]
-        [--f0 <Hz>] [--config <exp23 config.json>] [--header-wait off|bound|<cycles>] --out <dir>
+        [--f0 <Hz>] [--config <exp23 config.json>] [--header-wait off|bound|<cycles>] [--costs <costs.json>]
+        --out <dir>
     python -m rttools.paper.exp23 check <dir>/metrics.json <reference.json>
 
 For each mapping (a .map file, or `spiral` for ORT/GCM and the Spiral
@@ -19,6 +20,10 @@ continues above f_CPU and the result is the first feasible frequency.
 | metrics.json | Per mapping: mapping entries, dispatch order per node (phase model), CPU demand per node, f_CPU, f*, the lower bound of the bisection, the attempts, the network check at f_CPU and the minimum frequency |
 | frequency.csv | One row per mapping with f*, f_CPU, the verdict of the network at f_CPU and the minimum (Hz) |
 | values.tex | LaTeX macros with the frequencies in MHz and the network check at f_CPU |
+
+With --costs (a costs file of rttools.wcet), the pipeline takes the
+static t(v) of each task and the dispatch term as scheduler_cycles
+(rttools/wcet/costs.py) in place of the Capacity column of the CSV.
 
 With --config (experiments/exp23/config.json), metrics.json also records
 whether f_CPU equals the f_CPU of the exp-23 analysis (characterized costs
@@ -68,9 +73,15 @@ def mapping_entries(map_arg, app, noc):
     return mapparser.loadFromFile(map_arg), None
 
 
-def run_one(app_file, map_arg, arch_file, f0):
+def run_one(app_file, map_arg, arch_file, f0, costs=None, cost_rule="max"):
     with network.quiet():
         app, appname = appparser.loadFromFile(app_file)
+    if costs is not None:
+        # t(v) of the costs file of rttools.wcet under cost_rule
+        # (rttools/wcet/costs.py: max of the CSV and the file, or the file)
+        from rttools.wcet import costs as wcosts
+        wcosts.apply(app, costs, cost_rule)
+    with network.quiet():
         noc = nocparser.loadFromFile(arch_file)
         entries, criterion = mapping_entries(map_arg, app, noc)
     bad = mapfile.problems(entries, list(app.nodes), list(noc.nodes))
@@ -105,10 +116,12 @@ def run_one(app_file, map_arg, arch_file, f0):
     }
 
 
-def run(app_file, maps, arch_file, f0, out_dir, config=None, header_wait=None):
+def run(app_file, maps, arch_file, f0, out_dir, config=None, header_wait=None, costs=None, cost_rule="max"):
     """Runs every mapping of `maps`; `header_wait` selects w_h of the link
     occupancy for this run (router.parse_header_wait; None keeps the
-    selection of the process)."""
+    selection of the process); `costs`: costs file of rttools.wcet (static
+    t(v), rttools/wcet/costs.py) under `cost_rule` ("max": the larger of
+    the CSV and the static cost; "static": the static cost)."""
     prev = router.set_header_wait(header_wait) if header_wait is not None else None
     try:
         w = router.header_wait()
@@ -116,8 +129,11 @@ def run(app_file, maps, arch_file, f0, out_dir, config=None, header_wait=None):
              "search": {k: v for k, v in search_config(f0).items() if k != "heuristic"},
              "heuristic": cli.RTTOOLS_HEURISTIC.__name__, "header_wait_cycles": w,
              "occupancy": "L0 + %d (m + 1)" % w if w else "L0", "runs": {}}
+        if costs is not None:
+            m["costs"] = os.path.basename(costs)
+            m["cost_rule"] = cost_rule
         for mp in maps:
-            r = run_one(app_file, mp, arch_file, f0)
+            r = run_one(app_file, mp, arch_file, f0, costs, cost_rule)
             m["runs"][r["map"]] = r
     finally:
         if header_wait is not None:
@@ -180,9 +196,11 @@ def main(argv=None):
     r.add_argument("--header-wait", default=None,
                    help="header wait per router w_h of o_i = L0 + w_h (m + 1): bound (default, "
                         f"{router.HEADER_WAIT_CYCLES} cycles), off or a number of cycles")
+    r.add_argument("--costs", default=None,
+                   help="costs file of rttools.wcet (static t(v)); default: the Capacity column of the CSV")
     r.add_argument("--out", required=True)
     a = p.parse_args(argv)
-    m = run(a.app, a.map, a.arch, a.f0, a.out, a.config, a.header_wait)
+    m = run(a.app, a.map, a.arch, a.f0, a.out, a.config, a.header_wait, a.costs)
     print(f"  link occupancy o_i = {m['occupancy']}")
     for key, r in m["runs"].items():
         c = r["final_check"]

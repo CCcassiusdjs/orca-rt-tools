@@ -1,0 +1,8 @@
+bootUCX/OS boot on RV32E (HF-RISCV-E)
+heap_init(), 50036 bytes free
+_ddma_init(): device info x:0, y:1, dimx:4, dimy:5
+noc_driver_init(): this is core #4
+[IDLE 0]: 40000224, stack: 40003520, size 2048
+[BFE3 1]: 40000680, stack: 40003db4, size 2048
+ucx_noc_comm_create(): task 1 connected on port 12
+irq2_handler(): out of memory for 2403 flits, halting

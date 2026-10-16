@@ -57,7 +57,8 @@ def test_carv_source():
     # PE 4 creates FBU3 before VOD1 (dispatch order of the model)
     case4 = src[src.index("  case 4:"):src.index("  case 5:")]
     assert case4.index("task_FBU3") < case4.index("task_VOD1")
-    assert sim.endswith("MESH=4x4\nRELEASE_MASK=2494\n")
+    # release by tick: the release generator on the 16 PEs (2494 = PEs of the sources, --release data)
+    assert sim.endswith("MESH=4x4\nRELEASE_MASK=65535\nTICK_RELEASE=1\n")
 
 
 # ---------------------------------------------------------------- memory
@@ -93,9 +94,10 @@ def toolchain(tmp_path):
     return f"{b}:{os.environ['PATH']}"
 
 
-def build(ucx, target, path):
+def build(ucx, target, path, extra=()):
+    """Builds `target` (make variables in `extra`); returns code.txt."""
     env = {**os.environ, "PATH": path}
-    for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", target]):
+    for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", target, *extra]):
         r = subprocess.run(args, cwd=ucx, env=env, capture_output=True, text=True, timeout=600)
         assert r.returncode == 0, (r.stdout + r.stderr)[-3000:]
     return open(os.path.join(ucx, "build", "target", "code.txt")).read()

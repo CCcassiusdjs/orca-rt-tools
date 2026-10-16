@@ -8,7 +8,7 @@
 | Command | Visual | Outputs |
 |---|---|---|
 | contraction | criteria table, contraction figure | contraction.json, criteria.csv, tab-criteria-rows.tex, fig-contraction-body.tex |
-| table71 | Table 7.1 summary and per-graph figure | metrics.json, table71.csv, sizes.csv, tab-table71-rows.tex, fig-table71-coords.tex |
+| table71 | the table of the random graphs summary and per-graph figure | metrics.json, table71.csv, sizes.csv, tab-table71-rows.tex, fig-table71-coords.tex |
 | exp23 | Gantt, iterations, flows of application E | metrics.json, gantt.csv, iterations.csv, flows.csv, fig-gantt-body.tex, fig-iterations-coords.tex, tab-flows-rows.tex |
 | spiral | Spiral Mapping of CAR (Figure 4) | fig-spiral.json, fig-spiral-body.tex |
 
@@ -214,7 +214,7 @@ def graph_sums(path):
 
 
 def table71(metrics_path, graphs_dir, out_dir):
-    """Derived quantities of Table 7.1 for each graph and their minimum,
+    """Derived quantities of the table of the random graphs for each graph and their minimum,
     mean and maximum: share of edges kept, NoC payload share (= M3_in /
     M3_out, the sum of the vertex values does not change), M1 and M2
     ratios, coefficient of variation of the demands (M2 / mean value),

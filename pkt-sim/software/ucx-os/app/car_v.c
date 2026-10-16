@@ -31,8 +31,36 @@
  * the PE prints `<t> <x-y> ITER begin|end <letter> <k>` (manycore_pe.sv).
  * The letter of each task is in the manifest (iter_letter); a run that
  * serves iterations k and k + 1 writes the markers of both.
+ *
+ * Release by tick (built with -DUCX_TICK_RELEASE: the Makefile rule of the
+ * generated applications, TR_DEFS; lib/tick_release.c): the release
+ * generator fires on every PE with a task (app/car_v.sim), the release
+ * interrupt counts the phases, and the tick hook of the kernel wakes the
+ * tasks whose phase has come. Task v waits for the tick of phase
+ * k + n(v) (TASK_PHASE: phase index of the model of the analysis flow,
+ * field "phase" of the manifest) before it reads the input of iteration k
+ * (FIFO), so it runs at most once per phase and serves iteration k from
+ * the tick of phase k + n(v). Without the macro, the code is the pattern
+ * above (data-driven release of the runs CV, CV2 and MA: a run serves
+ * every iteration whose packets are in the queue).
+ *
+ * Time-triggered injection (built with -DUCX_NOC_TT: Makefile of UCX-OS,
+ * INJECTION=tt; lib/noc_tt.c): a job hands each packet to the kernel with
+ * ucx_noc_send_at; a packet to a task of another PE leaves at its instant
+ * in the link schedule of the analysis flow, counted from the tick of the
+ * phase of the job (ucx_job_tick, lib/tick_release.c; app/car_v_tt.h of
+ * rttools.ucxgen tt: TT_AT, one table per clock F_CPU), and a packet to a
+ * task of the same PE goes to the queue of the task at once. Without the
+ * macro the job sends the packet at once (the code above).
  */
 #include <ucx.h>
+#ifdef UCX_NOC_TT
+#ifndef UCX_TICK_RELEASE
+#error "the time-triggered injection counts the instants from the tick of the phase (build with UCX_TICK_RELEASE)"
+#endif
+/* instants of the packets between PEs (rttools.ucxgen tt) */
+#include "car_v_tt.h"
+#endif
 
 #define N_TASKS     23
 #define MAX_IN      4
@@ -108,23 +136,34 @@ static const struct task_s TASKS[N_TASKS] = {
   {"OBMG", 'W', 23, 8400, 1, 0, {20}, {{0, 0, 0, 0}}},
 };
 
+#ifdef UCX_TICK_RELEASE
+/* phase index n(v) of each task (order of TASKS) */
+static const uint8_t TASK_PHASE[N_TASKS] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 2, 2, 3, 0, 0, 4};
+#else
 /* ------------------------------ release */
 static struct tcb_s *release_tcb[MAX_RELEASE];
 static int n_release = 0;
 
 /* release of the source tasks of this PE (manycore_pe.sv, wake-up
- * generator; the kernel handler of application E marks task A of PE 0) */
+ * generator; the kernel handler of application E marks task A of PE 0);
+ * interrupts stay disabled until the return of _isr (kernel/sched.c,
+ * UCX_ISR_NESTING) */
 void irq4_handler(void)
 {
+#ifdef UCX_ISR_NESTING
   _di();
+#endif
   for (int i = 0; i < n_release; i++)
     release_tcb[i]->state = TASK_READY;
 
   /* flag interruption down */
   volatile int *irq_flag_down = (volatile int *)(0x2000004C);
   *irq_flag_down = !(*irq_flag_down);
+#ifdef UCX_ISR_NESTING
   _ei();
+#endif
 }
+#endif
 
 /* ------------------------------ tasks */
 static noc_packet_t *create_pkt(uint32_t bytes)
@@ -172,6 +211,20 @@ static void receive_one(const struct task_s *t, uint32_t *received)
   printf("%s: packet from unknown port %d\n", t->name, port);
 }
 
+#ifdef UCX_NOC_TT
+/* ucx_noc_send with the time-triggered injection: hands the packet to
+ * the kernel (lib/noc_tt.c) with the instant of its flow (tag / TAG_MOD)
+ * from the tick of the phase of the job. The arguments of ucx_noc_send
+ * and a call that the compiler treats as the call of ucx_noc_send (noipa:
+ * no inlining, no clone, no knowledge of its registers) keep the code
+ * of run_task as in the build without UCX_NOC_TT (the static analysis
+ * follows t and its fields in the same registers) */
+static __attribute__((noipa)) uint32_t tt_send(uint16_t cpu, uint16_t port, noc_packet_t *pkt, uint16_t tag)
+{
+  return ucx_noc_send_at(cpu, port, pkt, tag, ucx_job_tick(), &TT_AT[tag / TAG_MOD]);
+}
+
+#endif
 static void run_task(const struct task_s *t)
 {
   noc_packet_t *pkt[MAX_OUT];
@@ -186,10 +239,16 @@ static void run_task(const struct task_s *t)
     received[i] = 0;
 
   do {
+#ifdef UCX_TICK_RELEASE
+    /* iteration done + 1 from the tick of phase done + 1 + n(v) */
+    ucx_phase_wait(done + 1 + TASK_PHASE[t - TASKS]);
+#endif
     if (t->n_in == 0) {
+#ifndef UCX_TICK_RELEASE
       /* voluntary sleep until the release */
       kcb_p->tcb_p->state = TASK_BLOCKED;
       ucx_task_yield();
+#endif
     } else {
       /* wait for the packet of iteration done + 1 of each input edge */
       for (int i = 0; i < t->n_in; i++)
@@ -203,7 +262,11 @@ static void run_task(const struct task_s *t)
     done++;
 
     for (int o = 0; o < t->n_out; o++)
+#ifdef UCX_NOC_TT
+      tt_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+#else
       ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+#endif
     ITER_END(t->letter, done);
   } while (--it);
 
@@ -238,6 +301,10 @@ static void task_OBMG(void) { run_task(&TASKS[22]); }
 
 void idle_task_p(void)
 {
+#ifdef UCX_TICK_RELEASE
+  /* a yield can enter the idle task with interrupts disabled (kernel/sched.c) */
+  _ei();
+#endif
   for (;;)
     ;
 }
@@ -245,8 +312,10 @@ void idle_task_p(void)
 static void add_task(void (*fn)(void), const struct task_s *t)
 {
   ucx_task_add(fn, (char *)t->name, DEFAULT_STACK_SIZE, 0, 0, 0);
+#ifndef UCX_TICK_RELEASE
   if (t->n_in == 0 && n_release < MAX_RELEASE)
     release_tcb[n_release++] = kcb_p->tcb_p;   /* tcb of the task just added */
+#endif
 }
 
 int32_t app_main(void)

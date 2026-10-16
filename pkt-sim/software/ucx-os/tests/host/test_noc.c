@@ -8,9 +8,14 @@
  *    a discard buffer (never address 0) and irq3_handler drops the packet.
  * 4. ucx_noc_comm_create and ucx_noc_comm_destroy: every return restores
  *    the interrupts; destroy of a task without a queue returns
- *    UCX_NOC_TASK_NOT_BOUND. */
+ *    UCX_NOC_TASK_NOT_BOUND.
+ * 5. irq2_handler and irq3_handler leave interrupts disabled until the
+ *    return of _isr (host_isr); with -DUCX_ISR_NESTING (test_noc_nesting
+ *    of run.sh) both enable them before that return. */
 #include <ucx.h>
 #include "host_test.h"
+
+void irq3_handler(void);
 
 #define NODE 1   /* 2x2 mesh, node (1,0) */
 
@@ -27,7 +32,7 @@ static void setup(void)
 static noc_packet_t *deliver(uint16_t node, uint16_t port, uint16_t tag)
 {
 	host_ddma_regs[8] = 4;                      /* 4 flits = 16 bytes */
-	irq2_handler();
+	host_isr(irq2_handler);
 	noc_packet_t *pkt = (noc_packet_t *)(uintptr_t)host_ddma_regs[6];
 	CHECK(pkt != NULL);
 	if (!pkt)
@@ -39,7 +44,7 @@ static noc_packet_t *deliver(uint16_t node, uint16_t port, uint16_t tag)
 	pkt->payload_size = 4;
 	pkt->tag = tag;
 	host_ddma_regs[7] = host_ddma_regs[6];      /* RECV_ADDR_OUT */
-	irq3_handler();
+	host_isr(irq3_handler);
 	return pkt;
 }
 
@@ -106,7 +111,7 @@ static void test_irq2_malloc_failure(void)           /* 3 */
 	host_ddma_regs[6] = 0;
 	host_ddma_regs[8] = 4;
 	host_fail_next_malloc = 1;
-	irq2_handler();
+	host_isr(irq2_handler);
 	CHECK(host_ddma_regs[6] != 0);               /* DDMA does not receive address 0 */
 	CHECK(host_irq_enabled == 1);
 	/* the packet arrives in the discard buffer and irq3 discards it */
@@ -116,7 +121,7 @@ static void test_irq2_malloc_failure(void)           /* 3 */
 		pkt->target_port = 5;
 		pkt->tag = 5;
 		host_ddma_regs[7] = host_ddma_regs[6];
-		irq3_handler();
+		host_isr(irq3_handler);
 	}
 	CHECK(ucx_noc_probe() == 0);
 	CHECK(host_live_blocks == live);
@@ -172,6 +177,22 @@ static void test_local_send_bound_port(void)
 	CHECK(host_irq_enabled == 1);
 }
 
+static void test_handlers_leave_interrupts_disabled(void)  /* 5 */
+{
+	setup();
+	host_current_task = 1;
+	CHECK(ucx_noc_comm_create(5) == UCX_NOC_OK);
+	host_isr_nested = 0;
+	deliver(NODE, 5, 12);
+	CHECK(ucx_noc_probe() == 1);
+	CHECK(host_irq_enabled == 1);               /* after the return of _isr */
+#ifdef UCX_ISR_NESTING
+	CHECK(host_isr_nested == 2);
+#else
+	CHECK(host_isr_nested == 0);
+#endif
+}
+
 int main(void)
 {
 	RUN_FORK(test_deliver_ok);
@@ -182,5 +203,6 @@ int main(void)
 	RUN_FORK(test_comm_create_errors_restore_irq);
 	RUN_FORK(test_comm_destroy);
 	RUN_FORK(test_local_send_bound_port);
+	RUN_FORK(test_handlers_leave_interrupts_disabled);
 	DONE();
 }

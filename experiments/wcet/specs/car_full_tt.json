@@ -1,0 +1,14 @@
+{
+ "_doc": "rttools.wcet spec of CAR-full on images/tt/car_full.elf (car_full.c with the time-triggered injection, INJECTION=tt, riscv64-elf-gcc 12.2.0; images/tt/BUILD.txt). A job runs from the return of ucx_task_yield in wait_release to its next call: one call of begin_marks (ITER_BEGIN and the read markers) and one ITER_END in run_task.",
+ "image": "../images/tt/car_full.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+  "../annotations/car_full.json"
+ ],
+ "manifest": "../../../pkt-sim/software/ucx-os/app/car_full.json",
+ "iteration_calls": {
+  "begin_marks": 1,
+  "set_iter_mark": 1
+ }
+}

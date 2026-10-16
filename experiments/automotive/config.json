@@ -1,0 +1,201 @@
+{
+ "_doc": "experiments/automotive: engine-control workload from the application characteristics of Kramer, Ziegenbein and Hamann, Real World Automotive Benchmarks For Free, WATERS 2015 (Tables I and III to VII; time-synchronous periods only), and the analysis flow with the general phase model on the 4x4 mesh (rttools/paper/automotive.py). Paths relative to this file. kernel_cycles: t_disp, t_tick and t_rel of the image of CAR, which runs a tick table (../wcet/reference_tt.json, ni_images.car_full_gcc12.kernel); scheduler_cycles = t_tick + t_rel; packet_cycles: t_send = send_isr and t_recv = receive_isr_size + receive_isr_end of the same image. driver_cycles: sections of the same image (wait_release per job, tt_insert per edge between distinct PEs, send_local per edge on one PE, read_one per input edge). The flow applies the handler charge of Eq. (7) with inject = send and receive of packet_cycles. terms, terms_image, lead_cycles: the check of premise (ii) on the link schedule at the minimum frequency (rttools.paper.ttflow.premise_release) with the terms of the image of CAR and its lead.",
+ "seed": 1,
+ "chains": 40,
+ "cycles_per_us": 300,
+ "scheduler_cycles": 1852,
+ "weibull_shape": 0.8,
+ "width": 4,
+ "height": 4,
+ "arch": "../../arch/hermes-4x4.gml",
+ "f0_hz": 500000000,
+ "trials": 20,
+ "period_shares": {
+  "1": 3,
+  "2": 2,
+  "5": 2,
+  "10": 25,
+  "20": 25,
+  "50": 3,
+  "100": 20,
+  "200": 1,
+  "1000": 4
+ },
+ "acet_us": {
+  "1": {
+   "min": 0.34,
+   "avg": 5.0,
+   "max": 30.11
+  },
+  "2": {
+   "min": 0.32,
+   "avg": 4.2,
+   "max": 40.69
+  },
+  "5": {
+   "min": 0.36,
+   "avg": 11.04,
+   "max": 83.38
+  },
+  "10": {
+   "min": 0.21,
+   "avg": 10.09,
+   "max": 309.87
+  },
+  "20": {
+   "min": 0.25,
+   "avg": 8.74,
+   "max": 291.42
+  },
+  "50": {
+   "min": 0.29,
+   "avg": 17.56,
+   "max": 92.98
+  },
+  "100": {
+   "min": 0.21,
+   "avg": 10.53,
+   "max": 420.43
+  },
+  "200": {
+   "min": 0.22,
+   "avg": 2.56,
+   "max": 21.95
+  },
+  "1000": {
+   "min": 0.37,
+   "avg": 0.43,
+   "max": 0.46
+  }
+ },
+ "factors": {
+  "1": {
+   "best": [
+    0.19,
+    0.92
+   ],
+   "worst": [
+    1.3,
+    29.11
+   ]
+  },
+  "2": {
+   "best": [
+    0.12,
+    0.89
+   ],
+   "worst": [
+    1.54,
+    19.04
+   ]
+  },
+  "5": {
+   "best": [
+    0.17,
+    0.94
+   ],
+   "worst": [
+    1.13,
+    18.44
+   ]
+  },
+  "10": {
+   "best": [
+    0.05,
+    0.99
+   ],
+   "worst": [
+    1.06,
+    30.03
+   ]
+  },
+  "20": {
+   "best": [
+    0.11,
+    0.98
+   ],
+   "worst": [
+    1.06,
+    15.61
+   ]
+  },
+  "50": {
+   "best": [
+    0.32,
+    0.95
+   ],
+   "worst": [
+    1.13,
+    7.76
+   ]
+  },
+  "100": {
+   "best": [
+    0.09,
+    0.99
+   ],
+   "worst": [
+    1.02,
+    8.88
+   ]
+  },
+  "200": {
+   "best": [
+    0.45,
+    0.98
+   ],
+   "worst": [
+    1.03,
+    4.9
+   ]
+  },
+  "1000": {
+   "best": [
+    0.68,
+    0.8
+   ],
+   "worst": [
+    1.84,
+    4.75
+   ]
+  }
+ },
+ "patterns_per_chain_shares": {
+  "1": 70,
+  "2": 20,
+  "3": 10
+ },
+ "runnables_per_pattern_shares": {
+  "2": 30,
+  "3": 40,
+  "4": 20,
+  "5": 10
+ },
+ "label_size_shares": {
+  "1": 35,
+  "2": 49,
+  "4": 13,
+  "5-8": 0.8,
+  "9-16": 1.3,
+  "17-32": 0.5,
+  "33-64": 0.2
+ },
+ "kernel_cycles": {
+  "dispatch": 515,
+  "tick": 1603,
+  "release": 249
+ },
+ "packet_cycles": {
+  "send": 622,
+  "receive": 4803
+ },
+ "driver_cycles": {
+  "job": 1001,
+  "send_noc": 1098,
+  "send_local": 1191,
+  "read": 332
+ },
+ "terms": "../wcet/reference_tt.json",
+ "terms_image": "car_full_gcc12",
+ "lead_cycles": 1621
+}

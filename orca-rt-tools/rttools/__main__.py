@@ -90,7 +90,7 @@ def load_mapping(map_arg, app, appname, noc, noc_file):
     """Mapping entries ({"node", "tasks"}) for the <map> argument: a .map
     file (rttools.modules.io.mapparser), or the word `spiral`, which runs
     ORT/GCM (criteria of Chapter 7, smallest deviation of the cluster WCET
-    sums) and the Spiral Mapping (thesis, Section 8.1.2) and saves the
+    sums) and the Spiral Mapping (ORCA RT-Tools reference, Section 8.1.2) and saves the
     result as `<app>-SPIRAL-<arch>.map` in the current directory.
 
     Returns (entries, problems). `problems` lists a task on two nodes, a
@@ -132,9 +132,11 @@ def report_frequency(freq):
         return "none" if v is None else str(v) + "Hz (" + format(v / 1e6, ".1f") + " MHz)"
     info("Network frequency f* = " + hz(freq["f_star_hz"]))
     if freq["cpu"] is not None:
+        # general phase model (several periods or a cycle): demand per hyperperiod
+        span = freq["cpu"].get("hyper_s", freq["cpu"]["period_s"])
         for node, d in sorted(freq["cpu"]["demand"].items(), key=lambda kv: str(kv[0])):
             info("CPU demand of node " + str(node) + ": " + str(d) + " cycles per "
-                 + str(freq["cpu"]["period_s"]) + " s")
+                 + str(span) + " s")
     info("CPU frequency f_CPU = " + hz(freq["f_cpu_hz"]))
     chk = freq.get("final_check")
     if chk is not None:
@@ -169,6 +171,14 @@ def main():
 
     header(welcome_msg)
     args = sys.argv[1:]
+    # --costs <file>: static t(v) of rttools.wcet in place of the
+    # Capacity column of the application (rttools/wcet/costs.py)
+    from rttools.wcet import costs as wcosts
+    try:
+        args, costs_file = wcosts.split_flag(args)
+    except wcosts.CostsError as e:
+        error(str(e))
+        return 1
 
     for i in args:
         info("-> " + i)
@@ -179,7 +189,8 @@ def main():
     # [3] frequency
     if len(args) not in [3, 4, 5, 6, 7]:
         error("Usage: ")
-        error("  __main__.py <app> <map> <arch> [<freq>] [<pruning factor>] [<fail threshold>] [<optimize True|False>]")
+        error("  __main__.py <app> <map> <arch> [<freq>] [<pruning factor>] [<fail threshold>] [<optimize True|False>]"
+              " [--costs <costs.json>]")
         error("  <map>: mapping file (.map) or `" + MAP_SPIRAL + "` (ORT/GCM clustering and Spiral Mapping)")
         return 1
 
@@ -203,20 +214,37 @@ def main():
 
     info("Loading application file `" + app_file + "`")
     app, appname = appparser.loadFromFile(app_file)
+    if costs_file is not None:
+        info("Task costs t(v) = max(CSV, static WCET of `" + costs_file + "`) (rttools.wcet)")
+        try:
+            for label, (old, new) in sorted(wcosts.apply(app, costs_file).items()):
+                info("  t(" + label + ") = " + str(new) + " cycles (application: " + str(old) + ")")
+        except (wcosts.CostsError, OSError, ValueError) as e:
+            error(str(e))
+            return 1
 
     # print(app, appname)
 
     info("Loading NoC file `" + noc_file + "`")
     noc = nocparser.loadFromFile(noc_file)
 
-    # link occupancy o_i = L0 + w_h (m + 1); w_h from RTTOOLS_HEADER_WAIT (default 0)
+    # link occupancy o_i = L0 + w_h (m + 1) + w_NI; w_h from RTTOOLS_HEADER_WAIT
+    # (default HEADER_WAIT_CYCLES), w_NI from RTTOOLS_NI (default tt, NI_WAIT_CYCLES)
     try:
         w_h = router.header_wait()
     except ValueError as e:
         error(str(e) + " (" + router.HEADER_WAIT_ENV + ")")
         return 1
+    try:
+        ni_res, w_ni = router.ni_model()
+    except ValueError as e:
+        error(str(e) + " (" + router.NI_ENV + ")")
+        return 1
     info("Link occupancy o_i = " + ("L0 + " + str(w_h) + " (m + 1)" if w_h else "L0")
-         + " (" + router.HEADER_WAIT_ENV + "; header wait bound " + str(router.HEADER_WAIT_CYCLES) + " cycles)")
+         + (" + " + str(w_ni) if w_ni else "")
+         + " (" + router.HEADER_WAIT_ENV + "; header wait bound " + str(router.HEADER_WAIT_CYCLES) + " cycles; "
+         + router.NI_ENV + ": network interface " + ("as a resource, w_NI = " + str(w_ni) + " cycles" if ni_res
+                                                     else "off") + ")")
 
     mapping, bad = load_mapping(map_file, app, appname, noc, noc_file)
     for p in bad:
@@ -258,7 +286,7 @@ def main():
 
     else:
         info("Target frequency is " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz")
-        cpu = search.cpu_check(app, mapping)
+        cpu = search.cpu_check(app, mapping, noc)
         if cpu is not None:
             info("CPU test: f_CPU = " + str(cpu["f_cpu_hz"]) + "Hz; the target frequency "
                  + ("meets" if RTTOOLS_DEFAULT_FREQUENCY >= cpu["f_cpu_hz"] else "does not meet")

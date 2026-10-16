@@ -17,14 +17,32 @@ static uint32_t pktdrv_sink[NOC_SINK_FLITS];
 // Gets the address of the current NoC node. Nodes are identified by
 // their XY address, which is compressed in a 32-bit word such that
 // XY = (X << 16) | Y;
+#ifdef UCX_NOC_TT
+// the time-triggered injection (lib/noc_tt.c) keeps the node index from
+// noc_driver_init: _ddma_node_addr multiplies in software (the core has no
+// multiplier), and the handlers of the driver compare node indices
+static uint32_t pktdrv_cpu_id = 0;
+
+uint32_t ucx_noc_cpu_id(void)
+{
+  return pktdrv_cpu_id;
+}
+#else
 uint32_t ucx_noc_cpu_id(void)
 {
   return _ddma_node_addr();
 }
+#endif
 
 
 
 void enable_receiver(uint16_t task_id){
+#ifdef UCX_TICK_RELEASE
+  // release by tick (lib/tick_release.c): a task that waits for the tick
+  // of its phase stays blocked; the tick hook wakes it
+  if (ucx_phase_waiting(task_id))
+    return;
+#endif
   // locate receiver tasks and remove blocked state
   struct tcb_s* p = kcb_p->tcb_p;
   
@@ -34,6 +52,40 @@ void enable_receiver(uint16_t task_id){
 
   p->state = TASK_READY;
 }
+
+// The handlers irq2_handler and irq3_handler leave interrupts disabled:
+// the return of _isr (arch/riscv/hf-riscv-e/crt0.s) enables them after the
+// frame is restored. _isr keeps the address of the return in a5 without
+// saving it, so an interrupt taken inside the return of another one, after
+// a handler enabled interrupts, changes a5 before `sb a5, 0(a5)` and
+// `jalr zero, 0(a5)` (pkt-sim/tests/rtl/tb_cpu_irq.vhd reproduces it on
+// the core). -DUCX_ISR_NESTING keeps the _ei() at the end of both handlers
+// (the image of the runs up to r11).
+
+#ifdef UCX_NOC_LATEST
+// Latest-value delivery, for the time-triggered applications of
+// rttools.ucxgen (built with -DUCX_NOC_LATEST): the queue of a task keeps
+// at most one packet per source (node and port). A new packet from the
+// same source takes the place of the queued one (a queued packet from
+// another PE is freed; a packet of this PE is the buffer of its sender),
+// and the arrival does not wake the task, which reads its queue when its
+// job starts. Without the macro, the driver keeps every packet in FIFO
+// order and wakes the receiver (blocking receive).
+static int32_t pktdrv_put_latest(struct queue_s *q, noc_packet_t *pkt)
+{
+  for (int32_t i = 0; i < q->elem; i++) {
+    int32_t k = (q->head + i) & q->mask;
+    noc_packet_t *old = (noc_packet_t *) q->pdata[k];
+    if (old->source_node == pkt->source_node && old->source_port == pkt->source_port) {
+      if (old != pkt && old->source_node != ucx_noc_cpu_id())
+        ucx_free(old);
+      q->pdata[k] = pkt;
+      return 0;
+    }
+  }
+  return ucx_queue_enqueue(q, pkt);
+}
+#endif
 
 // Implementation of the irq1_handler, intercepts 
 // sending interruptions. While sending, the ddma 
@@ -67,7 +119,9 @@ void irq2_handler(void){
 
   _ddma_set_recv_addr((uint32_t)pkt); // send packet address to the ddma
   _ddma_recv_ack();
+#ifdef UCX_ISR_NESTING
   _ei();
+#endif
 }
 
 // Implementation of the irq3_handler, intercepts
@@ -109,7 +163,11 @@ void irq3_handler(void){
       ucx_free(pkt);
     }
     // check whether the task has room for more packets in that queue
+#ifdef UCX_NOC_LATEST
+    else if (pktdrv_put_latest(pktdrv_tqueue[k], pkt) != 0)
+#else
     else if (ucx_queue_enqueue(pktdrv_tqueue[k], pkt) != 0)
+#endif
     {
       printf("noc_driver_isr(): task (on port %d) cannot receive more packets, dropping...\n", 
         pkt->target_port);
@@ -120,12 +178,16 @@ void irq3_handler(void){
 #ifndef UCX_NO_INSTRUMENTATION
       set_counter_4(pkt->tag);
 #endif
+#ifndef UCX_NOC_LATEST
       enable_receiver(k);
+#endif
     }
   }
   _ddma_recv_ack();
   asm("nop;nop;");
+#ifdef UCX_ISR_NESTING
   _ei();  
+#endif
 }
 
 
@@ -224,6 +286,9 @@ void noc_driver_init(void)
 {
   // init hardware
   _ddma_init();
+#ifdef UCX_NOC_TT
+  pktdrv_cpu_id = _ddma_node_addr();
+#endif
 
   // print out node id (from MMIO)
   printf("noc_driver_init(): this is core #%d\n", ucx_noc_cpu_id());
@@ -249,8 +314,15 @@ void noc_driver_init(void)
   //   // printf("noc_driver_init(): noc driver recv irq handler at 0x%0x\n", &irq3_handler);
   // }
 
+#ifdef UCX_NOC_TT
+  // irq pins 2 and 3 (receiving); the time-triggered injection (lib/noc_tt.c)
+  // flags down the send command of the previous packet before the next one,
+  // so the end of a send (irq1) does not interrupt the CPU
+  IRQ_MASK |= MASK_IRQ2 | MASK_IRQ3;
+#else
   // enable irq pins 1 (sending) and 2 (receiving)
   IRQ_MASK |= MASK_IRQ1 | MASK_IRQ2 | MASK_IRQ3;
+#endif
 }
 
 
@@ -349,6 +421,12 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
 
   //check whether the packet destination lies in the same pcore
   if(target_cpu != ucx_noc_cpu_id()) {
+#ifdef UCX_NOC_TT
+    // irq1 masked (noc_driver_init): flag down the command of the previous
+    // packet when the ddma waits in its handshake state (0x40)
+    if (_ddma_send_status() == 0x40)
+      _ddma_send_ack();
+#endif
     // prevent user from sending another packet until the 
     // ddma gets ready again (0x1 is the idle state)
     while(_ddma_send_status() != 0x1);
@@ -380,12 +458,20 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
     }
 
     // wake the receiver only when the packet entered its queue
+#ifdef UCX_NOC_LATEST
+    _di();
+    int32_t res = pktdrv_put_latest(pktdrv_tqueue[target_task], pkt);
+    _ei();
+#else
     int32_t res = ucx_queue_enqueue(pktdrv_tqueue[target_task], pkt);
+#endif
     if (res == 0) {
 #ifndef UCX_NO_INSTRUMENTATION
       set_counter_4(pkt->tag);
 #endif
+#ifndef UCX_NOC_LATEST
       enable_receiver(target_task);
+#endif
     }
     return res;
   }

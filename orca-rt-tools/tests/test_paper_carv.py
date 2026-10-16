@@ -10,6 +10,9 @@ from tests.conftest import REPO_ROOT, run_module
 from rttools.modules.io import appparser
 from rttools.paper import carv, exp23, frequency
 
+# reference.json of experiments/car-v: network-interface model off (NI ?= off)
+pytestmark = pytest.mark.usefixtures("ni_off")
+
 EXP = os.path.join(REPO_ROOT, "experiments", "car-v")
 APPS = os.path.join(REPO_ROOT, "apps")
 ARCH = os.path.join(REPO_ROOT, "arch", "hermes-4x4.gml")
@@ -23,7 +26,7 @@ def cfg():
 
 
 @pytest.fixture(scope="module")
-def metrics(cfg, tmp_path_factory):
+def metrics(cfg, tmp_path_factory, ni_off_module):
     out = tmp_path_factory.mktemp("carv")
     m = carv.run(cfg, APPS, ARCH, str(out))
     return m, out

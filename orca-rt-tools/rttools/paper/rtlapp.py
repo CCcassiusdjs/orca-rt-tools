@@ -3,7 +3,7 @@
 model of the analysis flow.
 
     python -m rttools.paper.rtlapp analyze <log> --manifest <name>.json --csv <app.csv> --map <app.map>
-        --out <dir> [--run-info <RUN_INFO>] [--arch <arch.gml>]
+        --out <dir> [--run-info <RUN_INFO>] [--arch <arch.gml>] [--app <name> [--composition <file>]]
     python -m rttools.paper.exp23 check <dir>/metrics.json <reference.json>
 
 The module generalizes rttools.paper.exp23 (application E, hand-written
@@ -11,7 +11,21 @@ weird_a.c) to any generated application: the tasks, flows, PEs and tags
 come from the manifest of the generator, the costs and the period from the
 CSV, the mapping from the .map file, the clock from the RUN_INFO of the
 simulation (experiments/exp23/simulate.sh). No number of an application
-is in this file.
+is in this file. The command line sends a time-triggered application
+(manifest "model": "time_triggered": several release periods or cycles)
+to rttools.paper.rtlmr.
+
+A run of a composition (rttools.ucxgen compose: several applications on
+disjoint PEs of one mesh, rttools.multiapp) holds the events of every
+application. With --app, the analysis takes the manifest of that
+application (rttools.ucxgen.model.app_manifest) and its CSV and .map: its
+tasks, PEs, flows and tags; the tags and the packets of the other
+applications are counted apart (tags.other_app_tags,
+network.other_app_packets) and listed as contenders by
+"<application>/f<flow>". The releases and their acknowledgments are those
+of the whole image (one release generator period). With --composition
+(the composition file of rttools.multiapp), the link schedule is the AGS
+schedule of the union of the packets of every application at F_CLK.
 
 Model (at the clock F_CLK of the run; P = T F_CLK cycles):
 
@@ -37,6 +51,8 @@ Measurement (log of the run):
 | CPU per PE | Non-IDLE time of the PE in windows of phi(v_last) + 1 releases from r_{phi(v_last) + 1} (every phase holds an iteration), divided by phi(v_last) + 1; and, per task, the CPU time of its runs up to the end of its last complete iteration divided by the number of iterations |
 | Packet against [r, d] | Send and receive (TAG lines) in cycles from r_k + phi(u) P |
 | Network latency | FLIT lines of the packet monitor (rtl/pe_checker.sv): RX.last - TX.head; header = RX.head - TX.head against 6 (m + 1); TX and RX pair by source, destination and tag |
+| Phase conformance | Executions (ITER begin markers) of each task per phase [r_k, r_k+1) and CPU of each PE per phase against t(V_k) (rttools/paper/phasecheck.py); release rule of the run from the RUN_INFO line `release` (release by tick: the release acknowledgments come from every PE of tick_pes of the manifest) |
+| Time-triggered injection (RUN_INFO injection=tt, with --arch or --composition) | Each packet between PEs against its instant s, occupancy o_i and deadline in the link schedule of the table of the image (rttools/paper/ttcheck.py: FLIT END and TIMER lines; metrics.json "tt", tt_packets.csv); the link schedule of the analysis takes the network-interface model tt |
 """
 from __future__ import annotations
 
@@ -55,7 +71,7 @@ from rttools.modules.instances import release
 from rttools.modules.io import appparser
 from rttools.modules.mapping import mapfile
 from rttools.modules.routing import router
-from rttools.paper import exp23
+from rttools.paper import exp23, ttcheck
 from rttools.tui.model import metrics as tmetrics
 
 exact = exp23.exact
@@ -104,12 +120,23 @@ def task_deadlines(csv_path):
     return out
 
 
-def load_app(manifest_path, csv_path, map_path):
+def load_app(manifest_path, csv_path, map_path, app_name=None):
     """Application of a run: the manifest of rttools.ucxgen, the costs and
     period of the CSV and the mapping of the .map file. ValueError when the
-    manifest and the inputs disagree (tasks, flows, PEs)."""
+    manifest and the inputs disagree (tasks, flows, PEs). A manifest of a
+    composition needs `app_name` (the application to analyze)."""
     with open(manifest_path) as f:
         man = json.load(f)
+    other = None
+    if man.get("apps"):
+        from rttools.ucxgen import model as ucxmodel
+        if app_name is None:
+            raise ValueError("the manifest holds a composition (" + ", ".join(a["name"] for a in man["apps"])
+                             + "); give the application (--app)")
+        man = ucxmodel.app_manifest(man, app_name)
+        other = {int(k): v for k, v in man["composition"]["other_flows"].items()}
+    elif app_name is not None:
+        raise ValueError("--app: the manifest holds one application")
     g, _ = appparser.loadFromFile(csv_path)
     entries = mapfile.read(map_path)
     tasks = [t["name"] for t in man["tasks"]]
@@ -139,7 +166,7 @@ def load_app(manifest_path, csv_path, map_path):
     if rel["model"] != release.PHASE:
         raise ValueError("the application does not use the phase model (release_model)")
     deadlines = task_deadlines(csv_path)
-    return {
+    out = {
         "manifest": man, "graph": g, "entries": entries, "tasks": tasks, "wcet": wcet,
         "flows": by_id, "period_s": period_s, "release": rel, "deadlines": deadlines,
         "label": {t["name"]: t["pe_label"] for t in man["tasks"]},
@@ -150,6 +177,12 @@ def load_app(manifest_path, csv_path, map_path):
                    "csv_matches_manifest": sha256(csv_path) == man["inputs"]["csv"]["sha256"],
                    "map_matches_manifest": sha256(map_path) == man["inputs"]["map"]["sha256"]},
     }
+    if other is not None:
+        out["app_name"] = app_name
+        out["other_flows"] = other
+        out["inputs"]["composition"] = man["composition"]["name"]
+        out["inputs"]["app"] = app_name
+    return out
 
 
 # ------------------------------------------------------------ model
@@ -204,11 +237,16 @@ def model(app, f_clk):
     }
 
 
-def link_schedule(app, arch_path, f_clk):
+def link_schedule(app, arch_path, f_clk, composition=None):
     """Link schedule of the analysis flow at F_CLK (AGS backend,
     search.schedule_at, link occupancy o_i): start of the packet of each
     flow between PEs, cycles from the start of the phase of its source;
-    {"feasible", "starts": {flow id: start}}."""
+    {"feasible", "starts": {flow id: start}}. With `composition` (file of
+    rttools.multiapp), the schedule of the union of the packets of every
+    application of the composition (compose.schedule_union); the
+    composition must place this application on the PEs of its .map file."""
+    if composition is not None:
+        return union_link_schedule(app, f_clk, composition)
     from rttools.modules.frequency import search
     from rttools.modules.io import nocparser
     from rttools.paper.frequency import search_config
@@ -216,6 +254,10 @@ def link_schedule(app, arch_path, f_clk):
     with tnet.quiet():
         g, name = appparser.loadFromFile(app["csv_path"])
         noc = nocparser.loadFromFile(arch_path)
+    if app.get("costs"):
+        from rttools.wcet import costs as wcosts
+        wcosts.apply(g, app["costs"], wcosts.MAX)
+    with tnet.quiet():
         a = search.schedule_at(g, noc, app["entries"], name, f_clk, search_config(f_clk))
     if a is None or a["schedule"] is None:
         return {"feasible": False, "starts": {}}
@@ -227,6 +269,35 @@ def link_schedule(app, arch_path, f_clk):
         if fid is not None and vals:
             starts[fid] = min(vals)
     return {"feasible": True, "skipped": len(a["skipped"]), "starts": starts}
+
+
+def union_link_schedule(app, f_clk, composition):
+    from rttools.multiapp import compose
+    from rttools.paper.frequency import search_config
+    from rttools.tui.model import network as tnet
+    spec = compose.read_spec(composition)
+    if app.get("costs"):
+        compose.set_costs(spec, {x["name"]: app["costs"] for x in spec["apps"]})
+    with tnet.quiet():
+        comp = compose.load(spec)
+    me = next((a for a in comp["apps"] if a["name"] == app.get("app_name")), None)
+    if me is None:
+        raise ValueError(f"application {app.get('app_name')} not in the composition {composition}")
+    if mapfile.to_text(me["entries"]) != mapfile.to_text(app["entries"]):
+        raise ValueError(f"the composition places {me['name']} on other PEs than its .map file")
+    with tnet.quiet():
+        a = compose.schedule_union(comp["apps"], comp["noc"], f_clk, search_config(f_clk))
+    if a is None or a["schedule"] is None:
+        return {"feasible": False, "starts": {}}
+    by_label = {compose.qualify(me["name"], "f" + str(fl["csv_id"])): fid for fid, fl in app["flows"].items()}
+    starts = {}
+    for j, p in enumerate(a["problem"]["packets"]):
+        vals = [row[j] for row in a["schedule"] if row[j] is not None]
+        fid = by_label.get(p["flow"])
+        if fid is not None and vals:
+            starts[fid] = min(vals)
+    return {"feasible": True, "skipped": len(a["skipped"]), "starts": starts, "union": True,
+            "apps": [x["name"] for x in comp["apps"]]}
 
 
 # ------------------------------------------------------------ log
@@ -243,11 +314,12 @@ def load_log(log_path, app, f_clk=None, run_info="auto"):
     return tr, clk, clock
 
 
-def release_acks(log_path, app):
+def release_acks(log_path, app, rule=None):
     """Acknowledgment of each release by the PEs of the mask (TRIGGER line
     of the lowest PE, TRIGGER-PE lines of the others): PEs per release
-    against the PEs of the release mask of the manifest, and the spread of
-    the acknowledgment instants (ns of the log)."""
+    against the PEs of the release mask of the manifest (tick_pes for a run
+    with the release by tick, rule "tick"), and the spread of the
+    acknowledgment instants (ns of the log)."""
     acks, trig = [], []
     with open(log_path, errors="replace") as f:
         for line in f:
@@ -264,7 +336,9 @@ def release_acks(log_path, app):
             per[min(range(len(trig)), key=lambda j: abs(trig[j] - a))].append(a)
     counts = [len(x) for x in per]
     spread = [max(x) - min(x) for x in per]
-    return {"releases": len(trig), "pes_expected": len(app["manifest"]["release"]["pes"]),
+    rel = app["manifest"]["release"]
+    pes = rel["tick_pes"] if rule == "tick" and "tick_pes" in rel else rel["pes"]
+    return {"releases": len(trig), "pes_expected": len(pes),
             "pes_min": min(counts) if counts else None, "pes_max": max(counts) if counts else None,
             "spread_ns_max": max(spread) if spread else None}
 
@@ -291,7 +365,8 @@ def tag_events(tr, app):
     mod = man["tag_mod"]
     flows = app["flows"]
     ev = {fid: {"send": [], "recv": []} for fid in flows}
-    unknown = lane_errors = 0
+    unknown = lane_errors = other_app = 0
+    other = app.get("other_flows") or {}
     for lane in tr.lanes:
         for mk in tr.lane_marks(lane):
             if mk.kind not in ("send", "recv") or not mk.label.startswith("TAG "):
@@ -299,7 +374,10 @@ def tag_events(tr, app):
             tag = int(mk.label.split()[1])
             fid = tag // mod
             if fid not in flows:
-                unknown += 1
+                if fid in other:
+                    other_app += 1
+                else:
+                    unknown += 1
                 continue
             fl = flows[fid]
             want = fl["src_label"] if mk.kind == "send" else fl["dst_label"]
@@ -320,8 +398,11 @@ def tag_events(tr, app):
                 mismatch += k != pos
             o[kind] = ks
         out[fid] = o
-    return out, {"unknown_tags": unknown, "lane_errors": lane_errors, "repeated": repeated,
-                 "fifo_mismatch": mismatch}
+    counts = {"unknown_tags": unknown, "lane_errors": lane_errors, "repeated": repeated,
+              "fifo_mismatch": mismatch}
+    if "other_flows" in app:
+        counts["other_app_tags"] = other_app
+    return out, counts
 
 
 def iteration_marks(tr, app):
@@ -608,6 +689,7 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
         t = lst.pop(0)
         fid, km = t["tag"] // mod, t["tag"] % mod
         fl = app["flows"].get(fid)
+        oth = (app.get("other_flows") or {}).get(fid)
         m = exp23._hops(t["src"], t["dst"])
         p = t["size"]
         hop = router.getRoutingTime() * (m + 1)
@@ -624,7 +706,7 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
                    "stall": r.get("stall"), "gap": r.get("gap"), "tx_block": t.get("block"), "tx_gap": t.get("gap"),
                    "identity_ok": (r["last"] - r["head"] == p + 1 + r.get("stall", 0) + r.get("gap", 0)
                                    and t["last"] - t["head"] == p + 1 + t.get("block", 0) + t.get("gap", 0)),
-                   "links": xy_links(t["src"], t["dst"])})
+                   "links": xy_links(t["src"], t["dst"]), "other": oth})
     unpaired_tx = sum(len(v) for v in q.values())
     # iteration of each packet (unwrap per flow in order of the header)
     for x in pk:
@@ -637,6 +719,7 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
     # path while the header of this one waits
     for x in pk:
         x["contenders"] = []
+        x["contenders_other"] = []
         if x["header_minus_model"] <= 0:
             continue
         links = set(x["links"])
@@ -645,6 +728,8 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
                 continue
             if links & set(y["links"]):
                 x["contenders"].append(y["flow"])
+                if y["other"] is not None:
+                    x["contenders_other"].append(y["other"])
     # software latency (TAG lines) against the network latency
     for x in pk:
         sw = None
@@ -674,23 +759,80 @@ def network(log_path, app, mdl, clk, ev, schedule=None):
                "header_waits_above_bound": sum(1 for x in xs if x["header_minus_model"] > w_h * (m + 1)),
                "above_occupancy": sum(1 for x in xs if x["latency_minus_occupancy"] > 0),
                "contender_flows": sorted({c for x in xs for c in x["contenders"] if c is not None})}
+        if "other_flows" in app:
+            row["contender_other_apps"] = sorted({c for x in xs for c in x["contenders_other"]})
         for k in ("latency", "latency_minus_L0", "header_minus_model", "stall", "gap", "tx_block",
                   "software_latency", "driver"):
             vals = [x[k] for x in xs if x[k] is not None]
             row[k + "_min"], row[k + "_max"] = (min(vals), max(vals)) if vals else (None, None)
         flows.append(row)
-    return {
+    # the packets of the other applications of a composition stay out of
+    # the counts (they appear as contenders only)
+    own = [x for x in pk if x["other"] is None]
+    out = {
         "model": "L0 = 6 (m + 1) + p + 1; header 6 (m + 1); o_i = L0 + w_h (m + 1)",
         "header_wait_cycles": w_h,
-        "tx": len(tx), "rx": len(rx), "packets": len(pk), "unpaired_tx": unpaired_tx, "unpaired_rx": unpaired_rx,
-        "outside_flows": sum(1 for x in pk if x["flow"] is None),
-        "identity_errors": sum(1 for x in pk if not x["identity_ok"]),
-        "header_waits": sum(1 for x in pk if x["header_minus_model"] > 0),
-        "header_waits_above_bound": sum(1 for x in pk if x["header_minus_model"] > w_h * (x["hops"] + 1)),
-        "above_occupancy": sum(1 for x in pk if x["latency_minus_occupancy"] > 0),
+        "tx": len(tx), "rx": len(rx), "packets": len(own), "unpaired_tx": unpaired_tx, "unpaired_rx": unpaired_rx,
+        "outside_flows": sum(1 for x in own if x["flow"] is None),
+        "identity_errors": sum(1 for x in own if not x["identity_ok"]),
+        "header_waits": sum(1 for x in own if x["header_minus_model"] > 0),
+        "header_waits_above_bound": sum(1 for x in own if x["header_minus_model"] > w_h * (x["hops"] + 1)),
+        "above_occupancy": sum(1 for x in own if x["latency_minus_occupancy"] > 0),
         "flows": flows,
-        "per_packet": pk,
+        "per_packet": own,
     }
+    if "other_flows" in app:
+        out["other_app_packets"] = len(pk) - len(own)
+        out["header_waits_with_other_app_contender"] = sum(1 for x in own if x["contenders_other"])
+    return out
+
+
+def apply_costs(app, costs):
+    """t(v) = max(CSV, static) of the costs file of a run (rttools/wcet/
+    costs.py, rule max) in the graph, the costs and the release settings
+    (scheduler_cycles) of `app` (load_app)."""
+    from rttools.wcet import costs as wcosts
+    wcosts.apply(app["graph"], costs, wcosts.MAX)
+    app["wcet"] = {str(d.get("label", n)): int(float(d["wcet"])) for n, d in app["graph"].nodes(data=True)}
+    app["release"] = release.settings(app["graph"].graph)
+    app["costs"] = costs
+    app["cost_sources"] = wcosts.sources(app["graph"])
+    return app
+
+
+def tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, arch, f_clk, composition=None,
+             marks=None, ev=None):
+    """Packets between PEs of a run with the time-triggered injection
+    against the link schedule of the table of its image
+    (rttools.paper.ttcheck): packet k of a flow comes from the job of the
+    source in phase k - 1 + n(source); the end of job k of v (ITER end
+    marker) at or before F(v) after the tick of phase k - 1 + n(v), and the
+    enqueue of each packet (send TAG line) at or before its instant s."""
+    table = ttcheck.schedule_rows(csv_path, map_path, arch, f_clk, composition, app.get("costs"))
+    if composition:
+        from rttools.multiapp import compose
+        label = {fid: compose.qualify(app["app_name"], "f" + str(fl["csv_id"])) for fid, fl in app["flows"].items()}
+    else:
+        label = {fid: "f" + str(fl["csv_id"]) for fid, fl in app["flows"].items()}
+    pk = [dict(x, flow_label=label[x["flow"]], n=x["iteration"] - 1) for x in per_packet
+          if x["flow"] is not None and x["iteration"] is not None and not app["flows"][x["flow"]]["local"]]
+
+    def phase_of(p, row, h):
+        return h + mdl["tasks"][app["flows"][p["flow"]]["source"]]["phase"]
+    jobs = [{"pe": mdl["tasks"][v]["pe"], "task": v, "j": k, "t_raw": mk["end"],
+             "q": k - 1 + mdl["tasks"][v]["phase"], "bound": mdl["tasks"][v]["finish"]}
+            for v, ks in (marks or {}).items() for k, mk in sorted(ks.items()) if mk.get("end") is not None]
+    by = ttcheck.rows_by_flow(table)
+    ready = []
+    for fid, fl in app["flows"].items():
+        if fl["local"] or fid not in (ev or {}):
+            continue
+        s0 = by[label[fid]][0]["offset"]
+        for k, t in sorted(ev[fid]["send"].items()):
+            ready.append({"pe": fl["src_label"], "flow": fid, "n": k, "t_raw": t,
+                          "q": k - 1 + mdl["tasks"][fl["source"]]["phase"], "bound": s0})
+    return ttcheck.analyze_run(log_path, clk, releases, table, pk, phase_of, w_h=mdl["header_wait_cycles"],
+                               jobs=jobs if marks else None, ready=ready if ev else None)
 
 
 # ------------------------------------------------------------ outputs
@@ -703,11 +845,30 @@ def _csv(path, rows, cols):
             w.writerow([r.get(c) for c in cols])
 
 
-def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None):
-    app = load_app(manifest_path, csv_path, map_path)
+def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None,
+            app_name=None, composition=None, release_rule=None):
+    """Every output of the module for one log, with the network-interface
+    model of the images of the run (ttcheck.run_ni)."""
+    from rttools.paper import ttcheck
+    with ttcheck.run_ni(log_path, run_info):
+        return _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info, f_clk, arch,
+                        app_name, composition, release_rule)
+
+
+def _analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto", f_clk=None, arch=None,
+             app_name=None, composition=None, release_rule=None):
+    from rttools.paper import phasecheck
+    app = load_app(manifest_path, csv_path, map_path, app_name)
     tr, clk, clock = load_log(log_path, app, f_clk, run_info)
+    info_path = exp23.run_info_path(log_path) if run_info == "auto" else run_info
+    info = exp23.read_run_info(info_path) if info_path else {}
+    rel_rule = phasecheck.release_rule(info, release_rule)
+    injection = ttcheck.injection_rule(info)
     if tr.meta.get("swap_xy"):
         raise ValueError("the PE labels of the log are swapped against the manifest")
+    costs = ttcheck.costs_of_run(info) if injection == "tt" else None
+    if costs:
+        apply_costs(app, costs)
     mdl = model(app, clock["clock_hz"])
     releases = sorted(m.time for m in tr.lane_marks("TRIGGER"))
     if not releases:
@@ -719,12 +880,23 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
     win = cpu_windows(tr, app, mdl, clk, releases)
     att = cpu_attributed(mdl, its)
     pkts = packets(app, mdl, clk, releases, ev)
-    sched = link_schedule(app, arch, clock["clock_hz"]) if arch else None
+    # link schedule of the model of the run: the network interface as a
+    # resource and w_NI in o_i for the time-triggered injection
+    prev_ni = router.set_ni("tt" if injection == "tt" else "off")
+    try:
+        sched = link_schedule(app, arch, clock["clock_hz"], composition) if (arch or composition) else None
+    finally:
+        router.set_ni(prev_ni)
     if sched:
         for f in pkts["flows"]:
             f["schedule_start"] = sched["starts"].get(f["flow"])
     net = network(log_path, app, mdl, clk, ev, sched)
     per_packet = net.pop("per_packet") if net else []
+    tt = None
+    if injection == "tt" and net is not None and (arch or composition):
+        tt = tt_check(log_path, app, mdl, clk, releases, per_packet, csv_path, map_path, arch, clock["clock_hz"],
+                      composition, marks, ev)
+    tt_rows = ttcheck.pop_rows(tt)
     r2d = []
     for k, r in enumerate(releases, start=1):
         firsts = []
@@ -751,7 +923,7 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
                      if len(releases) > 1 else None,
                      "release_to_first_dispatch_min_cycles": min(r2d) if r2d else None,
                      "release_to_first_dispatch_max_cycles": max(r2d) if r2d else None,
-                     "acks": release_acks(log_path, app)},
+                     "acks": release_acks(log_path, app, rel_rule)},
         "tags": tagc,
         "markers": len(tr.meta.get("iterations") or []),
         "iteration_source": {v: d["source"] for v, d in its.items()},
@@ -763,6 +935,15 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
         "network": net,
         "link_schedule": None if sched is None else {k: v for k, v in sched.items()},
         "monitor": exp23.monitor_summary(log_path),
+        "injection": injection,
+        "costs": None if not costs else {"file": ttcheck.costs_label(costs), "rule": "max",
+                                         "static_above_csv": sorted(t for t, v in app["cost_sources"].items()
+                                                                    if v == "static")},
+        "tt": tt,
+        "phase_conformance": phasecheck.conformance(
+            tr, clk, releases, {v: {k: mk["begin"] for k, mk in ks.items()} for v, ks in marks.items()},
+            lambda v, j: j - 1 + mdl["tasks"][v]["phase"], {t["name"]: t["pe_label"] for t in app["manifest"]["tasks"]},
+            lambda pe, p: mdl["demand_cycles"][pe], rel_rule) if marks else None,
     }
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
@@ -791,9 +972,10 @@ def analyze(log_path, manifest_path, csv_path, map_path, out_dir, run_info="auto
          ["task", "pe", "source", "iterations", "phase_model", "phase_observed", "cost",
           "cpu_per_iteration_cycles", "end_minus_model_finish_max", "ends_after_model_finish",
           "max_iterations_per_run", "same_run"])
+    ttcheck.write_rows(out_dir, tt_rows)
     if net:
         _csv(os.path.join(out_dir, "network.csv"), net["flows"], list(net["flows"][0]) if net["flows"] else [])
-        cols = [c for c in per_packet[0] if c != "links"] if per_packet else []
+        cols = [c for c in per_packet[0] if c not in ("links", "other", "contenders_other")] if per_packet else []
         _csv(os.path.join(out_dir, "network_packets.csv"), per_packet, cols)
     return m
 
@@ -826,6 +1008,12 @@ def summary_lines(m):
     out.append("  monitor: " + ("no CHKSUM lines" if mon is None else
                                 f"{mon['errors']} errors, {mon['send_pkts']} sent, {mon['recv_pkts']} received "
                                 f"({mon['nodes']} PEs)"))
+    pc = m.get("phase_conformance")
+    if pc is not None:
+        from rttools.paper import phasecheck
+        out.append("  phase conformance: " + phasecheck.summary(pc)[0][2:])
+    if m.get("injection") == "tt":
+        out += ["  " + x.lstrip() for x in ttcheck.summary_lines(m.get("tt"))]
     return out
 
 
@@ -842,9 +1030,30 @@ def main(argv=None):
     a.add_argument("--f-clk", type=int, default=None, help="F_CLK (Hz) when the log has no RUN_INFO")
     a.add_argument("--arch", default=None,
                    help="architecture (.gml) for the link schedule of the analysis flow at F_CLK (AGS)")
+    a.add_argument("--app", default=None,
+                   help="application of a composition (manifest of rttools.ucxgen compose)")
+    a.add_argument("--composition", default=None,
+                   help="composition file (rttools.multiapp): link schedule of the union of the packets")
+    a.add_argument("--release", choices=["auto", "tick", "data"], default="auto",
+                   help="release rule of the run (default: the line `release` of the RUN_INFO; data without "
+                        "it, the runs before the release by tick)")
     args = p.parse_args(argv)
-    m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch)
-    for line in summary_lines(m):
+    with open(args.manifest) as f:
+        time_triggered = json.load(f).get("model") == "time_triggered"
+    if time_triggered:
+        # several release periods or cycles: general phase model (rttools/paper/rtlmr.py)
+        if args.app is not None or args.composition is not None:
+            p.error("--app and --composition take a composition of applications with one release "
+                    "period (rttools.ucxgen compose); the manifest is a time-triggered application")
+        from rttools.paper import rtlmr
+        m = rtlmr.analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk,
+                          args.arch)
+        lines = rtlmr.summary_lines(m)
+    else:
+        m = analyze(args.log, args.manifest, args.csv, args.map, args.out, args.run_info, args.f_clk, args.arch,
+                    args.app, args.composition, args.release)
+        lines = summary_lines(m)
+    for line in lines:
         print(line)
     print("wrote " + args.out)
     return 0

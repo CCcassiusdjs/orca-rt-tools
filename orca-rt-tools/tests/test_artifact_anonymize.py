@@ -45,12 +45,24 @@ def test_export_content(export):
     assert not (e / "ch6").exists()
     assert sorted(os.listdir(e / "exp23" / "logs")) == ["F.RUN_INFO", "F.events.txt", "F.image.lst",
                                                          "F.noinstr.lst", "F.software.txt", "F.time.txt"] + [
-        f"{r}.{x}" for r in "GH" for x in ("RUN_INFO", "events.txt", "image.lst", "noinstr.lst", "time.txt")]
+        f"{r}.{x}" for r in "GH" for x in ("RUN_INFO", "events.txt", "image.lst", "noinstr.lst", "time.txt")] + [
+        "TG.RUN_INFO", "TG.events.txt", "TG.image.lst", "TG.noinstr.lst", "TG.time.txt",
+        "TH.RUN_INFO", "TH.events.txt", "TH.image.elf", "TH.image.lst", "TH.noinstr.lst", "TH.time.txt",
+        "UG.RUN_INFO", "UG.events.txt", "UG.image.lst", "UG.noinstr.lst", "UG.time.txt",
+        "UH.RUN_INFO", "UH.events.txt", "UH.image.elf", "UH.image.lst", "UH.noinstr.lst", "UH.time.txt",
+        "VG.RUN_INFO", "VG.events.txt", "VG.image.lst", "VG.noinstr.lst", "VG.time.txt",
+        "VH.RUN_INFO", "VH.events.txt", "VH.image.elf", "VH.image.lst", "VH.noinstr.lst", "VH.time.txt"]
     assert (e / "exp23" / "reference_G.json").exists() and (e / "exp23" / "reference_H.json").exists()
     assert not (e / "exp23" / "reference_D.json").exists() and not (e / "exp23" / "reference_E.json").exists()
     assert sorted(os.listdir(e / "car-v-rtl" / "logs")) == [
-        f"{r}.{x}" for r in ("CV", "CV2") for x in ("RUN_INFO", "events.txt", "time.txt")]
+        f"{r}.{x}" for r in ("CV", "CV2") for x in ("RUN_INFO", "events.txt", "time.txt")] + [
+        f"{r}.{x}" for r in ("TCV", "UCV", "VCV") for x in ("RUN_INFO", "events.txt", "image.elf", "time.txt")]
     assert (e / "car-v-rtl" / "reference_CV.json").exists() and (e / "car-v-rtl" / "reference_CV2.json").exists()
+    assert sorted(os.listdir(e / "multiapp" / "logs")) == [
+        f"MA.{x}" for x in ("RUN_INFO", "events.txt", "output-0-1.txt", "time.txt")] + [
+        f"{r}.{x}" for r in ("TMA", "UMA") for x in ("RUN_INFO", "events.txt", "time.txt")] + [
+        f"VMA.{x}" for x in ("RUN_INFO", "events.txt", "image.elf", "time.txt")]
+    assert all((e / "multiapp" / f"reference_MA_{a}.json").exists() for a in ("CARV", "E"))
     assert "thesis" not in json.loads((e / "exp23" / "config.json").read_text())
     assert "reference_rows" in json.loads((e / "ch7" / "config.json").read_text())
     exp23 = (out / "orca-rt-tools" / "rttools" / "paper" / "exp23.py").read_text()
