@@ -62,7 +62,7 @@ cd orca-rt-tools
 python -m rttools ../apps/synthetic-app-e/synthetic-app-e.csv spiral ../arch/hermes-2x2.gml
 ```
 
-The command runs steps 1 to 6 on application E and prints $f_{\mathrm{CPU}}$, $f_{\mathrm{NoC}}$, the clock frequency and the link schedule.
+The command runs steps 1 to 6 on application E with its characterized costs. It prints the network frequency, $f_{\mathrm{CPU}}$ and the minimum frequency (434.9 MHz), and writes the link schedule to `results.svg`. The pipelines of `experiments/tt` add the static costs of each image and give the clocks of the paper.
 
 ## Reproduce the paper
 
