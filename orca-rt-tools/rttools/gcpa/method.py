@@ -44,3 +44,18 @@ def calculate_gcpa(graph):
       get_largest_path(n, dct, graph)
 
     return dct
+
+def cluster_time(costs):
+    """CPU time of the task set of one PE by the CPA rule of ORT/GCPA
+    (ORCA RT-Tools reference, Sec. 8.1.4): the driver operations of one
+    processor cannot run in parallel, so the method sums the costs of the
+    tasks of the set in place of the longest path between them.
+    `costs`: iterable of task costs in cycles (int >= 0), each with the
+    kernel work of the task. Returns the cycles of one iteration."""
+    total = 0
+    for c in costs:
+        v = int(c)
+        if (isinstance(c, float) and c != v) or v < 0:
+            raise ValueError(f"cost must be a non-negative integer, got {c!r}")
+        total += v
+    return total
