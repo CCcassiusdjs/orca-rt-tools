@@ -4,12 +4,13 @@
 #      pkt-sim/tests/rtl/pe_stubs.sv (router, core and peripherals are VHDL
 #      in the DUT), pe_checker.sv and chk_binds.sv;
 #   2. tb_pe_checker.sv: two PE stubs, synthetic handshakes on the LOCAL
-#      ports, FLIT and CHKSUM lines on stdout.
+#      ports and a synthetic timer line, FLIT (TX, RX, END), TIMER and
+#      CHKSUM lines on stdout.
 #
 #   run.sh [<out_dir>]      (default: experiments/exp23/build/rtl_test)
 #
 # Prints "lint bind: ok" and the output of the testbench; exits with 1 if a
-# step fails. tests/test_exp23_flit_monitor.py checks the FLIT lines.
+# step fails. tests/test_exp23_flit_monitor.py checks the FLIT and TIMER lines.
 set -eu
 T=$(cd "$(dirname "$0")" && pwd)
 RTL=$(cd "$T/.." && pwd)

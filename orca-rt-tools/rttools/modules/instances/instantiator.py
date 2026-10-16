@@ -47,6 +47,12 @@ def createInstance(app, noc, frequency):
     'release': release.settings(getattr(app, 'graph', {}) or {})
   }
 
+  # end-to-end deadline of each task in cycles (Deadline column of the task
+  # rows; release.deadline_fits)
+  deadlines = (getattr(app, 'graph', {}) or {}).get('task_deadlines')
+  if deadlines:
+    instance['deadlines'] = {t: int(float(d) * scale) for t, d in deadlines.items()}
+
   # phase model with several periods or a cycle (rttools/bench_t/
   # multirate.py): the period of each flow is m_e k_u phases of
   # floor(P f) cycles, so the periods share the phase in cycles

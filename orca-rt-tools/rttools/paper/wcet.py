@@ -24,6 +24,14 @@ The flow runs with the static costs of E (frequency pipeline with
 --costs): f_CPU, f* and the minimum frequency, against the measured costs
 of the CSV.
 
+Images with the time-triggered injection (pkt-sim/software/ucx-os/lib/
+noc_tt.c; config_tt.json, images/tt and images/tt13):
+
+| Part | Comparison |
+|---|---|
+| app with `csv` and `map` | t(V_k) = sum of the static t(v) of the tasks of each PE (map) <= the sum of the costs of the CSV, the t(V_k) of the model (pe_bound) |
+| ni_images | terms of the network interface of each image (rttools.wcet.ucx.ni_terms: inject, rx_size, rx_end) <= router.NI_INJECT_CYCLES, NI_RX_SIZE_CYCLES and NI_RX_END_CYCLES, whose sum is NI_WAIT_CYCLES, the w_NI of the occupancy o_i of the model (ni_within_bound) |
+
 Outputs in <dir>: metrics.json, values.tex (\\ExpWcet... macros),
 <app>/costs.json and <app>/costs.csv (rttools.wcet), tasks.csv,
 clusters.csv, bodies.csv, frequency/ (rttools.paper.frequency with the
@@ -200,10 +208,38 @@ def bodies(elf, trace):
 
 # ------------------------------------------------------------ analysis
 
+def costs_file(res):
+    """Costs file (rttools/wcet/costs.py) of a static analysis: t(v) of
+    every task and scheduler_cycles, with the image."""
+    return {"_doc": "static t(v) (rttools.wcet) of the image; the analysis flow takes max(t(v) of the CSV, this t(v)) "
+                    "(rttools/wcet/costs.py, rule max)",
+            "image": res["image"], "scheduler_cycles": res["scheduler_cycles"],
+            "tasks": {t: {"t": r["t"]} for t, r in res["tasks"].items()}}
+
+
+def handlers_file(res):
+    """Handlers file (rttools/wcet/costs.py, load_handlers) of a static
+    analysis: the handlers of one packet event (inject: the send_isr term,
+    the compare interrupt of TIMER1 of an image with the time-triggered
+    injection; receive: the receive_isr term) and the handler cycles that
+    t(v) of each task holds (its send_isr and receive_isr terms)."""
+    k = res["kernel"]
+    return {"_doc": "handlers of one packet event and the handler cycles in t(v) of each task (rttools.wcet, "
+                    "terms send_isr and receive_isr) of the image of the costs file next to this file",
+            "image": res["image"], "inject": k["send_isr"], "receive": k["receive_isr"],
+            "tasks": {t: {"isr": r["terms"]["send_isr"] + r["terms"]["receive_isr"]} for t, r in res["tasks"].items()}}
+
+
 def static(spec_path, out_dir, image=None):
     spec = wcli.load_spec(spec_path)
     res = wcli.run_spec(spec, image)
     os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "costs_file.json"), "w") as f:
+        json.dump(costs_file(res), f, indent=1)
+        f.write("\n")
+    with open(os.path.join(out_dir, "costs_file.handlers.json"), "w") as f:
+        json.dump(handlers_file(res), f, indent=1)
+        f.write("\n")
     with open(os.path.join(out_dir, "costs.json"), "w") as f:
         json.dump(res, f, indent=1)
         f.write("\n")
@@ -283,11 +319,31 @@ def summary(rows, key):
 
 
 def flow(cfg, costs_path, out_dir):
+    """Flow of E with the static costs and with the costs of the CSV; the
+    key "ni" of the config pins the network-interface model of the flow
+    (rttools/modules/routing/router.py; "off" for the runs up to tag
+    r11-rc5, whose images inject a packet when its job sends it) and the
+    key "deadline" the deadline model (router.set_deadline; "start" for the
+    runs up to tag r11-rc8)."""
+    from rttools.modules.routing import router
+    f = cfg["flow"]
+    prev = router.set_ni(f["ni"]) if "ni" in f else None
+    prev_d = router.set_deadline(f["deadline"]) if "deadline" in f else None
+    try:
+        return _flow(cfg, costs_path, out_dir)
+    finally:
+        if "ni" in f:
+            router.set_ni(prev)
+        if "deadline" in f:
+            router.set_deadline(prev_d)
+
+
+def _flow(cfg, costs_path, out_dir):
     from rttools.paper import frequency
     f = cfg["flow"]
     m_static = frequency.run(f["app"], f["maps"], f["arch"], f["f0"],
                              os.path.join(out_dir, "frequency"), header_wait=f.get("header_wait", "bound"),
-                             costs=costs_path)
+                             costs=costs_path, cost_rule="static")
     m_meas = frequency.run(f["app"], f["maps"], f["arch"], f["f0"],
                            os.path.join(out_dir, "frequency_measured"), header_wait=f.get("header_wait", "bound"))
     out = {}
@@ -303,6 +359,46 @@ def csv_costs(csv_path):
     from rttools.ucxgen.model import read_csv
     tasks, _, _ = read_csv(csv_path)
     return {t["label"]: int(float(str(t["wcet"]).replace(",", ""))) for t in tasks}
+
+
+def pe_bound(res, csv_path, map_path):
+    """t(V_k) of the static costs against the costs of the CSV per PE of
+    the map: {pe: {"tasks", "static", "csv", "sound": static <= csv}}."""
+    from rttools.modules.io import mapparser
+    from rttools.tui.model import network as tnet
+    with tnet.quiet():
+        entries = mapparser.loadFromFile(map_path)
+    want = csv_costs(csv_path)
+    out = {}
+    for e in entries:
+        tasks = [t for t in e["tasks"] if t in res["tasks"]]
+        if not tasks:
+            continue
+        st = sum(res["tasks"][t]["t"] for t in tasks)
+        cs = sum(want[t] for t in tasks)
+        out[str(e["node"])] = {"tasks": tasks, "static": st, "csv": cs, "sound": st <= cs}
+    return out
+
+
+def ni_image(name, a):
+    """Terms of the network interface of an image with the time-triggered
+    injection (rttools.wcet.ucx.ni_terms) and their bound in the model."""
+    from rttools.modules.routing import router
+    from rttools.wcet import annotations as wann
+    from rttools.wcet import ucx
+    img = wimg.load(a["image"])
+    if not ucx.tt_image(img):
+        raise ValueError(f"{name}: {a['image']} has no time-triggered injection (timer1ocr_handler)")
+    an = wan.Analyzer(img, wann.Annotations.load(a["annotations"]))
+    kernel = ucx.kernel_terms(an, True)
+    secs = ucx.sections(an, kernel, an.ann.sections)
+    ni = ucx.ni_terms(kernel, secs)
+    return {"image": {"file": os.path.basename(a["image"]), "sha256": ucx.sha256(a["image"])},
+            "kernel": {k: kernel[k] for k in ("tick", "send_isr", "receive_isr_size", "receive_isr_end",
+                                              "release", "dispatch", "yield_save", "yield_resume") if k in kernel},
+            "sections": secs["sections"], "tail": secs["tail"], "ni": ni,
+            "within_bound": (ni["inject"] <= router.NI_INJECT_CYCLES and ni["rx_size"] <= router.NI_RX_SIZE_CYCLES
+                             and ni["rx_end"] <= router.NI_RX_END_CYCLES and ni["ni_wait"] <= router.NI_WAIT_CYCLES)}
 
 
 def analyze(cfg_path, out_dir):
@@ -322,6 +418,13 @@ def analyze(cfg_path, out_dir):
             meas = measured_app(a["log"], a["manifest"], a["csv"], a["map"])
             tasks, groups = compare_app(res, meas)
             entry.update(clock_hz=meas["clock_hz"], windows=meas["windows"], tasks=tasks, groups=groups)
+        if "ni" in res:
+            entry["injection"] = res["injection"]
+            entry["ni"] = res["ni"]
+            entry["sections"] = res["sections"]["sections"]
+        if "csv" in a and "map" in a and not a.get("measured"):
+            entry["pe_bound"] = pe_bound(res, a["csv"], a["map"])
+            entry["pe_bound_sound"] = all(r["sound"] for r in entry["pe_bound"].values())
         if "csv" in a and a.get("csv_costs"):
             want = csv_costs(a["csv"])
             entry["csv_equals_static"] = all(want.get(t) == r["t"] for t, r in res["tasks"].items())
@@ -338,6 +441,14 @@ def analyze(cfg_path, out_dir):
                 "all_runs_sound": all(x["run_sound"] is not False for x in ts),
                 "all_runs_with_receptions_sound": all(x.get("run_with_receptions_sound") is not False for x in ts)}
         m["apps"][name] = entry
+    if "ni_images" in cfg:
+        from rttools.modules.routing import router
+        m["ni_images"] = {name: ni_image(name, a) for name, a in cfg["ni_images"].items()}
+        m["ni_bound"] = router.NI_WAIT_CYCLES
+        m["ni_term_bounds"] = {"inject": router.NI_INJECT_CYCLES, "rx_size": router.NI_RX_SIZE_CYCLES,
+                               "rx_end": router.NI_RX_END_CYCLES}
+        m["ni_max"] = max(r["ni"]["ni_wait"] for r in m["ni_images"].values())
+        m["ni_within_bound"] = all(r["within_bound"] for r in m["ni_images"].values())
     if "bodies" in cfg:
         m["bodies"] = bodies(cfg["bodies"]["elf"], cfg["bodies"]["trace"])
     if "flow" in cfg:
@@ -437,15 +548,25 @@ def run_log(log, spec, image, manifest, csv_path, map_path, out_dir, arch=None):
     """Static costs of the image of an RTL run against its log (WCET-E
     after `make sim`): CPU per PE and per task, and the phase-model
     analysis of rtlapp (responses against R_bound and the deadline,
-    packets against [r, d], network, monitor) with the static t(v) of
-    that image in the CSV (a copy in `out_dir`), under the key rtlapp."""
+    packets against [r, d], network, monitor) under the key rtlapp: for a
+    run with a costs file in its RUN_INFO (costs=max_csv_static, the
+    images with the time-triggered injection), the model of the run, t(v)
+    = max(CSV, static t(v) of the costs file), and the check of the
+    injection (tt); otherwise the static t(v) of the image in the CSV (a
+    copy in `out_dir`)."""
     import shutil
+    from rttools.paper import exp23, ttcheck
     res = static(spec, out_dir, image)
     meas = measured_app(log, manifest, csv_path, map_path)
     tasks, pes = compare_app(res, meas)
-    csv_run = os.path.join(out_dir, os.path.basename(csv_path))
-    shutil.copyfile(csv_path, csv_run)
-    set_csv(os.path.join(out_dir, "costs.json"), csv_run)
+    info_path = exp23.run_info_path(log)
+    info = exp23.read_run_info(info_path) if info_path else {}
+    if ttcheck.injection_rule(info) == "tt" and ttcheck.costs_of_run(info):
+        csv_run = csv_path
+    else:
+        csv_run = os.path.join(out_dir, os.path.basename(csv_path))
+        shutil.copyfile(csv_path, csv_run)
+        set_csv(os.path.join(out_dir, "costs.json"), csv_run)
     rt = rtlapp.analyze(log, manifest, csv_run, map_path, os.path.join(out_dir, "rtlapp"), arch=arch)
     resp = rt["responses"]
     m = {"log": os.path.basename(log), "image": res["image"], "clock_hz": meas["clock_hz"], "windows": meas["windows"],
@@ -460,7 +581,8 @@ def run_log(log, spec, image, manifest, csv_path, map_path, out_dir, arch=None):
                      "all_runs_with_receptions_sound": all(x.get("run_with_receptions_sound") is not False
                                                            for x in tasks.values())},
          "rtlapp": {k: rt[k] for k in ("clock", "model", "releases", "markers", "responses", "cpu_windows",
-                                       "cpu_attributed", "packets", "network", "monitor", "phase_conformance") if k in rt}}
+                                       "cpu_attributed", "packets", "network", "monitor", "phase_conformance",
+                                       "injection", "costs", "tt") if k in rt and rt[k] is not None}}
     mdl = rt["model"]
     pk = rt["packets"]
     mon = rt.get("monitor") or {}
@@ -526,6 +648,16 @@ def print_summary(m):
                           f"{_r(r.get('run_with_receptions_margin_percent'))}%")
         if "csv_equals_static" in e:
             print(f"  t(v) of the CSV equals the static costs: {e['csv_equals_static']}")
+        for pe, r in e.get("pe_bound", {}).items():
+            print(f"  PE {pe}: t(V_k) static {r['static']} CSV {r['csv']} {'covers' if r['sound'] else 'ABOVE'}")
+        if "ni" in e:
+            print(f"  network interface: w_NI {e['ni']['ni_wait']} (inject {e['ni']['inject']}, rx_size "
+                  f"{e['ni']['rx_size']}, rx_end {e['ni']['rx_end']})")
+    for name, r in m.get("ni_images", {}).items():
+        n = r["ni"]
+        print(f"ni {name}: {r['image']['file']} w_NI {n['ni_wait']} (inject {n['inject']}, rx_size {n['rx_size']}, "
+              f"rx_end {n['rx_end']}, blocking {n['blocking']}) {'within' if r['within_bound'] else 'ABOVE'} "
+              f"{m['ni_bound']}")
     for b, r in m.get("bodies", {}).items():
         print(f"bodies: {b} WCET {r['wcet_wrapper']} measured {r['measured_min']}-{r['measured_max']} "
               f"({r['calls']} calls) margin {_r(r['margin_percent'])}% {'sound' if r['sound'] else 'BELOW'}")

@@ -163,9 +163,10 @@ def math_floor(phase_s, f):
     return math.floor(multirate.seconds(phase_s) * Fraction(f))
 
 
-def test_two_periods_response_equals_r_bound(tmp_path):
+def test_two_periods_response_equals_r_bound(tmp_path, ni_off):
     """CAR-V (T = 0.5 ms) and E with T = 1 ms: phase 0.5 ms, the general
-    model; the largest data age of CAR-V equals its R_bound (one period)."""
+    model; the largest data age of CAR-V equals its R_bound (one period).
+    Network-interface model off: f of experiments/car-v (reference.json)."""
     comp = load(tmp_path, [{"name": "CARV", "csv": CARV_CSV, "map": "spiral", "pes": 16},
                            {"name": "E", "csv": e_with_period(tmp_path), "map": "spiral", "pes": 4}])
     with network.quiet():
@@ -184,11 +185,20 @@ def test_two_periods_response_equals_r_bound(tmp_path):
 
 
 def test_costs_in_the_composition(tmp_path, e_costs):
-    """Static t(v) of E in a composition with one period: f_CPU of E equals
-    the f_CPU of the flow of E with --costs; CAR-V keeps its costs."""
+    """Static t(v) of E in a composition with one period (rule static):
+    f_CPU of E equals the f_CPU of the flow of E with --costs; CAR-V keeps
+    its costs. The default rule max takes max(CSV, static) of each task."""
+    d = json.load(open(e_costs))
+    csv = {t: int(dd["wcet"]) for t, dd in appparser.loadFromFile(E_CSV)[0].nodes(data=True)}
     comp = load(tmp_path, [{"name": "CARV", "csv": CARV_CSV, "map": "spiral", "pes": 16},
                            {"name": "E", "csv": E_CSV, "map": "spiral", "pes": 4, "costs": e_costs}])
-    d = json.load(open(e_costs))
+    e = comp["apps"][1]
+    assert {t: dd["wcet"] for t, dd in e["graph"].nodes(data=True)} == {t: max(csv[t], v["t"])
+                                                                        for t, v in d["tasks"].items()}
+    assert e["graph"].graph["scheduler_cycles"] == 11000
+    comp = load(tmp_path, [{"name": "CARV", "csv": CARV_CSV, "map": "spiral", "pes": 16},
+                           {"name": "E", "csv": E_CSV, "map": "spiral", "pes": 4, "costs": e_costs,
+                            "cost_rule": "static"}])
     e = comp["apps"][1]
     assert {t: dd["wcet"] for t, dd in e["graph"].nodes(data=True)} == {t: v["t"] for t, v in d["tasks"].items()}
     assert e["graph"].graph["scheduler_cycles"] == d["scheduler_cycles"]
@@ -200,9 +210,10 @@ def test_costs_in_the_composition(tmp_path, e_costs):
 
 
 def test_costs_in_the_general_model(tmp_path, e_costs):
-    """Static t(v) of E next to CAR-full: E keeps its scheduler cost on its
-    PEs (scheduler_cycles_pe), so P_min of E is (t(G) + t(J) + sigma_E) / 2."""
-    comp = cf_and_e(tmp_path, costs=e_costs)
+    """Static t(v) of E next to CAR-full (rule static): E keeps its
+    scheduler cost on its PEs (scheduler_cycles_pe), so P_min of E is (t(G)
+    + t(J) + sigma_E) / 2."""
+    comp = cf_and_e(tmp_path, costs=e_costs, cost_rule="static")
     d = json.load(open(e_costs))
     U, _, _, _ = compose.union_graph(comp["apps"])
     e_pes = {str(x["node"]) for x in comp["apps"][1]["entries"] if x["tasks"]}
@@ -217,16 +228,16 @@ def test_costs_in_the_general_model(tmp_path, e_costs):
 
 
 def test_costs_in_the_general_model_of_one_application(tmp_path):
-    """--costs on an application of the general model (CAR-full): the CPU
-    test takes the costs of the file, the same as a CSV with these
-    capacities."""
+    """Costs file (rule static) on an application of the general model
+    (CAR-full): the CPU test takes the costs of the file, the same as a CSV
+    with these capacities."""
     g, _ = appparser.loadFromFile(CF_CSV)
     entries = mapparser.loadFromFile(CF_MAP)
     tasks = {t: int(dd["wcet"]) // 2 for t, dd in g.nodes(data=True)}
     p = tmp_path / "costs.json"
     p.write_text(json.dumps({"tasks": {t: {"t": v} for t, v in tasks.items()}, "scheduler_cycles": 5500}))
     from rttools.wcet import costs
-    costs.apply(g, str(p))
+    costs.apply(g, str(p), costs.STATIC)
     with network.quiet():
         got = search.cpu_check(g, entries)
     text = open(CF_CSV).read()
@@ -248,7 +259,10 @@ def test_cli_with_costs(tmp_path, e_costs):
     r = run_module("rttools.multiapp", str(comp), "--costs", "E=" + e_costs, timeout=300)
     assert r.returncode == 0, r.stderr[-2000:]
     assert "general phase model: phase 0.25 ms, hyperperiod 12.5 ms" in r.stdout
-    assert "CF: largest data age = 15552000 cycles (36.000 ms)" in r.stdout
+    # rule max: f_CPU of E with max(CSV, static) sets the frequency
+    assert "E: f_CPU = 456900000 Hz (456.900 MHz)" in r.stdout
+    assert "frequency of the platform = 456900000 Hz (456.900 MHz)" in r.stdout
+    assert "CF: largest data age = 16381950 cycles (35.855 ms)" in r.stdout
     assert "E: largest data age" in r.stdout
     r = run_module("rttools.multiapp", str(comp), "--costs", "X=" + e_costs, timeout=300)
     assert r.returncode == 1 and "application 'X' not in the composition" in r.stderr

@@ -81,8 +81,8 @@ def test_simulate_crt0_line(tmp_path, env, line, asdefs):
 
 
 RUNS = [
-    ("exp23/logs/D.events.txt", "exp23/reference_D.json"),
-    ("exp23/logs/E.events.txt", "exp23/reference_E.json"),
+    ("exp23/logs/D.events.txt", "exp23/reference_D.json"),  # anon:drop-line
+    ("exp23/logs/E.events.txt", "exp23/reference_E.json"),  # anon:drop-line
     ("exp23/logs/F.events.txt", "exp23/reference_head.json"),
     ("exp23/logs/G.events.txt", "exp23/reference_G.json"),
     ("exp23/logs/H.events.txt", "exp23/reference_H.json"),
@@ -138,7 +138,8 @@ def test_build_default_and_plain_crt0(tmp_path):
     _interrupt_set with the read back (lw a3, 0(a1)); with the symbols of
     CRT0=plain, neither, and the image is the one of images/isr (crt0.s of
     tag r11-rc3) when the compiler is the one of that image; the default
-    image is the one of images/guard."""
+    image is the one of images/guard. Both builds take INJECTION=finish, the
+    injection of the stored images (the default, tt, adds lib/noc_tt.c)."""
     from tests.test_ucxgen_carv import toolchain
     pytest.importorskip("elftools")
     path = toolchain(tmp_path)
@@ -157,7 +158,7 @@ def test_build_default_and_plain_crt0(tmp_path):
                          env={**os.environ, "PATH": path}).stdout.splitlines()[0]
     same_gcc = gcc.split(" ", 1)[-1].strip() == built.split(" ", 1)[-1].strip()
     for asdefs, guard, stored in ((None, True, "guard"), (PLAIN_ASDEFS, False, "isr")):
-        elf = make(ucx, path, "weird_a", asdefs=asdefs)
+        elf = make(ucx, path, "weird_a", asdefs=asdefs, injection="finish", f_clk="434912000")
         f = disassembly(path, elf)
         isr, di = "\n".join(f["_isr"]), "\n".join(f["_interrupt_set"])
         assert ("lw\ta5,36(sp)" in isr) == guard and ("lw\ta3,0(a1)" in di) == guard

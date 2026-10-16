@@ -76,7 +76,7 @@ pipe.o: $(SRC_DIR)/kernel/pipe.c
 event.o: $(SRC_DIR)/kernel/event.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/event.c
 
-libs.pack: libc.o dump.o malloc.o list.o queue.o noc.o tick_release.o
+libs.pack: libc.o dump.o malloc.o list.o queue.o noc.o tick_release.o noc_tt.o
 	@echo null > libs.pack
 
 queue.o: $(SRC_DIR)/lib/queue.c
@@ -93,6 +93,8 @@ noc.o: $(SRC_DIR)/lib/noc.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/lib/noc.c
 tick_release.o: $(SRC_DIR)/lib/tick_release.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/lib/tick_release.c
+noc_tt.o: $(SRC_DIR)/lib/noc_tt.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/lib/noc_tt.c
 
 devices.pack: ddma.o cacc.o
 	@echo null > devices.pack
@@ -162,7 +164,20 @@ hello: incl ucx.pack
 # application E or of a generated application waits for the tick of its
 # phase j + n(v) before it serves iteration j. Kernel and application are
 # built with TR_DEFS. Example: make weird_a ARCH=riscv/hf-riscv-e
-TR_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_TICK_RELEASE
+#
+# Injection of the packets between PEs (INJECTION): tt (default) injects
+# each packet at the instant of the link schedule of the analysis flow,
+# counted from the tick of the phase of the sending job (lib/noc_tt.c,
+# -DUCX_NOC_TT; table app/<app>_tt.h of rttools.ucxgen tt for the clock
+# F_CLK of the build); finish injects it when the job sends it (the images
+# up to tag r11-rc5, e.g. make weird_a INJECTION=finish)
+INJECTION ?= tt
+ifeq ($(INJECTION),tt)
+INJ_DEFS = -DUCX_NOC_TT
+else ifneq ($(INJECTION),finish)
+$(error INJECTION must be tt or finish)
+endif
+TR_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_TICK_RELEASE $(INJ_DEFS)
 
 # application E with the release by tick (app/weird_a.sim: RELEASE_MASK of
 # the four PEs)
@@ -217,7 +232,7 @@ $(GEN_APPS): incl
 # through the return of _isr (above, return of _isr). Example: make car_full
 # ARCH=riscv/hf-riscv-e
 GEN_TT_APPS = car_full
-TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST
+TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST $(INJ_DEFS)
 
 $(GEN_TT_APPS): incl
 	@$(MAKE) --no-print-directory clean

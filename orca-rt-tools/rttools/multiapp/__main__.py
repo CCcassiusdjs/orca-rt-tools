@@ -8,8 +8,10 @@ the union of the packets, the frequency of the platform, the network check
 at f_CPU and R_bound of each application at that frequency (with several
 release periods or a cycle, the general phase model: the largest data age
 over the cause-effect chains of each application). --costs (or the key
-"costs" of an application in the composition file) replaces the Capacity
-column of the application with the static t(v) of rttools.wcet. With --out,
+"costs" of an application in the composition file) gives the static t(v)
+of rttools.wcet: t(v) = max(Capacity column, static t(v)) (rule max of
+rttools/wcet/costs.py; the key "cost_rule" of the application selects
+another rule). With --out,
 writes <dir>/<application>.map (node indices of the mesh) for each
 application. Exit status 1 when the composition has a mapping problem or
 the flow finds no frequency.

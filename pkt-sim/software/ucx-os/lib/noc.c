@@ -17,10 +17,22 @@ static uint32_t pktdrv_sink[NOC_SINK_FLITS];
 // Gets the address of the current NoC node. Nodes are identified by
 // their XY address, which is compressed in a 32-bit word such that
 // XY = (X << 16) | Y;
+#ifdef UCX_NOC_TT
+// the time-triggered injection (lib/noc_tt.c) keeps the node index from
+// noc_driver_init: _ddma_node_addr multiplies in software (the core has no
+// multiplier), and the handlers of the driver compare node indices
+static uint32_t pktdrv_cpu_id = 0;
+
+uint32_t ucx_noc_cpu_id(void)
+{
+  return pktdrv_cpu_id;
+}
+#else
 uint32_t ucx_noc_cpu_id(void)
 {
   return _ddma_node_addr();
 }
+#endif
 
 
 
@@ -274,6 +286,9 @@ void noc_driver_init(void)
 {
   // init hardware
   _ddma_init();
+#ifdef UCX_NOC_TT
+  pktdrv_cpu_id = _ddma_node_addr();
+#endif
 
   // print out node id (from MMIO)
   printf("noc_driver_init(): this is core #%d\n", ucx_noc_cpu_id());
@@ -299,8 +314,15 @@ void noc_driver_init(void)
   //   // printf("noc_driver_init(): noc driver recv irq handler at 0x%0x\n", &irq3_handler);
   // }
 
+#ifdef UCX_NOC_TT
+  // irq pins 2 and 3 (receiving); the time-triggered injection (lib/noc_tt.c)
+  // flags down the send command of the previous packet before the next one,
+  // so the end of a send (irq1) does not interrupt the CPU
+  IRQ_MASK |= MASK_IRQ2 | MASK_IRQ3;
+#else
   // enable irq pins 1 (sending) and 2 (receiving)
   IRQ_MASK |= MASK_IRQ1 | MASK_IRQ2 | MASK_IRQ3;
+#endif
 }
 
 
@@ -399,6 +421,12 @@ uint32_t ucx_noc_send(uint16_t target_cpu, uint16_t target_port,
 
   //check whether the packet destination lies in the same pcore
   if(target_cpu != ucx_noc_cpu_id()) {
+#ifdef UCX_NOC_TT
+    // irq1 masked (noc_driver_init): flag down the command of the previous
+    // packet when the ddma waits in its handshake state (0x40)
+    if (_ddma_send_status() == 0x40)
+      _ddma_send_ack();
+#endif
     // prevent user from sending another packet until the 
     // ddma gets ready again (0x1 is the idle state)
     while(_ddma_send_status() != 0x1);

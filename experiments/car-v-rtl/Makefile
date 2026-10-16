@@ -5,8 +5,8 @@
 #   make app     write pkt-sim/software/ucx-os/app/$(NAME).{c,json,sim} from $(CSV) and $(MAP)
 #   make check   the stored $(NAME).{c,json,sim} match a new generation; heap demand of
 #                each PE (rttools.ucxgen.memory) against HEAP; analyze + check-run of the
-#                stored runs CV and CV2, and analyze + check-run + phase-check of runs TCV and
-#                UCV (default target)
+#                stored runs CV and CV2, and analyze + check-run + phase-check of runs TCV,
+#                UCV and VCV (default target)
 #   make analyze analysis of $(LOG) against the phase model (rttools.paper.rtlapp): CPU per PE,
 #                response per iteration, packets against [r, d], network latency; into $(OUTDIR)
 #   make check-run  compare $(OUTDIR)/metrics.json with $(REF)
@@ -17,6 +17,13 @@
 #   make flow-clock  F_CLK of a run at the minimum frequency of the CAR-V flow (make -C ../car-v run,
 #                chosen candidate): the first multiple of 32 kHz at or above it (exp23.flow_clock)
 #   make sim-flow  sim at that F_CLK in build/sim-flow
+#   make tt      write app/$(NAME)_tt.h: injection instants of the packets between PEs in the link
+#                schedule at TT_CLOCKS (rttools.ucxgen tt; model of the time-triggered injection)
+#   make tt-check  $(NAME)_tt.h equals a new generation (part of `make check`)
+# TT_CLOCKS: 441.088 MHz, the clock of the flow with the model of the time-triggered injection,
+# t(v) = max(CSV, static) and the deadline of each packet at the release tick of its reader
+# (experiments/tt, run VCV of tag r11-rc9; f_NoC 441.082 MHz binds), and
+# 500 MHz, the default F_CLK. TT_COSTS: static t(v) of the image (experiments/wcet, costs/tt).
 #
 # CSV and MAP: the files of the CAR-V analysis flow (apps/car-v, rttools.paper.carv)
 # when they exist, otherwise input/car-v.csv and input/car-v.map, provisional
@@ -39,6 +46,10 @@
 # of _isr and the read back of _interrupt_set(0), crt0=guard_readback; UCV.image.elf for
 # experiments/wcet), same clock and duration:
 #   make analyze check-run phase-check LOG=logs/UCV.events.txt REF=reference_UCV.json OUTDIR=build/results_UCV
+# Run VCV (logs/VCV.*, reference_VCV.json): car_v of tag r11-rc9 (as UCV with the time-triggered
+# injection, table car_v_tt.h of t(v) = max(CSV, static) and the deadline model tick, at 441.088 MHz; VCV.image.elf for
+# experiments/wcet), 11.5 ms:
+#   make analyze check-run phase-check LOG=logs/VCV.events.txt REF=reference_VCV.json OUTDIR=build/results_VCV
 # After `make sim`, use LOG=$(BUILD)/sim/events.txt (RUN_INFO next to it).
 #
 #   make phase-check  conformance of $(OUTDIR)/metrics.json with the phase model (rttools.paper.
@@ -61,15 +72,18 @@ BUILD   ?= build
 SIM_NS  ?= 11500000
 # clock of the simulation (Hz); default 500 MHz, the clock of run F
 F_CLK   ?= 500000000
+TT_CLOCKS ?= 441088000 500000000
+TT_COSTS ?= ../wcet/costs/tt/car_v.json
 CARV_METRICS ?= ../car-v/build/metrics.json
 FLOW_F_CLK = $(PYTHON) -c "import json; from rttools.paper import exp23; \
 	m = json.load(open('$(CARV_METRICS)')); \
 	print(exp23.flow_clock(m['chosen']['search']['frequency_hz'], m['scale']['period_s'])['f_clk_hz'])"
 # _heap_size of the image of car_v built with riscv64-unknown-elf-gcc 13.2,
-# release by tick (TR_DEFS), crt0.s of this tree (49764 for the image of run
-# TCV, crt0 plain; 50676 for the image of runs CV and CV2); make build reads
-# the value of the toolchain in use
-HEAP    ?= 49700
+# release by tick (TR_DEFS), crt0.s of this tree, time-triggered injection
+# (INJECTION=tt; 49700 with INJECTION=finish, 49764 for the image of run TCV,
+# crt0 plain; 50676 for the image of runs CV and CV2; 48176 for the image of
+# riscv64-elf-gcc 12.2.0); make build reads the value of the toolchain in use
+HEAP    ?= 48208
 IN_FLIGHT ?= 2
 GEN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.ucxgen
 ARCH    := ../../arch/hermes-4x4.gml
@@ -79,14 +93,14 @@ OUTDIR  ?= $(BUILD)/results_CV
 ANALYZE  = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.rtlapp
 RELEASE ?= auto
 
-.PHONY: all app check analyze check-run build sim flow-clock sim-flow clean phase-check
+.PHONY: all app check analyze check-run build sim flow-clock sim-flow clean phase-check tt tt-check
 
 all: check
 
 app:
 	$(GEN) generate $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR) $(GENFLAGS)
 
-check:
+check: tt-check
 	$(GEN) check $(CSV) $(MAP) --name $(NAME) --mesh $(MESH) --out $(APP_DIR) $(GENFLAGS)
 	$(GEN) memory $(APP_DIR)/$(NAME).json --heap $(HEAP) --in-flight $(IN_FLIGHT)
 	$(MAKE) analyze check-run RELEASE=data
@@ -96,6 +110,8 @@ check:
 		OUTDIR=$(BUILD)/results_TCV
 	$(MAKE) analyze check-run phase-check LOG=logs/UCV.events.txt REF=reference_UCV.json \
 		OUTDIR=$(BUILD)/results_UCV
+	$(MAKE) analyze check-run phase-check LOG=logs/VCV.events.txt REF=reference_VCV.json \
+		OUTDIR=$(BUILD)/results_VCV
 
 analyze:
 	$(ANALYZE) analyze $(LOG) --manifest $(APP_DIR)/$(NAME).json --csv $(CSV) --map $(MAP) --arch $(ARCH) \
@@ -117,6 +133,12 @@ build:
 
 sim:
 	F_CLK=$(F_CLK) ../exp23/simulate.sh $(BUILD)/sim $(SIM_NS) $(NAME) $(MESH)
+
+tt:
+	$(GEN) tt $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
+
+tt-check:
+	$(GEN) tt-check $(CSV) $(MAP) --arch $(ARCH) --name $(NAME) $(foreach f,$(TT_CLOCKS),--clock $(f)) --costs $(TT_COSTS) --out $(APP_DIR)
 
 flow-clock:
 	$(MAKE) -C ../car-v run PYTHON=$(PYTHON)

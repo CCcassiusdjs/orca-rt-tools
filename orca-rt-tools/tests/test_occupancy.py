@@ -7,6 +7,10 @@ import pytest
 from tests.conftest import REPO_ROOT
 from rttools.modules.routing import router
 
+# the header wait w_h with the network-interface model off (w_NI = 0);
+# tests/test_tt_injection.py has the default model tt (w_NI = NI_WAIT_CYCLES)
+pytestmark = pytest.mark.usefixtures("ni_off")
+
 # GHDL simulation of the Hermes of the repository (8 x 3 mesh, source
 # (0,0), ideal injector and sink at the LOCAL ports): hops m, payload flits
 # p (size flit value) and cycles from the acceptance of the header at the

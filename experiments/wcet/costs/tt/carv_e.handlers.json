@@ -1,0 +1,111 @@
+{
+ "_doc": "handlers of one packet event and the handler cycles in t(v) of each task (rttools.wcet, terms send_isr and receive_isr) of the image of the costs file next to this file",
+ "image": {
+  "file": "carv_e.elf",
+  "kind": "elf",
+  "sha256": "19dcf66cd4ebcdebd6c576dc0f73ec52b928098b499358f179138ad785d6ad2e"
+ },
+ "inject": 622,
+ "receive": 3873,
+ "tasks": {
+  "FBU1": {
+   "isr": 622
+  },
+  "FBU2": {
+   "isr": 622
+  },
+  "FBU3": {
+   "isr": 1244
+  },
+  "FBU4": {
+   "isr": 622
+  },
+  "FBU5": {
+   "isr": 622
+  },
+  "FBU6": {
+   "isr": 622
+  },
+  "FBU7": {
+   "isr": 622
+  },
+  "FBU8": {
+   "isr": 1244
+  },
+  "NAVC": {
+   "isr": 7746
+  },
+  "BFE1": {
+   "isr": 4495
+  },
+  "BFE2": {
+   "isr": 4495
+  },
+  "BFE3": {
+   "isr": 4495
+  },
+  "BFE4": {
+   "isr": 4495
+  },
+  "BFE5": {
+   "isr": 4495
+  },
+  "BFE6": {
+   "isr": 4495
+  },
+  "BFE7": {
+   "isr": 4495
+  },
+  "BFE8": {
+   "isr": 4495
+  },
+  "FDF1": {
+   "isr": 16114
+  },
+  "FDF2": {
+   "isr": 16114
+  },
+  "STPH": {
+   "isr": 8368
+  },
+  "VOD1": {
+   "isr": 4495
+  },
+  "VOD2": {
+   "isr": 4495
+  },
+  "OBMG": {
+   "isr": 3873
+  },
+  "A": {
+   "isr": 1244
+  },
+  "B": {
+   "isr": 4495
+  },
+  "C": {
+   "isr": 4495
+  },
+  "D": {
+   "isr": 4495
+  },
+  "E": {
+   "isr": 5117
+  },
+  "F": {
+   "isr": 4495
+  },
+  "G": {
+   "isr": 4495
+  },
+  "H": {
+   "isr": 4495
+  },
+  "I": {
+   "isr": 4495
+  },
+  "J": {
+   "isr": 11619
+  }
+ }
+}

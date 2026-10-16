@@ -122,17 +122,219 @@ def header_wait():
     return parse_header_wait(os.environ.get(HEADER_WAIT_ENV))
 
 
-def occupancy(hops, datasize, wait=None):
+# Network interface of a PE (pkt-sim/hw/ddma/ddma.sv) under the
+# time-triggered injection of UCX-OS (pkt-sim/software/ucx-os/lib/noc_tt.c).
+# The DDMA reads and writes the memory of the PE through one port, which it
+# interleaves between the send and the receive of two packets; it waits
+# for the CPU after the size flit of a received packet (irq2: the address
+# of the buffer; the credit of the local port stays low) and after its last
+# flit (irq3: the handshake that lets the next packet in), and the CPU
+# injects a packet at the compare interrupt of TIMER1 at the instant of the
+# link schedule rounded up to its 16-cycle step. The model of the analysis
+# flow takes the network interface of each PE as one resource of the link
+# schedule (ni_resources: the packets that a PE sends or receives never
+# hold it in the same cycle) and adds to the occupancy the bound w_NI of
+# these three waits: o_i = L0 + w_h (m + 1) + w_NI.
+#
+# The three terms of w_NI (cycles; rttools/wcet/ucx.py, ni_terms): the
+# largest value of each term in the static analysis of the UCX-OS images
+# with the time-triggered injection of tag r11-rc7 (car_full built with
+# riscv64-unknown-elf-gcc 13.2.0 had the three largest); every term of every
+# image of this tree is at or below its constant (experiments/wcet,
+# config_tt.json, make analyze-tt check-tt; the tick hook of car_full with
+# the table TT_TICK shortens its tick term, and its terms are now 3842,
+# 7056 and 4100). The analysis of a run (rttools.paper.ttcheck) compares
+# each measured wait with its term.
+NI_INJECT_CYCLES = 3899     # instant s to the injection (compare interrupt of TIMER1)
+NI_RX_SIZE_CYCLES = 7113    # size flit to the buffer of irq2_handler (credit withheld)
+NI_RX_END_CYCLES = 4157     # last flit to the handshake of irq3_handler
+NI_WAIT_CYCLES = NI_INJECT_CYCLES + NI_RX_SIZE_CYCLES + NI_RX_END_CYCLES
+# premise (ii) of the paper (the release handler of each phase runs before the
+# tick of that phase): the release generator raises its request at a multiple
+# of the phase from reset and the tick timers start RELEASE_LEAD_CYCLES after
+# reset (the smallest lead of the images of the runs, the boot of the image of
+# CAR; 1,861 cycles in the others), so the request comes that many cycles
+# before the tick. A handler longer than the lead that runs at the request can
+# hold the release interrupt past the tick; the size-flit handler of packet i
+# ends by s_i + o_i - NI_RX_END_CYCLES, so the link schedule must not place a
+# packet that starts by the request of a tick with that instant at or after the
+# tick (release_guard; rttools.paper.ttflow.premise_release checks a schedule).
+RELEASE_LEAD_CYCLES = 1621
+# from the end of an activity with interrupts disabled to the read of the cause
+# word in _isr (IRQ_DECISION, entry, prologue of _isr up to the load of
+# IRQ_CAUSE: 56 cycles under the timing model of rttools/wcet, rounded up): the
+# routine that serves the release must read the cause word before the tick
+ISR_ENTRY_CYCLES = 60
+RELEASE_SECTION_CYCLES = 1191   # longest kernel section with interrupts disabled of the images
+RELEASE_HANDLER_CYCLES = 253    # release handler of the images plus IRQ_DECISION
+RELEASE_END_CYCLES = 933        # longest end-of-reception handler of the images plus IRQ_DECISION
+# RTTOOLS_RELEASE_GUARD=off: link schedules without the guard (the stored run CF5,
+# whose table the generator built before the guard)
+RELEASE_GUARD_ENV = "RTTOOLS_RELEASE_GUARD"
+NI_ENV = "RTTOOLS_NI"
+# selection of the network-interface model, as the header wait: set_ni() in
+# the process, otherwise RTTOOLS_NI. "tt" (default when unset or empty: the
+# network interface as a resource and w_NI = NI_WAIT_CYCLES, the model of
+# the images built with INJECTION=tt, the default of
+# pkt-sim/software/ucx-os/Makefile, and of the runs from tag r11-rc7 on),
+# "off" (no resource, w_NI = 0: the model of the runs up to tag r11-rc5,
+# whose images injected each packet when its job sent it; the targets that
+# reproduce the references of those runs set it) or a nonnegative integer
+# (the resource and that w_NI). rttools.ucxgen tt and the analysis of a run
+# whose RUN_INFO has injection=tt select "tt"; the analysis of a run with
+# injection=send selects "off".
+NI_TT = "tt"
+NI_OFF = "off"
+_ni = None
+
+
+def parse_ni(value):
+    """(resource, w_NI) for a value of RTTOOLS_NI or of set_ni: None and ""
+    give the default ("tt"), "tt" gives (True, NI_WAIT_CYCLES), "off" gives
+    (False, 0), an integer n gives (True, n)."""
+    if value is None:
+        return True, NI_WAIT_CYCLES
+    if isinstance(value, tuple):
+        return bool(value[0]), int(value[1])
+    if isinstance(value, bool):
+        raise ValueError("network interface model: expected tt, off or an integer, got " + repr(value))
+    if isinstance(value, int):
+        w = value
+    else:
+        v = str(value).strip().lower()
+        if v in ("", NI_TT):
+            return True, NI_WAIT_CYCLES
+        if v == NI_OFF:
+            return False, 0
+        try:
+            w = int(v)
+        except ValueError:
+            raise ValueError("network interface model: expected tt, off or an integer, got "
+                             + repr(value)) from None
+    if w < 0:
+        raise ValueError("network interface model: negative wait " + repr(value))
+    return True, w
+
+
+def set_ni(value):
+    """Selects the network-interface model for this process (see parse_ni);
+    None returns to the environment variable. Returns the previous
+    selection."""
+    global _ni
+    prev = _ni
+    _ni = None if value is None else parse_ni(value)
+    return prev
+
+
+def ni_model():
+    """(resource, w_NI) of the network-interface model in use."""
+    if _ni is not None:
+        return _ni
+    return parse_ni(os.environ.get(NI_ENV))
+
+
+def ni_wait():
+    """w_NI (cycles) that occupancy() adds."""
+    return ni_model()[1]
+
+
+def ni_resources():
+    """True when the link schedule takes the network interface of each PE
+    as one resource (ni_label)."""
+    return ni_model()[0]
+
+
+# Skew bound sigma (cycles) between the ticks of two PEs, set by
+# set_skew() (rttools/paper/ablation.py, skew_sweep, which also adds sigma to
+# w_NI): the handlers of a packet at its target start up to sigma before or
+# after the window of the packet in the time of the source
+# (rttools/modules/instances/release.py, handler_windows). Default 0 (one
+# reset and one clock for every PE).
+_skew = 0
+
+
+def set_skew(value):
+    """Selects the skew bound sigma in cycles; returns the previous value."""
+    global _skew
+    prev = _skew
+    _skew = int(value or 0)
+    return prev
+
+
+def skew():
+    return _skew
+
+
+# deadline of a packet between PEs on the time-triggered platform, as the
+# header wait: set_deadline() in the process, otherwise RTTOOLS_DEADLINE.
+# "tick" (default when unset or empty): the tick of the release of the job
+# that reads the packet, the earliest start of that job, and the handlers of
+# the packet events in the finish of each job (rttools/modules/instances/
+# release.py, rttools/bench_t/multirate.py; the tables from tag r11-rc9,
+# line "Deadline: tick" of app/<app>_tt.h); "start": the modeled start of
+# the reader, without the handlers (the tables up to tag r11-rc8: the
+# analysis of a run takes the value of its RUN_INFO, deadline=, start when
+# the line is absent)
+DEADLINE_ENV = "RTTOOLS_DEADLINE"
+DEADLINES = ("tick", "start")
+_deadline = None
+
+
+def parse_deadline(value):
+    v = "tick" if value is None or str(value).strip() == "" else str(value).strip().lower()
+    if v not in DEADLINES:
+        raise ValueError("packet deadline: expected tick or start, got " + repr(value))
+    return v
+
+
+def set_deadline(value):
+    """Selects the deadline model for this process (see parse_deadline);
+    None returns to the environment variable. Returns the previous
+    selection."""
+    global _deadline
+    prev = _deadline
+    _deadline = None if value is None else parse_deadline(value)
+    return prev
+
+
+def deadline_model():
+    return _deadline if _deadline is not None else parse_deadline(os.environ.get(DEADLINE_ENV))
+
+
+def tick_deadline():
+    """True on the time-triggered platform (the network-interface model tt,
+    ni_resources) with the deadline model tick (deadline_model): a packet
+    between PEs must reach its target by the tick of the release of the job
+    that reads it, the earliest start of that job (rttools/modules/
+    instances/release.py, rttools/bench_t/multirate.py), and each job
+    carries the handlers of the packet events of its PE (the handlers file
+    of the costs, rttools/wcet/costs.py). Otherwise (the model "off" of the
+    runs up to tag r11-rc5, the deadline model start of the tables up to
+    tag r11-rc8) the deadline is the modeled start of the reader."""
+    return ni_resources() and deadline_model() == "tick"
+
+
+def ni_label(node):
+    """Label of the network-interface resource of PE `node` in the link
+    schedule (the paths keep their links; the resource is extra)."""
+    return "NI-" + str(node)
+
+
+def occupancy(hops, datasize, wait=None, ni=None):
     """Cycles a packet of `datasize` payload bytes holds each link of an
-    XY path with `hops` hops: o_i = L0 + w_h (m + 1), with the zero-load
-    latency of the Hermes L0 = 6 (m + 1) + p + 1 (p from getPacketFlits;
-    the GHDL simulation of the router reproduces L0 for m from 1 to 9 hops)
-    and the header wait w_h per router of each of the m + 1 routers of the
-    path. `wait` gives w_h; None takes header_wait() (default
-    HEADER_WAIT_CYCLES = 20, the bound of the wait of the Hermes; "off"
-    or 0 gives o_i = L0)."""
+    XY path with `hops` hops: o_i = L0 + w_h (m + 1) + w_NI, with the
+    zero-load latency of the Hermes L0 = 6 (m + 1) + p + 1 (p from
+    getPacketFlits; the GHDL simulation of the router reproduces L0 for m
+    from 1 to 9 hops), the header wait w_h per router of each of the m + 1
+    routers of the path and the bound w_NI of the waits of the network
+    interfaces (NI_WAIT_CYCLES). `wait` gives w_h; None takes header_wait()
+    (default HEADER_WAIT_CYCLES = 20, the bound of the wait of the Hermes;
+    "off" or 0 gives w_h = 0). `ni` gives the network-interface model
+    (parse_ni); None takes ni_model() (default "tt", w_NI = NI_WAIT_CYCLES;
+    "off" gives 0)."""
     w = header_wait() if wait is None else parse_header_wait(wait)
-    return getRoutingTime() * (hops + 1) + getPacketFlits(datasize) + 1 + w * (hops + 1)
+    n = ni_wait() if ni is None else parse_ni(ni)[1]
+    return getRoutingTime() * (hops + 1) + getPacketFlits(datasize) + 1 + w * (hops + 1) + n
 
 
 def manhattan(source, target, graph):
@@ -260,3 +462,37 @@ def XY(source, target, graph):
       )
 
     return paths
+
+
+def release_guard(tick):
+    """Predicate (start k, occupancy o) -> True when a reservation [k, k + o]
+    of a link schedule with ticks every `tick` cycles breaks premise (ii)
+    (RELEASE_LEAD_CYCLES); None without the network-interface model of the
+    time-triggered images or without a tick."""
+    resource, w_ni = ni_model()
+    if not resource or w_ni < NI_WAIT_CYCLES or not tick or os.environ.get(RELEASE_GUARD_ENV, "") == "off":
+        return None
+    lead = RELEASE_LEAD_CYCLES
+    # latest end of the size-flit handler and of the last flit: s + o - NI_RX_END_CYCLES; after it, the
+    # routine that reads the request can serve the end-of-reception handler of the packet first
+    end = NI_RX_END_CYCLES - (ISR_ENTRY_CYCLES + RELEASE_END_CYCLES + RELEASE_HANDLER_CYCLES)
+    after = RELEASE_SECTION_CYCLES + ISR_ENTRY_CYCLES
+
+    def breaks(k, o):
+        kp = -(-(k + lead) // tick) * tick      # first tick whose request comes at or after k
+        if k + o - end >= kp:
+            return True
+        # a reservation that starts within a kernel section after a request: its size flit can be pending
+        # with the request
+        return k - (kp - tick - lead) <= after
+    return breaks
+
+
+def tick_cycles(instance):
+    """Cycles per tick of an instance: the phase of the general model, else
+    the period of the flows (one period)."""
+    rates = instance.get("rates")
+    if rates:
+        return int(rates["phase_cycles"])
+    periods = [d["period"] for _, _, d in instance["flows"]]
+    return min(periods) if periods else None

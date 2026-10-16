@@ -83,17 +83,22 @@ def unifdef(text, macro="UCX_TICK_RELEASE"):
         if all(x is not False for x in stack):
             out.append(line)
     text = "".join(out)
-    a = text.find(" *\n * Release by tick")
+    head = {"UCX_TICK_RELEASE": " *\n * Release by tick", "UCX_NOC_TT": " *\n * Time-triggered injection"}.get(macro)
+    a = text.find(head) if head else -1
     if a >= 0:
-        text = text[:a] + text[text.index(" */\n", a):]
+        b = text.find(" *\n *", a + 1)
+        end = text.index(" */\n", a)
+        text = text[:a] + text[b if 0 <= b < end else end:]
     return text
 
 
 @pytest.mark.parametrize("name", ["car_v", "wcet_e", "carv_e", "e_ucx"])
 def test_data_path_of_the_generated_code(name):
-    """Without UCX_TICK_RELEASE, the stored code (release by tick, the
-    default of the generator) is the code of the data-driven release
-    (--release data): the code of runs CV, CV2 and MA."""
+    """Without UCX_NOC_TT and UCX_TICK_RELEASE, the stored code (release by
+    tick and time-triggered injection, the default of the generator) is the
+    code of the data-driven release (--release data): the code of runs CV,
+    CV2 and MA. The time-triggered injection (UCX_NOC_TT) is removed first:
+    it needs the release by tick."""
     if name == "e_ucx":
         e_map2 = os.path.join(APPS, "synthetic-app-e", "synthetic-app-e-ONTO-hermes2x2.map")
         tick = model.build(E_CSV, e_map2, "e_ucx", mesh="2x2")
@@ -111,7 +116,7 @@ def test_data_path_of_the_generated_code(name):
         data = model.build(*args, mesh="2x2", bodies=bodies, release_rule=model.DATA)
     src = emit.c_source(tick)
     assert src == open(os.path.join(APP_DIR, f"{name}.c")).read()
-    assert unifdef(src) == emit.c_source(data)
+    assert unifdef(unifdef(src, "UCX_NOC_TT")) == emit.c_source(data)
     assert "ucx_phase_wait(done + 1 + TASK_PHASE[t - TASKS]);" in src
     assert "TICK_RELEASE" not in emit.c_source(data) and "rule" not in data["release"]
     # the release by tick keeps the source PEs and adds every PE with a task
@@ -163,13 +168,13 @@ def test_simulate_release_line(tmp_path):
     assert r.returncode == 0, r.stdout + r.stderr
     assert "vsim -c work.manycore_top work.chk_binds +RUN_NS=1000 -gRELEASE_MASK=15\n" in run_do(tmp_path / "o")
     info = (tmp_path / "o" / "RUN_INFO").read_text()
-    assert "app=weird_a mesh=2x2 generics=-gRELEASE_MASK=15\n" in info and info.endswith("release=tick\n")
+    assert "app=weird_a mesh=2x2 generics=-gRELEASE_MASK=15\n" in info and info.endswith("release=tick\ndeadline=start\n")
     # weird_a_data: the vsim command of run F
     r = subprocess.run(["bash", sh, str(tmp_path / "d"), "1000", "weird_a_data"], capture_output=True, text=True,
                        env=env)
     assert r.returncode == 0, r.stdout + r.stderr
     assert "vsim -c work.manycore_top work.chk_binds +RUN_NS=1000\n" in run_do(tmp_path / "d")
-    assert (tmp_path / "d" / "RUN_INFO").read_text().endswith("release=data\n")
+    assert (tmp_path / "d" / "RUN_INFO").read_text().endswith("release=data\ndeadline=start\n")
     assert "-s weird_a_data" in log.read_text()
 
 

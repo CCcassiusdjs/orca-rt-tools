@@ -2,8 +2,13 @@
 import json
 import os
 
+import pytest
+
 from tests.conftest import REPO_ROOT
 from rttools.paper import ch6
+
+# reference.json of experiments/ch6: network-interface model off (NI ?= off)
+pytestmark = pytest.mark.usefixtures("ni_off")
 
 EXP = os.path.join(REPO_ROOT, "experiments", "ch6")
 

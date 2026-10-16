@@ -21,6 +21,7 @@ TESTS = {
     "tb_release_mask": "verilator",  # release generator on the PEs of RELEASE_MASK (4x4 and 2x2)
     "tb_release_mask_4x5": "verilator",  # the same on the 4x5 mesh of experiments/multiapp
     "tb_cpu_irq": "ghdl",            # _isr and _interrupt_set: nested interrupts, resume by yield(), _di
+    "tb_timer1_ocr": "ghdl",         # compare interrupt of TIMER1 16 OCR cycles after the tick (lib/noc_tt.c)
 }
 
 
@@ -53,6 +54,11 @@ def test_rtl(name, tmp_path):
         # back of IRQ_STATUS in _interrupt_set(0)) passes modes 0, 2 and 3
         for m in (0, 2, 3):
             assert f"PASS tb_cpu_irq GUARD MODE={m}" in r.stdout, out[-4000:]
+    if name == "tb_timer1_ocr":
+        # steps 1, 5 and 15 of a tick of 16 steps, and step 0
+        assert r.stdout.count("PASS tb_timer1_ocr") == 4, out[-4000:]
+        for o in (1, 5, 15):
+            assert f"{16 * o} cycles after the tick" in r.stdout, out[-4000:]
     if name == "tb_manycore_pe":
         # the printed iteration markers have the format of the trace parser
         from rttools.tui.model import parsers

@@ -1,6 +1,6 @@
 """Release and deadline of the flows (rttools/modules/instances/release.py):
 phase model of the analysis flow, selected in the #parameters section of
-the application, and the ORT/GCPA model of the thesis as the default."""
+the application, and the ORT/GCPA model of the ORCA RT-Tools reference as the default."""
 import os
 
 import pytest
@@ -11,6 +11,9 @@ from rttools.modules.instances import instantiator, release
 from rttools.modules.io import appparser
 from rttools.modules.unwrapper import flowUnwrapper
 from rttools.tui.model import network
+
+# the model of the ORCA RT-Tools reference of the phase windows: deadline at the start of the reader
+pytestmark = pytest.mark.usefixtures("deadline_start")
 
 # application E in real cycles (costs c^ of rttools/bench_t/main.py / 10)
 COSTS = {"A": 28530, "B": 58600, "C": 96330, "D": 14000, "E": 52700, "F": 80800,

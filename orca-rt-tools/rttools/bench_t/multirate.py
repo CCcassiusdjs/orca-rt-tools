@@ -21,6 +21,9 @@ Model (cycles at a frequency f; P = phase length):
 | CPU test | Every job finishes before the next release of its task (F <= r + T_v) in a periodic schedule; f_CPU = P_min / P_s, P_min the smallest phase length in cycles that passes |
 | Read | Job c of v reads, at its start S_c, the packet of the latest job i of u (i mod m_e = 0) with F_i <= r_c (u on another PE: the packet left u before the tick that releases c) or F_i <= S_c (u on the PE of v) |
 | Packet i of flow e | Release F_i; absolute deadline S of the first job c of v with r_c >= F_i (the first job that reads it); local packets do not enter the NoC |
+| Read, time-triggered platform (router.tick_deadline) | Job c reads the latest i with F_i + o_e <= r_c (u on another PE, o_e the occupancy of the flow) or F_i <= r_c (u on the PE of v): the job can start at r_c, so only a packet that reaches its queue by r_c is certain to be read; the job reads that packet or a newer one |
+| Packet i, time-triggered platform | Release F_i; absolute deadline r_c of the first job c of v with r_c >= F_i + o_e |
+| Handlers, time-triggered platform | Job J of v on PE k costs c^(v) + I(J), I(J) = max(0, sum of the handler costs of the packet events of PE k that can start in (r_J - c_e, F_J) - B_v): each packet between PEs costs inject on the PE of its source (compare interrupt at the tick plus s16) and receive on the PE of its target (inside [s, s + o_i]) of the link schedule (link_events); B_v, the handler cycles of t(v) (rttools/wcet/costs.py, handlers file); I(J) is the largest value over the hyperperiods of the job of the same position; the schedule, the link schedule and I form a fixed point (search.schedule_at) |
 | Data age of a chain v_0 ... v_n | F of a job of v_n minus the release of the job of v_0 whose data the job of v_n read, following the reads backwards; the bound is the largest value over the jobs of a periodic hyperperiod |
 
 Feedback edges (`feedback_edges`): the edges marked in the application
@@ -39,6 +42,7 @@ Becker et al. (2016).
 """
 from __future__ import annotations
 
+import bisect
 import math
 from fractions import Fraction
 
@@ -208,7 +212,7 @@ class Spec:
     frequency (costs in cycles, periods in phases)."""
 
     def __init__(self, tasks, cost, ticks, phase_s, hyper_ticks, flows, node_of, orders, sigma, feedback,
-                 offsets=None, task_period_s=None, sigma_pe=None):
+                 offsets=None, task_period_s=None, sigma_pe=None, occupancy=None, tick=False, handlers=None):
         self.tasks = list(tasks)
         self.cost = {t: int(cost[t]) for t in tasks}
         self.ticks = dict(ticks)
@@ -224,6 +228,22 @@ class Spec:
         self.sigma_pe = {str(n): int(v) for n, v in (sigma_pe or {}).items()}
         self.feedback = [tuple(e) for e in feedback]
         self.task_period_s = task_period_s
+        # time-triggered platform (router.tick_deadline): reads and deadlines at the release tick of
+        # the reader, o_e of each flow between PEs ({label: cycles}) and the handlers of the packet
+        # events ({"inject", "receive", "budget": {task: cycles}}, rttools/wcet/costs.py)
+        self.tick = bool(tick)
+        self.occupancy = dict(occupancy) if occupancy is not None else None
+        self.handlers = handlers
+        self._label_uv = {(u, v): label for label, u, v, _ in self.flows}
+
+    def occ(self, u, v):
+        """o_e of the flow (u, v) between PEs on the time-triggered platform
+        (the reads and the deadlines; the CPU schedule does not need it)."""
+        label = self._label_uv[(u, v)]
+        if self.occupancy is None or label not in self.occupancy:
+            raise MultirateError(f"time-triggered platform: no occupancy o_e for the flow {label} "
+                                 "(the NoC of the instance)")
+        return self.occupancy[label]
 
     def edges(self):
         return [(u, v) for _, u, v, _ in self.flows]
@@ -276,8 +296,34 @@ def instance_rates(app, frequency):
     return r
 
 
-def spec_from_graph(app, mapping, r=None):
-    """Spec of an application graph and a mapping."""
+def occupancies(flows, node_of, noc, datasize):
+    """o_e (router.occupancy) of each flow between PEs: {label: cycles};
+    `flows`: [(label, u, v, m)], `datasize`: {label: bytes}."""
+    from rttools.modules.routing import router
+    out = {}
+    for label, u, v, _ in flows:
+        if node_of[u] != node_of[v]:
+            out[label] = router.occupancy(router.manhattan(node_of[u], node_of[v], noc), int(datasize[label]))
+    return out
+
+
+def _platform(flows, node_of, noc, datasize, handlers, budget_of):
+    """(occupancy, tick, handlers) of a Spec on the platform of the process
+    (router.tick_deadline)."""
+    from rttools.modules.routing import router
+    if not router.tick_deadline():
+        return None, False, None
+    occ = None if noc is None else occupancies(flows, node_of, noc, datasize)
+    h = None
+    if handlers:
+        h = {"inject": int(handlers["inject"]), "receive": int(handlers["receive"]),
+             "budget": {t: int(b) for t, b in budget_of(handlers).items()}}
+    return occ, True, h
+
+
+def spec_from_graph(app, mapping, r=None, noc=None):
+    """Spec of an application graph and a mapping; `noc`: the NoC (o_e of
+    each flow on the time-triggered platform)."""
     from rttools.modules.instances import release
     r = r or graph_rates(app)
     if r is None:
@@ -289,13 +335,16 @@ def spec_from_graph(app, mapping, r=None):
     flows = [(d["label"], u, v, r["flow_jobs"][d["label"]]) for u, v, d in fl]
     orders = _orders(tasks, [(u, v) for _, u, v, _ in flows], r["feedback"], mapping, settings)
     node_of = {t: n for n, ts in orders.items() for t in ts}
+    occ, tick, h = _platform(flows, node_of, noc, {d["label"]: d.get("datasize", 0) for _, _, d in fl},
+                             settings.get("handlers"), lambda x: x.get("budget") or {})
     return Spec(tasks, cost, r["ticks"], r["phase_s"], r["hyper_ticks"], flows, node_of, orders,
                 settings["scheduler_cycles"], r["feedback"], r.get("offsets"), r["task_period_s"],
-                settings.get("scheduler_cycles_pe"))
+                settings.get("scheduler_cycles_pe"), occ, tick, h)
 
 
-def spec_from_instance(instance, mapping):
-    """Spec of an instance of instantiator.createInstance (key "rates")."""
+def spec_from_instance(instance, mapping, noc=None):
+    """Spec of an instance of instantiator.createInstance (key "rates");
+    `noc`: as spec_from_graph."""
     r = instance["rates"]
     settings = instance.get("release") or {}
     tasks = [t for t, _ in instance["tasks"]]
@@ -304,9 +353,11 @@ def spec_from_instance(instance, mapping):
     flows = [(d["label"], u, v, r["flow_jobs"][d["label"]]) for u, v, d in fl]
     orders = _orders(tasks, [(u, v) for _, u, v, _ in flows], r["feedback"], mapping, settings)
     node_of = {t: n for n, ts in orders.items() for t in ts}
+    occ, tick, h = _platform(flows, node_of, noc, {d["label"]: d.get("datasize", 0) for _, _, d in fl},
+                             settings.get("handlers"), lambda x: x.get("budget") or {})
     return Spec(tasks, cost, r["ticks"], r["phase_s"], r["hyper_ticks"], flows, node_of, orders,
                 settings.get("scheduler_cycles", 0), r["feedback"], r.get("offsets"), r["task_period_s"],
-                settings.get("scheduler_cycles_pe"))
+                settings.get("scheduler_cycles_pe"), occ, tick, h)
 
 
 # ------------------------------------------------------------ schedule
@@ -316,8 +367,9 @@ class Schedule:
     P cycles. Jobs of hyperperiod h > h0 repeat the jobs of h0 shifted by
     (h - h0) H (periodic schedule)."""
 
-    def __init__(self, spec, P, sims, h0, periodic):
+    def __init__(self, spec, P, sims, h0, periodic, extra=None):
         self.spec = spec
+        self.extra = dict(extra or {})     # I(J) of each job position (handlers of the packet events)
         self.P = P
         self.H = P * spec.hyper_ticks
         self.sims = sims
@@ -355,6 +407,14 @@ class Schedule:
         x = self.jobs[task][j]
         return (x.release + shift, x.start + shift, x.finish + shift)
 
+    def tick_owners(self):
+        """{node: [position in the creation order of the PE (1..n) that the
+        simulation dispatches at tick t, 0: idle]} for the ticks 0 ..
+        (h0 + 1) Ht - 1; the ticks from h0 Ht repeat every Ht ticks
+        (periodic schedule)."""
+        n = (self.h0 + 1) * self.spec.hyper_ticks
+        return {node: list(sim["owners"][:n]) for node, sim in self.sims.items()}
+
     def busy_per_phase(self):
         """{node: busy cycles in each phase of the periodic hyperperiod h0}."""
         out = {}
@@ -365,29 +425,116 @@ class Schedule:
         return out
 
 
-def schedule(spec, P, max_hyperperiods=32):
+def _simulate_all(spec, P, W, extra):
+    Ht = spec.hyper_ticks
+    sims = {}
+    h0s = {}
+    for node, ts in spec.orders.items():
+        tasks = [{"name": t, "cost": spec.cost[t], "period": spec.ticks[t], "offset": spec.offsets[t],
+                  "extra": extra.get(t)} for t in ts]
+        sigma = spec.sigma_pe.get(str(node), spec.sigma)
+        sim = ucx.simulate(tasks, P, (W + 1) * Ht, sigma, tail=(W + 1) * Ht, boundary=Ht)
+        sims[node] = sim
+        st = sim["states"]
+        h0s[node] = next((h for h in range(W) if (h * Ht) in st and ((h + 1) * Ht) in st
+                          and st[h * Ht] == st[(h + 1) * Ht]), None)
+    return sims, h0s
+
+
+def link_events(spec, sched, rows):
+    """Packet events of each PE from the link schedule of the injection
+    table (rows of rttools.ucxgen.tt: s, phase_start, s16 and o_i of each
+    packet between PEs of one hyperperiod, cycles from the start of the
+    hyperperiod): {node: [(a, b, cost)]}, the instants at which the
+    handler of the event can start, periodic with the hyperperiod. The
+    injection: the compare interrupt of TIMER1 at the tick plus s16 and its
+    wait within NI_INJECT_CYCLES, on the PE of the source; the reception:
+    irq2_handler and irq3_handler inside [s, s + o_i], on the PE of the
+    target, widened by the skew bound sigma (router.skew) on both sides."""
+    from rttools.modules.routing import router
+    h = spec.handlers
+    src = {label: u for label, u, _, _ in spec.flows}
+    dst = {label: v for label, _, v, _ in spec.flows}
+    ev = {}
+    for r in rows:
+        inj = r["phase_start"] + r["s16"]
+        ev.setdefault(spec.node_of[src[r["flow"]]], []).append((inj, inj + router.NI_INJECT_CYCLES, h["inject"]))
+        sg = router.skew()
+        ev.setdefault(spec.node_of[dst[r["flow"]]], []).append((r["s"] - sg, r["s"] + r["occupancy"] + sg,
+                                                                 h["receive"]))
+    return ev
+
+
+def attempt_rows(spec, sched, attempt):
+    """Rows of link_events of an AGS attempt on the packets of
+    packet_windows (flow, s, phase_start, s16, occupancy per packet between
+    PEs; the step of TIMER1 of rttools.ucxgen.tt, 16 cycles)."""
+    win = packet_windows(spec, sched)
+    src = {label: u for label, u, _, _ in spec.flows}
+    rows = []
+    for j, p in enumerate(attempt["problem"]["packets"]):
+        vals = [row[j] for row in attempt["schedule"] if row[j] is not None]
+        if not vals:
+            continue
+        label, _, k = p["name"].rpartition(":")
+        u = src[p["flow"]]
+        jl = win[p["flow"]][int(k)][0]
+        base = (spec.offsets[u] + jl * spec.ticks[u]) * sched.P
+        s = min(vals)
+        rows.append({"flow": p["flow"], "s": s, "phase_start": base, "s16": -(-(s - base) // 16) * 16,
+                     "occupancy": p["net_time"]})
+    return rows
+
+
+def handler_extra(spec, sched, events, extra=None):
+    """I(J) of every job position ({task: [cycles per job of the
+    hyperperiod]}), at least the values of `extra`: the handler costs of
+    the events of the PE (link_events, repeated every hyperperiod) that can
+    start in (r_J - c_e, F_J), less B_v, the largest value over the
+    simulated jobs of the same position."""
+    budget = spec.handlers.get("budget") or {}
+    extra = extra or {}
+    H = sched.H
+    out = {}
+    for node, sim in sched.sims.items():
+        base = sorted(events.get(node, []))
+        span = max((b - a + c for a, b, c in base), default=0)
+        js_all = [J for js in sim["jobs"].values() for J in js if J.finish is not None]
+        last = max((J.finish for J in js_all), default=0)
+        evs = sorted((a + k * H, b + k * H, c) for k in range(-1, last // H + 2) for a, b, c in base)
+        starts = [a for a, _, _ in evs]
+        for t, js in sim["jobs"].items():
+            n = spec.hyper_ticks // spec.ticks[t]
+            row = list(extra.get(t) or [0] * n)
+            for J in js:
+                if J.finish is None:
+                    continue
+                load = 0
+                for i in range(bisect.bisect_left(starts, J.release - span), bisect.bisect_left(starts, J.finish)):
+                    a, b, c = evs[i]
+                    if b > J.release - c:
+                        load += c
+                row[J.index % n] = max(row[J.index % n], load - budget.get(t, 0))
+            out[t] = row
+    return out
+
+
+def schedule(spec, P, max_hyperperiods=32, extra=None):
     """Simulates every PE at a phase of P cycles until the state of each PE
-    at a hyperperiod boundary repeats (periodic schedule)."""
+    at a hyperperiod boundary repeats (periodic schedule). `extra`: I(J) of
+    each job position, {task: [cycles]} (handler_extra: the handlers of the
+    packet events of the time-triggered platform; search.schedule_at
+    iterates them with the link schedule to a fixed point)."""
     if P <= 0:
         raise MultirateError("phase length must be positive")
-    Ht = spec.hyper_ticks
+    extra = {t: list(x) for t, x in (extra or {}).items()}
     W = 2
     while True:
-        sims = {}
-        h0s = {}
-        for node, ts in spec.orders.items():
-            tasks = [{"name": t, "cost": spec.cost[t], "period": spec.ticks[t], "offset": spec.offsets[t]}
-                     for t in ts]
-            sigma = spec.sigma_pe.get(str(node), spec.sigma)
-            sim = ucx.simulate(tasks, P, (W + 1) * Ht, sigma, tail=(W + 1) * Ht, boundary=Ht)
-            sims[node] = sim
-            st = sim["states"]
-            h0s[node] = next((h for h in range(W) if (h * Ht) in st and ((h + 1) * Ht) in st
-                              and st[h * Ht] == st[(h + 1) * Ht]), None)
+        sims, h0s = _simulate_all(spec, P, W, extra)
         if all(h is not None for h in h0s.values()):
-            return Schedule(spec, P, sims, max(h0s.values()), True)
+            return Schedule(spec, P, sims, max(h0s.values()), True, extra)
         if W >= max_hyperperiods:
-            return Schedule(spec, P, sims, None, False)
+            return Schedule(spec, P, sims, None, False, extra)
         W *= 2
 
 
@@ -475,7 +622,10 @@ def read_index(spec, sched, u, v, m, c):
     """Index of the job of u whose packet job c of v reads on a flow (u, v)
     with m_e = m, or None when no packet exists yet."""
     rel_c, S_c, _ = sched.job(v, c)
-    limit = S_c if spec.node_of[u] == spec.node_of[v] else rel_c
+    if spec.tick:
+        limit = rel_c - (0 if spec.node_of[u] == spec.node_of[v] else spec.occ(u, v))
+    else:
+        limit = S_c if spec.node_of[u] == spec.node_of[v] else rel_c
     P = sched.P
     o, k = spec.offsets[u], spec.ticks[u]
     i = (limit - o * P) // (k * P)
@@ -492,8 +642,13 @@ def read_index(spec, sched, u, v, m, c):
 def reader_index(spec, sched, u, v, F):
     """Index of the first job of v that reads a packet that u finished at
     F: on another PE, the first job released at or after F; on the same
-    PE, the first job that starts at or after F."""
+    PE, the first job that starts at or after F. Time-triggered platform:
+    the first job released at or after F + o_e (another PE) or F (the same
+    PE)."""
     P = sched.P
+    if spec.tick:
+        o = 0 if spec.node_of[u] == spec.node_of[v] else spec.occ(u, v)
+        return _first_job_released_at_or_after(spec, v, F + o, P)
     if spec.node_of[u] != spec.node_of[v]:
         return _first_job_released_at_or_after(spec, v, F, P)
     o, k = spec.offsets[v], spec.ticks[v]
@@ -506,7 +661,9 @@ def reader_index(spec, sched, u, v, F):
 def packet_windows(spec, sched):
     """Packets of one periodic hyperperiod (jobs of the sources released in
     hyperperiod h0), in cycles from the start of h0: {label: [(job index
-    in the hyperperiod, release, deadline, local)]}."""
+    in the hyperperiod, release, deadline, local)]}; deadline: the start S
+    of the first job that reads the packet, or its release r on the
+    time-triggered platform (reader_index)."""
     if not sched.feasible:
         raise MultirateError("the CPU schedule misses a deadline or is not periodic at this phase length")
     base = sched.h0 * sched.H
@@ -519,7 +676,7 @@ def packet_windows(spec, sched):
                 continue
             F = sched.job(u, j)[2]
             c = reader_index(spec, sched, u, v, F)
-            d = sched.job(v, c)[1]
+            d = sched.job(v, c)[0 if spec.tick else 1]
             rows.append((j - sched.h0 * n, F - base, d - base, spec.node_of[u] == spec.node_of[v]))
         out[label] = rows
     return out

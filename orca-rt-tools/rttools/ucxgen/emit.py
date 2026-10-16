@@ -554,10 +554,302 @@ def task_row(t, flows, tasks_by_name, max_in, max_out):
 
 def c_source(m):
     if m.get("model") == "time_triggered":
-        return tt_source(m)
+        return tt_injection_jobs(tt_source(m), m)
     text = data_source(m)
     if m["release"].get("rule") == "tick":
-        text = tick_release(text, m)
+        text = tt_injection(tick_release(text, m), m)
+    return text
+
+
+# ------------------------------------------------------------ time-triggered injection
+
+INJECTION_HEADER = """\
+ *
+ * Time-triggered injection (built with -DUCX_NOC_TT: Makefile of UCX-OS,
+ * INJECTION=tt; lib/noc_tt.c): a job hands each packet to the kernel with
+ * ucx_noc_send_at; a packet to a task of another PE leaves at its instant
+ * in the link schedule of the analysis flow, counted from the tick of the
+ * phase of the job (ucx_job_tick, lib/tick_release.c; app/{name}_tt.h of
+ * rttools.ucxgen tt: TT_AT, one table per clock F_CPU), and a packet to a
+ * task of the same PE goes to the queue of the task at once. Without the
+ * macro the job sends the packet at once (the code above).
+ */
+"""
+
+_INCLUDE = "#include <ucx.h>\n"
+_TT_INCLUDE = ("#include <ucx.h>\n"
+               "#ifdef UCX_NOC_TT\n"
+               "#ifndef UCX_TICK_RELEASE\n"
+               "#error \"the time-triggered injection counts the instants from the tick of the phase "
+               "(build with UCX_TICK_RELEASE)\"\n"
+               "#endif\n"
+               "/* instants of the packets between PEs (rttools.ucxgen tt) */\n"
+               "#include \"{name}_tt.h\"\n"
+               "#endif\n")
+_SEND = "      ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));\n"
+_TT_SEND = ("#ifdef UCX_NOC_TT\n"
+            "      tt_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));\n"
+            "#else\n" + _SEND + "#endif\n")
+_RUN_TASK = "static void run_task(const struct task_s *t)\n"
+_TT_RUN_TASK = ("#ifdef UCX_NOC_TT\n"
+                "/* ucx_noc_send with the time-triggered injection: hands the packet to\n"
+                " * the kernel (lib/noc_tt.c) with the instant of its flow (tag / TAG_MOD)\n"
+                " * from the tick of the phase of the job. The arguments of ucx_noc_send\n"
+                " * and a call that the compiler treats as the call of ucx_noc_send (noipa:\n"
+                " * no inlining, no clone, no knowledge of its registers) keep the code\n"
+                " * of run_task as in the build without UCX_NOC_TT (the static analysis\n"
+                " * follows t and its fields in the same registers) */\n"
+                "static __attribute__((noipa)) uint32_t tt_send(uint16_t cpu, uint16_t port, noc_packet_t *pkt, "
+                "uint16_t tag)\n"
+                "{\n"
+                "  return ucx_noc_send_at(cpu, port, pkt, tag, ucx_job_tick(), &TT_AT[tag / TAG_MOD]);\n"
+                "}\n\n"
+                "#endif\n" + _RUN_TASK)
+
+
+def tt_injection(text, m):
+    """Code with the time-triggered injection (lib/noc_tt.c) under #ifdef
+    UCX_NOC_TT from the code of the release by tick: the table of the
+    instants (app/<name>_tt.h) and ucx_noc_send_at, with the tick of the
+    phase of the job (ucx_job_tick), in place of ucx_noc_send. Without the
+    macro the preprocessed code is the code of the release by tick."""
+    end = text.index(" */\n")                  # end of the header comment
+    text = text[:end] + INJECTION_HEADER.format(name=m["name"]) + text[end + len(" */\n"):]
+    text = _replace_once(text, _INCLUDE, _TT_INCLUDE.format(name=m["name"]))
+    text = _replace_once(text, _SEND, _TT_SEND)
+    text = _replace_once(text, _RUN_TASK, _TT_RUN_TASK)
+    return text
+
+
+_JOBS_HEADER = """\
+ *
+ * Time-triggered injection (built with -DUCX_NOC_TT: Makefile of UCX-OS,
+ * INJECTION=tt; lib/noc_tt.c): a job hands each packet to a task of
+ * another PE to the kernel with ucx_noc_send_at, which injects it at its
+ * instant in the link schedule of the analysis flow (app/{name}_tt.h of
+ * rttools.ucxgen tt: TT_AT[flow][k] for packet k of the flow in the
+ * hyperperiod), counted from the tick of the phase o_v + (j - 1) k_v that
+ * released job j (phase0_tick: tick of phase 0, lib/noc_tt.c). The packet
+ * of job j is packet ((j - 1) / m_e) mod TT_PACKETS[flow] of the flow. A
+ * job writes its number into one of TT_BUFFERS[flow] buffers of the flow in
+ * turn, so it does not write a packet that waits for its instant. Without
+ * the macro the job sends the packet at once (the code above).
+ */
+"""
+_J_RELEASE = "static uint32_t phase = 0;                  /* index of the next phase */\n"
+_TT_J_RELEASE = (_J_RELEASE + "#ifdef UCX_NOC_TT\n"
+                 "static uint32_t phase0_tick = 0;            /* tick of phase 0 (lib/noc_tt.c) */\n"
+                 "#endif\n")
+_J_HOOK_START = ("/* tick hook (kernel/sched.c, dispatch): releases the jobs of each phase\n"
+                 " * whose interrupt came since the previous tick */\nvoid ucx_app_tick(void)\n{\n")
+_J_HOOK_END = "    phase++;\n  }\n}\n"
+_TT_J_HOOK = """\
+#ifdef UCX_NOC_TT
+static const uint8_t *tick_row;             /* TT_TICK of this PE (app/<app>_tt.h) */
+static struct tcb_s *owner_pred[MAX_LOCAL + 1];  /* tcb before position p of the circular list */
+static uint32_t tick_idx = 0;               /* index of the next phase in TT_TICK */
+
+/* tick hook (kernel/sched.c, dispatch): the generator raises the release
+ * request before the tick of its phase, and the link schedule keeps any
+ * handler that runs at the request from reaching the tick (premise (ii));
+ * a request pending here is served first; then the hook releases the jobs of the phase (TT_TICK: bit 2 +
+ * i for the task of position i + 1, the phases o_v + j k_v) and sets the
+ * current task of the scheduler to the task before the position that the
+ * model dispatches at this tick (TT_TICK bits 0-1; 0: no change), so that
+ * krnl_schedule dispatches that position or, when its job has ended, the
+ * next ready task after it: the tasks of each phase run in the circular
+ * order of the model, whatever task holds the CPU at the tick */
+void ucx_app_tick(void)
+{
+  uint32_t p = 0;
+
+  if (IRQ_CAUSE & MASK_IRQ4)
+    irq4_handler();
+  while (irq_pending) {
+    uint32_t e = tick_row[tick_idx];
+
+    irq_pending--;
+    if (phase == 0)
+      phase0_tick = ucx_noc_tt_ticks();
+    if (++tick_idx == TT_TICKS)
+      tick_idx = TT_TICK_LOOP;
+    p = e & 3;
+    e >>= 2;
+    for (int i = 0; i < n_local; i++, e >>= 1) {
+      if (e & 1) {
+        released[i]++;
+        if (local_tcb[i]->state == TASK_BLOCKED)
+          local_tcb[i]->state = TASK_READY;
+      }
+    }
+    phase++;
+  }
+  if (p) {
+    if (kcb_p->tcb_p->state == TASK_RUNNING)
+      kcb_p->tcb_p->state = TASK_READY;
+    kcb_p->tcb_p = owner_pred[p];
+  }
+}
+#else
+"""
+_J_READ_FULL = None
+_TT_J_READ = """\
+#ifdef UCX_NOC_TT
+/* first packet of the queue (one queued packet per source), with
+ * interrupts disabled: keeps the job number of the source (first word of
+ * the payload) and frees a packet from another PE; 0 when the queue is
+ * empty */
+static TT_SECTION int read_one(const struct task_s *t, uint32_t *last, uint32_t me)
+{
+  int got = 0;
+
+  _di();
+  if (ucx_noc_probe() > 0) {
+    noc_packet_t *pkt = ucx_noc_receive();
+    uint16_t port = pkt->source_port;
+    uint32_t job = *(volatile uint32_t *)pkt->data;
+
+    for (int i = 0; i < t->n_in; i++)
+      if (t->in_port[i] == port)
+        last[i] = job;
+    if (pkt->source_node != me)
+      ucx_free(pkt);
+    got = 1;
+  }
+  _ei();
+  return got;
+}
+
+/* latest packet of each input edge, one packet per section */
+static void read_inputs(const struct task_s *t, uint32_t *last)
+{
+  uint32_t me = ucx_noc_cpu_id();
+
+  while (read_one(t, last, me))
+    ;
+}
+#else
+"""
+_J_ADD = "  released[n_local] = 0;\n"
+_TT_J_ADD = "  released[n_local] = 0;\n"
+_J_DECL = "  noc_packet_t *pkt[MAX_OUT];\n  uint32_t last[MAX_IN];\n  uint32_t done = 0;\n"
+_TT_J_DECL = (_J_DECL + "#ifdef UCX_NOC_TT\n"
+              "  noc_packet_t *pkt_tt[MAX_OUT][TT_MAX_BUFFERS];   /* buffers of each output edge */\n"
+              "  uint32_t sent[MAX_OUT];                          /* packets of each output edge */\n"
+              "#endif\n")
+_J_CREATE = "  for (int o = 0; o < t->n_out; o++)\n    pkt[o] = create_pkt(t->out[o].bytes);\n"
+_TT_J_CREATE = (_J_CREATE + "#ifdef UCX_NOC_TT\n"
+                "  for (int o = 0; o < t->n_out; o++) {\n"
+                "    sent[o] = 0;\n"
+                "    pkt_tt[o][0] = pkt[o];\n"
+                "    for (int b = 1; b < TT_BUFFERS[t->out[o].flow] && b < TT_MAX_BUFFERS; b++)\n"
+                "      pkt_tt[o][b] = create_pkt(t->out[o].bytes);\n"
+                "  }\n"
+                "#endif\n")
+_J_SEND = ("      } else {\n"
+           "        *(volatile uint32_t *)pkt[o]->data = done;\n"
+           "        ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));\n"
+           "      }}\n")
+_TT_J_SEND = ("      } else {\n"
+              "#ifdef UCX_NOC_TT\n"
+              "        uint16_t fl = t->out[o].flow;\n"
+              "        noc_packet_t *b = pkt_tt[o][sent[o] % TT_BUFFERS[fl]];\n"
+              "        uint32_t k = ((done - 1) / t->out[o].every) % TT_PACKETS[fl];\n"
+              "\n"
+              "        sent[o]++;\n"
+              "        *(volatile uint32_t *)b->data = done;\n"
+              "        ucx_noc_send_at(t->out[o].cpu, t->out[o].port, b, TAG(fl, done),\n"
+              "                        phase0_tick + t->offset + (done - 1) * t->period, &TT_AT[fl][k]);\n"
+              "#else\n"
+              "        *(volatile uint32_t *)pkt[o]->data = done;\n"
+              "        ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));\n"
+              "#endif\n"
+              "      }}\n")
+
+
+_J_WAIT = "static void wait_release(int li, uint32_t done)\n"
+_TT_J_WAIT = "static TT_SECTION void wait_release(int li, uint32_t done)\n"
+_J_READ = "static void read_inputs(const struct task_s *t, uint32_t *last)\n"
+_J_MARKS = ("    _di();\n    ITER_BEGIN(t->letter, done + 1);\n    for (int i = 0; i < t->n_in; i++)\n"
+            "      READ_MARK(t->in_letter[i], last[i]);\n    _ei();\n")
+_TT_J_MARKS = ("#ifdef UCX_NOC_TT\n    begin_marks(t, last, done);\n#else\n" + _J_MARKS + "#endif\n")
+_J_LOCAL = ("        _di();\n        *(volatile uint32_t *)pkt[o]->data = done;\n"
+            "        ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));\n"
+            "        _ei();\n")
+_TT_J_LOCAL = ("#ifdef UCX_NOC_TT\n        send_local(t, o, pkt[o], done);\n#else\n" + _J_LOCAL + "#endif\n")
+_J_RUN = "static void run_task(const struct task_s *t, int li)\n"
+_TT_J_SECTIONS = """\
+#ifdef UCX_NOC_TT
+/* begin marker and read markers of job done + 1, with interrupts disabled */
+static TT_SECTION void begin_marks(const struct task_s *t, const uint32_t *last, uint32_t done)
+{
+  _di();
+  ITER_BEGIN(t->letter, done + 1);
+  for (int i = 0; i < t->n_in; i++)
+    READ_MARK(t->in_letter[i], last[i]);
+  _ei();
+}
+
+/* packet of output edge o to a task of this PE: job number and enqueue
+ * with interrupts disabled (the target reads the buffer of this task) */
+static TT_SECTION void send_local(const struct task_s *t, int o, noc_packet_t *pkt, uint32_t done)
+{
+  _di();
+  *(volatile uint32_t *)pkt->data = done;
+  ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt, TAG(t->out[o].flow, done));
+  _ei();
+}
+#endif
+
+"""
+_J_MAIN_END = "  default:\n    break;\n  }\n\n  return 1;\n}\n"
+_TT_J_MAIN_END = ("  default:\n    break;\n  }\n"
+                  "#ifdef UCX_NOC_TT\n"
+                  "  /* positions of the tick hook: the task before position p in the circular list\n"
+                  "   * (idle task, then the tasks in creation order) */\n"
+                  "  tick_row = TT_TICK[ucx_noc_cpu_id()];\n"
+                  "  owner_pred[1] = kcb_p->tcb_first;\n"
+                  "  for (int i = 1; i < n_local; i++)\n"
+                  "    owner_pred[i + 1] = local_tcb[i - 1];\n"
+                  "#endif\n"
+                  "\n  return 1;\n}\n")
+_TT_SECTION_DEF = ("#ifdef UCX_NOC_TT\n"
+                   "/* functions that run with interrupts disabled: one function each, for the static\n"
+                   " * analysis of their length (rttools.wcet, sections) */\n"
+                   "#define TT_SECTION __attribute__((noinline))\n"
+                   "#else\n#define TT_SECTION\n#endif\n")
+
+
+def tt_injection_jobs(text, m):
+    """Code of a time-triggered application (several periods) with the
+    time-triggered injection under #ifdef UCX_NOC_TT: the table of the
+    instants of the packets of each flow in the hyperperiod, the tick of
+    phase 0, the buffers of each output edge and ucx_noc_send_at for a
+    target on another PE. Without the macro the preprocessed code does not
+    change."""
+    end = text.index(" */\n")
+    text = text[:end] + _JOBS_HEADER.format(name=m["name"]) + text[end + len(" */\n"):]
+    text = _replace_once(text, _INCLUDE, "#include <ucx.h>\n#ifdef UCX_NOC_TT\n"
+                         "/* instants of the packets between PEs (rttools.ucxgen tt) */\n"
+                         f"#include \"{m['name']}_tt.h\"\n#endif\n")
+    text = _replace_once(text, _J_RELEASE, _TT_J_RELEASE)
+    a = text.index(_J_HOOK_START)
+    b = text.index(_J_HOOK_END, a) + len(_J_HOOK_END)
+    text = text[:a] + _TT_J_HOOK + text[a:b] + "#endif\n" + text[b:]
+    text = _replace_once(text, _J_ADD, _TT_J_ADD)
+    text = _replace_once(text, _J_DECL, _TT_J_DECL)
+    text = _replace_once(text, _J_CREATE, _TT_J_CREATE)
+    text = _replace_once(text, _J_SEND.replace("}}", "}"), _TT_J_SEND.replace("}}", "}"))
+    text = _replace_once(text, _J_WAIT, _TT_J_WAIT)
+    a = text.index(_J_READ)
+    b = text.index("  _ei();\n}\n", a) + len("  _ei();\n}\n")
+    text = text[:a] + _TT_J_READ + text[a:b] + "#endif\n" + text[b:]
+    text = _replace_once(text, _J_MARKS, _TT_J_MARKS)
+    text = _replace_once(text, _J_LOCAL, _TT_J_LOCAL)
+    text = _replace_once(text, _J_RUN, _TT_J_SECTIONS + _J_RUN)
+    a = text.index("/* ------------------------------ tasks */\n")
+    text = text[:a] + _TT_SECTION_DEF + "\n" + text[a:]
+    text = _replace_once(text, _J_MAIN_END, _TT_J_MAIN_END)
     return text
 
 

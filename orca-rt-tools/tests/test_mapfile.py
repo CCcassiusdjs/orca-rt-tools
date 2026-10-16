@@ -3,7 +3,7 @@
 apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map had `3:G,H`: task
 H on nodes 2 and 3 and task J on no node. The application of exp-23
 (pkt-sim/software/ucx-os/app/weird_a.c, CPU_G = CPU_J = 3) and Fig. 8.6a
-of the thesis run G and J on node 3.
+of the ORCA RT-Tools reference run G and J on node 3.
 """
 import os
 

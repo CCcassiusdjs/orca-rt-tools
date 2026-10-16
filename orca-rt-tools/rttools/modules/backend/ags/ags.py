@@ -22,10 +22,11 @@ def agsExport(packets, links, hp, mapping, arch, appname, prunning, fail, heuris
 
     for p in range(0, len(packets)):
       paths = packets[p]['path']
+      # links of the path and the extra resources of the packet (network
+      # interfaces of its PEs, rttools/modules/routing/router.py)
+      labels = [paths[e]['data']['label'] for e in range(0, len(paths))] + list(packets[p].get('resources', []))
 
-      for e in range(0, len(paths)):
-        label2 = paths[e]['data']['label']
-
+      for label2 in labels:
         # packet has that link
         if(label == label2):
           min_start[l][p] = packets[p]['min_start']

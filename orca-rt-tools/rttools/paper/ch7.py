@@ -1,4 +1,4 @@
-"""Reproduction of Table 7.1 (ORT/GCM and ORT/GDE, Ch. 7).
+"""Reproduction of the table of the random graphs (ORT/GCM and ORT/GDE, Ch. 7).
 
     python -m rttools.paper.ch7 run --config <config.json> --graphs <dir> --out <dir> [--sizes 20,30] [--n 4]
     python -m rttools.paper.ch7 check <dir>/metrics.json <reference.json>

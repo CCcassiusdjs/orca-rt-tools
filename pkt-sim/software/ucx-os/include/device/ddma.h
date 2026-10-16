@@ -12,6 +12,12 @@ void _ddma_init();
 uint32_t _ddma_send(uint32_t dest, uint32_t size, uint32_t* payload);
 void _ddma_send_ack();
 
+// conversions of _ddma_send (XY address of a node, flits of a packet of
+// `size` bytes) and the send with converted values (lib/noc_tt.c)
+uint32_t _ddma_dest_xy(uint32_t dest);
+uint32_t _ddma_flits(uint32_t size);
+void _ddma_send_xy(uint32_t xy, uint32_t flits, uint32_t* payload);
+
 // recv
 uint32_t* _ddma_recv_ptr_out();
 

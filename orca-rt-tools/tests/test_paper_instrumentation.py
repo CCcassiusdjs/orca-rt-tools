@@ -82,6 +82,8 @@ def test_values_and_reference_of_run_f(run_f):
 
 
 def test_without_listing_no_bound(tmp_path):
+    if not os.path.exists(os.path.join(EXP, "logs", "D.events.txt")):
+        pytest.skip("run D is not part of this copy of the artifact")
     m = exp23.analyze(os.path.join(EXP, "logs", "D.events.txt"), cfg(), str(tmp_path), join="any3")
     assert "instrumentation" not in m
     assert "Instrumentation" not in open(tmp_path / "values.tex").read()
@@ -213,10 +215,13 @@ def test_instruction_classes():
 def test_build_of_this_tree_gives_the_stored_costs(tmp_path):
     """build_sw.sh with and without the writes (make software): the costs
     of the events equal those of the stored listings of run F when the
-    compiler is riscv64-elf-gcc 12.2.0 (logs/F.software.txt)."""
+    compiler is riscv64-elf-gcc 12.2.0 (logs/F.software.txt). The image of
+    run F: the data-driven application (APP=weird_a_data) with the injection
+    at the end of each task (INJECTION=finish)."""
+    run_f = {"APP": "weird_a_data", "INJECTION": "finish"}
     for v, extra in (("with", {}), ("without", {"UCX_CFLAGS": "-DUCX_NO_INSTRUMENTATION"})):
         r = subprocess.run(["bash", os.path.join(EXP, "build_sw.sh"), str(tmp_path / v)],
-                           env={**os.environ, **extra}, capture_output=True, text=True, timeout=1200)
+                           env={**os.environ, **run_f, **extra}, capture_output=True, text=True, timeout=1200)
         assert r.returncode == 0, (r.stdout + r.stderr)[-3000:]
     img = os.path.join("pkt-sim", "software", "ucx-os", "build", "target", "image.lst")
     got = ins.event_costs(str(tmp_path / "with" / img), str(tmp_path / "without" / img), cfg()["instrumentation"])

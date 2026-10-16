@@ -23,6 +23,7 @@ cycles and milliseconds:
 | (metrics.json) per_iteration; packets_per_iteration.csv | Send and arrival of each packet against the phase of its own iteration; with ITER lines, also the response of each iteration to the end of J for it (iterations_markers.csv) and the iterations that a task runs in the run of the previous one |
 | fig812.svg, fig812.pdf | Gantt of the first complete hyperperiod |
 | network.tex, network.csv, network_packets.csv | Network latency per flow and per packet from the FLIT lines of the packet monitor (only when the log has them) |
+| tt_packets.csv, metrics.json "tt" | Packets between PEs of a run with the time-triggered injection (RUN_INFO injection=tt; --arch and --map) against the link schedule of the table of the image (rttools/paper/ttcheck.py) |
 
 `check` compares metrics.json with a reference file and exits with 1 when
 a value differs (integers exactly; floats within 1e-6 relative).
@@ -206,19 +207,12 @@ def clock_of_frequency_run(freq_metrics, cfg, map_name=None):
     return out
 
 
-def snap_to_edges(tr, half_fs):
-    """Trace with each time moved to the rising edge of the simulator
-    clock that it rounds: manycore_pe.sv prints $time (integer, unit of the
-    log) at rising edges, and edge n occurs at (2 n + 1) half fs. With a
-    period that is not a whole number of units (435.2 MHz: 2.297794 ns),
-    the printed value differs from the edge by up to half a unit; the edge
-    is the nearest one while the period exceeds one unit. The cycles
-    between two events are then whole numbers."""
-    unit_fs = round(tr.unit.seconds * 1e15)
+def edge_function(unit_fs, half_fs):
+    """Function from a time of the log (units of unit_fs) to the time of
+    the rising edge of the simulator clock that it rounds (snap_to_edges)."""
     period_fs = 2 * half_fs
     if period_fs <= unit_fs:
         raise ValueError(f"clock period of {period_fs} fs not above the log unit of {unit_fs} fs")
-
     cache = {}
 
     def edge(t):
@@ -231,7 +225,18 @@ def snap_to_edges(tr, half_fs):
             raise ValueError(f"time {t} is not within half a unit of a rising edge")
         cache[t] = e_fs / unit_fs
         return cache[t]
+    return edge
 
+
+def snap_to_edges(tr, half_fs):
+    """Trace with each time moved to the rising edge of the simulator
+    clock that it rounds: manycore_pe.sv prints $time (integer, unit of the
+    log) at rising edges, and edge n occurs at (2 n + 1) half fs. With a
+    period that is not a whole number of units (435.2 MHz: 2.297794 ns),
+    the printed value differs from the edge by up to half a unit; the edge
+    is the nearest one while the period exceeds one unit. The cycles
+    between two events are then whole numbers."""
+    edge = edge_function(round(tr.unit.seconds * 1e15), half_fs)
     from dataclasses import replace
     slices = [replace(s, start=edge(s.start), end=edge(s.end)) for s in tr.slices]
     marks = [replace(m, time=edge(m.time)) for m in tr.marks]
@@ -338,7 +343,10 @@ def load_run(log_path, cfg, unit=None, run_info="auto"):
     run_cfg = dict(cfg, clock_hz=clock["clock_hz"])
     tr = load(log_path, run_cfg, unit, clock)
     clock["edges_snapped"] = tr.meta["edges_snapped"]
-    return tr, run_cfg, Clock(tr.unit, clock["clock_hz"], clock["cycle_hz"]), clock
+    clk = Clock(tr.unit, clock["clock_hz"], clock["cycle_hz"])
+    if tr.meta["edges_snapped"]:
+        clk.edge = edge_function(round(tr.unit.seconds * 1e15), clock["half_period_fs"])
+    return tr, run_cfg, clk, clock
 
 
 class Clock:
@@ -354,6 +362,9 @@ class Clock:
         self.cycle_hz = clock_hz if cycle_hz is None else cycle_hz
         # platform seconds per second of the simulator (1.0 at F_CLK)
         self.scale = self.cycle_hz / self.hz
+        # edge(raw): raw time of the rising edge that a printed time rounds
+        # (snap_to_edges), None when the times of the log fall on the edges
+        self.edge = None
 
     def raw(self, seconds):
         """Raw units of `seconds` of platform time."""
@@ -411,7 +422,7 @@ def cpu_per_iteration(tr, cfg, clk, windows):
 def cpu_sequence(cfg):
     """Start and finish of each task in the sequence of its PE, in real
     cycles from the start of the phase: ORT/BENCH (rttools/bench_t/
-    estimate.py) on the characterized costs of each cluster (thesis
+    estimate.py) on the characterized costs of each cluster (ORCA RT-Tools reference
     scale) in the dispatch order of dispatch_sequences, divided by the
     scale. The start includes the scheduler cost; each cost includes the
     dispatch of the task."""
@@ -457,6 +468,28 @@ def phase_windows(cfg):
     return {f["name"]: win[f["name"]] for f in cfg["flows"]}
 
 
+def config_with_costs(cfg, costs_path):
+    """Config whose characterized costs (estimate.clusters, scale of the ORCA RT-Tools reference)
+    and scheduler cost take the rule max of a costs file of rttools.wcet
+    (rttools/wcet/costs.py): t(v) = max(cost of the config / scale, static
+    t(v)); the costs of a run with costs=max_csv_static in its RUN_INFO."""
+    from rttools.wcet import costs as wcosts
+    c = wcosts.load(costs_path)
+    est = cfg["estimate"]
+    k = est["scale"]
+    clusters = {}
+    for cluster, tasks in est["clusters"].items():
+        clusters[cluster] = []
+        for n, w in tasks:
+            if n not in c["tasks"]:
+                raise wcosts.CostsError(f"{costs_path}: no cost for task {n}")
+            clusters[cluster].append([n, max(w, c["tasks"][n] * k)])
+    sched = est["scheduler_cycles"] if c["scheduler_cycles"] is None else max(est["scheduler_cycles"],
+                                                                             c["scheduler_cycles"] * k)
+    return dict(cfg, estimate=dict(est, clusters=clusters, scheduler_cycles=sched,
+                                   costs=os.path.basename(costs_path), rule=wcosts.MAX))
+
+
 def estimates(cfg):
     """Tab. 8.3 (estimated): CPU demand c^(V_k) of each cluster, the sum of
     the characterized costs of its tasks / scale."""
@@ -476,15 +509,18 @@ def cpu_check(cfg, estimated):
             "f_cpu_hz": exact(f_cpu), "meets_phase": f_cpu <= cfg["clock_hz"]}
 
 
-def response_bound(cfg):
+def response_bound(cfg, finish=None):
     """R^ = phi(v_out) P + f^(v_out): phase index of each task (one phase
     per edge between PEs, config task_graph; on the same PE, one phase
     when the target runs before the source in the dispatch order) and the
     finish of the last task of the iteration in its sequence; P = phase in
     cycles. With the dispatch order J, G of GJ, J of iteration k runs first
     in phase 3 and G of iteration k ran in phase 1 (phi(J) = 3 comes from
-    I and H), so f^(J) = c^(J)."""
+    I and H), so f^(J) = c^(J). finish: F of each task in place of the
+    sequence (tt_finish: the handlers of the packet events of each PE)."""
     seq = cpu_sequence(cfg)
+    if finish is not None:
+        seq = {t: dict(v, finish=finish[t]) for t, v in seq.items()}
     pe_of = {t: v["cluster"] for t, v in seq.items()}
     order = release.sequence_positions(dispatch_sequences(cfg))
     phi = cpu_estimate.phases([tuple(e) for e in cfg["task_graph"]["edges"]], pe_of, order)
@@ -1201,6 +1237,73 @@ def mhz_text(hz):
     return f"{hz / 1e6:.6f}".rstrip("0").rstrip(".")
 
 
+def tt_check(log_path, tr, cfg, clk, per_packet, arch_path, map_path, costs=None):
+    """Packets between PEs of a run with the time-triggered injection
+    (weird_a.c with the table weird_a_tt.h) against the link schedule at
+    the clock of the run (rttools.paper.ttcheck): the n-th packet of a flow
+    (n from 0, order of TX.head) comes from the job of its source in phase
+    n + n(source). `costs`: costs file of the run (t(v) = max(CSV,
+    static)); the end of iteration k of v (ITER end marker) at or before
+    F(v) of that model after the tick of phase k - 1 + n(v), and the
+    enqueue of the k-th packet of a flow (send TAG line) at or before s."""
+    from rttools.paper import ttcheck
+    from rttools.tui.model import parsers as tparsers
+    from rttools.ucxgen.model import read_csv
+    _, csv_flows, _ = read_csv(cfg["application"])
+    label = {(f["source"], f["target"]): "f" + str(f["id"]) for f in csv_flows}
+    flows = {f["name"]: f for f in cfg["flows"]}
+    phi = response_bound(cfg)["phases"]
+    pk = []
+    for x in sorted(per_packet, key=lambda x: x["tx_head"]):
+        f = flows.get(x["flow"])
+        if f is None:
+            continue
+        pk.append(dict(x, tag=x["tag_tx"], flow_label=label[(f["source"], f["target"])]))
+    count = {}
+    for p in pk:
+        p["n"] = count.get(p["flow"], 0)
+        count[p["flow"]] = p["n"] + 1
+    table = ttcheck.schedule_rows(cfg["application"], map_path, arch_path, cfg["clock_hz"], costs=costs)
+
+    def phase_of(p, row, h):
+        return h + phi[flows[p["flow"]]["source"]]
+    jobs = ready = None
+    if costs:
+        fin = tt_finish(cfg, map_path, arch_path, costs)
+        jobs = [{"pe": it["lane"], "task": v, "j": k, "t_raw": it["end"], "q": k - 1 + phi[v], "bound": fin[v]}
+                for v, ks in iteration_marks(tr).items() if v in fin
+                for k, it in sorted(ks.items()) if it["end"] is not None]
+        by = ttcheck.rows_by_flow(table)
+        ready = []
+        for f in cfg["flows"]:
+            if f["src_pe"] == f["dst_pe"]:
+                continue
+            s0 = by[label[(f["source"], f["target"])]][0]["offset"]
+            sends = sorted(m.time for m in tr.lane_marks(f["src_pe"]) if m.kind == "send" and m.label == "TAG " + f["tag"])
+            ready += [{"pe": f["src_pe"], "flow": f["name"], "n": n, "t_raw": t, "q": n + phi[f["source"]],
+                       "bound": s0} for n, t in enumerate(sends)]
+    return ttcheck.analyze_run(log_path, clk, release_times(tr, cfg, clk), table, pk, phase_of,
+                               relabel=tparsers.swap_node if tr.meta.get("swap_xy") else None, jobs=jobs,
+                               ready=ready)
+
+
+def tt_finish(cfg, map_path, arch_path, costs):
+    """F(v) of each task in the model of a run with the time-triggered
+    injection (rttools.paper.ttflow, phase_model): t(v) = max(CSV, static)
+    of the costs file and, with the deadline model tick of its RUN_INFO,
+    the handlers of the packet events of each PE
+    (rttools/modules/instances/release.py, task_windows)."""
+    from rttools.paper import ttflow
+    from rttools.modules.routing import router
+    prev = router.set_ni("tt")
+    try:
+        g, _, noc, entries, _ = ttflow.load_app(cfg["application"], map_path, arch_path, costs)
+        pm = ttflow.phase_model(g, noc, entries, cfg["clock_hz"])
+    finally:
+        router.set_ni(prev)
+    return {t: x["finish"] for t, x in pm["tasks"].items()}
+
+
 def phase_conformance(tr, cfg, clk, rule):
     """Executions per phase of each task (ITER begin markers) and CPU per
     phase of each PE against t(V_k) (estimates), with n(v) of
@@ -1219,17 +1322,35 @@ def phase_conformance(tr, cfg, clk, rule):
 
 
 def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None,
-            release_rule=None):
+            release_rule=None, arch=None, mapping=None):
+    """analyze with the network-interface model of the images of the run
+    (ttcheck.run_ni)."""
+    from rttools.paper import ttcheck
+    with ttcheck.run_ni(log_path, run_info):
+        return _analyze(log_path, cfg, out_dir, unit, join, run_info, listing, listing_without,
+                        release_rule, arch, mapping)
+
+
+def _analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listing=None, listing_without=None,
+             release_rule=None, arch=None, mapping=None):
     """Every output of the module for one log; run_info: RUN_INFO path,
     "auto" (next to the log) or None (config clock_hz); listing and
     listing_without: objdump listings of the image with and without the
     instrumentation writes (bound of their cycles; None: no bound);
     release_rule: release rule of the run for phase_conformance ("tick",
-    "data"; None: the RUN_INFO line `release`, "data" without it)."""
-    from rttools.paper import phasecheck
+    "data"; None: the RUN_INFO line `release`, "data" without it); arch
+    and mapping (.gml and .map of E): the check of the time-triggered
+    injection of a run with injection=tt in its RUN_INFO (tt_check)."""
+    from rttools.paper import phasecheck, ttcheck
     tr, cfg, clk, clock = load_run(log_path, cfg, unit, run_info)
     info_path = run_info_path(log_path) if run_info == "auto" else run_info
-    rel_rule = phasecheck.release_rule(read_run_info(info_path) if info_path else {}, release_rule)
+    info = read_run_info(info_path) if info_path else {}
+    rel_rule = phasecheck.release_rule(info, release_rule)
+    injection = ttcheck.injection_rule(info)
+    costs = ttcheck.costs_of_run(info) if injection == "tt" else None
+    if costs:
+        # the model of the run: t(v) = max(characterized, static t(v) of its image)
+        cfg = config_with_costs(cfg, costs)
     windows = hyperperiods(tr, cfg, clk)
     if not windows:
         raise ValueError("the log has no complete hyperperiod after first_hyperperiod_s")
@@ -1243,6 +1364,14 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
     rows82 = tab82(cfg, tr, clk)
     net = flit_times(log_path, tr, cfg, clk)
     per_packet = net.pop("per_packet") if net else []
+    tt = None
+    # R^ of the model of the run: F with the handlers of the packet events (deadline model tick)
+    from rttools.modules.routing import router as _router
+    finish = tt_finish(cfg, mapping, arch, costs) if costs and arch and mapping and _router.tick_deadline() else None
+    if injection == "tt" and net is not None and arch and mapping:
+        tt = tt_check(log_path, tr, cfg, clk, per_packet, arch, mapping, costs)
+    from rttools.paper import ttcheck as _tc
+    tt_rows = _tc.pop_rows(tt)
     m = {
         "log": os.path.basename(log_path),
         "unit": {"name": tr.unit.name, "seconds": tr.unit.seconds, "detected": tr.meta["timescale_detected"],
@@ -1259,7 +1388,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
         "tab83": {"rows": rows83, "mean_difference_percent": mean83, "per_cluster": measured},
         "cpu": cpu_check(cfg, est),
         "sequences": dispatch_sequences(cfg),
-        "response_bound": response_bound(cfg),
+        "response_bound": response_bound(cfg, finish),
         "iterations": {"all": [{k: r[k] for k in ("iteration", "response_cycles", "response_ms", "release_offset_ms",
                                                   "release_to_dispatch_cycles", "response_from_release_cycles")}
                                for r in resp],
@@ -1283,6 +1412,9 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
         "per_iteration": per_iteration(tr, cfg, clk),
         "network": net,
         "phase_conformance": phase_conformance(tr, cfg, clk, rel_rule),
+        "injection": injection,
+        "costs": None if not costs else {"file": ttcheck.costs_label(costs), "rule": "max"},
+        "tt": tt,
     }
     if listing or listing_without:
         if not (listing and listing_without):
@@ -1343,6 +1475,7 @@ def analyze(log_path, cfg, out_dir, unit=None, join=None, run_info="auto", listi
                 [("Item", "item"), ("Thesis", "thesis"), ("This run", "this_run")],
                 thesis_rows, "lrr", "Values of the thesis and of this run.", "tab:exp23-thesis")
     write_per_iteration(out_dir, m["per_iteration"])
+    _tc.write_rows(out_dir, tt_rows)
     if net:
         cols = list(per_packet[0].keys()) if per_packet else []
         with open(os.path.join(out_dir, "network_packets.csv"), "w", newline="") as f:
@@ -1427,6 +1560,10 @@ def main(argv=None):
                    help="objdump listing of the simulated image (build_sw.sh, image.lst)")
     a.add_argument("--listing-without", default=None,
                    help="objdump listing of the image built with -DUCX_NO_INSTRUMENTATION")
+    a.add_argument("--arch", default=None,
+                   help="architecture (.gml) of E: with --map, the check of the time-triggered injection of a run "
+                        "with injection=tt in its RUN_INFO (rttools.paper.ttcheck)")
+    a.add_argument("--map", default=None, help="mapping (.map) of E for the check of the time-triggered injection")
     c = sub.add_parser("check")
     c.add_argument("metrics")
     c.add_argument("reference")
@@ -1439,7 +1576,7 @@ def main(argv=None):
             unit = RTL_PRESETS[args.unit]
         run_info = None if args.run_info == "none" else args.run_info
         m = analyze(args.log, cfg, args.out, unit, args.join, run_info, args.listing, args.listing_without,
-                    args.release)
+                    args.release, args.arch, args.map)
         ck = m["clock"]
         print(f"{m['log']}: unit {m['unit']['name']} (detected {m['unit']['detected']}), "
               f"{m['parameters']['hyperperiods']} hyperperiods, join rule {m['join_rule']}")
@@ -1477,6 +1614,10 @@ def main(argv=None):
         if pc is not None:
             from rttools.paper import phasecheck
             print("  phase conformance: " + phasecheck.summary(pc)[0][2:])
+        if m["injection"] == "tt":
+            from rttools.paper import ttcheck
+            for line in ttcheck.summary_lines(m["tt"]):
+                print("  " + line.lstrip())
         net = m["network"]
         if net is None:
             print("  flit times: no FLIT lines")
