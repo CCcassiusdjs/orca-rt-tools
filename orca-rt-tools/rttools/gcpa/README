@@ -1,0 +1,10 @@
+# ORT/GCPA: ORCA-RT-TOOLS/Graph Critical Path Analyser
+
+This module implements a method for findind the largest path from one node to another. 
+
+`gcpa <ifile>`
+
+- `ifile`: Input file containing a graph description (ORCA format)
+
+It outputs a list of graph vertices and the cost to reach them.
+

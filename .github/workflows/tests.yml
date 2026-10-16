@@ -1,0 +1,21 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"   # matplotlib 3.5.1 ships wheels up to 3.10
+      - name: System packages (C host tests and RTL tests)
+        run: sudo apt-get update && sudo apt-get install -y gcc verilator ghdl
+      - name: Python packages
+        run: pip install -r orca-rt-tools/requirements.txt pytest
+      - name: Tests
+        working-directory: orca-rt-tools
+        run: python -m pytest -q

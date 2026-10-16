@@ -1,0 +1,37 @@
+# Application E (synthetic-app-e.txt, pkt-sim/software/ucx-os/app/weird_a.c) for the analysis flow of the paper
+# Task rows: Period = release period (s); Capacity = characterized cost c^(v) in cycles (rttools/bench_t/main.py / 10: the task of weird_a.c plus its dispatch and kernel work); Deadline = end-to-end deadline (s)
+# Flow rows: Period = release period (s); Data = payload (bytes); Deadline = relative deadline (s), not used by the phase model (#parameters: release and deadline from the sequence of each PE, rttools/modules/instances/release.py)
+# creation rows: order of ucx_task_add in app_main of weird_a.c per PE (cpu id), without the idle task; the kernel rule (round robin in creation order from the idle task, rttools/bench_t/estimate.py dispatch_order) gives the sequence of each PE
+#tasks,,,,,
+Task,Period,Capacity,Deadline,Acronym,Description
+1,0.0005,28530,0.002,A,Task A
+2,0.0005,58600,0.002,B,Task B
+3,0.0005,96330,0.002,C,Task C
+4,0.0005,14000,0.002,D,Task D
+5,0.0005,52700,0.002,E,Task E
+6,0.0005,80800,0.002,F,Task F
+7,0.0005,109880,0.002,G,Task G
+8,0.0005,45300,0.002,H,Task H
+9,0.0005,75370,0.002,I,Task I
+10,0.0005,107570,0.002,J,Task J
+#flows,,,,,
+Flow,Period,Data,Deadline,Source,Target
+1,0.0005,1230,0.0005,A,C
+2,0.0005,4560,0.0005,A,B
+3,0.0005,7890,0.0005,B,D
+4,0.0005,1200,0.0005,C,E
+5,0.0005,3450,0.0005,D,F
+6,0.0005,6780,0.0005,F,G
+7,0.0005,9010,0.0005,E,I
+8,0.0005,2340,0.0005,E,H
+9,0.0005,5670,0.0005,I,J
+10,0.0005,8900,0.0005,H,J
+11,0.0005,1230,0.0005,G,J
+#parameters,,,,,
+Parameter,Value,,,,
+release_model,phase,,,,
+scheduler_cycles,11000,,,,
+creation,0,F,D,B,A,
+creation,1,C,,,
+creation,2,H,I,E,
+creation,3,J,G,,

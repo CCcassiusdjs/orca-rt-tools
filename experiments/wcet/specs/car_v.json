@@ -1,0 +1,10 @@
+{
+ "_doc": "rttools.wcet spec of CAR-V on images/car_v.elf (car_v.c of this tree; images/BUILD.txt).",
+ "image": "../images/car_v.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+  "../annotations/car_v.json"
+ ],
+ "manifest": "../../../pkt-sim/software/ucx-os/app/car_v.json"
+}

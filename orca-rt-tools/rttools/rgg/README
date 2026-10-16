@@ -1,0 +1,12 @@
+# ORT/RGG: ORCA-RT-TOOLS/Random Graph Generator
+
+This module generates a random graph of `a` vertices, whose the range of vertice values is [`b`; `c`], the density of the graph is `x`, and the range of vertice values is  [`y`; `z`].
+
+Usage: `rgg <a> <b> <c> <x> <y> <z> <ofile>` 
+- `a` is the number of nodes in the output graph (integer)
+- `b` is the minimum value for vertice value (integer)
+- `c` is the maximum value for vertice value (integer)
+- `x` is the graph density (float, 0 = no edges, 1 = fully connected)
+- `y` is the minimum value for edge value (integer)
+- `z` is the maximum value for edge value (integer)
+- `ofile` is the output file name- `y` is the minimum value for edge value (integer)

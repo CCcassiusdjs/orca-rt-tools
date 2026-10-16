@@ -1,0 +1,75 @@
+#tasks,,,,,
+Task,Period,Data,Deadline,Acronym,Description
+1,0,0,0,TPMS,Tire pressure monitoring system
+2,0,0,0,VIBS,Vibration sensor
+3,0,0,0,SPES,Speed sensor
+4,0,0,0,POSI,Position sensor interface
+5,0,0,0,USOS,Ultrasonic sensor
+6,0,0,0,FBU1,"Frame buffer - Left camera, upper-left quadrant"
+7,0,0,0,FBU2,"Frame buffer - Left camera, upper-right quadrant"
+8,0,0,0,FBU3,"Frame buffer - Left camera, lower-left quadrant"
+9,0,0,0,FBU4,"Frame buffer - Left camera, lower-right quadrant"
+10,0,0,0,FBU5,"Frame buffer - Right camera, upper-left quadrant"
+11,0,0,0,FBU6,"Frame buffer - Right camera, upper-right quadrant"
+12,0,0,0,FBU7,"Frame buffer - Right camera, lower-left quadrant"
+13,0,0,0,FBU8,"Frame buffer - Right camera, lower-right quadrant"
+14,0,0,0,STAC,Stability control
+15,0,0,0,TPRC,Tire pressure control
+16,0,0,0,DIRC,Direction control
+17,0,0,0,NAVC,Navigation control
+18,0,0,0,OBDB,Obstacle database
+19,0,0,0,BFE1,Background estimation and feature extraction 1
+20,0,0,0,BFE2,Background estimation and feature extraction 2
+21,0,0,0,BFE3,Background estimation and feature extraction 3
+22,0,0,0,BFE4,Background estimation and feature extraction 4
+23,0,0,0,BFE5,Background estimation and feature extraction 5
+24,0,0,0,BFE6,Background estimation and feature extraction 6
+25,0,0,0,BFE7,Background estimation and feature extraction 7
+26,0,0,0,BFE8,Background estimation and feature extraction 8
+27,0,0,0,FDF1,Feature data fusion 1
+28,0,0,0,FDF2,Feature data fusion 2
+29,0,0,0,STPH,Stereo photogrammetry
+31,0,0,0,THRC,Throttle control
+32,0,0,0,VOD1,Visual odometry 1
+33,0,0,0,VOD2,Visual odometry 2
+34,0,0,0,OBMG,Obstacle database manager
+#flows,,,,,
+Flow,Period,Data,Deadline,Source,Target
+1,0.5,4096,0.5,POSI,NAVC
+2,0.5,8192,0.5,NAVC,OBDB
+3,0.5,65536,0.5,OBDB,NAVC
+4,0.5,65536,0.5,OBDB,OBMG
+5,0.1,2048,0.1,NAVC,DIRC
+6,0.1,2048,0.1,SPES,NAVC
+7,0.1,4096,0.1,NAVC,THRC
+8,0.04,153600,0.04,FBU3,VOD1
+9,0.04,153600,0.04,FBU8,VOD2
+10,0.04,2048,0.04,VOD1,NAVC
+11,0.04,2048,0.04,VOD2,NAVC
+12,0.04,153600,0.04,FBU1,BFE1
+13,0.04,153600,0.04,FBU2,BFE2
+14,0.04,153600,0.04,FBU3,BFE3
+15,0.04,153600,0.04,FBU4,BFE4
+16,0.04,153600,0.04,FBU5,BFE5
+17,0.04,153600,0.04,FBU6,BFE6
+18,0.04,153600,0.04,FBU7,BFE7
+19,0.04,153600,0.04,FBU8,BFE8
+20,0.04,8192,0.04,BFE1,FDF1
+21,0.04,8192,0.04,BFE2,FDF1
+22,0.04,8192,0.04,BFE3,FDF1
+23,0.04,8192,0.04,BFE4,FDF1
+24,0.04,8192,0.04,BFE5,FDF2
+25,0.04,8192,0.04,BFE6,FDF2
+26,0.04,8192,0.04,BFE7,FDF2
+27,0.04,8192,0.04,BFE8,FDF2
+28,0.04,32768,0.04,FDF1,STPH
+29,0.04,32768,0.04,FDF2,STPH
+30,0.04,16384,0.04,STPH,OBMG
+31,0.5,4096,0.5,POSI,OBMG
+32,0.1,4096,0.1,USOS,OBMG
+33,1,16384,1,OBMG,OBDB
+34,0.5,8192,0.5,TPMS,STAC
+35,0.1,2048,0.1,VIBS,STAC
+36,1,8192,1,STAC,TPRC
+37,0.1,4096,0.1,SPES,STAC
+38,0.1,4096,0.1,STAC,THRC

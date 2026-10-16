@@ -1,0 +1,2185 @@
+{
+ "_doc": "Reference of make (experiments/car-full, python -m rttools.paper.carfull run): generated application, candidates of the cost factor and of the payload divisor, and the analysis flow of the chosen pair (cost factor 4, payload divisor 16) with the general phase model on arch/hermes-4x4.gml at 500 MHz (at_clock) and at the minimum frequency (at_minimum).",
+ "header_wait_cycles": 20,
+ "occupancy": "L0 + 20 (m + 1)",
+ "app": {
+  "csv": "car-full.csv",
+  "map": "car-full-ONTO-hermes4x4.map",
+  "csv_matches_repo": true,
+  "map_matches_repo": true
+ },
+ "selection": {
+  "tasks": [
+   "TPMS",
+   "VIBS",
+   "SPES",
+   "POSI",
+   "USOS",
+   "FBU1",
+   "FBU2",
+   "FBU3",
+   "FBU4",
+   "FBU5",
+   "FBU6",
+   "FBU7",
+   "FBU8",
+   "STAC",
+   "TPRC",
+   "DIRC",
+   "NAVC",
+   "OBDB",
+   "BFE1",
+   "BFE2",
+   "BFE3",
+   "BFE4",
+   "BFE5",
+   "BFE6",
+   "BFE7",
+   "BFE8",
+   "FDF1",
+   "FDF2",
+   "STPH",
+   "THRC",
+   "VOD1",
+   "VOD2",
+   "OBMG"
+  ],
+  "flows": 38,
+  "source_periods_s": [
+   0.04,
+   0.1,
+   0.5,
+   1.0
+  ],
+  "feedback": [
+   "OBDB-NAVC",
+   "OBMG-OBDB"
+  ]
+ },
+ "mapping": {
+  "criterion": "MAX_PROC",
+  "clusters": {
+   "SPES": [
+    "SPES"
+   ],
+   "TPRC": [
+    "TPRC"
+   ],
+   "THRC": [
+    "THRC"
+   ],
+   "FBU4:BFE4": [
+    "FBU4",
+    "BFE4"
+   ],
+   "FBU3:VOD1": [
+    "FBU3",
+    "VOD1"
+   ],
+   "FBU8:VOD2": [
+    "FBU8",
+    "VOD2"
+   ],
+   "FBU1:BFE1": [
+    "FBU1",
+    "BFE1"
+   ],
+   "FBU2:BFE2": [
+    "FBU2",
+    "BFE2"
+   ],
+   "FBU5:BFE5": [
+    "FBU5",
+    "BFE5"
+   ],
+   "FBU6:BFE6": [
+    "FBU6",
+    "BFE6"
+   ],
+   "FBU7:BFE7": [
+    "FBU7",
+    "BFE7"
+   ],
+   "BFE8:FDF2": [
+    "BFE8",
+    "FDF2"
+   ],
+   "OBDB:USOS:OBMG": [
+    "OBDB",
+    "USOS",
+    "OBMG"
+   ],
+   "VIBS:TPMS:STAC": [
+    "VIBS",
+    "TPMS",
+    "STAC"
+   ],
+   "POSI:NAVC:DIRC": [
+    "POSI",
+    "NAVC",
+    "DIRC"
+   ],
+   "BFE3:FDF1:STPH": [
+    "BFE3",
+    "FDF1",
+    "STPH"
+   ]
+  },
+  "cluster_nodes": {
+   "TPRC": 0,
+   "SPES": 1,
+   "THRC": 2,
+   "VIBS:TPMS:STAC": 3,
+   "FBU4:BFE4": 7,
+   "FBU1:BFE1": 11,
+   "FBU2:BFE2": 15,
+   "FBU5:BFE5": 14,
+   "FBU6:BFE6": 13,
+   "FBU7:BFE7": 12,
+   "POSI:NAVC:DIRC": 8,
+   "OBDB:USOS:OBMG": 4,
+   "FBU3:VOD1": 5,
+   "FBU8:VOD2": 6,
+   "BFE8:FDF2": 10,
+   "BFE3:FDF1:STPH": 9
+  },
+  "volumes": {
+   "SPES": 15360,
+   "TPRC": 2048,
+   "THRC": 20480,
+   "FBU4:BFE4": 51200,
+   "FBU3:VOD1": 972800,
+   "FBU8:VOD2": 972800,
+   "FBU1:BFE1": 51200,
+   "FBU2:BFE2": 51200,
+   "FBU5:BFE5": 51200,
+   "FBU6:BFE6": 51200,
+   "FBU7:BFE7": 51200,
+   "BFE8:FDF2": 1318400,
+   "OBDB:USOS:OBMG": 141312,
+   "VIBS:TPMS:STAC": 22528,
+   "POSI:NAVC:DIRC": 79872,
+   "BFE3:FDF1:STPH": 1420800
+  },
+  "nodes": {
+   "0": [
+    "TPRC"
+   ],
+   "1": [
+    "SPES"
+   ],
+   "2": [
+    "THRC"
+   ],
+   "3": [
+    "TPMS",
+    "VIBS",
+    "STAC"
+   ],
+   "4": [
+    "USOS",
+    "OBDB",
+    "OBMG"
+   ],
+   "5": [
+    "FBU3",
+    "VOD1"
+   ],
+   "6": [
+    "FBU8",
+    "VOD2"
+   ],
+   "7": [
+    "FBU4",
+    "BFE4"
+   ],
+   "8": [
+    "POSI",
+    "DIRC",
+    "NAVC"
+   ],
+   "9": [
+    "BFE3",
+    "FDF1",
+    "STPH"
+   ],
+   "10": [
+    "BFE8",
+    "FDF2"
+   ],
+   "11": [
+    "FBU1",
+    "BFE1"
+   ],
+   "12": [
+    "FBU7",
+    "BFE7"
+   ],
+   "13": [
+    "FBU6",
+    "BFE6"
+   ],
+   "14": [
+    "FBU5",
+    "BFE5"
+   ],
+   "15": [
+    "FBU2",
+    "BFE2"
+   ]
+  }
+ },
+ "scale": {
+  "ratio": 80.0,
+  "period_s": 0.0005,
+  "cost_factor": 4,
+  "payload_divisor": 16,
+  "scheduler_cycles": 11000
+ },
+ "rule": {
+  "max_utilization": 0.8698,
+  "chosen_cost_factor": 4,
+  "config_matches_rule": true
+ },
+ "candidates": {
+  "k3_q8": {
+   "cost_factor": 3,
+   "payload_divisor": 8,
+   "f_cpu_hz": 340000000.0,
+   "f_cpu_phase_hz": 6711996000.0,
+   "utilization_bound_hz": 318000000.0,
+   "utilization_at_clock": 0.68,
+   "frequency_hz": 340000000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": true,
+   "packets": 347,
+   "skipped": 0,
+   "data_age_max_ms_at_clock": 27.732,
+   "data_age_max_ms_at_minimum": 35.99705882352941,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 69164,
+   "memory_free_bytes": -21012,
+   "memory_fits": false
+  },
+  "k3_q16": {
+   "cost_factor": 3,
+   "payload_divisor": 16,
+   "f_cpu_hz": 340000000.0,
+   "f_cpu_phase_hz": 6711996000.0,
+   "utilization_bound_hz": 318000000.0,
+   "utilization_at_clock": 0.68,
+   "frequency_hz": 340000000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": true,
+   "packets": 347,
+   "skipped": 0,
+   "data_age_max_ms_at_clock": 27.732,
+   "data_age_max_ms_at_minimum": 35.99705882352941,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 39212,
+   "memory_free_bytes": 8940,
+   "memory_fits": true
+  },
+  "k4_q8": {
+   "cost_factor": 4,
+   "payload_divisor": 8,
+   "f_cpu_hz": 432000000.0,
+   "f_cpu_phase_hz": 8905328000.0,
+   "utilization_bound_hz": 402000000.0,
+   "utilization_at_clock": 0.864,
+   "frequency_hz": 432000000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": true,
+   "packets": 347,
+   "skipped": 0,
+   "data_age_max_ms_at_clock": 28.398,
+   "data_age_max_ms_at_minimum": 36.0,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 69164,
+   "memory_free_bytes": -21012,
+   "memory_fits": false
+  },
+  "k4_q16": {
+   "cost_factor": 4,
+   "payload_divisor": 16,
+   "f_cpu_hz": 432000000.0,
+   "f_cpu_phase_hz": 8905328000.0,
+   "utilization_bound_hz": 402000000.0,
+   "utilization_at_clock": 0.864,
+   "frequency_hz": 432000000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": true,
+   "packets": 347,
+   "skipped": 0,
+   "data_age_max_ms_at_clock": 28.398,
+   "data_age_max_ms_at_minimum": 36.0,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 39212,
+   "memory_free_bytes": 8940,
+   "memory_fits": true
+  },
+  "k5_q8": {
+   "cost_factor": 5,
+   "payload_divisor": 8,
+   "f_cpu_hz": 525336000.0,
+   "f_cpu_phase_hz": 11098660000.0,
+   "utilization_bound_hz": 486000000.0,
+   "utilization_at_clock": 1.050672,
+   "frequency_hz": 525336000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": false,
+   "packets": null,
+   "skipped": null,
+   "data_age_max_ms_at_clock": null,
+   "data_age_max_ms_at_minimum": 35.999996192912725,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 69164,
+   "memory_free_bytes": -21012,
+   "memory_fits": false
+  },
+  "k5_q16": {
+   "cost_factor": 5,
+   "payload_divisor": 16,
+   "f_cpu_hz": 525336000.0,
+   "f_cpu_phase_hz": 11098660000.0,
+   "utilization_bound_hz": 486000000.0,
+   "utilization_at_clock": 1.050672,
+   "frequency_hz": 525336000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": false,
+   "packets": null,
+   "skipped": null,
+   "data_age_max_ms_at_clock": null,
+   "data_age_max_ms_at_minimum": 35.999996192912725,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 39212,
+   "memory_free_bytes": 8940,
+   "memory_fits": true
+  },
+  "k6_q8": {
+   "cost_factor": 6,
+   "payload_divisor": 8,
+   "f_cpu_hz": 618668000.0,
+   "f_cpu_phase_hz": 13291992000.0,
+   "utilization_bound_hz": 570000000.0,
+   "utilization_at_clock": 1.237336,
+   "frequency_hz": 618668000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": false,
+   "packets": null,
+   "skipped": null,
+   "data_age_max_ms_at_clock": null,
+   "data_age_max_ms_at_minimum": 35.999998383624174,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 69164,
+   "memory_free_bytes": -21012,
+   "memory_fits": false
+  },
+  "k6_q16": {
+   "cost_factor": 6,
+   "payload_divisor": 16,
+   "f_cpu_hz": 618668000.0,
+   "f_cpu_phase_hz": 13291992000.0,
+   "utilization_bound_hz": 570000000.0,
+   "utilization_at_clock": 1.237336,
+   "frequency_hz": 618668000.0,
+   "binding": "cpu",
+   "network_at_f_cpu_feasible": true,
+   "network_at_clock_feasible": false,
+   "packets": null,
+   "skipped": null,
+   "data_age_max_ms_at_clock": null,
+   "data_age_max_ms_at_minimum": 35.999998383624174,
+   "memory_worst_pe": "9",
+   "memory_worst_bytes": 39212,
+   "memory_free_bytes": 8940,
+   "memory_fits": true
+  }
+ },
+ "chosen": {
+  "cost_factor": 4,
+  "payload_divisor": 16,
+  "tasks": 33,
+  "flows": 38,
+  "costs": {
+   "TPMS": 477668,
+   "VIBS": 151000,
+   "SPES": 151000,
+   "POSI": 711000,
+   "USOS": 104332,
+   "FBU1": 67000,
+   "FBU2": 67000,
+   "FBU3": 67000,
+   "FBU4": 48332,
+   "FBU5": 67000,
+   "FBU6": 67000,
+   "FBU7": 67000,
+   "FBU8": 67000,
+   "STAC": 151000,
+   "TPRC": 1411000,
+   "DIRC": 151000,
+   "NAVC": 151000,
+   "OBDB": 711000,
+   "BFE1": 67000,
+   "BFE2": 67000,
+   "BFE3": 67000,
+   "BFE4": 67000,
+   "BFE5": 67000,
+   "BFE6": 67000,
+   "BFE7": 67000,
+   "BFE8": 67000,
+   "FDF1": 67000,
+   "FDF2": 67000,
+   "STPH": 67000,
+   "THRC": 151000,
+   "VOD1": 67000,
+   "VOD2": 67000,
+   "OBMG": 1411000
+  },
+  "task_period_ms": {
+   "TPMS": 6.25,
+   "VIBS": 1.25,
+   "SPES": 1.25,
+   "POSI": 6.25,
+   "USOS": 1.25,
+   "FBU1": 0.5,
+   "FBU2": 0.5,
+   "FBU3": 0.5,
+   "FBU4": 0.5,
+   "FBU5": 0.5,
+   "FBU6": 0.5,
+   "FBU7": 0.5,
+   "FBU8": 0.5,
+   "STAC": 1.25,
+   "TPRC": 12.5,
+   "DIRC": 1.25,
+   "NAVC": 1.25,
+   "OBDB": 6.25,
+   "BFE1": 0.5,
+   "BFE2": 0.5,
+   "BFE3": 0.5,
+   "BFE4": 0.5,
+   "BFE5": 0.5,
+   "BFE6": 0.5,
+   "BFE7": 0.5,
+   "BFE8": 0.5,
+   "FDF1": 0.5,
+   "FDF2": 0.5,
+   "STPH": 0.5,
+   "THRC": 1.25,
+   "VOD1": 0.5,
+   "VOD2": 0.5,
+   "OBMG": 12.5
+  },
+  "rates": {
+   "phase_ms": 0.25,
+   "hyperperiod_ms": 12.5,
+   "phases_per_hyperperiod": 50,
+   "ticks": {
+    "TPMS": 25,
+    "VIBS": 5,
+    "SPES": 5,
+    "POSI": 25,
+    "USOS": 5,
+    "FBU1": 2,
+    "FBU2": 2,
+    "FBU3": 2,
+    "FBU4": 2,
+    "FBU5": 2,
+    "FBU6": 2,
+    "FBU7": 2,
+    "FBU8": 2,
+    "STAC": 5,
+    "TPRC": 50,
+    "DIRC": 5,
+    "NAVC": 5,
+    "OBDB": 25,
+    "BFE1": 2,
+    "BFE2": 2,
+    "BFE3": 2,
+    "BFE4": 2,
+    "BFE5": 2,
+    "BFE6": 2,
+    "BFE7": 2,
+    "BFE8": 2,
+    "FDF1": 2,
+    "FDF2": 2,
+    "STPH": 2,
+    "THRC": 5,
+    "VOD1": 2,
+    "VOD2": 2,
+    "OBMG": 50
+   },
+   "flow_jobs": {
+    "f1": 1,
+    "f2": 5,
+    "f3": 1,
+    "f4": 1,
+    "f5": 1,
+    "f6": 1,
+    "f7": 1,
+    "f8": 1,
+    "f9": 1,
+    "f10": 1,
+    "f11": 1,
+    "f12": 1,
+    "f13": 1,
+    "f14": 1,
+    "f15": 1,
+    "f16": 1,
+    "f17": 1,
+    "f18": 1,
+    "f19": 1,
+    "f20": 1,
+    "f21": 1,
+    "f22": 1,
+    "f23": 1,
+    "f24": 1,
+    "f25": 1,
+    "f26": 1,
+    "f27": 1,
+    "f28": 1,
+    "f29": 1,
+    "f30": 1,
+    "f31": 1,
+    "f32": 1,
+    "f33": 1,
+    "f34": 1,
+    "f35": 1,
+    "f36": 10,
+    "f37": 1,
+    "f38": 1
+   }
+  },
+  "feedback": [
+   "OBDB-NAVC",
+   "OBMG-OBDB"
+  ],
+  "sequences": {
+   "0": [
+    "TPRC"
+   ],
+   "1": [
+    "SPES"
+   ],
+   "2": [
+    "THRC"
+   ],
+   "3": [
+    "VIBS",
+    "TPMS",
+    "STAC"
+   ],
+   "4": [
+    "OBDB",
+    "USOS",
+    "OBMG"
+   ],
+   "5": [
+    "FBU3",
+    "VOD1"
+   ],
+   "6": [
+    "FBU8",
+    "VOD2"
+   ],
+   "7": [
+    "FBU4",
+    "BFE4"
+   ],
+   "8": [
+    "POSI",
+    "NAVC",
+    "DIRC"
+   ],
+   "9": [
+    "BFE3",
+    "FDF1",
+    "STPH"
+   ],
+   "10": [
+    "BFE8",
+    "FDF2"
+   ],
+   "11": [
+    "FBU1",
+    "BFE1"
+   ],
+   "12": [
+    "FBU7",
+    "BFE7"
+   ],
+   "13": [
+    "FBU6",
+    "BFE6"
+   ],
+   "14": [
+    "FBU5",
+    "BFE5"
+   ],
+   "15": [
+    "FBU2",
+    "BFE2"
+   ]
+  },
+  "cpu": {
+   "f_cpu_hz": 432000000.0,
+   "phase_cycles": 108000,
+   "utilization_bound_cycles": 100500,
+   "utilization_bound_hz": 402000000.0,
+   "f_cpu_phase_hz": 8905328000.0,
+   "steps": 22,
+   "demand_per_hyperperiod_cycles": {
+    "0": 1411000,
+    "1": 1510000,
+    "2": 1510000,
+    "3": 3975336,
+    "4": 3876320,
+    "5": 3350000,
+    "6": 3350000,
+    "7": 2883300,
+    "8": 4442000,
+    "9": 5025000,
+    "10": 3350000,
+    "11": 3350000,
+    "12": 3350000,
+    "13": 3350000,
+    "14": 3350000,
+    "15": 3350000
+   },
+   "utilization_at_clock": 0.864
+  },
+  "search": {
+   "f_cpu_hz": 432000000.0,
+   "network_at_f_cpu": {
+    "frequency_hz": 432000000.0,
+    "feasible": true,
+    "hyperperiod": 5400000,
+    "packets": 347,
+    "skipped": 0
+   },
+   "frequency_hz": 432000000.0,
+   "f_noc_hz": 432000000.0,
+   "search_above_f_cpu": null,
+   "binding": "cpu"
+  },
+  "network_at_clock": {
+   "frequency_hz": 500000000,
+   "feasible": true,
+   "hyperperiod": 6250000,
+   "packets": 347,
+   "skipped": 0
+  },
+  "at_clock": {
+   "frequency_hz": 500000000,
+   "phase_cycles": 125000,
+   "hyper_cycles": 6250000,
+   "cpu_feasible": true,
+   "periodic_from_hyperperiod": 0,
+   "misses": 0,
+   "busy_per_phase_max": {
+    "0": 125000,
+    "1": 125000,
+    "2": 125000,
+    "3": 125000,
+    "4": 125000,
+    "5": 125000,
+    "6": 125000,
+    "7": 115332,
+    "8": 125000,
+    "9": 125000,
+    "10": 125000,
+    "11": 125000,
+    "12": 125000,
+    "13": 125000,
+    "14": 125000,
+    "15": 125000
+   },
+   "busy_per_hyperperiod": {
+    "0": 1543000,
+    "1": 1620000,
+    "2": 1620000,
+    "3": 4305336,
+    "4": 4206320,
+    "5": 3625000,
+    "6": 3625000,
+    "7": 2883300,
+    "8": 4838000,
+    "9": 5300000,
+    "10": 3625000,
+    "11": 3625000,
+    "12": 3625000,
+    "13": 3625000,
+    "14": 3625000,
+    "15": 3625000
+   },
+   "data_age": [
+    {
+     "chain": "TPMS-STAC-TPRC",
+     "source": "TPMS",
+     "sink": "TPRC",
+     "length": 2,
+     "max_cycles": 10918000,
+     "min_cycles": 10918000,
+     "max_ms": 21.836000000000002,
+     "output_job": 0
+    },
+    {
+     "chain": "TPMS-STAC-THRC",
+     "source": "TPMS",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 4537000,
+     "min_cycles": 2037000,
+     "max_ms": 9.074,
+     "output_job": 7
+    },
+    {
+     "chain": "VIBS-STAC-TPRC",
+     "source": "VIBS",
+     "sink": "TPRC",
+     "length": 2,
+     "max_cycles": 8418000,
+     "min_cycles": 8418000,
+     "max_ms": 16.836,
+     "output_job": 0
+    },
+    {
+     "chain": "VIBS-STAC-THRC",
+     "source": "VIBS",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 1412000,
+     "min_cycles": 1412000,
+     "max_ms": 2.8240000000000003,
+     "output_job": 9
+    },
+    {
+     "chain": "SPES-NAVC-DIRC",
+     "source": "SPES",
+     "sink": "DIRC",
+     "length": 2,
+     "max_cycles": 1824000,
+     "min_cycles": 1574000,
+     "max_ms": 3.648,
+     "output_job": 5
+    },
+    {
+     "chain": "SPES-NAVC-THRC",
+     "source": "SPES",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 1412000,
+     "min_cycles": 1412000,
+     "max_ms": 2.8240000000000003,
+     "output_job": 9
+    },
+    {
+     "chain": "SPES-STAC-TPRC",
+     "source": "SPES",
+     "sink": "TPRC",
+     "length": 2,
+     "max_cycles": 8418000,
+     "min_cycles": 8418000,
+     "max_ms": 16.836,
+     "output_job": 0
+    },
+    {
+     "chain": "SPES-STAC-THRC",
+     "source": "SPES",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 1412000,
+     "min_cycles": 1412000,
+     "max_ms": 2.8240000000000003,
+     "output_job": 9
+    },
+    {
+     "chain": "POSI-NAVC-DIRC",
+     "source": "POSI",
+     "sink": "DIRC",
+     "length": 2,
+     "max_cycles": 5324000,
+     "min_cycles": 2824000,
+     "max_ms": 10.648,
+     "output_job": 8
+    },
+    {
+     "chain": "POSI-NAVC-THRC",
+     "source": "POSI",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 5162000,
+     "min_cycles": 2662000,
+     "max_ms": 10.324,
+     "output_job": 8
+    },
+    {
+     "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+     "source": "POSI",
+     "sink": "DIRC",
+     "length": 4,
+     "max_cycles": 14199000,
+     "min_cycles": 8449000,
+     "max_ms": 28.398,
+     "output_job": 7
+    },
+    {
+     "chain": "POSI-OBMG-OBDB-NAVC-THRC",
+     "source": "POSI",
+     "sink": "THRC",
+     "length": 4,
+     "max_cycles": 13912000,
+     "min_cycles": 8287000,
+     "max_ms": 27.824,
+     "output_job": 7
+    },
+    {
+     "chain": "USOS-OBMG-OBDB-NAVC-DIRC",
+     "source": "USOS",
+     "sink": "DIRC",
+     "length": 4,
+     "max_cycles": 11074000,
+     "min_cycles": 5324000,
+     "max_ms": 22.148,
+     "output_job": 7
+    },
+    {
+     "chain": "USOS-OBMG-OBDB-NAVC-THRC",
+     "source": "USOS",
+     "sink": "THRC",
+     "length": 4,
+     "max_cycles": 10787000,
+     "min_cycles": 5162000,
+     "max_ms": 21.573999999999998,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU1",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU1",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU2",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU2",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU3-VOD1-NAVC-DIRC",
+     "source": "FBU3",
+     "sink": "DIRC",
+     "length": 3,
+     "max_cycles": 1574000,
+     "min_cycles": 1199000,
+     "max_ms": 3.148,
+     "output_job": 0
+    },
+    {
+     "chain": "FBU3-VOD1-NAVC-THRC",
+     "source": "FBU3",
+     "sink": "THRC",
+     "length": 3,
+     "max_cycles": 1162000,
+     "min_cycles": 1037000,
+     "max_ms": 2.3240000000000003,
+     "output_job": 8
+    },
+    {
+     "chain": "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU3",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU3",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU4",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU4",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU5",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU5",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU6",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU6",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU7",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU7",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU8-VOD2-NAVC-DIRC",
+     "source": "FBU8",
+     "sink": "DIRC",
+     "length": 3,
+     "max_cycles": 1574000,
+     "min_cycles": 1199000,
+     "max_ms": 3.148,
+     "output_job": 0
+    },
+    {
+     "chain": "FBU8-VOD2-NAVC-THRC",
+     "source": "FBU8",
+     "sink": "THRC",
+     "length": 3,
+     "max_cycles": 1162000,
+     "min_cycles": 1037000,
+     "max_ms": 2.3240000000000003,
+     "output_job": 8
+    },
+    {
+     "chain": "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU8",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 11824000,
+     "min_cycles": 6074000,
+     "max_ms": 23.648,
+     "output_job": 7
+    },
+    {
+     "chain": "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU8",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 11537000,
+     "min_cycles": 5912000,
+     "max_ms": 23.074,
+     "output_job": 7
+    }
+   ],
+   "data_age_max": {
+    "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+    "cycles": 14199000,
+    "ms": 28.398
+   }
+  },
+  "at_minimum": {
+   "frequency_hz": 432000000.0,
+   "phase_cycles": 108000,
+   "hyper_cycles": 5400000,
+   "cpu_feasible": true,
+   "periodic_from_hyperperiod": 0,
+   "misses": 0,
+   "busy_per_phase_max": {
+    "0": 108000,
+    "1": 108000,
+    "2": 108000,
+    "3": 108000,
+    "4": 108000,
+    "5": 108000,
+    "6": 108000,
+    "7": 108000,
+    "8": 108000,
+    "9": 108000,
+    "10": 108000,
+    "11": 108000,
+    "12": 108000,
+    "13": 108000,
+    "14": 108000,
+    "15": 108000
+   },
+   "busy_per_hyperperiod": {
+    "0": 1565000,
+    "1": 1620000,
+    "2": 1620000,
+    "3": 4349336,
+    "4": 4283320,
+    "5": 3625000,
+    "6": 3625000,
+    "7": 3158300,
+    "8": 4816000,
+    "9": 5300000,
+    "10": 3625000,
+    "11": 3625000,
+    "12": 3625000,
+    "13": 3625000,
+    "14": 3625000,
+    "15": 3625000
+   },
+   "data_age": [
+    {
+     "chain": "TPMS-STAC-TPRC",
+     "source": "TPMS",
+     "sink": "TPRC",
+     "length": 2,
+     "max_cycles": 9665000,
+     "min_cycles": 9665000,
+     "max_ms": 22.372685185185187,
+     "output_job": 0
+    },
+    {
+     "chain": "TPMS-STAC-THRC",
+     "source": "TPMS",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 4482000,
+     "min_cycles": 2322000,
+     "max_ms": 10.375,
+     "output_job": 8
+    },
+    {
+     "chain": "VIBS-STAC-TPRC",
+     "source": "VIBS",
+     "sink": "TPRC",
+     "length": 2,
+     "max_cycles": 7505000,
+     "min_cycles": 7505000,
+     "max_ms": 17.372685185185187,
+     "output_job": 0
+    },
+    {
+     "chain": "VIBS-STAC-THRC",
+     "source": "VIBS",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 1242000,
+     "min_cycles": 1242000,
+     "max_ms": 2.875,
+     "output_job": 9
+    },
+    {
+     "chain": "SPES-NAVC-DIRC",
+     "source": "SPES",
+     "sink": "DIRC",
+     "length": 2,
+     "max_cycles": 1620000,
+     "min_cycles": 1404000,
+     "max_ms": 3.75,
+     "output_job": 5
+    },
+    {
+     "chain": "SPES-NAVC-THRC",
+     "source": "SPES",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 1242000,
+     "min_cycles": 1242000,
+     "max_ms": 2.875,
+     "output_job": 9
+    },
+    {
+     "chain": "SPES-STAC-TPRC",
+     "source": "SPES",
+     "sink": "TPRC",
+     "length": 2,
+     "max_cycles": 7505000,
+     "min_cycles": 7505000,
+     "max_ms": 17.372685185185187,
+     "output_job": 0
+    },
+    {
+     "chain": "SPES-STAC-THRC",
+     "source": "SPES",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 1242000,
+     "min_cycles": 1242000,
+     "max_ms": 2.875,
+     "output_job": 9
+    },
+    {
+     "chain": "POSI-NAVC-DIRC",
+     "source": "POSI",
+     "sink": "DIRC",
+     "length": 2,
+     "max_cycles": 5184000,
+     "min_cycles": 3240000,
+     "max_ms": 12.0,
+     "output_job": 9
+    },
+    {
+     "chain": "POSI-NAVC-THRC",
+     "source": "POSI",
+     "sink": "THRC",
+     "length": 2,
+     "max_cycles": 5022000,
+     "min_cycles": 2862000,
+     "max_ms": 11.625,
+     "output_job": 9
+    },
+    {
+     "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+     "source": "POSI",
+     "sink": "DIRC",
+     "length": 4,
+     "max_cycles": 15552000,
+     "min_cycles": 10584000,
+     "max_ms": 36.0,
+     "output_job": 3
+    },
+    {
+     "chain": "POSI-OBMG-OBDB-NAVC-THRC",
+     "source": "POSI",
+     "sink": "THRC",
+     "length": 4,
+     "max_cycles": 15282000,
+     "min_cycles": 10422000,
+     "max_ms": 35.375,
+     "output_job": 3
+    },
+    {
+     "chain": "USOS-OBMG-OBDB-NAVC-DIRC",
+     "source": "USOS",
+     "sink": "DIRC",
+     "length": 4,
+     "max_cycles": 12852000,
+     "min_cycles": 7884000,
+     "max_ms": 29.75,
+     "output_job": 3
+    },
+    {
+     "chain": "USOS-OBMG-OBDB-NAVC-THRC",
+     "source": "USOS",
+     "sink": "THRC",
+     "length": 4,
+     "max_cycles": 12582000,
+     "min_cycles": 7722000,
+     "max_ms": 29.125,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU1",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU1",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU2",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU2",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU3-VOD1-NAVC-DIRC",
+     "source": "FBU3",
+     "sink": "DIRC",
+     "length": 3,
+     "max_cycles": 1404000,
+     "min_cycles": 1080000,
+     "max_ms": 3.25,
+     "output_job": 0
+    },
+    {
+     "chain": "FBU3-VOD1-NAVC-THRC",
+     "source": "FBU3",
+     "sink": "THRC",
+     "length": 3,
+     "max_cycles": 1026000,
+     "min_cycles": 918000,
+     "max_ms": 2.375,
+     "output_job": 8
+    },
+    {
+     "chain": "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU3",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU3",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU4",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU4",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU5",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU5",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU6",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU6",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU7",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU7",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU8-VOD2-NAVC-DIRC",
+     "source": "FBU8",
+     "sink": "DIRC",
+     "length": 3,
+     "max_cycles": 1404000,
+     "min_cycles": 1080000,
+     "max_ms": 3.25,
+     "output_job": 0
+    },
+    {
+     "chain": "FBU8-VOD2-NAVC-THRC",
+     "source": "FBU8",
+     "sink": "THRC",
+     "length": 3,
+     "max_cycles": 1026000,
+     "min_cycles": 918000,
+     "max_ms": 2.375,
+     "output_job": 8
+    },
+    {
+     "chain": "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+     "source": "FBU8",
+     "sink": "DIRC",
+     "length": 7,
+     "max_cycles": 13500000,
+     "min_cycles": 8532000,
+     "max_ms": 31.25,
+     "output_job": 3
+    },
+    {
+     "chain": "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+     "source": "FBU8",
+     "sink": "THRC",
+     "length": 7,
+     "max_cycles": 13230000,
+     "min_cycles": 8370000,
+     "max_ms": 30.625,
+     "output_job": 3
+    }
+   ],
+   "data_age_max": {
+    "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+    "cycles": 15552000,
+    "ms": 36.0
+   }
+  },
+  "flow_windows": [
+   {
+    "flow": "f1",
+    "source": "POSI",
+    "target": "NAVC",
+    "period_ms": 6.25,
+    "bytes": 256,
+    "src_pe": "8",
+    "dst_pe": "8",
+    "on_noc": false,
+    "packets": 2,
+    "window_min_cycles": 115000,
+    "window_max_cycles": 115000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f2",
+    "source": "NAVC",
+    "target": "OBDB",
+    "period_ms": 6.25,
+    "bytes": 512,
+    "src_pe": "8",
+    "dst_pe": "4",
+    "on_noc": true,
+    "packets": 2,
+    "window_min_cycles": 2599000,
+    "window_max_cycles": 2599000,
+    "hops": 3,
+    "net_time_cycles": 184,
+    "slack_min_cycles": 2598816
+   },
+   {
+    "flow": "f3",
+    "source": "OBDB",
+    "target": "NAVC",
+    "period_ms": 6.25,
+    "bytes": 4096,
+    "src_pe": "4",
+    "dst_pe": "8",
+    "on_noc": true,
+    "packets": 2,
+    "window_min_cycles": 264336,
+    "window_max_cycles": 359000,
+    "hops": 3,
+    "net_time_cycles": 1080,
+    "slack_min_cycles": 263256
+   },
+   {
+    "flow": "f4",
+    "source": "OBDB",
+    "target": "OBMG",
+    "period_ms": 6.25,
+    "bytes": 4096,
+    "src_pe": "4",
+    "dst_pe": "4",
+    "on_noc": false,
+    "packets": 2,
+    "window_min_cycles": 2368668,
+    "window_max_cycles": 4963332,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f5",
+    "source": "NAVC",
+    "target": "DIRC",
+    "period_ms": 1.25,
+    "bytes": 128,
+    "src_pe": "8",
+    "dst_pe": "8",
+    "on_noc": false,
+    "packets": 10,
+    "window_min_cycles": 224000,
+    "window_max_cycles": 599000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f6",
+    "source": "SPES",
+    "target": "NAVC",
+    "period_ms": 1.25,
+    "bytes": 128,
+    "src_pe": "1",
+    "dst_pe": "8",
+    "on_noc": true,
+    "packets": 10,
+    "window_min_cycles": 474000,
+    "window_max_cycles": 599000,
+    "hops": 5,
+    "net_time_cycles": 140,
+    "slack_min_cycles": 473860
+   },
+   {
+    "flow": "f7",
+    "source": "NAVC",
+    "target": "THRC",
+    "period_ms": 1.25,
+    "bytes": 256,
+    "src_pe": "8",
+    "dst_pe": "2",
+    "on_noc": true,
+    "packets": 10,
+    "window_min_cycles": 99000,
+    "window_max_cycles": 349000,
+    "hops": 6,
+    "net_time_cycles": 198,
+    "slack_min_cycles": 98802
+   },
+   {
+    "flow": "f8",
+    "source": "FBU3",
+    "target": "VOD1",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "5",
+    "dst_pe": "5",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f9",
+    "source": "FBU8",
+    "target": "VOD2",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "6",
+    "dst_pe": "6",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f10",
+    "source": "VOD1",
+    "target": "NAVC",
+    "period_ms": 0.5,
+    "bytes": 128,
+    "src_pe": "5",
+    "dst_pe": "8",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 116000,
+    "window_max_cycles": 741000,
+    "hops": 4,
+    "net_time_cycles": 114,
+    "slack_min_cycles": 115886
+   },
+   {
+    "flow": "f11",
+    "source": "VOD2",
+    "target": "NAVC",
+    "period_ms": 0.5,
+    "bytes": 128,
+    "src_pe": "6",
+    "dst_pe": "8",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 116000,
+    "window_max_cycles": 741000,
+    "hops": 5,
+    "net_time_cycles": 140,
+    "slack_min_cycles": 115860
+   },
+   {
+    "flow": "f12",
+    "source": "FBU1",
+    "target": "BFE1",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "11",
+    "dst_pe": "11",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f13",
+    "source": "FBU2",
+    "target": "BFE2",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "15",
+    "dst_pe": "15",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f14",
+    "source": "FBU3",
+    "target": "BFE3",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "5",
+    "dst_pe": "9",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 194000,
+    "window_max_cycles": 194000,
+    "hops": 3,
+    "net_time_cycles": 2456,
+    "slack_min_cycles": 191544
+   },
+   {
+    "flow": "f15",
+    "source": "FBU4",
+    "target": "BFE4",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "7",
+    "dst_pe": "7",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f16",
+    "source": "FBU5",
+    "target": "BFE5",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "14",
+    "dst_pe": "14",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f17",
+    "source": "FBU6",
+    "target": "BFE6",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "13",
+    "dst_pe": "13",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f18",
+    "source": "FBU7",
+    "target": "BFE7",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "12",
+    "dst_pe": "12",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f19",
+    "source": "FBU8",
+    "target": "BFE8",
+    "period_ms": 0.5,
+    "bytes": 9600,
+    "src_pe": "6",
+    "dst_pe": "10",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 194000,
+    "window_max_cycles": 194000,
+    "hops": 3,
+    "net_time_cycles": 2456,
+    "slack_min_cycles": 191544
+   },
+   {
+    "flow": "f20",
+    "source": "BFE1",
+    "target": "FDF1",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "11",
+    "dst_pe": "9",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 183000,
+    "window_max_cycles": 183000,
+    "hops": 4,
+    "net_time_cycles": 210,
+    "slack_min_cycles": 182790
+   },
+   {
+    "flow": "f21",
+    "source": "BFE2",
+    "target": "FDF1",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "15",
+    "dst_pe": "9",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 183000,
+    "window_max_cycles": 183000,
+    "hops": 5,
+    "net_time_cycles": 236,
+    "slack_min_cycles": 182764
+   },
+   {
+    "flow": "f22",
+    "source": "BFE3",
+    "target": "FDF1",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "9",
+    "dst_pe": "9",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f23",
+    "source": "BFE4",
+    "target": "FDF1",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "7",
+    "dst_pe": "9",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 212668,
+    "window_max_cycles": 212668,
+    "hops": 5,
+    "net_time_cycles": 236,
+    "slack_min_cycles": 212432
+   },
+   {
+    "flow": "f24",
+    "source": "BFE5",
+    "target": "FDF2",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "14",
+    "dst_pe": "10",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 183000,
+    "window_max_cycles": 183000,
+    "hops": 3,
+    "net_time_cycles": 184,
+    "slack_min_cycles": 182816
+   },
+   {
+    "flow": "f25",
+    "source": "BFE6",
+    "target": "FDF2",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "13",
+    "dst_pe": "10",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 183000,
+    "window_max_cycles": 183000,
+    "hops": 4,
+    "net_time_cycles": 210,
+    "slack_min_cycles": 182790
+   },
+   {
+    "flow": "f26",
+    "source": "BFE7",
+    "target": "FDF2",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "12",
+    "dst_pe": "10",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 183000,
+    "window_max_cycles": 183000,
+    "hops": 5,
+    "net_time_cycles": 236,
+    "slack_min_cycles": 182764
+   },
+   {
+    "flow": "f27",
+    "source": "BFE8",
+    "target": "FDF2",
+    "period_ms": 0.5,
+    "bytes": 512,
+    "src_pe": "10",
+    "dst_pe": "10",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 11000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f28",
+    "source": "FDF1",
+    "target": "STPH",
+    "period_ms": 0.5,
+    "bytes": 2048,
+    "src_pe": "9",
+    "dst_pe": "9",
+    "on_noc": false,
+    "packets": 25,
+    "window_min_cycles": 174000,
+    "window_max_cycles": 174000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f29",
+    "source": "FDF2",
+    "target": "STPH",
+    "period_ms": 0.5,
+    "bytes": 2048,
+    "src_pe": "10",
+    "dst_pe": "9",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 241000,
+    "window_max_cycles": 241000,
+    "hops": 3,
+    "net_time_cycles": 568,
+    "slack_min_cycles": 240432
+   },
+   {
+    "flow": "f30",
+    "source": "STPH",
+    "target": "OBMG",
+    "period_ms": 0.5,
+    "bytes": 1024,
+    "src_pe": "9",
+    "dst_pe": "4",
+    "on_noc": true,
+    "packets": 25,
+    "window_min_cycles": 298332,
+    "window_max_cycles": 6298332,
+    "hops": 4,
+    "net_time_cycles": 338,
+    "slack_min_cycles": 297994
+   },
+   {
+    "flow": "f31",
+    "source": "POSI",
+    "target": "OBMG",
+    "period_ms": 6.25,
+    "bytes": 256,
+    "src_pe": "8",
+    "dst_pe": "4",
+    "on_noc": true,
+    "packets": 2,
+    "window_min_cycles": 1594332,
+    "window_max_cycles": 4719332,
+    "hops": 3,
+    "net_time_cycles": 120,
+    "slack_min_cycles": 1594212
+   },
+   {
+    "flow": "f32",
+    "source": "USOS",
+    "target": "OBMG",
+    "period_ms": 1.25,
+    "bytes": 256,
+    "src_pe": "4",
+    "dst_pe": "4",
+    "on_noc": false,
+    "packets": 10,
+    "window_min_cycles": 11000,
+    "window_max_cycles": 5761000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f33",
+    "source": "OBMG",
+    "target": "OBDB",
+    "period_ms": 12.5,
+    "bytes": 1024,
+    "src_pe": "4",
+    "dst_pe": "4",
+    "on_noc": false,
+    "packets": 1,
+    "window_min_cycles": 239340,
+    "window_max_cycles": 239340,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f34",
+    "source": "TPMS",
+    "target": "STAC",
+    "period_ms": 6.25,
+    "bytes": 512,
+    "src_pe": "3",
+    "dst_pe": "3",
+    "on_noc": false,
+    "packets": 2,
+    "window_min_cycles": 205332,
+    "window_max_cycles": 205332,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f35",
+    "source": "VIBS",
+    "target": "STAC",
+    "period_ms": 1.25,
+    "bytes": 128,
+    "src_pe": "3",
+    "dst_pe": "3",
+    "on_noc": false,
+    "packets": 10,
+    "window_min_cycles": 224000,
+    "window_max_cycles": 599000,
+    "hops": null,
+    "net_time_cycles": null,
+    "slack_min_cycles": null
+   },
+   {
+    "flow": "f36",
+    "source": "STAC",
+    "target": "TPRC",
+    "period_ms": 12.5,
+    "bytes": 512,
+    "src_pe": "3",
+    "dst_pe": "0",
+    "on_noc": true,
+    "packets": 1,
+    "window_min_cycles": 5724000,
+    "window_max_cycles": 5724000,
+    "hops": 5,
+    "net_time_cycles": 236,
+    "slack_min_cycles": 5723764
+   },
+   {
+    "flow": "f37",
+    "source": "SPES",
+    "target": "STAC",
+    "period_ms": 1.25,
+    "bytes": 256,
+    "src_pe": "1",
+    "dst_pe": "3",
+    "on_noc": true,
+    "packets": 10,
+    "window_min_cycles": 474000,
+    "window_max_cycles": 724000,
+    "hops": 4,
+    "net_time_cycles": 146,
+    "slack_min_cycles": 473854
+   },
+   {
+    "flow": "f38",
+    "source": "STAC",
+    "target": "THRC",
+    "period_ms": 1.25,
+    "bytes": 256,
+    "src_pe": "3",
+    "dst_pe": "2",
+    "on_noc": true,
+    "packets": 10,
+    "window_min_cycles": 99000,
+    "window_max_cycles": 312000,
+    "hops": 3,
+    "net_time_cycles": 120,
+    "slack_min_cycles": 98880
+   }
+  ],
+  "packets_per_hyperperiod": 347,
+  "local_flows": 18,
+  "memory": {
+   "heap_bytes": 48168,
+   "usable_bytes": 48152,
+   "ram_bytes": 65536,
+   "worst_pe": "9",
+   "worst_bytes": 39212,
+   "free_bytes": 8940,
+   "fits": true,
+   "largest_payload": 9600,
+   "payload_fits": true,
+   "tasks_fit": true,
+   "pes": {
+    "0": {
+     "bytes": 5528,
+     "tasks": 4464,
+     "out_packets": 0,
+     "in_packets": 1064
+    },
+    "1": {
+     "bytes": 4888,
+     "tasks": 4464,
+     "out_packets": 424,
+     "in_packets": 0
+    },
+    "2": {
+     "bytes": 5568,
+     "tasks": 4464,
+     "out_packets": 0,
+     "in_packets": 1104
+    },
+    "3": {
+     "bytes": 11040,
+     "tasks": 9000,
+     "out_packets": 1488,
+     "in_packets": 552
+    },
+    "4": {
+     "bytes": 22256,
+     "tasks": 9000,
+     "out_packets": 9552,
+     "in_packets": 3704
+    },
+    "5": {
+     "bytes": 26120,
+     "tasks": 6732,
+     "out_packets": 19388,
+     "in_packets": 0
+    },
+    "6": {
+     "bytes": 26120,
+     "tasks": 6732,
+     "out_packets": 19388,
+     "in_packets": 0
+    },
+    "7": {
+     "bytes": 16884,
+     "tasks": 6732,
+     "out_packets": 10152,
+     "in_packets": 0
+    },
+    "8": {
+     "bytes": 19628,
+     "tasks": 9000,
+     "out_packets": 1508,
+     "in_packets": 9120
+    },
+    "9": {
+     "bytes": 39212,
+     "tasks": 9000,
+     "out_packets": 3644,
+     "in_packets": 26568
+    },
+    "10": {
+     "bytes": 31764,
+     "tasks": 6732,
+     "out_packets": 2600,
+     "in_packets": 22432
+    },
+    "11": {
+     "bytes": 16884,
+     "tasks": 6732,
+     "out_packets": 10152,
+     "in_packets": 0
+    },
+    "12": {
+     "bytes": 16884,
+     "tasks": 6732,
+     "out_packets": 10152,
+     "in_packets": 0
+    },
+    "13": {
+     "bytes": 16884,
+     "tasks": 6732,
+     "out_packets": 10152,
+     "in_packets": 0
+    },
+    "14": {
+     "bytes": 16884,
+     "tasks": 6732,
+     "out_packets": 10152,
+     "in_packets": 0
+    },
+    "15": {
+     "bytes": 16884,
+     "tasks": 6732,
+     "out_packets": 10152,
+     "in_packets": 0
+    }
+   }
+  }
+ }
+}

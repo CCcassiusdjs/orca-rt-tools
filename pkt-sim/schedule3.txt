@@ -1,0 +1,106 @@
+# 502305 0-1 scheduled 1
+# 502323 1-1 scheduled 1
+# 502345 1-0 scheduled 1
+# 502365 0-0 scheduled 1
+# 511075 1-1 scheduled 2
+# 530731 0-1 scheduled 0
+# 540019 1-1 scheduled 0
+# 620077 0-0 scheduled 2
+# 653965 1-0 scheduled 2
+# 684485 0-0 scheduled 3
+# 753881 1-0 scheduled 3
+# 819947 0-0 scheduled 4
+# 945283 1-0 scheduled 0
+# 963311 0-0 -> TAG 4560
+# 963843 0-0 <- TAG 4560
+# 979417 0-0 -> TAG 1230
+# 983113 0-1 <- TAG 1230
+# Elapsed 1ms. $now is 1000000 ns.
+# 1002337 0-1 scheduled 1
+# 1002473 1-1 scheduled 0
+# 1002531 0-0 scheduled 3
+# 1002541 1-0 scheduled 0
+# 1124681 0-0 -> TAG 7890
+# 1125213 0-0 <- TAG 7890
+# 1126059 0-0 scheduled 4
+# 1192757 0-1 -> TAG 1200
+# 1194333 0-0 -> TAG 4560
+# 1194865 0-0 <- TAG 4560
+# 1195347 0-1 scheduled 0
+# 1196489 1-0 <- TAG 1200
+# 1208783 0-0 -> TAG 1230
+# 1212477 0-1 <- TAG 1230
+# 1261029 0-0 scheduled 2
+# 1320915 0-0 -> TAG 3450
+# 1321447 0-0 <- TAG 3450
+# 1322279 0-0 scheduled 3
+# 1451039 0-0 -> TAG 7890
+# 1451571 0-0 <- TAG 7890
+# 1452391 0-0 scheduled 1
+# 1502373 0-1 scheduled 1
+# 1502433 0-0 scheduled 2
+# 1502505 1-0 scheduled 3
+# 1502507 1-1 scheduled 0
+# 1555709 0-0 -> TAG 3450
+# 1556241 0-0 <- TAG 3450
+# 1557095 0-0 scheduled 1
+# 1604131 1-0 -> TAG 3450
+# 1604671 1-0 <- TAG 3450
+# 1618577 1-0 -> TAG 2340
+# 1619117 1-0 <- TAG 2340
+# 1619965 1-0 scheduled 1
+# 1678153 0-0 -> TAG 6780
+# 1684659 1-1 <- TAG 6780
+# 1692791 0-1 -> TAG 1200
+# 1695299 0-1 scheduled 0
+# 1696517 1-0 <- TAG 1200
+# 1704083 1-0 -> TAG 8900
+# 1706663 1-0 scheduled 2
+# 1711619 1-1 <- TAG 8900
+# 1850113 0-0 -> TAG 6780
+# 1852783 0-0 scheduled 0
+# 1856601 1-1 <- TAG 6780
+# 1859615 1-0 -> TAG 5670
+# 1862209 1-0 scheduled 3
+# 1865527 1-1 <- TAG 5670
+# 1970755 1-0 -> TAG 3450
+# 1971295 1-0 <- TAG 3450
+# 1986849 1-0 -> TAG 2340
+# 1987389 1-0 <- TAG 2340
+# 1988183 1-0 scheduled 1
+# Elapsed 1ms. $now is 2000000 ns.
+# 2002425 1-1 scheduled 1
+# 2002445 1-0 scheduled 2
+# 2002457 0-1 scheduled 0
+# 2002621 0-0 scheduled 0
+# 2042169 1-1 scheduled 2
+# 2148463 1-0 -> TAG 5670
+# 2151031 1-0 scheduled 1
+# 2154385 1-1 <- TAG 5670
+# 2224383 1-0 -> TAG 8900
+# 2227007 1-0 scheduled 0
+# 2231915 1-1 <- TAG 8900
+# 2261047 1-1 -> TAG 1230
+# 2261587 1-1 <- TAG 1230
+# 2479385 1-1 -> TAG 1230
+# 2479925 1-1 <- TAG 1230
+# 2480625 1-1 scheduled 1
+# 2502487 0-1 scheduled 0
+# 2502547 1-1 scheduled 1
+# 2502599 1-0 scheduled 0
+# 2502651 0-0 scheduled 0
+# 2931767 1-1 scheduled 0
+# Elapsed 1ms. $now is 3000000 ns.
+# 3002523 0-1 scheduled 0
+# 3002573 1-1 scheduled 0
+# 3002629 1-0 scheduled 0
+# 3002681 0-0 scheduled 0
+# 3502553 0-1 scheduled 0
+# 3502609 1-1 scheduled 0
+# 3502659 1-0 scheduled 0
+# 3502717 0-0 scheduled 0
+# Elapsed 1ms. $now is 4000000 ns.
+# 4002583 0-1 scheduled 0
+# 4002639 1-1 scheduled 0
+# 4002695 1-0 scheduled 0
+# 4002747 0-0 scheduled 0

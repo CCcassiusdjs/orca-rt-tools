@@ -1,0 +1,9 @@
+# ORT/GFF: ORCA-RT-TOOLS/Graph File Formatter
+
+This module is a helper to convert graphs between two formats
+
+`gff <input_file> input format <out_file>`
+
+Available formats:
+- ORCA: Orca Format (import and export from default orca format)
+- DOT:  Graphviz format (import only). DOT converter backends graphviz and support all formats available in graphviz.

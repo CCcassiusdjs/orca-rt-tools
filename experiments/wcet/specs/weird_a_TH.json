@@ -1,0 +1,9 @@
+{
+ "_doc": "rttools.wcet spec of application E on the image of run TH (experiments/exp23/logs/TH.image.elf, riscv64-elf-gcc 12.2.0, tag r11-rc3: release by tick, kernel without nested interrupts).",
+ "image": "../../exp23/logs/TH.image.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../annotations/weird_a.json"
+ ],
+ "app": "../../../apps/synthetic-app-e/synthetic-app-e.csv"
+}

@@ -1,0 +1,8 @@
+# Setup of manycore_top for app/carv_e.c (rttools.ucxgen, release by tick); read by
+# experiments/exp23/simulate.sh. RELEASE_MASK: bit k = PE with node index k
+# (PEs 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19): every PE with a task counts the phases
+# (lib/tick_release.c); source tasks on PEs 1, 2, 3, 7, 8, 11, 12, 14, 16. Release period 500000 ns,
+# first release at 3000000 ns: the defaults of the release generator (manycore_pe.sv).
+MESH=4x5
+RELEASE_MASK=1048575
+TICK_RELEASE=1

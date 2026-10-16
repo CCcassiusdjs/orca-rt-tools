@@ -1,0 +1,2437 @@
+{
+ "_doc": "Values of run TMA for application E (logs/TMA.events.txt, logs/TMA.RUN_INFO, logs/TMA.time.txt): simulation (simulate.sh) of a git archive of tag r11-rc3 (commit xxxxxxx, repo_state=archive) of carv_e (CAR-V and E on the 4x5 mesh) with the release by tick (RELEASE_MASK=1048575, release=tick) and the UCX-OS kernel without nested interrupts (isr=no_nesting) at F_CLK = 434.912 MHz, 11.5 ms of platform time, Questa 2025.3, riscv64-elf-gcc 12.2.0, 2026-10-14 (run_r11c.sh: make -C experiments/multiapp sim F_CLK=434912000 SIM_NS=11500000 BUILD=build/tma). Analysis: make -C experiments/multiapp check-tma (python -m rttools.paper.rtlapp --app E --composition composition.json, release rule tick from the RUN_INFO).",
+ "inputs": {
+  "csv": "synthetic-app-e.csv",
+  "map": "E.map",
+  "manifest": "carv_e.json",
+  "csv_matches_manifest": true,
+  "map_matches_manifest": true,
+  "composition": "carv_e",
+  "app": "E"
+ },
+ "clock": {
+  "clock_hz": 434912000,
+  "cycle_hz": 434912326.0241968,
+  "half_period_fs": 1149657,
+  "source": "RUN_INFO",
+  "run_info": "TMA.RUN_INFO",
+  "edges_snapped": true,
+  "isr": "no_nesting",
+  "crt0": "plain"
+ },
+ "model": {
+  "clock_hz": 434912000,
+  "period_cycles": 217456,
+  "dispatch": {
+   "1-2": [
+    "J",
+    "G"
+   ],
+   "2-2": [
+    "C"
+   ],
+   "1-3": [
+    "E",
+    "H",
+    "I"
+   ],
+   "2-3": [
+    "A",
+    "B",
+    "D",
+    "F"
+   ]
+  },
+  "dispatch_matches_manifest": true,
+  "outputs": {
+   "J": {
+    "phase": 3,
+    "finish": 107570,
+    "bound_cycles": 759938
+   }
+  },
+  "response_bound": {
+   "cycles": 759938,
+   "ms": 1.747337392,
+   "task": "J",
+   "phase": 3
+  },
+  "deadline": {
+   "s": 0.002,
+   "ms": 2.0,
+   "cycles": 869824
+  },
+  "demand_cycles": {
+   "1-2": 217450,
+   "2-2": 96330,
+   "1-3": 173370,
+   "2-3": 181930
+  },
+  "f_cpu_hz": 434900000,
+  "flows": {
+   "24": {
+    "release": 28530,
+    "deadline": 228456
+   },
+   "25": {
+    "release": 28530,
+    "deadline": 256986
+   },
+   "26": {
+    "release": 87130,
+    "deadline": 315586
+   },
+   "27": {
+    "release": 96330,
+    "deadline": 228456
+   },
+   "28": {
+    "release": 101130,
+    "deadline": 329586
+   },
+   "29": {
+    "release": 181930,
+    "deadline": 336026
+   },
+   "30": {
+    "release": 52700,
+    "deadline": 326456
+   },
+   "31": {
+    "release": 52700,
+    "deadline": 281156
+   },
+   "32": {
+    "release": 173370,
+    "deadline": 228456
+   },
+   "33": {
+    "release": 98000,
+    "deadline": 228456
+   },
+   "34": {
+    "release": 217450,
+    "deadline": 228456
+   }
+  },
+  "header_wait_cycles": 20
+ },
+ "releases": {
+  "count": 17,
+  "first_ms": 3.000306959,
+  "period_cycles_min": 217455,
+  "period_cycles_max": 217458,
+  "release_to_first_dispatch_min_cycles": 3509,
+  "release_to_first_dispatch_max_cycles": 3510,
+  "acks": {
+   "releases": 17,
+   "pes_expected": 20,
+   "pes_min": 20,
+   "pes_max": 20,
+   "spread_ns_max": 5
+  }
+ },
+ "tags": {
+  "unknown_tags": 0,
+  "lane_errors": 0,
+  "repeated": 0,
+  "fifo_mismatch": 0,
+  "other_app_tags": 762
+ },
+ "markers": 1070,
+ "responses": {
+  "complete": 14,
+  "exact": 14,
+  "upper_bound_only": 0,
+  "max_cycles": 753282,
+  "max_ms": 1.732033147,
+  "max_exact_cycles": 753282,
+  "max_upper_cycles": null,
+  "max_lower_cycles": 753282,
+  "above_bound": 0,
+  "exact_above_bound": 0,
+  "lower_above_bound": 0,
+  "margin_bound_exact_cycles": 6656,
+  "margin_bound_all_cycles": 6656,
+  "above_deadline": 0,
+  "margin_deadline_cycles": 116542,
+  "rows": [
+   {
+    "iteration": 1,
+    "task": "J",
+    "response_cycles": 753282,
+    "response_ms": 1.732033147,
+    "exact": true,
+    "lower_cycles": 753282,
+    "outputs": {
+     "J": {
+      "cycles": 753282,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 2,
+    "task": "J",
+    "response_cycles": 752667,
+    "response_ms": 1.730619068,
+    "exact": true,
+    "lower_cycles": 752667,
+    "outputs": {
+     "J": {
+      "cycles": 752667,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 3,
+    "task": "J",
+    "response_cycles": 752927,
+    "response_ms": 1.73121689,
+    "exact": true,
+    "lower_cycles": 752927,
+    "outputs": {
+     "J": {
+      "cycles": 752927,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 4,
+    "task": "J",
+    "response_cycles": 752974,
+    "response_ms": 1.731324958,
+    "exact": true,
+    "lower_cycles": 752974,
+    "outputs": {
+     "J": {
+      "cycles": 752974,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 5,
+    "task": "J",
+    "response_cycles": 752968,
+    "response_ms": 1.731311162,
+    "exact": true,
+    "lower_cycles": 752968,
+    "outputs": {
+     "J": {
+      "cycles": 752968,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 6,
+    "task": "J",
+    "response_cycles": 752928,
+    "response_ms": 1.731219189,
+    "exact": true,
+    "lower_cycles": 752928,
+    "outputs": {
+     "J": {
+      "cycles": 752928,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 7,
+    "task": "J",
+    "response_cycles": 752972,
+    "response_ms": 1.731320359,
+    "exact": true,
+    "lower_cycles": 752972,
+    "outputs": {
+     "J": {
+      "cycles": 752972,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 8,
+    "task": "J",
+    "response_cycles": 752969,
+    "response_ms": 1.731313461,
+    "exact": true,
+    "lower_cycles": 752969,
+    "outputs": {
+     "J": {
+      "cycles": 752969,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 9,
+    "task": "J",
+    "response_cycles": 752926,
+    "response_ms": 1.731214591,
+    "exact": true,
+    "lower_cycles": 752926,
+    "outputs": {
+     "J": {
+      "cycles": 752926,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 10,
+    "task": "J",
+    "response_cycles": 752973,
+    "response_ms": 1.731322658,
+    "exact": true,
+    "lower_cycles": 752973,
+    "outputs": {
+     "J": {
+      "cycles": 752973,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 11,
+    "task": "J",
+    "response_cycles": 752967,
+    "response_ms": 1.731308862,
+    "exact": true,
+    "lower_cycles": 752967,
+    "outputs": {
+     "J": {
+      "cycles": 752967,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 12,
+    "task": "J",
+    "response_cycles": 752927,
+    "response_ms": 1.73121689,
+    "exact": true,
+    "lower_cycles": 752927,
+    "outputs": {
+     "J": {
+      "cycles": 752927,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 13,
+    "task": "J",
+    "response_cycles": 752974,
+    "response_ms": 1.731324958,
+    "exact": true,
+    "lower_cycles": 752974,
+    "outputs": {
+     "J": {
+      "cycles": 752974,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   },
+   {
+    "iteration": 14,
+    "task": "J",
+    "response_cycles": 752968,
+    "response_ms": 1.731311162,
+    "exact": true,
+    "lower_cycles": 752968,
+    "outputs": {
+     "J": {
+      "cycles": 752968,
+      "exact": true,
+      "lower_cycles": null
+     }
+    }
+   }
+  ]
+ },
+ "cpu_windows": {
+  "releases_per_window": 4,
+  "windows": [
+   {
+    "first_release": 4,
+    "start_ms": 4.500309258,
+    "end_ms": 6.500306959
+   },
+   {
+    "first_release": 8,
+    "start_ms": 6.500306959,
+    "end_ms": 8.500304659
+   },
+   {
+    "first_release": 12,
+    "start_ms": 8.500304659,
+    "end_ms": 10.500309258
+   }
+  ],
+  "phases": 13,
+  "pes": {
+   "1-2": {
+    "estimated": 217450,
+    "per_window": [
+     201255.25,
+     201263.5,
+     201254.5
+    ],
+    "mean": 201257.75,
+    "overestimation_percent": 8.04552868150419,
+    "phase_busy_max": 201551,
+    "phases_above_estimate": 0,
+    "tasks": [
+     "J",
+     "G"
+    ]
+   },
+   "2-2": {
+    "estimated": 96330,
+    "per_window": [
+     88290,
+     88290,
+     88290
+    ],
+    "mean": 88290,
+    "overestimation_percent": 9.1063540604825,
+    "phase_busy_max": 88290,
+    "phases_above_estimate": 0,
+    "tasks": [
+     "C"
+    ]
+   },
+   "1-3": {
+    "estimated": 173370,
+    "per_window": [
+     148621,
+     148621,
+     148621
+    ],
+    "mean": 148621,
+    "overestimation_percent": 16.652424623707283,
+    "phase_busy_max": 148621,
+    "phases_above_estimate": 0,
+    "tasks": [
+     "E",
+     "H",
+     "I"
+    ]
+   },
+   "2-3": {
+    "estimated": 181930,
+    "per_window": [
+     147092,
+     147092,
+     147092
+    ],
+    "mean": 147092,
+    "overestimation_percent": 23.68449677752699,
+    "phase_busy_max": 147092,
+    "phases_above_estimate": 0,
+    "tasks": [
+     "A",
+     "B",
+     "D",
+     "F"
+    ]
+   }
+  },
+  "mean_overestimation_percent": 14.372201035805242,
+  "min_overestimation_percent": 8.04552868150419
+ },
+ "cpu_attributed": {
+  "1-2": {
+   "measured": 201103.375,
+   "estimated": 217450,
+   "overestimation_percent": 8.12846875394309
+  },
+  "2-2": {
+   "measured": 88290,
+   "estimated": 96330,
+   "overestimation_percent": 9.1063540604825
+  },
+  "1-3": {
+   "measured": 148621,
+   "estimated": 173370,
+   "overestimation_percent": 16.652424623707283
+  },
+  "2-3": {
+   "measured": 147092,
+   "estimated": 181930,
+   "overestimation_percent": 23.68449677752699
+  }
+ },
+ "tasks": {
+  "A": {
+   "pe": "2-3",
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 17,
+   "max_iterations_per_run": 1,
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -5452,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 19889,
+   "cost": 28530
+  },
+  "B": {
+   "pe": "2-3",
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 17,
+   "max_iterations_per_run": 1,
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -14966,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 49779,
+   "cost": 58600
+  },
+  "C": {
+   "pe": "2-2",
+   "source": "markers",
+   "iterations": 16,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 16,
+   "max_iterations_per_run": 1,
+   "phase_model": 1,
+   "phase_observed": {
+    "1": 16
+   },
+   "end_minus_model_finish_max": -6664,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 88290,
+   "cost": 96330
+  },
+  "D": {
+   "pe": "2-3",
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 17,
+   "max_iterations_per_run": 1,
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -24480,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 5028,
+   "cost": 14000
+  },
+  "E": {
+   "pe": "1-3",
+   "source": "markers",
+   "iterations": 15,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 15,
+   "max_iterations_per_run": 1,
+   "phase_model": 2,
+   "phase_observed": {
+    "2": 15
+   },
+   "end_minus_model_finish_max": -6437,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 43767,
+   "cost": 52700
+  },
+  "F": {
+   "pe": "2-3",
+   "source": "markers",
+   "iterations": 17,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 17,
+   "max_iterations_per_run": 1,
+   "phase_model": 0,
+   "phase_observed": {
+    "0": 17
+   },
+   "end_minus_model_finish_max": -33454,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 72396,
+   "cost": 80800
+  },
+  "G": {
+   "pe": "1-2",
+   "source": "markers",
+   "iterations": 16,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 16,
+   "max_iterations_per_run": 1,
+   "phase_model": 1,
+   "phase_observed": {
+    "1": 16
+   },
+   "end_minus_model_finish_max": -14520,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 101942.875,
+   "cost": 109880
+  },
+  "H": {
+   "pe": "1-3",
+   "source": "markers",
+   "iterations": 15,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 15,
+   "max_iterations_per_run": 1,
+   "phase_model": 2,
+   "phase_observed": {
+    "2": 15
+   },
+   "end_minus_model_finish_max": -15469,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 36782,
+   "cost": 45300
+  },
+  "I": {
+   "pe": "1-3",
+   "source": "markers",
+   "iterations": 15,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 15,
+   "max_iterations_per_run": 1,
+   "phase_model": 2,
+   "phase_observed": {
+    "2": 15
+   },
+   "end_minus_model_finish_max": -23369,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 68072,
+   "cost": 75370
+  },
+  "J": {
+   "pe": "1-2",
+   "source": "markers",
+   "iterations": 14,
+   "same_run_as_previous": [],
+   "runs_with_iterations": 14,
+   "max_iterations_per_run": 1,
+   "phase_model": 3,
+   "phase_observed": {
+    "3": 14
+   },
+   "end_minus_model_finish_max": -6656,
+   "ends_after_model_finish": 0,
+   "cpu_per_iteration_cycles": 99160.5,
+   "cost": 107570
+  }
+ },
+ "packets": {
+  "flows": [
+   {
+    "flow": 24,
+    "source": "A",
+    "target": "C",
+    "local": false,
+    "src_pe": "2-3",
+    "dst_pe": "2-2",
+    "bytes": 1230,
+    "release": 28530,
+    "deadline": 228456,
+    "phase": 0,
+    "packets": 17,
+    "received": 17,
+    "send_min": 21365,
+    "send_max": 21366,
+    "arrival_min": 23256,
+    "arrival_max": 23347,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 205109,
+    "rows": [
+     {
+      "flow": 24,
+      "iteration": 1,
+      "send_cycles": 21366,
+      "arrival_cycles": 23256,
+      "slack_cycles": 205200
+     },
+     {
+      "flow": 24,
+      "iteration": 2,
+      "send_cycles": 21365,
+      "arrival_cycles": 23343,
+      "slack_cycles": 205113
+     },
+     {
+      "flow": 24,
+      "iteration": 3,
+      "send_cycles": 21365,
+      "arrival_cycles": 23347,
+      "slack_cycles": 205109
+     },
+     {
+      "flow": 24,
+      "iteration": 4,
+      "send_cycles": 21365,
+      "arrival_cycles": 23345,
+      "slack_cycles": 205111
+     },
+     {
+      "flow": 24,
+      "iteration": 5,
+      "send_cycles": 21365,
+      "arrival_cycles": 23346,
+      "slack_cycles": 205110
+     },
+     {
+      "flow": 24,
+      "iteration": 6,
+      "send_cycles": 21365,
+      "arrival_cycles": 23347,
+      "slack_cycles": 205109
+     },
+     {
+      "flow": 24,
+      "iteration": 7,
+      "send_cycles": 21365,
+      "arrival_cycles": 23345,
+      "slack_cycles": 205111
+     },
+     {
+      "flow": 24,
+      "iteration": 8,
+      "send_cycles": 21365,
+      "arrival_cycles": 23346,
+      "slack_cycles": 205110
+     },
+     {
+      "flow": 24,
+      "iteration": 9,
+      "send_cycles": 21365,
+      "arrival_cycles": 23347,
+      "slack_cycles": 205109
+     },
+     {
+      "flow": 24,
+      "iteration": 10,
+      "send_cycles": 21365,
+      "arrival_cycles": 23345,
+      "slack_cycles": 205111
+     },
+     {
+      "flow": 24,
+      "iteration": 11,
+      "send_cycles": 21365,
+      "arrival_cycles": 23346,
+      "slack_cycles": 205110
+     },
+     {
+      "flow": 24,
+      "iteration": 12,
+      "send_cycles": 21365,
+      "arrival_cycles": 23347,
+      "slack_cycles": 205109
+     },
+     {
+      "flow": 24,
+      "iteration": 13,
+      "send_cycles": 21365,
+      "arrival_cycles": 23345,
+      "slack_cycles": 205111
+     },
+     {
+      "flow": 24,
+      "iteration": 14,
+      "send_cycles": 21365,
+      "arrival_cycles": 23346,
+      "slack_cycles": 205110
+     },
+     {
+      "flow": 24,
+      "iteration": 15,
+      "send_cycles": 21365,
+      "arrival_cycles": 23347,
+      "slack_cycles": 205109
+     },
+     {
+      "flow": 24,
+      "iteration": 16,
+      "send_cycles": 21365,
+      "arrival_cycles": 23345,
+      "slack_cycles": 205111
+     },
+     {
+      "flow": 24,
+      "iteration": 17,
+      "send_cycles": 21365,
+      "arrival_cycles": 23346,
+      "slack_cycles": 205110
+     }
+    ],
+    "schedule_start": 28530
+   },
+   {
+    "flow": 25,
+    "source": "A",
+    "target": "B",
+    "local": true,
+    "src_pe": "2-3",
+    "dst_pe": "2-3",
+    "bytes": 4560,
+    "release": 28530,
+    "deadline": 256986,
+    "phase": 0,
+    "packets": 17,
+    "received": 17,
+    "send_min": 22437,
+    "send_max": 22438,
+    "arrival_min": 22806,
+    "arrival_max": 22807,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 234179,
+    "rows": [
+     {
+      "flow": 25,
+      "iteration": 1,
+      "send_cycles": 22438,
+      "arrival_cycles": 22807,
+      "slack_cycles": 234179
+     },
+     {
+      "flow": 25,
+      "iteration": 2,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 3,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 4,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 5,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 6,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 7,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 8,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 9,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 10,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 11,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 12,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 13,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 14,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 15,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 16,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     },
+     {
+      "flow": 25,
+      "iteration": 17,
+      "send_cycles": 22437,
+      "arrival_cycles": 22806,
+      "slack_cycles": 234180
+     }
+    ],
+    "schedule_start": null
+   },
+   {
+    "flow": 26,
+    "source": "B",
+    "target": "D",
+    "local": true,
+    "src_pe": "2-3",
+    "dst_pe": "2-3",
+    "bytes": 7890,
+    "release": 87130,
+    "deadline": 315586,
+    "phase": 0,
+    "packets": 17,
+    "received": 17,
+    "send_min": 71676,
+    "send_max": 71677,
+    "arrival_min": 72045,
+    "arrival_max": 72046,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 243540,
+    "rows": [
+     {
+      "flow": 26,
+      "iteration": 1,
+      "send_cycles": 71677,
+      "arrival_cycles": 72046,
+      "slack_cycles": 243540
+     },
+     {
+      "flow": 26,
+      "iteration": 2,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 3,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 4,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 5,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 6,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 7,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 8,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 9,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 10,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 11,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 12,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 13,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 14,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 15,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 16,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     },
+     {
+      "flow": 26,
+      "iteration": 17,
+      "send_cycles": 71676,
+      "arrival_cycles": 72045,
+      "slack_cycles": 243541
+     }
+    ],
+    "schedule_start": null
+   },
+   {
+    "flow": 27,
+    "source": "C",
+    "target": "E",
+    "local": false,
+    "src_pe": "2-2",
+    "dst_pe": "1-3",
+    "bytes": 1200,
+    "release": 96330,
+    "deadline": 228456,
+    "phase": 1,
+    "packets": 16,
+    "received": 16,
+    "send_min": 88638,
+    "send_max": 88640,
+    "arrival_min": 90553,
+    "arrival_max": 90776,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 137680,
+    "rows": [
+     {
+      "flow": 27,
+      "iteration": 1,
+      "send_cycles": 88639,
+      "arrival_cycles": 90553,
+      "slack_cycles": 137903
+     },
+     {
+      "flow": 27,
+      "iteration": 2,
+      "send_cycles": 88639,
+      "arrival_cycles": 90775,
+      "slack_cycles": 137681
+     },
+     {
+      "flow": 27,
+      "iteration": 3,
+      "send_cycles": 88640,
+      "arrival_cycles": 90776,
+      "slack_cycles": 137680
+     },
+     {
+      "flow": 27,
+      "iteration": 4,
+      "send_cycles": 88638,
+      "arrival_cycles": 90774,
+      "slack_cycles": 137682
+     },
+     {
+      "flow": 27,
+      "iteration": 5,
+      "send_cycles": 88639,
+      "arrival_cycles": 90775,
+      "slack_cycles": 137681
+     },
+     {
+      "flow": 27,
+      "iteration": 6,
+      "send_cycles": 88640,
+      "arrival_cycles": 90776,
+      "slack_cycles": 137680
+     },
+     {
+      "flow": 27,
+      "iteration": 7,
+      "send_cycles": 88638,
+      "arrival_cycles": 90774,
+      "slack_cycles": 137682
+     },
+     {
+      "flow": 27,
+      "iteration": 8,
+      "send_cycles": 88639,
+      "arrival_cycles": 90775,
+      "slack_cycles": 137681
+     },
+     {
+      "flow": 27,
+      "iteration": 9,
+      "send_cycles": 88640,
+      "arrival_cycles": 90776,
+      "slack_cycles": 137680
+     },
+     {
+      "flow": 27,
+      "iteration": 10,
+      "send_cycles": 88638,
+      "arrival_cycles": 90774,
+      "slack_cycles": 137682
+     },
+     {
+      "flow": 27,
+      "iteration": 11,
+      "send_cycles": 88639,
+      "arrival_cycles": 90775,
+      "slack_cycles": 137681
+     },
+     {
+      "flow": 27,
+      "iteration": 12,
+      "send_cycles": 88640,
+      "arrival_cycles": 90776,
+      "slack_cycles": 137680
+     },
+     {
+      "flow": 27,
+      "iteration": 13,
+      "send_cycles": 88638,
+      "arrival_cycles": 90774,
+      "slack_cycles": 137682
+     },
+     {
+      "flow": 27,
+      "iteration": 14,
+      "send_cycles": 88639,
+      "arrival_cycles": 90775,
+      "slack_cycles": 137681
+     },
+     {
+      "flow": 27,
+      "iteration": 15,
+      "send_cycles": 88640,
+      "arrival_cycles": 90776,
+      "slack_cycles": 137680
+     },
+     {
+      "flow": 27,
+      "iteration": 16,
+      "send_cycles": 88638,
+      "arrival_cycles": 90774,
+      "slack_cycles": 137682
+     }
+    ],
+    "schedule_start": 96330
+   },
+   {
+    "flow": 28,
+    "source": "D",
+    "target": "F",
+    "local": true,
+    "src_pe": "2-3",
+    "dst_pe": "2-3",
+    "bytes": 3450,
+    "release": 101130,
+    "deadline": 329586,
+    "phase": 0,
+    "packets": 17,
+    "received": 17,
+    "send_min": 76162,
+    "send_max": 76163,
+    "arrival_min": 76531,
+    "arrival_max": 76532,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 253054,
+    "rows": [
+     {
+      "flow": 28,
+      "iteration": 1,
+      "send_cycles": 76163,
+      "arrival_cycles": 76532,
+      "slack_cycles": 253054
+     },
+     {
+      "flow": 28,
+      "iteration": 2,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 3,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 4,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 5,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 6,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 7,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 8,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 9,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 10,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 11,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 12,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 13,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 14,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 15,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 16,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     },
+     {
+      "flow": 28,
+      "iteration": 17,
+      "send_cycles": 76162,
+      "arrival_cycles": 76531,
+      "slack_cycles": 253055
+     }
+    ],
+    "schedule_start": null
+   },
+   {
+    "flow": 29,
+    "source": "F",
+    "target": "G",
+    "local": false,
+    "src_pe": "2-3",
+    "dst_pe": "1-2",
+    "bytes": 6780,
+    "release": 181930,
+    "deadline": 336026,
+    "phase": 0,
+    "packets": 17,
+    "received": 17,
+    "send_min": 147448,
+    "send_max": 147449,
+    "arrival_min": 150742,
+    "arrival_max": 150920,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 185106,
+    "rows": [
+     {
+      "flow": 29,
+      "iteration": 1,
+      "send_cycles": 147449,
+      "arrival_cycles": 150745,
+      "slack_cycles": 185281
+     },
+     {
+      "flow": 29,
+      "iteration": 2,
+      "send_cycles": 147448,
+      "arrival_cycles": 150882,
+      "slack_cycles": 185144
+     },
+     {
+      "flow": 29,
+      "iteration": 3,
+      "send_cycles": 147448,
+      "arrival_cycles": 150742,
+      "slack_cycles": 185284
+     },
+     {
+      "flow": 29,
+      "iteration": 4,
+      "send_cycles": 147448,
+      "arrival_cycles": 150875,
+      "slack_cycles": 185151
+     },
+     {
+      "flow": 29,
+      "iteration": 5,
+      "send_cycles": 147448,
+      "arrival_cycles": 150913,
+      "slack_cycles": 185113
+     },
+     {
+      "flow": 29,
+      "iteration": 6,
+      "send_cycles": 147448,
+      "arrival_cycles": 150919,
+      "slack_cycles": 185107
+     },
+     {
+      "flow": 29,
+      "iteration": 7,
+      "send_cycles": 147448,
+      "arrival_cycles": 150875,
+      "slack_cycles": 185151
+     },
+     {
+      "flow": 29,
+      "iteration": 8,
+      "send_cycles": 147448,
+      "arrival_cycles": 150914,
+      "slack_cycles": 185112
+     },
+     {
+      "flow": 29,
+      "iteration": 9,
+      "send_cycles": 147448,
+      "arrival_cycles": 150920,
+      "slack_cycles": 185106
+     },
+     {
+      "flow": 29,
+      "iteration": 10,
+      "send_cycles": 147448,
+      "arrival_cycles": 150876,
+      "slack_cycles": 185150
+     },
+     {
+      "flow": 29,
+      "iteration": 11,
+      "send_cycles": 147448,
+      "arrival_cycles": 150912,
+      "slack_cycles": 185114
+     },
+     {
+      "flow": 29,
+      "iteration": 12,
+      "send_cycles": 147448,
+      "arrival_cycles": 150918,
+      "slack_cycles": 185108
+     },
+     {
+      "flow": 29,
+      "iteration": 13,
+      "send_cycles": 147448,
+      "arrival_cycles": 150874,
+      "slack_cycles": 185152
+     },
+     {
+      "flow": 29,
+      "iteration": 14,
+      "send_cycles": 147448,
+      "arrival_cycles": 150913,
+      "slack_cycles": 185113
+     },
+     {
+      "flow": 29,
+      "iteration": 15,
+      "send_cycles": 147448,
+      "arrival_cycles": 150919,
+      "slack_cycles": 185107
+     },
+     {
+      "flow": 29,
+      "iteration": 16,
+      "send_cycles": 147448,
+      "arrival_cycles": 150875,
+      "slack_cycles": 185151
+     },
+     {
+      "flow": 29,
+      "iteration": 17,
+      "send_cycles": 147448,
+      "arrival_cycles": 150914,
+      "slack_cycles": 185112
+     }
+    ],
+    "schedule_start": 181930
+   },
+   {
+    "flow": 30,
+    "source": "E",
+    "target": "I",
+    "local": true,
+    "src_pe": "1-3",
+    "dst_pe": "1-3",
+    "bytes": 9010,
+    "release": 52700,
+    "deadline": 326456,
+    "phase": 2,
+    "packets": 15,
+    "received": 15,
+    "send_min": 45277,
+    "send_max": 45279,
+    "arrival_min": 45642,
+    "arrival_max": 45644,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 280812,
+    "rows": [
+     {
+      "flow": 30,
+      "iteration": 1,
+      "send_cycles": 45278,
+      "arrival_cycles": 45643,
+      "slack_cycles": 280813
+     },
+     {
+      "flow": 30,
+      "iteration": 2,
+      "send_cycles": 45278,
+      "arrival_cycles": 45643,
+      "slack_cycles": 280813
+     },
+     {
+      "flow": 30,
+      "iteration": 3,
+      "send_cycles": 45279,
+      "arrival_cycles": 45644,
+      "slack_cycles": 280812
+     },
+     {
+      "flow": 30,
+      "iteration": 4,
+      "send_cycles": 45277,
+      "arrival_cycles": 45642,
+      "slack_cycles": 280814
+     },
+     {
+      "flow": 30,
+      "iteration": 5,
+      "send_cycles": 45278,
+      "arrival_cycles": 45643,
+      "slack_cycles": 280813
+     },
+     {
+      "flow": 30,
+      "iteration": 6,
+      "send_cycles": 45279,
+      "arrival_cycles": 45644,
+      "slack_cycles": 280812
+     },
+     {
+      "flow": 30,
+      "iteration": 7,
+      "send_cycles": 45277,
+      "arrival_cycles": 45642,
+      "slack_cycles": 280814
+     },
+     {
+      "flow": 30,
+      "iteration": 8,
+      "send_cycles": 45278,
+      "arrival_cycles": 45643,
+      "slack_cycles": 280813
+     },
+     {
+      "flow": 30,
+      "iteration": 9,
+      "send_cycles": 45279,
+      "arrival_cycles": 45644,
+      "slack_cycles": 280812
+     },
+     {
+      "flow": 30,
+      "iteration": 10,
+      "send_cycles": 45277,
+      "arrival_cycles": 45642,
+      "slack_cycles": 280814
+     },
+     {
+      "flow": 30,
+      "iteration": 11,
+      "send_cycles": 45278,
+      "arrival_cycles": 45643,
+      "slack_cycles": 280813
+     },
+     {
+      "flow": 30,
+      "iteration": 12,
+      "send_cycles": 45279,
+      "arrival_cycles": 45644,
+      "slack_cycles": 280812
+     },
+     {
+      "flow": 30,
+      "iteration": 13,
+      "send_cycles": 45277,
+      "arrival_cycles": 45642,
+      "slack_cycles": 280814
+     },
+     {
+      "flow": 30,
+      "iteration": 14,
+      "send_cycles": 45278,
+      "arrival_cycles": 45643,
+      "slack_cycles": 280813
+     },
+     {
+      "flow": 30,
+      "iteration": 15,
+      "send_cycles": 45279,
+      "arrival_cycles": 45644,
+      "slack_cycles": 280812
+     }
+    ],
+    "schedule_start": null
+   },
+   {
+    "flow": 31,
+    "source": "E",
+    "target": "H",
+    "local": true,
+    "src_pe": "1-3",
+    "dst_pe": "1-3",
+    "bytes": 2340,
+    "release": 52700,
+    "deadline": 281156,
+    "phase": 2,
+    "packets": 15,
+    "received": 15,
+    "send_min": 45796,
+    "send_max": 45798,
+    "arrival_min": 46161,
+    "arrival_max": 46163,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 234993,
+    "rows": [
+     {
+      "flow": 31,
+      "iteration": 1,
+      "send_cycles": 45797,
+      "arrival_cycles": 46162,
+      "slack_cycles": 234994
+     },
+     {
+      "flow": 31,
+      "iteration": 2,
+      "send_cycles": 45797,
+      "arrival_cycles": 46162,
+      "slack_cycles": 234994
+     },
+     {
+      "flow": 31,
+      "iteration": 3,
+      "send_cycles": 45798,
+      "arrival_cycles": 46163,
+      "slack_cycles": 234993
+     },
+     {
+      "flow": 31,
+      "iteration": 4,
+      "send_cycles": 45796,
+      "arrival_cycles": 46161,
+      "slack_cycles": 234995
+     },
+     {
+      "flow": 31,
+      "iteration": 5,
+      "send_cycles": 45797,
+      "arrival_cycles": 46162,
+      "slack_cycles": 234994
+     },
+     {
+      "flow": 31,
+      "iteration": 6,
+      "send_cycles": 45798,
+      "arrival_cycles": 46163,
+      "slack_cycles": 234993
+     },
+     {
+      "flow": 31,
+      "iteration": 7,
+      "send_cycles": 45796,
+      "arrival_cycles": 46161,
+      "slack_cycles": 234995
+     },
+     {
+      "flow": 31,
+      "iteration": 8,
+      "send_cycles": 45797,
+      "arrival_cycles": 46162,
+      "slack_cycles": 234994
+     },
+     {
+      "flow": 31,
+      "iteration": 9,
+      "send_cycles": 45798,
+      "arrival_cycles": 46163,
+      "slack_cycles": 234993
+     },
+     {
+      "flow": 31,
+      "iteration": 10,
+      "send_cycles": 45796,
+      "arrival_cycles": 46161,
+      "slack_cycles": 234995
+     },
+     {
+      "flow": 31,
+      "iteration": 11,
+      "send_cycles": 45797,
+      "arrival_cycles": 46162,
+      "slack_cycles": 234994
+     },
+     {
+      "flow": 31,
+      "iteration": 12,
+      "send_cycles": 45798,
+      "arrival_cycles": 46163,
+      "slack_cycles": 234993
+     },
+     {
+      "flow": 31,
+      "iteration": 13,
+      "send_cycles": 45796,
+      "arrival_cycles": 46161,
+      "slack_cycles": 234995
+     },
+     {
+      "flow": 31,
+      "iteration": 14,
+      "send_cycles": 45797,
+      "arrival_cycles": 46162,
+      "slack_cycles": 234994
+     },
+     {
+      "flow": 31,
+      "iteration": 15,
+      "send_cycles": 45798,
+      "arrival_cycles": 46163,
+      "slack_cycles": 234993
+     }
+    ],
+    "schedule_start": null
+   },
+   {
+    "flow": 32,
+    "source": "I",
+    "target": "J",
+    "local": false,
+    "src_pe": "1-3",
+    "dst_pe": "1-2",
+    "bytes": 5670,
+    "release": 173370,
+    "deadline": 228456,
+    "phase": 2,
+    "packets": 15,
+    "received": 15,
+    "send_min": 148972,
+    "send_max": 148974,
+    "arrival_min": 152844,
+    "arrival_max": 153057,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 75399,
+    "rows": [
+     {
+      "flow": 32,
+      "iteration": 1,
+      "send_cycles": 148973,
+      "arrival_cycles": 152844,
+      "slack_cycles": 75612
+     },
+     {
+      "flow": 32,
+      "iteration": 2,
+      "send_cycles": 148973,
+      "arrival_cycles": 153007,
+      "slack_cycles": 75449
+     },
+     {
+      "flow": 32,
+      "iteration": 3,
+      "send_cycles": 148974,
+      "arrival_cycles": 153053,
+      "slack_cycles": 75403
+     },
+     {
+      "flow": 32,
+      "iteration": 4,
+      "send_cycles": 148972,
+      "arrival_cycles": 153056,
+      "slack_cycles": 75400
+     },
+     {
+      "flow": 32,
+      "iteration": 5,
+      "send_cycles": 148973,
+      "arrival_cycles": 153009,
+      "slack_cycles": 75447
+     },
+     {
+      "flow": 32,
+      "iteration": 6,
+      "send_cycles": 148974,
+      "arrival_cycles": 153054,
+      "slack_cycles": 75402
+     },
+     {
+      "flow": 32,
+      "iteration": 7,
+      "send_cycles": 148972,
+      "arrival_cycles": 153057,
+      "slack_cycles": 75399
+     },
+     {
+      "flow": 32,
+      "iteration": 8,
+      "send_cycles": 148973,
+      "arrival_cycles": 153008,
+      "slack_cycles": 75448
+     },
+     {
+      "flow": 32,
+      "iteration": 9,
+      "send_cycles": 148974,
+      "arrival_cycles": 153052,
+      "slack_cycles": 75404
+     },
+     {
+      "flow": 32,
+      "iteration": 10,
+      "send_cycles": 148972,
+      "arrival_cycles": 153055,
+      "slack_cycles": 75401
+     },
+     {
+      "flow": 32,
+      "iteration": 11,
+      "send_cycles": 148973,
+      "arrival_cycles": 153008,
+      "slack_cycles": 75448
+     },
+     {
+      "flow": 32,
+      "iteration": 12,
+      "send_cycles": 148974,
+      "arrival_cycles": 153053,
+      "slack_cycles": 75403
+     },
+     {
+      "flow": 32,
+      "iteration": 13,
+      "send_cycles": 148972,
+      "arrival_cycles": 153056,
+      "slack_cycles": 75400
+     },
+     {
+      "flow": 32,
+      "iteration": 14,
+      "send_cycles": 148973,
+      "arrival_cycles": 153009,
+      "slack_cycles": 75447
+     },
+     {
+      "flow": 32,
+      "iteration": 15,
+      "send_cycles": 148974,
+      "arrival_cycles": 153054,
+      "slack_cycles": 75402
+     }
+    ],
+    "schedule_start": 173370
+   },
+   {
+    "flow": 33,
+    "source": "H",
+    "target": "J",
+    "local": false,
+    "src_pe": "1-3",
+    "dst_pe": "1-2",
+    "bytes": 8900,
+    "release": 98000,
+    "deadline": 228456,
+    "phase": 2,
+    "packets": 15,
+    "received": 15,
+    "send_min": 81502,
+    "send_max": 81504,
+    "arrival_min": 85434,
+    "arrival_max": 85491,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 142965,
+    "rows": [
+     {
+      "flow": 33,
+      "iteration": 1,
+      "send_cycles": 81503,
+      "arrival_cycles": 85446,
+      "slack_cycles": 143010
+     },
+     {
+      "flow": 33,
+      "iteration": 2,
+      "send_cycles": 81503,
+      "arrival_cycles": 85491,
+      "slack_cycles": 142965
+     },
+     {
+      "flow": 33,
+      "iteration": 3,
+      "send_cycles": 81504,
+      "arrival_cycles": 85478,
+      "slack_cycles": 142978
+     },
+     {
+      "flow": 33,
+      "iteration": 4,
+      "send_cycles": 81502,
+      "arrival_cycles": 85435,
+      "slack_cycles": 143021
+     },
+     {
+      "flow": 33,
+      "iteration": 5,
+      "send_cycles": 81503,
+      "arrival_cycles": 85484,
+      "slack_cycles": 142972
+     },
+     {
+      "flow": 33,
+      "iteration": 6,
+      "send_cycles": 81504,
+      "arrival_cycles": 85479,
+      "slack_cycles": 142977
+     },
+     {
+      "flow": 33,
+      "iteration": 7,
+      "send_cycles": 81502,
+      "arrival_cycles": 85435,
+      "slack_cycles": 143021
+     },
+     {
+      "flow": 33,
+      "iteration": 8,
+      "send_cycles": 81503,
+      "arrival_cycles": 85483,
+      "slack_cycles": 142973
+     },
+     {
+      "flow": 33,
+      "iteration": 9,
+      "send_cycles": 81504,
+      "arrival_cycles": 85479,
+      "slack_cycles": 142977
+     },
+     {
+      "flow": 33,
+      "iteration": 10,
+      "send_cycles": 81502,
+      "arrival_cycles": 85434,
+      "slack_cycles": 143022
+     },
+     {
+      "flow": 33,
+      "iteration": 11,
+      "send_cycles": 81503,
+      "arrival_cycles": 85484,
+      "slack_cycles": 142972
+     },
+     {
+      "flow": 33,
+      "iteration": 12,
+      "send_cycles": 81504,
+      "arrival_cycles": 85478,
+      "slack_cycles": 142978
+     },
+     {
+      "flow": 33,
+      "iteration": 13,
+      "send_cycles": 81502,
+      "arrival_cycles": 85435,
+      "slack_cycles": 143021
+     },
+     {
+      "flow": 33,
+      "iteration": 14,
+      "send_cycles": 81503,
+      "arrival_cycles": 85484,
+      "slack_cycles": 142972
+     },
+     {
+      "flow": 33,
+      "iteration": 15,
+      "send_cycles": 81504,
+      "arrival_cycles": 85479,
+      "slack_cycles": 142977
+     }
+    ],
+    "schedule_start": 98000
+   },
+   {
+    "flow": 34,
+    "source": "G",
+    "target": "J",
+    "local": true,
+    "src_pe": "1-2",
+    "dst_pe": "1-2",
+    "bytes": 1230,
+    "release": 217450,
+    "deadline": 228456,
+    "phase": 1,
+    "packets": 16,
+    "received": 16,
+    "send_min": 101382,
+    "send_max": 202502,
+    "arrival_min": 101743,
+    "arrival_max": 202858,
+    "sent_before_phase": 0,
+    "sent_after_release": 0,
+    "late": 0,
+    "min_slack_cycles": 25598,
+    "rows": [
+     {
+      "flow": 34,
+      "iteration": 1,
+      "send_cycles": 101382,
+      "arrival_cycles": 101743,
+      "slack_cycles": 126713
+     },
+     {
+      "flow": 34,
+      "iteration": 2,
+      "send_cycles": 102261,
+      "arrival_cycles": 102617,
+      "slack_cycles": 125839
+     },
+     {
+      "flow": 34,
+      "iteration": 3,
+      "send_cycles": 202502,
+      "arrival_cycles": 202858,
+      "slack_cycles": 25598
+     },
+     {
+      "flow": 34,
+      "iteration": 4,
+      "send_cycles": 201929,
+      "arrival_cycles": 202285,
+      "slack_cycles": 26171
+     },
+     {
+      "flow": 34,
+      "iteration": 5,
+      "send_cycles": 202195,
+      "arrival_cycles": 202551,
+      "slack_cycles": 25905
+     },
+     {
+      "flow": 34,
+      "iteration": 6,
+      "send_cycles": 202195,
+      "arrival_cycles": 202551,
+      "slack_cycles": 25905
+     },
+     {
+      "flow": 34,
+      "iteration": 7,
+      "send_cycles": 202230,
+      "arrival_cycles": 202586,
+      "slack_cycles": 25870
+     },
+     {
+      "flow": 34,
+      "iteration": 8,
+      "send_cycles": 202196,
+      "arrival_cycles": 202552,
+      "slack_cycles": 25904
+     },
+     {
+      "flow": 34,
+      "iteration": 9,
+      "send_cycles": 202193,
+      "arrival_cycles": 202549,
+      "slack_cycles": 25907
+     },
+     {
+      "flow": 34,
+      "iteration": 10,
+      "send_cycles": 202231,
+      "arrival_cycles": 202587,
+      "slack_cycles": 25869
+     },
+     {
+      "flow": 34,
+      "iteration": 11,
+      "send_cycles": 202194,
+      "arrival_cycles": 202550,
+      "slack_cycles": 25906
+     },
+     {
+      "flow": 34,
+      "iteration": 12,
+      "send_cycles": 202194,
+      "arrival_cycles": 202550,
+      "slack_cycles": 25906
+     },
+     {
+      "flow": 34,
+      "iteration": 13,
+      "send_cycles": 202229,
+      "arrival_cycles": 202585,
+      "slack_cycles": 25871
+     },
+     {
+      "flow": 34,
+      "iteration": 14,
+      "send_cycles": 202195,
+      "arrival_cycles": 202551,
+      "slack_cycles": 25905
+     },
+     {
+      "flow": 34,
+      "iteration": 15,
+      "send_cycles": 202195,
+      "arrival_cycles": 202551,
+      "slack_cycles": 25905
+     },
+     {
+      "flow": 34,
+      "iteration": 16,
+      "send_cycles": 202230,
+      "arrival_cycles": 202586,
+      "slack_cycles": 25870
+     }
+    ],
+    "schedule_start": null
+   }
+  ],
+  "packets": 177,
+  "remote_packets": 80,
+  "late": 0,
+  "min_slack_remote_cycles": 75399
+ },
+ "network": {
+  "model": "L0 = 6 (m + 1) + p + 1; header 6 (m + 1); o_i = L0 + w_h (m + 1)",
+  "header_wait_cycles": 20,
+  "tx": 342,
+  "rx": 342,
+  "packets": 80,
+  "unpaired_tx": 0,
+  "unpaired_rx": 0,
+  "outside_flows": 0,
+  "identity_errors": 0,
+  "header_waits": 15,
+  "header_waits_above_bound": 15,
+  "above_occupancy": 80,
+  "flows": [
+   {
+    "flow": 24,
+    "source": "A",
+    "target": "C",
+    "src_pe": "2-3",
+    "dst_pe": "2-2",
+    "hops": 1,
+    "flits": 311,
+    "L0": 324,
+    "header_model": 12,
+    "occupancy": 364,
+    "header_wait_bound": 40,
+    "window": 199926,
+    "schedule_start": 28530,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "contender_other_apps": [],
+    "latency_min": 586,
+    "latency_max": 679,
+    "latency_minus_L0_min": 262,
+    "latency_minus_L0_max": 355,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 262,
+    "stall_max": 355,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 259,
+    "tx_block_max": 352,
+    "software_latency_min": 1890,
+    "software_latency_max": 1982,
+    "driver_min": 1302,
+    "driver_max": 1304
+   },
+   {
+    "flow": 27,
+    "source": "C",
+    "target": "E",
+    "src_pe": "2-2",
+    "dst_pe": "1-3",
+    "hops": 2,
+    "flits": 303,
+    "L0": 322,
+    "header_model": 18,
+    "occupancy": 382,
+    "header_wait_bound": 60,
+    "window": 132126,
+    "schedule_start": 96330,
+    "packets": 16,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 16,
+    "contender_flows": [],
+    "contender_other_apps": [],
+    "latency_min": 584,
+    "latency_max": 805,
+    "latency_minus_L0_min": 262,
+    "latency_minus_L0_max": 483,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 262,
+    "stall_max": 483,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 258,
+    "tx_block_max": 479,
+    "software_latency_min": 1914,
+    "software_latency_max": 2136,
+    "driver_min": 1330,
+    "driver_max": 1331
+   },
+   {
+    "flow": 29,
+    "source": "F",
+    "target": "G",
+    "src_pe": "2-3",
+    "dst_pe": "1-2",
+    "hops": 2,
+    "flits": 1698,
+    "L0": 1717,
+    "header_model": 18,
+    "occupancy": 1777,
+    "header_wait_bound": 60,
+    "window": 154096,
+    "schedule_start": 181930,
+    "packets": 17,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 17,
+    "contender_flows": [],
+    "contender_other_apps": [],
+    "latency_min": 1978,
+    "latency_max": 2154,
+    "latency_minus_L0_min": 261,
+    "latency_minus_L0_max": 437,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 261,
+    "stall_max": 437,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 257,
+    "tx_block_max": 433,
+    "software_latency_min": 3294,
+    "software_latency_max": 3472,
+    "driver_min": 1316,
+    "driver_max": 1318
+   },
+   {
+    "flow": 32,
+    "source": "I",
+    "target": "J",
+    "src_pe": "1-3",
+    "dst_pe": "1-2",
+    "hops": 1,
+    "flits": 1421,
+    "L0": 1434,
+    "header_model": 12,
+    "occupancy": 1474,
+    "header_wait_bound": 40,
+    "window": 55086,
+    "schedule_start": 173370,
+    "packets": 15,
+    "size_mismatch": 0,
+    "header_waits": 15,
+    "header_waits_above_bound": 15,
+    "above_occupancy": 15,
+    "contender_flows": [
+     29
+    ],
+    "contender_other_apps": [],
+    "latency_min": 2573,
+    "latency_max": 2788,
+    "latency_minus_L0_min": 1139,
+    "latency_minus_L0_max": 1354,
+    "header_minus_model_min": 446,
+    "header_minus_model_max": 622,
+    "stall_min": 693,
+    "stall_max": 732,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 1136,
+    "tx_block_max": 1351,
+    "software_latency_min": 3871,
+    "software_latency_max": 4085,
+    "driver_min": 1297,
+    "driver_max": 1299
+   },
+   {
+    "flow": 33,
+    "source": "H",
+    "target": "J",
+    "src_pe": "1-3",
+    "dst_pe": "1-2",
+    "hops": 1,
+    "flits": 2228,
+    "L0": 2241,
+    "header_model": 12,
+    "occupancy": 2281,
+    "header_wait_bound": 40,
+    "window": 130456,
+    "schedule_start": 98000,
+    "packets": 15,
+    "size_mismatch": 0,
+    "header_waits": 0,
+    "header_waits_above_bound": 0,
+    "above_occupancy": 15,
+    "contender_flows": [],
+    "contender_other_apps": [],
+    "latency_min": 2634,
+    "latency_max": 2684,
+    "latency_minus_L0_min": 393,
+    "latency_minus_L0_max": 443,
+    "header_minus_model_min": 0,
+    "header_minus_model_max": 0,
+    "stall_min": 393,
+    "stall_max": 443,
+    "gap_min": 0,
+    "gap_max": 0,
+    "tx_block_min": 390,
+    "tx_block_max": 440,
+    "software_latency_min": 3932,
+    "software_latency_max": 3988,
+    "driver_min": 1297,
+    "driver_max": 1304
+   }
+  ],
+  "other_app_packets": 262,
+  "header_waits_with_other_app_contender": 0
+ },
+ "link_schedule": {
+  "feasible": true,
+  "skipped": 0,
+  "starts": {
+   "24": 28530,
+   "33": 98000,
+   "27": 96330,
+   "29": 181930,
+   "32": 173370
+  },
+  "union": true,
+  "apps": [
+   "CARV",
+   "E"
+  ]
+ },
+ "monitor": {
+  "send_err": 0,
+  "send_incomplete": 0,
+  "recv_err": 0,
+  "recv_spurious": 0,
+  "recv_missing": 0,
+  "send_pkts": 342,
+  "recv_pkts": 342,
+  "nodes": 20,
+  "errors": 0
+ },
+ "phase_conformance": {
+  "release": "tick",
+  "phases": 16,
+  "jobs": 149,
+  "phases_with_a_task_twice": 0,
+  "early_jobs": 0,
+  "late_jobs": 0,
+  "phases_cpu_above": 0,
+  "conforms": true,
+  "pes": {
+   "1-2": {
+    "busy_max": 201551,
+    "bound_max": 217450,
+    "phases_above": 0
+   },
+   "1-3": {
+    "busy_max": 148621,
+    "bound_max": 173370,
+    "phases_above": 0
+   },
+   "2-2": {
+    "busy_max": 88290,
+    "bound_max": 96330,
+    "phases_above": 0
+   },
+   "2-3": {
+    "busy_max": 147092,
+    "bound_max": 181930,
+    "phases_above": 0
+   }
+  }
+ }
+}
