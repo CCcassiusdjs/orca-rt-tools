@@ -23,7 +23,7 @@
   {
    "chain": "T4",
    "constraint_ms": 100,
-   "data_age_ms": 3.9253406798350357,
+   "data_age_ms": 3.9324807936027133,
    "periods_ms": [
     100
    ],
@@ -41,7 +41,7 @@
   {
    "chain": "T6-T7",
    "constraint_ms": 1020,
-   "data_age_ms": 1005.2634245659174,
+   "data_age_ms": 1005.3185595601715,
    "periods_ms": [
     1000,
     20
@@ -51,7 +51,7 @@
   {
    "chain": "T8-T9",
    "constraint_ms": 30,
-   "data_age_ms": 23.284473481243655,
+   "data_age_ms": 23.291613595011334,
    "periods_ms": [
     20,
     10
@@ -116,7 +116,7 @@
   {
    "chain": "T17",
    "constraint_ms": 100,
-   "data_age_ms": 2.390778704630978,
+   "data_age_ms": 2.4387735851175707,
    "periods_ms": [
     100
    ],
@@ -125,7 +125,7 @@
   {
    "chain": "T18",
    "constraint_ms": 20,
-   "data_age_ms": 2.9360216688386243,
+   "data_age_ms": 2.943161782606302,
    "periods_ms": [
     20
    ],
@@ -134,7 +134,7 @@
   {
    "chain": "T19",
    "constraint_ms": 100,
-   "data_age_ms": 3.1985069444201653,
+   "data_age_ms": 3.212787171955521,
    "periods_ms": [
     100
    ],
@@ -162,7 +162,7 @@
   {
    "chain": "T23",
    "constraint_ms": 20,
-   "data_age_ms": 2.089654163869368,
+   "data_age_ms": 2.096794277637046,
    "periods_ms": [
     20
    ],
@@ -189,7 +189,7 @@
   {
    "chain": "T26",
    "constraint_ms": 2,
-   "data_age_ms": 0.4986141183486318,
+   "data_age_ms": 0.5057542321163094,
    "periods_ms": [
     2
    ],
@@ -198,7 +198,7 @@
   {
    "chain": "T27",
    "constraint_ms": 10,
-   "data_age_ms": 2.167805119705944,
+   "data_age_ms": 2.1749452334736215,
    "periods_ms": [
     10
    ],
@@ -275,7 +275,7 @@
   {
    "chain": "T40",
    "constraint_ms": 10,
-   "data_age_ms": 4.8241914647814985,
+   "data_age_ms": 4.85275191985221,
    "periods_ms": [
     10
    ],
@@ -293,7 +293,7 @@
   {
    "chain": "T42",
    "constraint_ms": 20,
-   "data_age_ms": 4.269386258180805,
+   "data_age_ms": 4.386796360457023,
    "periods_ms": [
     20
    ],
@@ -302,7 +302,7 @@
   {
    "chain": "T43",
    "constraint_ms": 20,
-   "data_age_ms": 3.3006955179890833,
+   "data_age_ms": 3.3629706260110312,
    "periods_ms": [
     20
    ],
@@ -311,7 +311,7 @@
   {
    "chain": "T44",
    "constraint_ms": 100,
-   "data_age_ms": 2.257584588800811,
+   "data_age_ms": 2.271864816336166,
    "periods_ms": [
     100
    ],
@@ -340,7 +340,7 @@
   {
    "chain": "T49",
    "constraint_ms": 100,
-   "data_age_ms": 3.757306941360331,
+   "data_age_ms": 3.9798328342645637,
    "periods_ms": [
     100
    ],
@@ -360,7 +360,7 @@
   {
    "chain": "T53",
    "constraint_ms": 1,
-   "data_age_ms": 0.9448597495459038,
+   "data_age_ms": 0.999994743800174,
    "periods_ms": [
     1
    ],
@@ -380,7 +380,7 @@
  "chains_with_several_tasks": 10,
  "chains_within_constraint": 40,
  "criterion": "MAX_PROC",
- "data_age_over_constraint_max": 0.9855523770254092,
+ "data_age_over_constraint_max": 0.999994743800174,
  "edges": 53,
  "edges_on_noc": 15,
  "f_cpu_hz": 83947000.0,
@@ -388,6 +388,7 @@
   "f_cpu_hz": 195057000.0,
   "minimum_hz": 195057000.0
  },
+ "handler_charge": true,
  "hyperperiod_ms": 1000,
  "label_bytes": {
   "max": 6,
@@ -404,6 +405,23 @@
   100,
   1000
  ],
+ "premise_release": {
+  "checks": 832,
+  "entry_cycles": 60,
+  "handler_cycles": {
+   "inject": 626,
+   "rx_end": 929,
+   "rx_size": 3882
+  },
+  "holds": true,
+  "lead_cycles": 1621,
+  "longer_than_lead": [
+   "rx_size"
+  ],
+  "margin_min_cycles": 759,
+  "section_max_cycles": 1191,
+  "violations": 0
+ },
  "runnables": 163,
  "several_tasks_within_constraint": 10,
  "single_task_data_age_ms_max": 5.348783199619286,

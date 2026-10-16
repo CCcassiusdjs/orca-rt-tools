@@ -31,6 +31,14 @@ def test_reservation_after_the_request():
     assert r["holds"] and r["margin_min_cycles"] == 2 * 131520 - (s + 15405 - router.NI_RX_END_CYCLES)
 
 
+def test_entry_latency():
+    # a size-flit handler that ends fewer than ISR_ENTRY_CYCLES before the tick breaks the premise
+    s = 117332
+    o = 131520 - router.ISR_ENTRY_CYCLES // 2 - s + router.NI_RX_END_CYCLES
+    assert not ttflow.premise_release([row(s, o)], 1621, TERMS)["holds"]
+    assert router.release_guard(131520)(s, o) if router.ni_model()[0] else True
+
+
 def test_long_section():
     r = ttflow.premise_release([], 1000, TERMS)
     assert not r["holds"]

@@ -15,7 +15,7 @@ compose.minimum_frequency) under each setting:
 | no_wni_schedule_windows | no_wni with the handler windows of the link schedule (compare with event_triggered_no_wni) |
 | schedule_windows | the flow, and a candidate whose tasks fail Eq. (7) with the windows [F(u), a] passes when they fit with the handlers of each packet inside its reservation [s, s + o_i] of the link schedule (search.schedule_windows_fit) |
 | event_triggered | one release period (single applications and the composition): no link schedule; each packet enters the NoC when its job sends it, and a candidate is feasible when F(u) + WCTT_i <= a_{i,j} and F(u) + WCTT_i <= the end of the phase of its release for every packet (rttools/modules/routing/wctt.py: polling arbiter of the Hermes router, DDMA interleaving, every packet of the phase can meet every other) and every task ends within its phase with the handlers of each packet charged inside [earliest release, F(u) + WCTT] (fixed point of the finishes and the windows) |
-| event_triggered_runs | as event_triggered_b50 with the beta of the stored run (beta_of_runs: the smallest ratio of the measured finish of a source task of a flow between PEs to its F(u)) |
+| event_triggered_runs | as event_triggered_b50 with the beta of each source task u in the stored run (beta_of_runs: the smallest ratio of the measured finish of u to F(u)) |
 | event_triggered_b50, _b90, _b100 | as event_triggered with the release jitter of each packet limited to [phase start + beta F(u), F(u)] (beta = 1: every job executes for exactly t(v)); two packets meet only when their windows [earliest release, F(u) + WCTT] meet (least fixed point, wctt.wctt) |
 | event_triggered_no_wni | as event_triggered with w_NI = 0 (no injection or receive handlers in the WCTT); compare with no_wni |
 
@@ -37,6 +37,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import math
 import os
 import sys
 
@@ -82,11 +83,21 @@ def setting(s):
 JITTER = (0.5, 0.9, 1.0)     # beta of the offset-aware variants: earliest release = phase start + beta F(u)
 
 
+def _source_key(p):
+    """Source task of a packet, qualified by its application in a composition
+    (flow "<app>/<label>")."""
+    return p["flow"].split("/")[0] + "/" + p["source"] if "/" in p["flow"] else p["source"]
+
+
 def _earliest(packets, period, beta):
     """Earliest release of each packet: the start of the phase of its
-    release plus beta F(u) (beta None: 0)."""
-    b = 0.0 if beta is None else beta
-    return {p["name"]: (p["min_start"] // period) * period + b * (p["min_start"] % period) for p in packets}
+    release plus beta F(u) (beta None: 0; a dict: the beta of the source
+    task of each packet, _source_key, 0 for a task without a value)."""
+    def b(p):
+        if beta is None:
+            return 0.0
+        return beta.get(_source_key(p), 0.0) if isinstance(beta, dict) else beta
+    return {p["name"]: (p["min_start"] // period) * period + b(p) * (p["min_start"] % period) for p in packets}
 
 
 def _et_check(packets, period, beta=None):
@@ -329,11 +340,13 @@ def _sources(a):
 
 
 def beta_of_runs(a, jobs, base):
-    """Largest beta whose interval [phase start + beta F(u), F(u)] holds the
-    finish of every job of a source task u of a flow between PEs in the
-    stored run: min over those jobs of (end - tick of its phase) / F(u)
-    (tt_jobs.csv of the run: after_tick, bound). `jobs`: {application name
-    (None for one application): path of tt_jobs.csv}."""
+    """For each source task u of a flow between PEs, the largest beta whose
+    interval [phase start + beta F(u), F(u)] holds the finish of every job of
+    u in the stored run: min over its jobs of (end - tick of its phase) /
+    F(u) (tt_jobs.csv of the run: after_tick, bound), rounded down to 0.001
+    ("per_task", keys of _source_key), and the smallest of them ("beta").
+    `jobs`: {application name ("-" for one application): path of
+    tt_jobs.csv}."""
     import csv
     srcs = _sources(a)
     ratios = {}
@@ -346,10 +359,10 @@ def beta_of_runs(a, jobs, base):
                 t = r["task"]
                 if t in srcs[None if name == "-" else name]:
                     x = float(r["after_tick"]) / float(r["bound"])
-                    k = t if name == "-" else name + "." + t
+                    k = t if name == "-" else name + "/" + t
                     ratios[k] = min(ratios.get(k, x), x)
-    b = min(ratios.values())
-    return {"beta": round(b, 3), "task": min(ratios, key=ratios.get), "sources": len(ratios)}
+    per = {k: math.floor(v * 1000) / 1000 for k, v in sorted(ratios.items())}
+    return {"beta": min(per.values()), "task": min(per, key=per.get), "sources": len(per), "per_task": per}
 
 
 def run(cfg_path, out_dir):
@@ -386,8 +399,8 @@ def run(cfg_path, out_dir):
             if br:
                 b = beta_of_runs(a, br["jobs"], os.path.dirname(os.path.abspath(cfg_path)))
                 with setting(SETTINGS["flow"]):
-                    et = (_single(a, schedule=event_triggered_jitter(b["beta"])) if a["kind"] == "single"
-                          else _composition(a, et=True, beta=b["beta"]))
+                    et = (_single(a, schedule=event_triggered_jitter(b["per_task"])) if a["kind"] == "single"
+                          else _composition(a, et=True, beta=b["per_task"]))
                 row["event_triggered_runs"] = dict(b, run=br["run"], f_cpu_hz=et["f_cpu_hz"],
                                                    minimum_hz=et["frequency_hz"])
         if a["kind"] == "single":

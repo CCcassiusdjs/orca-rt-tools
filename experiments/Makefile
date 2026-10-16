@@ -35,5 +35,8 @@ all: $(DIRS)
 $(DIRS):
 	$(MAKE) -C $@ PYTHON=$(PYTHON) GHDL=$(GHDL) $(if $(filter exp23,$@),all check-run)
 
+# ablation reads the job tables of the runs (beta of the runs) that these directories build
+ablation: exp23 wcet multiapp car-v-rtl
+
 clean:
 	for d in $(DIRS); do $(MAKE) -C $$d clean; done

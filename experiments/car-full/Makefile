@@ -149,9 +149,11 @@ check-cf4:
 	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF4.events.txt REF=reference_CF4.json \
 		OUTDIR=$(BUILD)/results_CF4
 
+# CF5 ran with a table that the generator built before the release guard of the link schedule
+# (rttools/modules/routing/router.py, release_guard), which places flow 7 later at its clock
 check-cf5:
-	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF5.events.txt REF=reference_CF5.json \
-		OUTDIR=$(BUILD)/results_CF5
+	RTTOOLS_RELEASE_GUARD=off $(MAKE) --no-print-directory analyze check-run LOG=logs/CF5.events.txt \
+		REF=reference_CF5.json OUTDIR=$(BUILD)/results_CF5
 
 check-cf6:
 	$(MAKE) --no-print-directory analyze check-run LOG=logs/CF6.events.txt REF=reference_CF6.json \

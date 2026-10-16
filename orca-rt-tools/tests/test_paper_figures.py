@@ -1,6 +1,6 @@
-"""Pipelines of the visuals of the article: stored graphs of Table 7.1
+"""Pipelines of the visuals of the article: stored graphs of the table of the random graphs
 (rttools/paper/graphs.py), CAR and criterion of application E
-(rttools/paper/car.py), contraction example, Table 7.1 summary and the
+(rttools/paper/car.py), contraction example, the table of the random graphs summary and the
 figures of application E (rttools/paper/figures.py)."""
 import json
 import os

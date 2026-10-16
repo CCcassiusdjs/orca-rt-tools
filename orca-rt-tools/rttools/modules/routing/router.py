@@ -149,6 +149,25 @@ NI_INJECT_CYCLES = 3899     # instant s to the injection (compare interrupt of T
 NI_RX_SIZE_CYCLES = 7113    # size flit to the buffer of irq2_handler (credit withheld)
 NI_RX_END_CYCLES = 4157     # last flit to the handshake of irq3_handler
 NI_WAIT_CYCLES = NI_INJECT_CYCLES + NI_RX_SIZE_CYCLES + NI_RX_END_CYCLES
+# premise (ii) of the paper (the release handler of each phase runs before the
+# tick of that phase): the release generator raises its request at a multiple
+# of the phase from reset and the tick timers start RELEASE_LEAD_CYCLES after
+# reset (the smallest lead of the images of the runs, the boot of the image of
+# CAR; 1,861 cycles in the others), so the request comes that many cycles
+# before the tick. A handler longer than the lead that runs at the request can
+# hold the release interrupt past the tick; the size-flit handler of packet i
+# ends by s_i + o_i - NI_RX_END_CYCLES, so the link schedule must not place a
+# packet that starts by the request of a tick with that instant at or after the
+# tick (release_guard; rttools.paper.ttflow.premise_release checks a schedule).
+RELEASE_LEAD_CYCLES = 1621
+# from the end of an activity with interrupts disabled to the read of the cause
+# word in _isr (IRQ_DECISION, entry, prologue of _isr up to the load of
+# IRQ_CAUSE: 56 cycles under the timing model of rttools/wcet, rounded up): the
+# routine that serves the release must read the cause word before the tick
+ISR_ENTRY_CYCLES = 60
+# RTTOOLS_RELEASE_GUARD=off: link schedules without the guard (the stored run CF5,
+# whose table the generator built before the guard)
+RELEASE_GUARD_ENV = "RTTOOLS_RELEASE_GUARD"
 NI_ENV = "RTTOOLS_NI"
 # selection of the network-interface model, as the header wait: set_ni() in
 # the process, otherwise RTTOOLS_NI. "tt" (default when unset or empty: the
@@ -440,3 +459,29 @@ def XY(source, target, graph):
       )
 
     return paths
+
+
+def release_guard(tick):
+    """Predicate (start k, occupancy o) -> True when a reservation [k, k + o]
+    of a link schedule with ticks every `tick` cycles breaks premise (ii)
+    (RELEASE_LEAD_CYCLES); None without the network-interface model of the
+    time-triggered images or without a tick."""
+    resource, w_ni = ni_model()
+    if not resource or w_ni < NI_WAIT_CYCLES or not tick or os.environ.get(RELEASE_GUARD_ENV, "") == "off":
+        return None
+    lead, end = RELEASE_LEAD_CYCLES, NI_RX_END_CYCLES - ISR_ENTRY_CYCLES
+
+    def breaks(k, o):
+        kp = -(-(k + lead) // tick) * tick      # first tick whose request comes at or after k
+        return k + o - end >= kp
+    return breaks
+
+
+def tick_cycles(instance):
+    """Cycles per tick of an instance: the phase of the general model, else
+    the period of the flows (one period)."""
+    rates = instance.get("rates")
+    if rates:
+        return int(rates["phase_cycles"])
+    periods = [d["period"] for _, _, d in instance["flows"]]
+    return min(periods) if periods else None

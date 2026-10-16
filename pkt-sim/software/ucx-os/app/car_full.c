@@ -181,10 +181,10 @@ static const uint8_t *tick_row;             /* TT_TICK of this PE (app/<app>_tt.
 static struct tcb_s *owner_pred[MAX_LOCAL + 1];  /* tcb before position p of the circular list */
 static uint32_t tick_idx = 0;               /* index of the next phase in TT_TICK */
 
-/* tick hook (kernel/sched.c, dispatch): a release request that the release
- * interrupt has not served yet (interrupts disabled since before the
- * request) is served here, since the generator raises it before the tick of
- * its phase; then the hook releases the jobs of the phase (TT_TICK: bit 2 +
+/* tick hook (kernel/sched.c, dispatch): the generator raises the release
+ * request before the tick of its phase, and the link schedule keeps any
+ * handler that runs at the request from reaching the tick (premise (ii));
+ * a request pending here is served first; then the hook releases the jobs of the phase (TT_TICK: bit 2 +
  * i for the task of position i + 1, the phases o_v + j k_v) and sets the
  * current task of the scheduler to the task before the position that the
  * model dispatches at this tick (TT_TICK bits 0-1; 0: no change), so that

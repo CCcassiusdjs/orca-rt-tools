@@ -383,9 +383,27 @@
     "minimum_hz": 393997192.3828125
    },
    "event_triggered_runs": {
-    "beta": 0.794,
+    "beta": 0.793,
     "f_cpu_hz": 380000000.0,
-    "minimum_hz": 457218170.1660156,
+    "minimum_hz": 456863403.3203125,
+    "per_task": {
+     "BFE1": 0.904,
+     "BFE2": 0.904,
+     "BFE3": 0.911,
+     "BFE4": 0.887,
+     "BFE5": 0.904,
+     "BFE6": 0.904,
+     "BFE7": 0.911,
+     "BFE8": 0.911,
+     "FBU3": 0.914,
+     "FBU7": 0.908,
+     "FBU8": 0.914,
+     "FDF1": 0.816,
+     "FDF2": 0.793,
+     "STPH": 0.902,
+     "VOD1": 0.914,
+     "VOD2": 0.914
+    },
     "run": "VCV",
     "sources": 16,
     "task": "FDF2"
@@ -456,10 +474,33 @@
    "event_triggered_runs": {
     "beta": 0.762,
     "f_cpu_hz": 443346000.0,
-    "minimum_hz": 573894500.7324219,
+    "minimum_hz": 480125427.24609375,
+    "per_task": {
+     "CARV/BFE1": 0.904,
+     "CARV/BFE2": 0.904,
+     "CARV/BFE3": 0.911,
+     "CARV/BFE4": 0.887,
+     "CARV/BFE5": 0.904,
+     "CARV/BFE6": 0.904,
+     "CARV/BFE7": 0.911,
+     "CARV/BFE8": 0.911,
+     "CARV/FBU3": 0.914,
+     "CARV/FBU7": 0.908,
+     "CARV/FBU8": 0.914,
+     "CARV/FDF1": 0.788,
+     "CARV/FDF2": 0.762,
+     "CARV/STPH": 0.886,
+     "CARV/VOD1": 0.914,
+     "CARV/VOD2": 0.914,
+     "E/A": 0.782,
+     "E/C": 0.879,
+     "E/F": 0.816,
+     "E/H": 0.821,
+     "E/I": 0.856
+    },
     "run": "VMA",
     "sources": 21,
-    "task": "CARV.FDF2"
+    "task": "CARV/FDF2"
    },
    "flow": {
     "f_cpu_hz": 443346000.0,
@@ -572,9 +613,16 @@
     "minimum_hz": 434902191.1621094
    },
    "event_triggered_runs": {
-    "beta": 0.587,
+    "beta": 0.586,
     "f_cpu_hz": 434900000.0,
-    "minimum_hz": 471763610.83984375,
+    "minimum_hz": 435920715.33203125,
+    "per_task": {
+     "A": 0.586,
+     "C": 0.814,
+     "F": 0.781,
+     "H": 0.643,
+     "I": 0.71
+    },
     "run": "VH",
     "sources": 5,
     "task": "A"
@@ -677,7 +725,14 @@
    "event_triggered_runs": {
     "beta": 0.22,
     "f_cpu_hz": 220388000.0,
-    "minimum_hz": 280822753.90625,
+    "minimum_hz": 269866943.359375,
+    "per_task": {
+     "A": 0.652,
+     "C": 0.22,
+     "F": 0.397,
+     "H": 0.446,
+     "I": 0.395
+    },
     "run": "W5",
     "sources": 5,
     "task": "C"

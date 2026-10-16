@@ -1,6 +1,6 @@
 """Model of the runs of round r11g (rttools/paper/ttflow.py, experiments/tt):
 the defaults of rttools (network-interface model tt, cost rule max), the
-clock rule of the paper, the tables of the conferencia of run_r11g.sh and
+clock rule of the paper, the tables of the check of run_r11g.sh and
 the network-interface model of the analysis of a stored run."""
 import os
 
@@ -67,7 +67,7 @@ def test_model_follows_the_network_interface_model_in_use(tmp_path, ni_off):
     assert exp23.check(str(tmp_path / "metrics.json"), os.path.join(EXP, "reference.json")) != []
 
 
-def test_tables_of_the_conferencia(run, tmp_path):
+def test_tables_of_the_check(run, tmp_path):
     m, _ = run
     ttflow.write_tables(CONFIG, str(tmp_path))
     runs = {run_id: r for a in m["apps"].values() for run_id, r in a["runs"].items()}

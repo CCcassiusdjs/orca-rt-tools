@@ -151,6 +151,7 @@
      "packets_between_pes": 5,
      "premise_release": {
       "lead_cycles": 1861,
+      "entry_cycles": 60,
       "section_max_cycles": 1151,
       "handler_cycles": {
        "inject": 626,
@@ -271,6 +272,7 @@
      "packets_between_pes": 5,
      "premise_release": {
       "lead_cycles": 1861,
+      "entry_cycles": 60,
       "section_max_cycles": 1151,
       "handler_cycles": {
        "inject": 626,
@@ -747,6 +749,7 @@
      "packets_between_pes": 16,
      "premise_release": {
       "lead_cycles": 1861,
+      "entry_cycles": 60,
       "section_max_cycles": 1098,
       "handler_cycles": {
        "inject": 626,
@@ -1133,6 +1136,7 @@
      "packets_between_pes": 5,
      "premise_release": {
       "lead_cycles": 1861,
+      "entry_cycles": 60,
       "section_max_cycles": 1151,
       "handler_cycles": {
        "inject": 626,
@@ -1253,6 +1257,7 @@
      "packets_between_pes": 5,
      "premise_release": {
       "lead_cycles": 1861,
+      "entry_cycles": 60,
       "section_max_cycles": 1151,
       "handler_cycles": {
        "inject": 626,
@@ -2145,6 +2150,7 @@
      "packets_between_pes": 21,
      "premise_release": {
       "lead_cycles": 1861,
+      "entry_cycles": 60,
       "section_max_cycles": 1151,
       "handler_cycles": {
        "inject": 626,
@@ -2647,6 +2653,7 @@
      "packets_between_pes": 347,
      "premise_release": {
       "lead_cycles": 1621,
+      "entry_cycles": 60,
       "section_max_cycles": 1191,
       "handler_cycles": {
        "inject": 626,

@@ -8,6 +8,7 @@ from rttools.terminal.terminal import error, info, warn
 from rttools.modules.instances import instantiator, release
 from rttools.modules.unwrapper import flowUnwrapper
 from rttools.modules.backend.ags import ags
+from rttools.modules.routing import router
 
 
 HANDLER_ROUNDS = 64
@@ -117,17 +118,22 @@ def schedule_at(app, noc, mapping, appname, frequency, cfg):
         packets, hp, nlinks = flowUnwrapper.unwrap(instance, noc, mapping)
         if hp == 0:
             return None
-        problem, result = ags.agsExport(
-            packets,
-            nlinks,
-            hp,
-            mapping,
-            noc,
-            appname,
-            cfg["pruning_factor"],
-            cfg["fail_threshold"],
-            cfg["heuristic"],
-        )
+        from rttools.modules.backend.ags import search3
+        search3.GUARD = router.release_guard(router.tick_cycles(instance))
+        try:
+            problem, result = ags.agsExport(
+                packets,
+                nlinks,
+                hp,
+                mapping,
+                noc,
+                appname,
+                cfg["pruning_factor"],
+                cfg["fail_threshold"],
+                cfg["heuristic"],
+            )
+        finally:
+            search3.GUARD = None
         sched, skipped = (None, set()) if result is None else result
         if sched is not None and not release.handlers_fit(instance, mapping) and not (
                 SCHEDULE_WINDOWS and schedule_windows_fit(instance, noc, mapping, problem, sched)):

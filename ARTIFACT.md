@@ -66,7 +66,7 @@ Each time below comes from one run of the command.
 
 | Command | Time | Machine |
 |---|---|---|
-| `make -k -C experiments` (every directory and its check) | 220 s | Container |
+| `make -k -C experiments` (every directory and its check) | 238 s | Container |
 | `make -C experiments/ch7` (\|V\| = 20 to 100) | 2.3 s | Container |
 | `make -C experiments/ch7 car` | 1.2 s (with the Spiral Mapping and 10,000 random placements) | Container |
 | `make -C experiments/ch7 graphs full` (17 graphs) | 21 min 32 s wall clock, 17 min 1 s user time (\|V\| = 900 alone 560 s) | Container |

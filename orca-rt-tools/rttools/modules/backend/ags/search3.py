@@ -50,6 +50,9 @@ from rttools.terminal.terminal import debug, error, info, warn
 
 # search counters of the last run
 hsearch = SimpleNamespace(entered=0, ignored=0, skipped=[], resets=0)
+# predicate (start, occupancy) -> True for a release that the platform excludes
+# (rttools.modules.routing.router.release_guard), or None
+GUARD = None
 
 
 '''
@@ -96,7 +99,7 @@ def allocate(placed, view, step):
   links, o, a, b = view
   for k in candidates(a, b, step):
     rng = (k, k + o)
-    if any(overleap(rng, iv) for l in links for iv in placed[l]):
+    if (GUARD is not None and GUARD(k, o)) or any(overleap(rng, iv) for l in links for iv in placed[l]):
       hsearch.ignored += 1
       continue
     return k

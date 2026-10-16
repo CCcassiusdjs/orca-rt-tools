@@ -59,9 +59,9 @@ void ucx_app_tick(void)
 
 #ifdef UCX_NOC_TT
 	/* the release generator raises its request before the tick of its
-	 * phase; a request that the release interrupt has not served yet
-	 * (interrupts disabled since before the request) is served here, so
-	 * the tick of phase p applies release p */
+	 * phase, and the link schedule keeps any handler that runs at the
+	 * request from reaching the tick (premise (ii) of the analysis); a
+	 * request pending here is served first */
 	if (IRQ_CAUSE & MASK_IRQ4)
 		irq4_handler();
 #endif

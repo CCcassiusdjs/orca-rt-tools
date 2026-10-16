@@ -327,7 +327,22 @@ def run(cfg_path, out_dir):
            "edges_on_noc": sum(1 for a, b, _, _ in app["flows"] if mres["mapping"][a] != mres["mapping"][b])}
     if fmin is not None:
         P = math.floor(spec.phase_s * Fraction(fmin))
-        sched = multirate.schedule(spec, P)
+        from rttools.paper import carfull
+        # the schedule of the search at fmin, with the handler charge of its link schedule (as for CAR)
+        with tnet.quiet():
+            extra = carfull.handler_extra(g, noc, entries, fmin, spec)
+        sched = multirate.schedule(spec, P, extra=extra)
+        out["handler_charge"] = extra is not None
+        if cfg.get("terms"):
+            from rttools.paper import ttflow
+            from rttools.ucxgen import tt
+            with tnet.quiet():
+                at = search.schedule_at(g, noc, entries, name, fmin, search_config(fmin))
+            rows = [{"s": tt.packet_start(at, j), "occupancy": pk["net_time"], "period": P}
+                    for j, pk in enumerate(at["problem"]["packets"]) if j not in at["skipped"]]
+            with open(os.path.join(base, cfg["terms"])) as fh:
+                img = json.load(fh)["ni_images"][cfg["terms_image"]]
+            out["premise_release"] = ttflow.premise_release(rows, cfg["lead_cycles"], img)
         ages = multirate.data_age(spec, sched, [c["tasks"] for c in app["chains"]])
         rows = []
         for c, a in zip(app["chains"], ages):

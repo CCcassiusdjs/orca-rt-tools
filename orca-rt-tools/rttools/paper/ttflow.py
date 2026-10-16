@@ -18,7 +18,7 @@ the image of each run.
 | General phase model (CAR-FULL) | P_min of the CPU test, the utilization-bound frequency (the smallest phase at which the largest utilization of a PE reaches 1, over P_s), the phase-rule frequency (the largest demand of a PE in one phase, every job confined to the phase of its release, over P_s), the chains and the largest data age at the clock and at the minimum frequency, the flows on one PE, the packets between PEs in one hyperperiod |
 
 `run` writes metrics.json and values.tex (macros \\ExpTt...). `tables` writes, for each run, the expected link schedule (packets) and
-the finish of every job (jobs) that the conferencia of run_r11g.sh checks
+the finish of every job (jobs) that the check of run_r11g.sh checks
 (awk), in the format of the docstring of write_tables.
 """
 from __future__ import annotations
@@ -292,7 +292,10 @@ def premise_release(rows, lead, terms):
     instant (the size-flit handler by s_i + o_i - NI_RX_END_CYCLES, the
     end-of-reception handler by s_i + o_i, the injection by s_i +
     NI_INJECT_CYCLES), so the check requires, for every packet with
-    s_i <= kP - lead, that this instant precede kP.
+    s_i <= kP - lead, that this instant precede kP by more than
+    router.ISR_ENTRY_CYCLES: the routine that serves the release reads its
+    cause word once, at its entry, and _isr does not nest, so a word read
+    before the tick holds the request and not the tick.
 
     `terms`: {"kernel": {...}, "sections": {...}} of the image
     (experiments/wcet/reference_tt.json, ni_images). Returns the lead, the
@@ -306,7 +309,8 @@ def premise_release(rows, lead, terms):
     late = {"inject": lambda r: r["s"] + router.NI_INJECT_CYCLES,
             "rx_size": lambda r: r["s"] + r["occupancy"] - router.NI_RX_END_CYCLES,
             "rx_end": lambda r: r["s"] + r["occupancy"]}
-    long_ = sorted(h for h, d in dur.items() if d >= lead)
+    entry = router.ISR_ENTRY_CYCLES
+    long_ = sorted(h for h, d in dur.items() if d + entry >= lead)
     checked = violations = 0
     margin = None
     for r in rows:
@@ -315,11 +319,11 @@ def premise_release(rows, lead, terms):
         for h in long_:
             checked += 1
             m = kP - late[h](r)
-            violations += m <= 0
+            violations += m <= entry
             margin = m if margin is None else min(margin, m)
-    return {"lead_cycles": lead, "section_max_cycles": section, "handler_cycles": dur,
+    return {"lead_cycles": lead, "entry_cycles": entry, "section_max_cycles": section, "handler_cycles": dur,
             "longer_than_lead": long_, "checks": checked, "violations": violations, "margin_min_cycles": margin,
-            "holds": section < lead and violations == 0}
+            "holds": section + entry < lead and violations == 0}
 
 
 def _premise(a, rows):
@@ -430,7 +434,7 @@ def mhz(v):
     return "-" if v is None else f"{v / 1e6:.3f}"
 
 
-# ------------------------------------------------------------ tables of the conferencia
+# ------------------------------------------------------------ tables of the check
 
 def write_tables(cfg_path, out_dir):
     """For each run, <out>/<run>.packets and <out>/<run>.jobs (text tables
