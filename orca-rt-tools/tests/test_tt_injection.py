@@ -318,13 +318,15 @@ def test_exp23_run_with_the_injection_at_the_schedule(tmp_path):
     assert phasecheck.main([str(tmp_path / "out" / "metrics.json")]) in (0, 1)
 
 
-def test_exp23_run_with_the_costs_of_the_image(tmp_path):
+def test_exp23_run_with_the_costs_of_the_image(tmp_path, monkeypatch):
     """RUN_INFO costs=max(CSV, static) weird_a.json: the link schedule takes
     t(v) = max(CSV, static t(v) of the image); every iteration of run UH
     ends at or before F(v) of that model after the tick of its phase and
     every packet between PEs is enqueued (send TAG line) at or before its
     instant s (the finish injection of UH sends a packet at the end of its
     job, before s)."""
+    # UH ran with a table built before the release guard of the link schedule (router.release_guard)
+    monkeypatch.setenv("RTTOOLS_RELEASE_GUARD", "off")
     m, pk = run_e(tmp_path, costs=os.path.join(COSTS, "weird_a.json"))
     t = m["tt"]
     assert m["costs"] == {"file": "weird_a.json", "rule": "max"}

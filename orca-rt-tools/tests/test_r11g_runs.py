@@ -203,7 +203,7 @@ def test_run_images_equal_the_images_of_the_analysis():
         assert content(os.path.join(EXP, run)) == content(os.path.join(EXP, "wcet", "images", "tt", img + ".elf")), run
 
 
-def test_run_cf5_jobs_after_their_finish(tmp_path):
+def test_run_cf5_jobs_after_their_finish(tmp_path, monkeypatch):
     """make -C experiments/car-full check-cf5: run CF5 (car_full of tag
     r11-rc7, 478.336 MHz) meets the checks of the injection, but jobs 3, 13,
     23, 33 and 43 of USOS (PE 0-1, phase 10 of each hyperperiod of 50
@@ -213,6 +213,8 @@ def test_run_cf5_jobs_after_their_finish(tmp_path):
     the round robin, while the model dispatches USOS at that tick."""
     import csv
     from rttools.paper import rtlmr
+    # CF5 ran with a table built before the release guard of the link schedule (experiments/car-full, check-cf5)
+    monkeypatch.setenv("RTTOOLS_RELEASE_GUARD", "off")
     d = os.path.join(EXP, "car-full")
     app = os.path.join(APPS, "car-full")
     log = os.path.join(d, "logs", "CF5.events.txt")
