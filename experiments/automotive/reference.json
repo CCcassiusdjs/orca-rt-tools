@@ -406,19 +406,16 @@
   1000
  ],
  "premise_release": {
+  "activity_in_lead_cycles": 1504,
+  "after_request": 0,
   "checks": 832,
+  "end_cycles": 929,
   "entry_cycles": 60,
-  "handler_cycles": {
-   "inject": 626,
-   "rx_end": 929,
-   "rx_size": 3882
-  },
   "holds": true,
   "lead_cycles": 1621,
-  "longer_than_lead": [
-   "rx_size"
-  ],
-  "margin_min_cycles": 759,
+  "margin_min_cycles": 7329,
+  "release_cycles": 253,
+  "required_margin_cycles": 1242,
   "section_max_cycles": 1191,
   "violations": 0
  },

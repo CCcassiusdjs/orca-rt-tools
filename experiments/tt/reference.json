@@ -152,17 +152,14 @@
      "premise_release": {
       "lead_cycles": 1861,
       "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
       "section_max_cycles": 1151,
-      "handler_cycles": {
-       "inject": 626,
-       "rx_size": 3178,
-       "rx_end": 703
-      },
-      "longer_than_lead": [
-       "rx_size"
-      ],
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
       "checks": 5,
       "violations": 0,
+      "after_request": 0,
       "margin_min_cycles": 6720,
       "holds": true
      },
@@ -273,17 +270,14 @@
      "premise_release": {
       "lead_cycles": 1861,
       "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
       "section_max_cycles": 1151,
-      "handler_cycles": {
-       "inject": 626,
-       "rx_size": 3178,
-       "rx_end": 703
-      },
-      "longer_than_lead": [
-       "rx_size"
-      ],
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
       "checks": 5,
       "violations": 0,
+      "after_request": 0,
       "margin_min_cycles": 32144,
       "holds": true
      },
@@ -750,17 +744,14 @@
      "premise_release": {
       "lead_cycles": 1861,
       "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 685,
       "section_max_cycles": 1098,
-      "handler_cycles": {
-       "inject": 626,
-       "rx_size": 2474,
-       "rx_end": 685
-      },
-      "longer_than_lead": [
-       "rx_size"
-      ],
+      "required_margin_cycles": 998,
+      "activity_in_lead_cycles": 1411,
       "checks": 16,
       "violations": 0,
+      "after_request": 0,
       "margin_min_cycles": 3296,
       "holds": true
      },
@@ -1137,17 +1128,14 @@
      "premise_release": {
       "lead_cycles": 1861,
       "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
       "section_max_cycles": 1151,
-      "handler_cycles": {
-       "inject": 626,
-       "rx_size": 3178,
-       "rx_end": 703
-      },
-      "longer_than_lead": [
-       "rx_size"
-      ],
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
       "checks": 5,
       "violations": 0,
+      "after_request": 0,
       "margin_min_cycles": 6227,
       "holds": true
      },
@@ -1258,17 +1246,14 @@
      "premise_release": {
       "lead_cycles": 1861,
       "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
       "section_max_cycles": 1151,
-      "handler_cycles": {
-       "inject": 626,
-       "rx_size": 3178,
-       "rx_end": 703
-      },
-      "longer_than_lead": [
-       "rx_size"
-      ],
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
       "checks": 5,
       "violations": 0,
+      "after_request": 0,
       "margin_min_cycles": 138899,
       "holds": true
      },
@@ -2151,17 +2136,14 @@
      "premise_release": {
       "lead_cycles": 1861,
       "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
       "section_max_cycles": 1151,
-      "handler_cycles": {
-       "inject": 626,
-       "rx_size": 3178,
-       "rx_end": 703
-      },
-      "longer_than_lead": [
-       "rx_size"
-      ],
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
       "checks": 21,
       "violations": 0,
+      "after_request": 0,
       "margin_min_cycles": 11526,
       "holds": true
      },
@@ -2654,17 +2636,14 @@
      "premise_release": {
       "lead_cycles": 1621,
       "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 929,
       "section_max_cycles": 1191,
-      "handler_cycles": {
-       "inject": 626,
-       "rx_size": 3882,
-       "rx_end": 929
-      },
-      "longer_than_lead": [
-       "rx_size"
-      ],
+      "required_margin_cycles": 1242,
+      "activity_in_lead_cycles": 1504,
       "checks": 347,
       "violations": 0,
+      "after_request": 0,
       "margin_min_cycles": 2940,
       "holds": true
      },

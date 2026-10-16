@@ -275,55 +275,54 @@ def run_multirate(name, a):
 
 def premise_release(rows, lead, terms):
     """Premise (ii) of the paper on a link schedule: the release handler of
-    each phase runs on every PE before the tick of that phase.
+    each phase runs on every PE, to its end, before the tick of that phase.
 
-    The release request of the tick kP comes `lead` cycles before it (the
-    generator raises it at a multiple of the phase from reset; the tick
-    timers start `lead` cycles after reset). The CPU enters the interrupt
-    routine for the request as soon as the activity with interrupts disabled
-    in progress at kP - lead ends; the routine reads the pending causes then,
-    before the tick, when that activity ends before kP. The activity is a
-    kernel section (at most max(sections) cycles) or one interrupt routine
-    with the handler of one packet (the network interface of a PE serves one
-    packet at a time in the link schedule): send_isr at the source, and
-    receive_isr_size and receive_isr_end at the target, each plus
-    IRQ_DECISION. A handler shorter than `lead` ends before kP. A longer
-    handler of packet i starts at or after s_i and ends by its latest
-    instant (the size-flit handler by s_i + o_i - NI_RX_END_CYCLES, the
-    end-of-reception handler by s_i + o_i, the injection by s_i +
-    NI_INJECT_CYCLES), so the check requires, for every packet with
-    s_i <= kP - lead, that this instant precede kP by more than
-    router.ISR_ENTRY_CYCLES: the routine that serves the release reads its
-    cause word once, at its entry, and _isr does not nest, so a word read
-    before the tick holds the request and not the tick.
+    The release request of the tick kP comes `lead` cycles before it. The
+    CPU enters _isr (no nesting) when the activity with interrupts disabled
+    in progress at the request ends, reads the cause word once, at most
+    router.ISR_ENTRY_CYCLES later, and serves its causes in bit order, the
+    release (bit 4) after the packet causes (bits 0 to 3). The network
+    interface of a PE serves one packet at a time, so the activity is a
+    kernel section (at most max(sections) cycles) or the handlers of one
+    packet. A packet of the PE whose reservation starts by the request ends
+    its size-flit handler and its last flit by s_i + o_i - NI_RX_END_CYCLES
+    (the latest instant X_i); after X_i, the routine that reads the request
+    can serve the end-of-reception handler of the packet first. The release
+    handler therefore ends before kP when, for every such packet,
+    X_i + entry + end-of-reception handler + release handler < kP (margin_min
+    = kP - X_i above that sum), when no reservation starts within a kernel
+    section plus the entry after a request (its size flit could be pending
+    with the request), and when a kernel section, the injection handler or
+    the end-of-reception handler in progress at the request, plus the entry
+    and the release handler, fits in the lead. rttools.modules.routing.router.
+    release_guard rejects the releases of AGS that break the first two
+    conditions.
 
     `terms`: {"kernel": {...}, "sections": {...}} of the image
-    (experiments/wcet/reference_tt.json, ni_images). Returns the lead, the
-    handlers longer than the lead, the packets checked, the violations and
-    the smallest margin (kP minus the latest end, cycles)."""
+    (experiments/wcet/reference_tt.json, ni_images)."""
     from rttools.wcet import ucx
     k = terms["kernel"]
-    dur = {"inject": k["send_isr"] + ucx.IRQ_DECISION, "rx_size": k["receive_isr_size"] + ucx.IRQ_DECISION,
-           "rx_end": k["receive_isr_end"] + ucx.IRQ_DECISION}
-    section = max(v for v in terms["sections"].values())
-    late = {"inject": lambda r: r["s"] + router.NI_INJECT_CYCLES,
-            "rx_size": lambda r: r["s"] + r["occupancy"] - router.NI_RX_END_CYCLES,
-            "rx_end": lambda r: r["s"] + r["occupancy"]}
     entry = router.ISR_ENTRY_CYCLES
-    long_ = sorted(h for h, d in dur.items() if d + entry >= lead)
-    checked = violations = 0
+    rel = k["release"] + ucx.IRQ_DECISION
+    end = k["receive_isr_end"] + ucx.IRQ_DECISION
+    section = max(v for v in terms["sections"].values())
+    need = entry + end + rel
+    in_lead = max(section, k["send_isr"] + ucx.IRQ_DECISION, end) + entry + rel
+    checked = violations = after = 0
     margin = None
     for r in rows:
         P = r["period"]
         kP = -(-(r["s"] + lead) // P) * P       # first tick whose request comes at or after s
-        for h in long_:
-            checked += 1
-            m = kP - late[h](r)
-            violations += m <= entry
-            margin = m if margin is None else min(margin, m)
-    return {"lead_cycles": lead, "entry_cycles": entry, "section_max_cycles": section, "handler_cycles": dur,
-            "longer_than_lead": long_, "checks": checked, "violations": violations, "margin_min_cycles": margin,
-            "holds": section + entry < lead and violations == 0}
+        checked += 1
+        m = kP - (r["s"] + r["occupancy"] - router.NI_RX_END_CYCLES)
+        violations += m <= need
+        margin = m if margin is None else min(margin, m)
+        if r["s"] - (kP - P - lead) <= section + entry:
+            after += 1
+    return {"lead_cycles": lead, "entry_cycles": entry, "release_cycles": rel, "end_cycles": end,
+            "section_max_cycles": section, "required_margin_cycles": need, "activity_in_lead_cycles": in_lead,
+            "checks": checked, "violations": violations, "after_request": after, "margin_min_cycles": margin,
+            "holds": in_lead < lead and violations == 0 and after == 0}
 
 
 def _premise(a, rows):

@@ -505,13 +505,15 @@ def schedule_union(apps, noc, frequency, cfg):
         return None
     from rttools.modules.backend.ags import search3
     from rttools.modules.routing import router
-    search3.GUARD = router.release_guard(min(router.tick_cycles(instantiator.createInstance(a["graph"], noc, frequency))
-                                             for a in apps))
+    # the guard of the tick of the application of each packet (flow "<app>/<label>")
+    guard = {a["name"]: router.release_guard(router.tick_cycles(instantiator.createInstance(a["graph"], noc, frequency)))
+             for a in apps}
+    search3.GUARDS = [guard.get(p["flow"].split("/")[0]) for p in packets]
     try:
         problem, result = ags.agsExport(packets, nlinks, H, None, noc, "+".join(a["name"] for a in apps),
                                         cfg["pruning_factor"], cfg["fail_threshold"], cfg["heuristic"])
     finally:
-        search3.GUARD = None
+        search3.GUARDS = None
     sched, skipped = (None, set()) if result is None else result
     if sched is not None and not general(apps) and not all(
             release.handlers_fit(instantiator.createInstance(a["graph"], noc, frequency), a["entries"])

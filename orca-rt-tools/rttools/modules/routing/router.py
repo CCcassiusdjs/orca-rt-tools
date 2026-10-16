@@ -165,6 +165,9 @@ RELEASE_LEAD_CYCLES = 1621
 # IRQ_CAUSE: 56 cycles under the timing model of rttools/wcet, rounded up): the
 # routine that serves the release must read the cause word before the tick
 ISR_ENTRY_CYCLES = 60
+RELEASE_SECTION_CYCLES = 1191   # longest kernel section with interrupts disabled of the images
+RELEASE_HANDLER_CYCLES = 253    # release handler of the images plus IRQ_DECISION
+RELEASE_END_CYCLES = 933        # longest end-of-reception handler of the images plus IRQ_DECISION
 # RTTOOLS_RELEASE_GUARD=off: link schedules without the guard (the stored run CF5,
 # whose table the generator built before the guard)
 RELEASE_GUARD_ENV = "RTTOOLS_RELEASE_GUARD"
@@ -469,11 +472,19 @@ def release_guard(tick):
     resource, w_ni = ni_model()
     if not resource or w_ni < NI_WAIT_CYCLES or not tick or os.environ.get(RELEASE_GUARD_ENV, "") == "off":
         return None
-    lead, end = RELEASE_LEAD_CYCLES, NI_RX_END_CYCLES - ISR_ENTRY_CYCLES
+    lead = RELEASE_LEAD_CYCLES
+    # latest end of the size-flit handler and of the last flit: s + o - NI_RX_END_CYCLES; after it, the
+    # routine that reads the request can serve the end-of-reception handler of the packet first
+    end = NI_RX_END_CYCLES - (ISR_ENTRY_CYCLES + RELEASE_END_CYCLES + RELEASE_HANDLER_CYCLES)
+    after = RELEASE_SECTION_CYCLES + ISR_ENTRY_CYCLES
 
     def breaks(k, o):
         kp = -(-(k + lead) // tick) * tick      # first tick whose request comes at or after k
-        return k + o - end >= kp
+        if k + o - end >= kp:
+            return True
+        # a reservation that starts within a kernel section after a request: its size flit can be pending
+        # with the request
+        return k - (kp - tick - lead) <= after
     return breaks
 
 
