@@ -12,6 +12,8 @@
 #                 phase-rule frequency, chains, flows on one PE, packets per hyperperiod and the largest data
 #                 age; into $(BUILD)/metrics.json and $(BUILD)/values.tex (macros \ExpTt...)
 #   make check    $(BUILD)/metrics.json against reference.json (default target: run check)
+#   make timing   wall time of the flow (median of 5 runs): steps 1 to 6 for E and CAR-V, steps 3 to 6 for
+#                 CAR-FULL, with the CPU model ($(BUILD)/timing/timing.json; timing.json holds the run of the paper)
 #   make tables   the link schedule and the finish of every job of each run, the tables of the
 #                 check of run_r11g.sh (rttools.paper.ttflow tables), into $(BUILD)/tables
 #
@@ -25,7 +27,7 @@ RTTOOLS := $(abspath ../../orca-rt-tools)
 BUILD   ?= build
 RUN      = PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.ttflow
 
-.PHONY: all run check tables clean
+.PHONY: all run check tables timing clean
 
 all: run check
 
@@ -34,6 +36,9 @@ run:
 
 check:
 	PYTHONPATH=$(RTTOOLS) $(PYTHON) -m rttools.paper.exp23 check $(BUILD)/metrics.json reference.json
+
+timing:
+	$(RUN) timing --config config.json --out $(BUILD)/timing
 
 tables:
 	$(RUN) tables --config config.json --out $(BUILD)/tables

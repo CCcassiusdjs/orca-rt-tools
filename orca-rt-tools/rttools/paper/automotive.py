@@ -286,9 +286,11 @@ def variation(spec, sched, app, cfg):
     return {"trials_per_pe": cfg["trials"], "jobs": jobs, "late": late}
 
 
-def run(cfg_path, out_dir):
+def run(cfg_path, out_dir, seed=None):
     base = os.path.dirname(os.path.abspath(cfg_path))
     cfg = json.load(open(cfg_path))
+    if seed is not None:
+        cfg["seed"] = seed
     app = generate(cfg)
     mres = mapping(app, cfg)
     app = with_packet_terms(app, cfg, mres["mapping"])
@@ -375,12 +377,114 @@ def run(cfg_path, out_dir):
     return out
 
 
+def setter(cfg_path, seed):
+    """Minimum frequency of the workload of `seed` with the flow and with one term removed: no handler
+    charge (no graph attribute handlers), w_NI = 0 (the network interface stays a resource of the link
+    schedule), no chain constraints. The term whose removal lowers the minimum frequency sets the clock;
+    when no removal lowers it below f_CPU of the flow, the CPU test sets it."""
+    from rttools.modules.routing import router
+    base = os.path.dirname(os.path.abspath(cfg_path))
+    cfg = json.load(open(cfg_path))
+    cfg["seed"] = seed
+    app = generate(cfg)
+    mres = mapping(app, cfg)
+    app = with_packet_terms(app, cfg, mres["mapping"])
+    text = csv_text(app, cfg, mres["mapping"], order="period")
+    import tempfile
+    out = {}
+    with tempfile.TemporaryDirectory() as tmp:
+        csv_path = os.path.join(tmp, "automotive.csv")
+        with open(csv_path, "w") as fh:
+            fh.write(text)
+        for key in ("flow", "no_handlers", "no_wni", "no_chains"):
+            with tnet.quiet():
+                g, name = appparser.loadFromFile(csv_path)
+                noc = nocparser.loadFromFile(os.path.join(base, cfg["arch"]))
+            entries = mapfile.from_dict(mres["mapping"])
+            if key != "no_chains":
+                g.graph["chain_constraints"] = [(c["tasks"], c["constraint_ms"] / 1000) for c in app["chains"]]
+            if key != "no_handlers":
+                set_handlers(g, app, cfg)
+            prev = router.set_ni((True, 0)) if key == "no_wni" else None
+            try:
+                with tnet.quiet():
+                    f = search.minimum_frequency(g, noc, entries, name, search_config(cfg["f0_hz"]))
+            finally:
+                if key == "no_wni":
+                    router.set_ni(prev)
+            out[key] = {"f_cpu_hz": f["f_cpu_hz"], "minimum_hz": f["frequency_hz"]}
+    return out
+
+
+def _setter_row(job):
+    cfg_path, s = job
+    return {"seed": s, **setter(cfg_path, s)}
+
+
+SEED_FIELDS = ("chains", "tasks", "edges_on_noc", "packets_per_hyperperiod", "f_cpu_hz", "utilization_bound_hz",
+               "minimum_hz", "chains_within_constraint", "chains_with_several_tasks",
+               "several_tasks_within_constraint", "data_age_over_constraint_max")
+
+
+def _seed_row(job):
+    cfg_path, out_dir, s = job
+    m = run(cfg_path, os.path.join(out_dir, "seed-%d" % s), seed=s)
+    row = {"seed": s}
+    row.update({k: m.get(k) for k in SEED_FIELDS})
+    row["premise_release_holds"] = (m.get("premise_release") or {}).get("holds")
+    row["premise_margin_min_cycles"] = (m.get("premise_release") or {}).get("margin_min_cycles")
+    row["late_jobs"] = (m.get("variation") or {}).get("late")
+    row["jobs"] = (m.get("variation") or {}).get("jobs")
+    row["minimum_over_f_cpu"] = (m["minimum_hz"] / m["f_cpu_hz"]) if m.get("minimum_hz") and m.get("f_cpu_hz") else None
+    return row
+
+
+def seeds(cfg_path, out_dir, first, last, jobs=1):
+    """Runs the workload for seeds first..last (the generator draws the structure, periods, execution
+    times and label sizes from each seed) and writes seeds.json with one row per seed and the ranges."""
+    os.makedirs(out_dir, exist_ok=True)
+    work = [(cfg_path, out_dir, s) for s in range(first, last + 1)]
+    if jobs > 1:
+        import multiprocessing
+        with multiprocessing.Pool(jobs) as pool:
+            rows = pool.map(_seed_row, work)
+    else:
+        rows = [_seed_row(w) for w in work]
+    rng = lambda k: {"min": min(r[k] for r in rows), "max": max(r[k] for r in rows)}
+    out = {"_doc": "rttools.paper.automotive seeds --config %s --first %d --last %d"
+                   % (os.path.basename(cfg_path), first, last),
+           "seeds": len(rows), "rows": rows,
+           "summary": {"f_cpu_hz": rng("f_cpu_hz"), "minimum_hz": rng("minimum_hz"),
+                       "minimum_over_f_cpu": rng("minimum_over_f_cpu"),
+                       "data_age_over_constraint_max": rng("data_age_over_constraint_max"),
+                       "premise_margin_min_cycles": rng("premise_margin_min_cycles"),
+                       "edges_on_noc": rng("edges_on_noc"), "tasks": rng("tasks"),
+                       "all_chains_within": all(r["chains_within_constraint"] == r["chains"] for r in rows),
+                       "all_premise_release": all(r["premise_release_holds"] for r in rows),
+                       "late_jobs": sum(r["late_jobs"] for r in rows), "jobs": sum(r["jobs"] for r in rows)}}
+    with open(os.path.join(out_dir, "seeds.json"), "w") as fh:
+        json.dump(out, fh, indent=1, sort_keys=True, default=str)
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="rttools.paper.automotive")
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
     r.add_argument("--config", required=True)
     r.add_argument("--out", required=True)
+    sd = sub.add_parser("seeds")
+    sd.add_argument("--config", required=True)
+    sd.add_argument("--out", required=True)
+    sd.add_argument("--first", type=int, default=1)
+    sd.add_argument("--last", type=int, default=10)
+    sd.add_argument("--jobs", type=int, default=1)
+    st = sub.add_parser("setter")
+    st.add_argument("--config", required=True)
+    st.add_argument("--out", required=True)
+    st.add_argument("--first", type=int, default=1)
+    st.add_argument("--last", type=int, default=10)
+    st.add_argument("--jobs", type=int, default=1)
     c = sub.add_parser("check")
     c.add_argument("metrics")
     c.add_argument("reference")
@@ -388,6 +492,25 @@ def main(argv=None):
     if args.cmd == "run":
         m = run(args.config, args.out)
         print({k: v for k, v in m.items() if k != "chain_rows"})
+        return 0
+    if args.cmd == "setter":
+        work = [(args.config, s) for s in range(args.first, args.last + 1)]
+        if args.jobs > 1:
+            import multiprocessing
+            with multiprocessing.Pool(args.jobs) as pool:
+                rows = pool.map(_setter_row, work)
+        else:
+            rows = [_setter_row(w) for w in work]
+        os.makedirs(args.out, exist_ok=True)
+        with open(os.path.join(args.out, "setter.json"), "w") as fh:
+            json.dump({"_doc": "rttools.paper.automotive setter --config %s --first %d --last %d"
+                       % (os.path.basename(args.config), args.first, args.last), "rows": rows},
+                      fh, indent=1, sort_keys=True, default=str)
+        print(json.dumps(rows, default=str))
+        return 0
+    if args.cmd == "seeds":
+        m = seeds(args.config, args.out, args.first, args.last, args.jobs)
+        print(json.dumps(m["summary"], indent=1, default=str))
         return 0
     return 0 if cputime.check(args.metrics, args.reference) else 1
 
