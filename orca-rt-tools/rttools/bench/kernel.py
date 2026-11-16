@@ -12,10 +12,15 @@ class SystemEvent:
         self._type = type
 
     def __lt__(self: "SystemEvent", target: "SystemEvent") -> bool:
-        return self._time > target._time
+        return self._time < target._time
 
     def __eq__(self: "SystemEvent", target: "SystemEvent") -> bool:
-        return self._time == target._time and self._type == target.type
+        if not isinstance(target, SystemEvent):
+            return NotImplemented
+        return self._time == target._time and self._type == target._type
+
+    # __eq__ without __hash__ would make the class unhashable
+    __hash__ = object.__hash__
 
     def __str__(self: "SystemEvent") -> str:
         return str(self._time) + str(self._type)

@@ -1,0 +1,9 @@
+{
+ "_doc": "Constants of the flow table (tab:flows). router: flits p = ceil((header_bytes + payload rounded up to a multiple of 4) / flit_bytes), with the 12-byte noc_packet_t header (pkt-sim/software/ucx-os/include/lib/noc.h), the rounding of ucx_noc_create_packet (lib/noc.c) and 32-bit flits of the DDMA (device/ddma.c); zero-load latency L0 = cycles_per_hop (m + 1) + p + extra_cycles of the Hermes router. Release and deadline of each flow come from the phase model (orca-rt-tools/rttools/modules/instances/release.py).",
+ "router": {
+  "header_bytes": 12,
+  "flit_bytes": 4,
+  "cycles_per_hop": 6,
+  "extra_cycles": 1
+ }
+}

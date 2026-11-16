@@ -1,9 +1,11 @@
 import random
 
-r = lambda: random.randint(150, 220)
+# fixed seed: the same input produces the same SVG
+SVG_COLOR_SEED = 0
 
 
-def getColor():
+def getColor(rng=random):
+    r = lambda: rng.randint(150, 220)
     return "#{:02x}{:02x}{:02x}".format(r(), r(), r())
 
 
@@ -44,8 +46,9 @@ def saveSvg(filename, res, problem, skipped=[], scale_x=1):
 
     # get colors for each packet
     colors = []
+    rng = random.Random(SVG_COLOR_SEED)
     for i in range(0, len(problem["packets"])):
-        colors.append(getColor())
+        colors.append(getColor(rng))
 
     # left scale here
     for l in range(0, len(problem["links"])):

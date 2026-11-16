@@ -1,6 +1,6 @@
 from sys import argv
-from random import randint
-from numpy import random
+import random as pyrandom
+import numpy
 from math import floor
 
 from rttools.gsl.graph import Graph, GraphNode, GraphEdge
@@ -13,8 +13,12 @@ def linear_scale(source: float, r_min: float, r_max: float, t_min: float, t_max:
 # pedges : mean number of edges per node
 # dwcet  : normal distribution for node values (task wcet)
 # dnet   : normal distribution for edge values (comm load)
-def generate_random_graph(num_nodes: int, node_lim: list[float], pedges: int, edge_lim: list[float]) -> Graph:
-    
+def generate_random_graph(num_nodes: int, node_lim: list[float], pedges: int, edge_lim: list[float], seed: int = None) -> Graph:
+
+    # local generators; seed None keeps the unseeded random draw
+    random = numpy.random.RandomState(seed)
+    randint = pyrandom.Random(seed).randint
+
     # create new graph
     graph : Graph = Graph()
 
@@ -74,16 +78,17 @@ def generate_random_graph(num_nodes: int, node_lim: list[float], pedges: int, ed
 
 if __name__ == "__main__":
 
-    usage_notice = "Usage: rgg <a> <b> <c> <x> <y> <z> <ofile>\n"
-    usage_notice = usage_notice + "`x`: number of vertices\n"
-    usage_notice = usage_notice + "`y`: vertices minimum value\n"
-    usage_notice = usage_notice + "`z`: vertices maximum value\n"
-    usage_notice = usage_notice + "`a`: graph density\n"
-    usage_notice = usage_notice + "`b`: edges minimum value\n"
-    usage_notice = usage_notice + "`x`: edges maximum value\n"
+    usage_notice = "Usage: rgg <a> <b> <c> <x> <y> <z> <ofile> [<seed>]\n"
+    usage_notice = usage_notice + "`a`: number of vertices\n"
+    usage_notice = usage_notice + "`b`: vertices minimum value\n"
+    usage_notice = usage_notice + "`c`: vertices maximum value\n"
+    usage_notice = usage_notice + "`x`: edges per vertex\n"
+    usage_notice = usage_notice + "`y`: edges minimum value\n"
+    usage_notice = usage_notice + "`z`: edges maximum value\n"
     usage_notice = usage_notice + "`ofile`: output file name\n"
+    usage_notice = usage_notice + "`seed`: random seed (optional)\n"
 
-    if(len(argv) != 8):
+    if(len(argv) not in (8, 9)):
         raise Exception(usage_notice)
 
     num_nodes: int = int(argv[1])
@@ -95,8 +100,9 @@ if __name__ == "__main__":
     max_comm: int = int(argv[6])
 
     graph_file = str(argv[7])
+    seed = int(argv[8]) if len(argv) == 9 else None
 
-    graph = generate_random_graph(num_nodes, [min_wcet, max_wcet], density_edges, [min_comm, max_comm])
+    graph = generate_random_graph(num_nodes, [min_wcet, max_wcet], density_edges, [min_comm, max_comm], seed)
     orca_export(graph_file, graph)
 
     

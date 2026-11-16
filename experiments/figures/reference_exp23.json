@@ -1,0 +1,347 @@
+{
+ "_doc": "Reference of make exp23 (python -m rttools.paper.figures exp23) on experiments/exp23/logs/F.events.txt (run F, join rule per_producer).",
+ "_dispatch_order": "Dispatch order of the kernel rule on the creation rows of apps/synthetic-app-e/synthetic-app-e.csv (E, H, I on EHI and J, G on GJ, before E, I, H and G, J): flows F2 deadline 261000 -> 368570, F4 release 128070 -> 173370 and deadline 370880 -> 261000, F5 release 173370 -> 98000 and deadline 370880 -> 261000. Measured send, arrival and latency do not change.",
+ "gantt": {
+  "window_raw": [
+   4000000,
+   6000000
+  ],
+  "busy_cycles_per_iteration": {
+   "ABDF": 144098,
+   "C": 80968.5,
+   "EHI": 119339,
+   "GJ": 176457.125
+  },
+  "releases_raw": [
+   4000775,
+   4500777,
+   5000779,
+   5500775
+  ],
+  "deadline_raw": 6000775.0,
+  "responses": [
+   {
+    "iteration": 3,
+    "start": 4003633,
+    "end": 5864165,
+    "cycles": 930266,
+    "ms": 1.860532
+   },
+   {
+    "iteration": 4,
+    "start": 4503665,
+    "end": 5864165,
+    "cycles": 680250,
+    "ms": 1.3605
+   }
+  ],
+  "busy_equals_tab83": true
+ },
+ "iterations": {
+  "points": [
+   {
+    "iteration": 1,
+    "release_ms": 3.0007770000000002,
+    "response_ms": 1.86117,
+    "response_cycles": 930585
+   },
+   {
+    "iteration": 2,
+    "release_ms": 3.500779,
+    "response_ms": 1.361138,
+    "response_cycles": 680569
+   },
+   {
+    "iteration": 3,
+    "release_ms": 4.000775,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
+   },
+   {
+    "iteration": 4,
+    "release_ms": 4.500777,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
+   },
+   {
+    "iteration": 5,
+    "release_ms": 5.0007790000000005,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
+   },
+   {
+    "iteration": 6,
+    "release_ms": 5.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
+   },
+   {
+    "iteration": 7,
+    "release_ms": 6.000777,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
+   },
+   {
+    "iteration": 8,
+    "release_ms": 6.5007790000000005,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
+   },
+   {
+    "iteration": 9,
+    "release_ms": 7.000775000000001,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
+   },
+   {
+    "iteration": 10,
+    "release_ms": 7.500777,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
+   },
+   {
+    "iteration": 11,
+    "release_ms": 8.000779000000001,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
+   },
+   {
+    "iteration": 12,
+    "release_ms": 8.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
+   },
+   {
+    "iteration": 13,
+    "release_ms": 9.000777,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
+   },
+   {
+    "iteration": 14,
+    "release_ms": 9.500779000000001,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
+   },
+   {
+    "iteration": 15,
+    "release_ms": 10.000774999999999,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
+   },
+   {
+    "iteration": 16,
+    "release_ms": 10.500777000000001,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
+   },
+   {
+    "iteration": 17,
+    "release_ms": 11.000779,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
+   },
+   {
+    "iteration": 18,
+    "release_ms": 11.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
+   },
+   {
+    "iteration": 19,
+    "release_ms": 12.000777000000001,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
+   },
+   {
+    "iteration": 20,
+    "release_ms": 12.500779,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
+   },
+   {
+    "iteration": 21,
+    "release_ms": 13.000775,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
+   },
+   {
+    "iteration": 22,
+    "release_ms": 13.500777000000001,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
+   },
+   {
+    "iteration": 23,
+    "release_ms": 14.000779000000001,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
+   },
+   {
+    "iteration": 24,
+    "release_ms": 14.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
+   },
+   {
+    "iteration": 25,
+    "release_ms": 15.000777000000001,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
+   },
+   {
+    "iteration": 26,
+    "release_ms": 15.500779000000001,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
+   },
+   {
+    "iteration": 27,
+    "release_ms": 16.000775,
+    "response_ms": 1.860532,
+    "response_cycles": 930266
+   },
+   {
+    "iteration": 28,
+    "release_ms": 16.500777000000003,
+    "response_ms": 1.3605,
+    "response_cycles": 680250
+   },
+   {
+    "iteration": 29,
+    "release_ms": 17.000779,
+    "response_ms": 1.860536,
+    "response_cycles": 930268
+   },
+   {
+    "iteration": 30,
+    "release_ms": 17.500775,
+    "response_ms": 1.360504,
+    "response_cycles": 680252
+   },
+   {
+    "iteration": 31,
+    "release_ms": 18.000777000000003,
+    "response_ms": 1.860534,
+    "response_cycles": 930267
+   },
+   {
+    "iteration": 32,
+    "release_ms": 18.500779,
+    "response_ms": 1.360502,
+    "response_cycles": 680251
+   }
+  ],
+  "max_ms": 1.86117,
+  "max_cycles": 930585,
+  "max_deadline_percent": 93.0585
+ },
+ "flows": [
+  {
+   "flow": "F1",
+   "source": "A",
+   "target": "C",
+   "payload": 1230,
+   "hops": 1,
+   "flits": 311,
+   "L0": 324,
+   "latency_min": 1891,
+   "latency_max": 1984,
+   "packets": 34,
+   "sends": 34,
+   "receives": 34,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1567,
+   "release": 28530,
+   "deadline": 261000,
+   "send_min": 14727,
+   "send_max": 15255,
+   "arrival_max": 17235
+  },
+  {
+   "flow": "F2",
+   "source": "F",
+   "target": "G",
+   "payload": 6780,
+   "hops": 2,
+   "flits": 1698,
+   "L0": 1717,
+   "latency_min": 3295,
+   "latency_max": 3437,
+   "packets": 34,
+   "sends": 34,
+   "receives": 34,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1578,
+   "release": 181930,
+   "deadline": 368570,
+   "send_min": 144427,
+   "send_max": 144955,
+   "arrival_max": 148367
+  },
+  {
+   "flow": "F3",
+   "source": "C",
+   "target": "E",
+   "payload": 1200,
+   "hops": 2,
+   "flits": 303,
+   "L0": 322,
+   "latency_min": 1909,
+   "latency_max": 2150,
+   "packets": 34,
+   "sends": 34,
+   "receives": 34,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1587,
+   "release": 96330,
+   "deadline": 261000,
+   "send_min": 81874,
+   "send_max": 162794,
+   "arrival_max": 164703
+  },
+  {
+   "flow": "F4",
+   "source": "I",
+   "target": "J",
+   "payload": 5670,
+   "hops": 1,
+   "flits": 1421,
+   "L0": 1434,
+   "latency_min": 2991,
+   "latency_max": 2993,
+   "packets": 32,
+   "sends": 32,
+   "receives": 32,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1557,
+   "release": 173370,
+   "deadline": 261000,
+   "send_min": 180851,
+   "send_max": 239520,
+   "arrival_max": 242513
+  },
+  {
+   "flow": "F5",
+   "source": "H",
+   "target": "J",
+   "payload": 8900,
+   "hops": 1,
+   "flits": 2228,
+   "L0": 2241,
+   "latency_min": 3799,
+   "latency_max": 3991,
+   "packets": 32,
+   "sends": 32,
+   "receives": 32,
+   "latency_matches_tab82": true,
+   "latency_min_minus_L0": 1558,
+   "release": 98000,
+   "deadline": 261000,
+   "send_min": 97385,
+   "send_max": 122755,
+   "arrival_max": 126700
+  }
+ ],
+ "join_rule": "per_producer"
+}

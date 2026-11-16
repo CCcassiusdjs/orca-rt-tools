@@ -1,0 +1,7 @@
+{
+ "_doc": "Params of the composition of CAR-V and application E (pkt-sim/software/ucx-os/app/carv_e.c, rttools.ucxgen compose) for rttools.wcet, with ucx-os.json and ucxgen.json. tcb = 5: PE 2-3 holds A, B, D, F of E and the idle task (the largest PE). heap_blocks: blocks of the heap of the largest PE: 1 end block, 3 per task and for the idle task (tcb, rt, stack; kernel/ucx.c), 2 per comm (queue and slots; lib/queue.c), 1 per output packet (create_pkt) and 2 packets in flight per input edge between PEs (rttools.ucxgen memory, --in-flight): 29 on PE 4-2, bound 32.",
+ "params": {
+  "tcb": 5,
+  "heap_blocks": 32
+ }
+}

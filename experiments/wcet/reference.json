@@ -1,0 +1,1696 @@
+{
+ "_doc": "Reference of make -C experiments/wcet check: metrics.json of rttools.paper.wcet analyze on the stored inputs (experiments/exp23/logs/H.image.lst and H.events.txt, experiments/car-v-rtl/logs/CV2.events.txt, images/car_v.elf and images/wcet_e.elf of images/BUILD.txt, pkt-sim/tests/rtl/wcet_bodies.elf and logs/bodies.trace.txt), rttools.wcet of branch feat/wcet-static.",
+ "apps": {
+  "E": {
+   "image": {
+    "file": "H.image.lst",
+    "kind": "listing",
+    "sha256": "5769a564ab5751188c08dcf00f08421d0cb82cc470aa80c8f071e7fe101d6a0d"
+   },
+   "kernel": {
+    "yield_save": 487,
+    "yield_resume": 8,
+    "dispatch": 495,
+    "tick_dispatch_save": 513,
+    "tick_dispatch_resume": 8,
+    "tick": 1978,
+    "send_isr": 235,
+    "receive_isr_size": 3169,
+    "receive_isr_end": 1011,
+    "receive_isr": 4180,
+    "release": 1038
+   },
+   "params": {
+    "tcb": 5,
+    "heap_blocks": 32,
+    "ddma_wait": 1,
+    "name_len": 5
+   },
+   "t": {
+    "A": 19210,
+    "B": 54554,
+    "C": 87853,
+    "D": 20953,
+    "E": 45083,
+    "F": 76756,
+    "G": 99053,
+    "H": 32354,
+    "I": 65656,
+    "J": 105924
+   },
+   "terms": {
+    "A": {
+     "body": 12414,
+     "send": 2770,
+     "receive": 42,
+     "dispatch": 498,
+     "send_isr": 470,
+     "receive_isr": 0,
+     "tick": 1978,
+     "release": 1038
+    },
+    "B": {
+     "body": 46078,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "C": {
+     "body": 79377,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "D": {
+     "body": 12477,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "E": {
+     "body": 34987,
+     "send": 2770,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 470,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "F": {
+     "body": 68280,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "G": {
+     "body": 90577,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "H": {
+     "body": 23878,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "I": {
+     "body": 57180,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1978,
+     "release": 0
+    },
+    "J": {
+     "body": 90396,
+     "send": 0,
+     "receive": 512,
+     "dispatch": 498,
+     "send_isr": 0,
+     "receive_isr": 12540,
+     "tick": 1978,
+     "release": 0
+    }
+   },
+   "clock_hz": 434912000,
+   "windows": 7,
+   "tasks": {
+    "A": {
+     "t_static": 19210,
+     "run_static": 15724,
+     "terms": {
+      "body": 12414,
+      "send": 2770,
+      "receive": 42,
+      "dispatch": 498,
+      "send_isr": 470,
+      "receive_isr": 0,
+      "tick": 1978,
+      "release": 1038
+     },
+     "measured_run_max": 14333,
+     "measured_run_min": 14333,
+     "measured_per_iteration": 14333,
+     "single_runs": 28,
+     "run_margin_percent": 9.70487685760134,
+     "per_iteration_margin_percent": 9.70487685760134,
+     "run_sound": true
+    },
+    "B": {
+     "t_static": 54554,
+     "run_static": 48161,
+     "terms": {
+      "body": 46078,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 235,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": 46993,
+     "measured_run_min": 46993,
+     "measured_per_iteration": 46993,
+     "single_runs": 28,
+     "run_margin_percent": 2.485476560338774,
+     "per_iteration_margin_percent": 2.485476560338774,
+     "run_sound": true
+    },
+    "C": {
+     "t_static": 87853,
+     "run_static": 81460,
+     "terms": {
+      "body": 79377,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 235,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 80999.5,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 0.5685220279137525,
+     "run_sound": true
+    },
+    "D": {
+     "t_static": 20953,
+     "run_static": 14560,
+     "terms": {
+      "body": 12477,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 235,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": 13239,
+     "measured_run_min": 13239,
+     "measured_per_iteration": 13239,
+     "single_runs": 28,
+     "run_margin_percent": 9.97809502228265,
+     "per_iteration_margin_percent": 9.97809502228265,
+     "run_sound": true
+    },
+    "E": {
+     "t_static": 45083,
+     "run_static": 38455,
+     "terms": {
+      "body": 34987,
+      "send": 2770,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 470,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 35946.49999999999,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 6.9784262723770265,
+     "run_sound": true
+    },
+    "F": {
+     "t_static": 76756,
+     "run_static": 70363,
+     "terms": {
+      "body": 68280,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 235,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": 69661,
+     "measured_run_min": 69661,
+     "measured_per_iteration": 69661,
+     "single_runs": 28,
+     "run_margin_percent": 1.007737471468971,
+     "per_iteration_margin_percent": 1.007737471468971,
+     "run_sound": true
+    },
+    "G": {
+     "t_static": 99053,
+     "run_static": 92660,
+     "terms": {
+      "body": 90577,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 235,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": 91285,
+     "measured_run_min": 35242,
+     "measured_per_iteration": 74141.28571428565,
+     "single_runs": 14,
+     "run_margin_percent": 1.506271567070165,
+     "per_iteration_margin_percent": 24.977600681324756,
+     "run_sound": true
+    },
+    "H": {
+     "t_static": 32354,
+     "run_static": 25961,
+     "terms": {
+      "body": 23878,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 235,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 25038,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 3.6863966770508827,
+     "run_sound": true
+    },
+    "I": {
+     "t_static": 65656,
+     "run_static": 59263,
+     "terms": {
+      "body": 57180,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 498,
+      "send_isr": 235,
+      "receive_isr": 4180,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 47757.50000000004,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 24.091503952258712,
+     "run_sound": true
+    },
+    "J": {
+     "t_static": 105924,
+     "run_static": 91406,
+     "terms": {
+      "body": 90396,
+      "send": 0,
+      "receive": 512,
+      "dispatch": 498,
+      "send_isr": 0,
+      "receive_isr": 12540,
+      "tick": 1978,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 90956.74999999997,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 0.49391606450321635,
+     "run_sound": true
+    }
+   },
+   "groups": {
+    "ABDF": {
+     "tasks": [
+      "F",
+      "D",
+      "B",
+      "A"
+     ],
+     "static": 171473,
+     "measured": 144226,
+     "window_max": 144226,
+     "phase_busy_max": 144226,
+     "estimated_input": 181930,
+     "static_margin_percent": 18.891878024766687,
+     "input_margin_percent": 26.142304438866777,
+     "sound": true
+    },
+    "C": {
+     "tasks": [
+      "C"
+     ],
+     "static": 87853,
+     "measured": 80999.50000000001,
+     "window_max": 80999.50000000003,
+     "phase_busy_max": 161999,
+     "estimated_input": 96330,
+     "static_margin_percent": 8.461163340514428,
+     "input_margin_percent": 18.926660041111344,
+     "sound": true
+    },
+    "EHI": {
+     "tasks": [
+      "H",
+      "I",
+      "E"
+     ],
+     "static": 143093,
+     "measured": 119800,
+     "window_max": 119800,
+     "phase_busy_max": 215801.49999999933,
+     "estimated_input": 173370,
+     "static_margin_percent": 19.4432387312187,
+     "input_margin_percent": 44.71619365609349,
+     "sound": true
+    },
+    "GJ": {
+     "tasks": [
+      "J",
+      "G"
+     ],
+     "static": 204977,
+     "measured": 183918.01785714287,
+     "window_max": 185689.62499999983,
+     "phase_busy_max": 217456,
+     "estimated_input": 217450,
+     "static_margin_percent": 11.45020068627238,
+     "input_margin_percent": 18.23202671143557,
+     "sound": true
+    }
+   },
+   "summary": {
+    "static_margin_percent": {
+     "min": 8.461163340514428,
+     "max": 19.4432387312187,
+     "mean": 14.561620195693049
+    },
+    "input_margin_percent": {
+     "min": 18.23202671143557,
+     "max": 44.71619365609349,
+     "mean": 27.004296211876795
+    },
+    "run_margin_percent": {
+     "min": 1.007737471468971,
+     "max": 9.97809502228265,
+     "mean": 4.93649149575238
+    },
+    "all_groups_sound": true,
+    "all_runs_sound": true
+   }
+  },
+  "CAR-V": {
+   "image": {
+    "file": "car_v.elf",
+    "kind": "elf",
+    "sha256": "da8d889405dd450891f521dc9b146e1e6180c407c28b06938543a7346e5771b4"
+   },
+   "kernel": {
+    "yield_save": 401,
+    "yield_resume": 8,
+    "dispatch": 409,
+    "tick_dispatch_save": 427,
+    "tick_dispatch_resume": 8,
+    "tick": 1867,
+    "send_isr": 235,
+    "receive_isr_size": 2465,
+    "receive_isr_end": 993,
+    "receive_isr": 3458,
+    "release": 283
+   },
+   "params": {
+    "tcb": 3,
+    "heap_blocks": 24,
+    "ddma_wait": 1,
+    "name_len": 5
+   },
+   "t": {
+    "FBU1": 88403,
+    "FBU2": 88403,
+    "FBU3": 90085,
+    "FBU4": 60403,
+    "FBU5": 88403,
+    "FBU6": 88403,
+    "FBU7": 88403,
+    "FBU8": 90085,
+    "NAVC": 94686,
+    "BFE1": 92204,
+    "BFE2": 92204,
+    "BFE3": 92204,
+    "BFE4": 92204,
+    "BFE5": 92204,
+    "BFE6": 92204,
+    "BFE7": 92204,
+    "BFE8": 92204,
+    "FDF1": 104630,
+    "FDF2": 104630,
+    "STPH": 96360,
+    "VOD1": 92204,
+    "VOD2": 92204,
+    "OBMG": 90530
+   },
+   "terms": {
+    "FBU1": {
+     "body": 84201,
+     "send": 1384,
+     "receive": 21,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "FBU2": {
+     "body": 84201,
+     "send": 1384,
+     "receive": 21,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "FBU3": {
+     "body": 84243,
+     "send": 2768,
+     "receive": 42,
+     "dispatch": 412,
+     "send_isr": 470,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "FBU4": {
+     "body": 56201,
+     "send": 1384,
+     "receive": 21,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "FBU5": {
+     "body": 84201,
+     "send": 1384,
+     "receive": 21,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "FBU6": {
+     "body": 84201,
+     "send": 1384,
+     "receive": 21,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "FBU7": {
+     "body": 84201,
+     "send": 1384,
+     "receive": 21,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "FBU8": {
+     "body": 84243,
+     "send": 2768,
+     "receive": 42,
+     "dispatch": 412,
+     "send_isr": 470,
+     "receive_isr": 0,
+     "tick": 1867,
+     "release": 283
+    },
+    "NAVC": {
+     "body": 85135,
+     "send": 0,
+     "receive": 356,
+     "dispatch": 412,
+     "send_isr": 0,
+     "receive_isr": 6916,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE1": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE2": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE3": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE4": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE5": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE6": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE7": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "BFE8": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "FDF1": {
+     "body": 86232,
+     "send": 1384,
+     "receive": 668,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 13832,
+     "tick": 1867,
+     "release": 0
+    },
+    "FDF2": {
+     "body": 86232,
+     "send": 1384,
+     "receive": 668,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 13832,
+     "tick": 1867,
+     "release": 0
+    },
+    "STPH": {
+     "body": 85190,
+     "send": 1384,
+     "receive": 356,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 6916,
+     "tick": 1867,
+     "release": 0
+    },
+    "VOD1": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "VOD2": {
+     "body": 84648,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 235,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    },
+    "OBMG": {
+     "body": 84593,
+     "send": 0,
+     "receive": 200,
+     "dispatch": 412,
+     "send_isr": 0,
+     "receive_isr": 3458,
+     "tick": 1867,
+     "release": 0
+    }
+   },
+   "clock_hz": 380000000,
+   "windows": 2,
+   "tasks": {
+    "FBU1": {
+     "t_static": 88403,
+     "run_static": 86018,
+     "terms": {
+      "body": 84201,
+      "send": 1384,
+      "receive": 21,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 84951,
+     "measured_run_min": 84951,
+     "measured_per_iteration": 84951,
+     "single_runs": 10,
+     "run_margin_percent": 1.256018175183341,
+     "per_iteration_margin_percent": 1.256018175183341,
+     "run_sound": true
+    },
+    "FBU2": {
+     "t_static": 88403,
+     "run_static": 86018,
+     "terms": {
+      "body": 84201,
+      "send": 1384,
+      "receive": 21,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 84951,
+     "measured_run_min": 84951,
+     "measured_per_iteration": 84951,
+     "single_runs": 10,
+     "run_margin_percent": 1.256018175183341,
+     "per_iteration_margin_percent": 1.256018175183341,
+     "run_sound": true
+    },
+    "FBU3": {
+     "t_static": 90085,
+     "run_static": 87465,
+     "terms": {
+      "body": 84243,
+      "send": 2768,
+      "receive": 42,
+      "dispatch": 412,
+      "send_isr": 470,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 86023,
+     "measured_run_min": 86023,
+     "measured_per_iteration": 86023,
+     "single_runs": 10,
+     "run_margin_percent": 1.676295874359183,
+     "per_iteration_margin_percent": 1.676295874359183,
+     "run_sound": true
+    },
+    "FBU4": {
+     "t_static": 60403,
+     "run_static": 58018,
+     "terms": {
+      "body": 56201,
+      "send": 1384,
+      "receive": 21,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 56951,
+     "measured_run_min": 56951,
+     "measured_per_iteration": 56951,
+     "single_runs": 10,
+     "run_margin_percent": 1.8735404119330652,
+     "per_iteration_margin_percent": 1.8735404119330652,
+     "run_sound": true
+    },
+    "FBU5": {
+     "t_static": 88403,
+     "run_static": 86018,
+     "terms": {
+      "body": 84201,
+      "send": 1384,
+      "receive": 21,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 84951,
+     "measured_run_min": 84951,
+     "measured_per_iteration": 84951,
+     "single_runs": 10,
+     "run_margin_percent": 1.256018175183341,
+     "per_iteration_margin_percent": 1.256018175183341,
+     "run_sound": true
+    },
+    "FBU6": {
+     "t_static": 88403,
+     "run_static": 86018,
+     "terms": {
+      "body": 84201,
+      "send": 1384,
+      "receive": 21,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 84951,
+     "measured_run_min": 84951,
+     "measured_per_iteration": 84951,
+     "single_runs": 10,
+     "run_margin_percent": 1.256018175183341,
+     "per_iteration_margin_percent": 1.256018175183341,
+     "run_sound": true
+    },
+    "FBU7": {
+     "t_static": 88403,
+     "run_static": 86018,
+     "terms": {
+      "body": 84201,
+      "send": 1384,
+      "receive": 21,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 85563,
+     "measured_run_min": 85563,
+     "measured_per_iteration": 85563,
+     "single_runs": 10,
+     "run_margin_percent": 0.5317719107558173,
+     "per_iteration_margin_percent": 0.5317719107558173,
+     "run_sound": true
+    },
+    "FBU8": {
+     "t_static": 90085,
+     "run_static": 87465,
+     "terms": {
+      "body": 84243,
+      "send": 2768,
+      "receive": 42,
+      "dispatch": 412,
+      "send_isr": 470,
+      "receive_isr": 0,
+      "tick": 1867,
+      "release": 283
+     },
+     "measured_run_max": 86023,
+     "measured_run_min": 86023,
+     "measured_per_iteration": 86023,
+     "single_runs": 10,
+     "run_margin_percent": 1.676295874359183,
+     "per_iteration_margin_percent": 1.676295874359183,
+     "run_sound": true
+    },
+    "NAVC": {
+     "t_static": 94686,
+     "run_static": 85903,
+     "terms": {
+      "body": 85135,
+      "send": 0,
+      "receive": 356,
+      "dispatch": 412,
+      "send_isr": 0,
+      "receive_isr": 6916,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 85227,
+     "measured_run_min": 85227,
+     "measured_per_iteration": 85227,
+     "single_runs": 10,
+     "run_margin_percent": 0.7931758714961221,
+     "per_iteration_margin_percent": 0.7931758714961221,
+     "run_sound": true
+    },
+    "BFE1": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86093,
+     "measured_run_min": 86093,
+     "measured_per_iteration": 86093,
+     "single_runs": 10,
+     "run_margin_percent": 0.6400055753661738,
+     "per_iteration_margin_percent": 0.6400055753661738,
+     "run_sound": true
+    },
+    "BFE2": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 85940,
+     "measured_run_min": 85940,
+     "measured_per_iteration": 85940,
+     "single_runs": 10,
+     "run_margin_percent": 0.819176169420526,
+     "per_iteration_margin_percent": 0.819176169420526,
+     "run_sound": true
+    },
+    "BFE3": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86531,
+     "measured_run_min": 86531,
+     "measured_per_iteration": 86531,
+     "single_runs": 10,
+     "run_margin_percent": 0.13058903745478498,
+     "per_iteration_margin_percent": 0.13058903745478498,
+     "run_sound": true
+    },
+    "BFE4": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86093,
+     "measured_run_min": 85940,
+     "measured_per_iteration": 86016.50000000003,
+     "single_runs": 10,
+     "run_margin_percent": 0.6400055753661738,
+     "per_iteration_margin_percent": 0.7295111984328247,
+     "run_sound": true
+    },
+    "BFE5": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 85940,
+     "measured_run_min": 85940,
+     "measured_per_iteration": 85940,
+     "single_runs": 10,
+     "run_margin_percent": 0.819176169420526,
+     "per_iteration_margin_percent": 0.819176169420526,
+     "run_sound": true
+    },
+    "BFE6": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86093,
+     "measured_run_min": 85940,
+     "measured_per_iteration": 86016.49999999991,
+     "single_runs": 10,
+     "run_margin_percent": 0.6400055753661738,
+     "per_iteration_margin_percent": 0.7295111984329611,
+     "run_sound": true
+    },
+    "BFE7": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86378,
+     "measured_run_min": 86378,
+     "measured_per_iteration": 86378,
+     "single_runs": 10,
+     "run_margin_percent": 0.3079487832549955,
+     "per_iteration_margin_percent": 0.3079487832549955,
+     "run_sound": true
+    },
+    "BFE8": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86531,
+     "measured_run_min": 86531,
+     "measured_per_iteration": 86531,
+     "single_runs": 10,
+     "run_margin_percent": 0.13058903745478498,
+     "per_iteration_margin_percent": 0.13058903745478498,
+     "run_sound": true
+    },
+    "FDF1": {
+     "t_static": 104630,
+     "run_static": 88696,
+     "terms": {
+      "body": 86232,
+      "send": 1384,
+      "receive": 668,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 13832,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 88675,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 0.02368198477586693,
+     "run_sound": true
+    },
+    "FDF2": {
+     "t_static": 104630,
+     "run_static": 88696,
+     "terms": {
+      "body": 86232,
+      "send": 1384,
+      "receive": 668,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 13832,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 88583.50000000003,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 0.1269988203220361,
+     "run_sound": true
+    },
+    "STPH": {
+     "t_static": 96360,
+     "run_static": 87342,
+     "terms": {
+      "body": 85190,
+      "send": 1384,
+      "receive": 356,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 6916,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 86185,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 1.342460985090213,
+     "run_sound": true
+    },
+    "VOD1": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86248,
+     "measured_run_min": 86248,
+     "measured_per_iteration": 86248,
+     "single_runs": 10,
+     "run_margin_percent": 0.4591410815323254,
+     "per_iteration_margin_percent": 0.4591410815323254,
+     "run_sound": true
+    },
+    "VOD2": {
+     "t_static": 92204,
+     "run_static": 86644,
+     "terms": {
+      "body": 84648,
+      "send": 1384,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 235,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": 86095,
+     "measured_run_min": 86095,
+     "measured_per_iteration": 86095,
+     "single_runs": 10,
+     "run_margin_percent": 0.6376676926650793,
+     "per_iteration_margin_percent": 0.6376676926650793,
+     "run_sound": true
+    },
+    "OBMG": {
+     "t_static": 90530,
+     "run_static": 85205,
+     "terms": {
+      "body": 84593,
+      "send": 0,
+      "receive": 200,
+      "dispatch": 412,
+      "send_isr": 0,
+      "receive_isr": 3458,
+      "tick": 1867,
+      "release": 0
+     },
+     "measured_run_max": null,
+     "measured_run_min": null,
+     "measured_per_iteration": 84669.49999999997,
+     "single_runs": 0,
+     "run_margin_percent": null,
+     "per_iteration_margin_percent": 0.6324591499891098,
+     "run_sound": true
+    }
+   },
+   "groups": {
+    "0-0": {
+     "tasks": [
+      "NAVC"
+     ],
+     "static": 94686,
+     "measured": 85227,
+     "attributed": 85227,
+     "window_max": 85227,
+     "phase_busy_max": 85227,
+     "estimated_input": 95000,
+     "static_margin_percent": 11.09859551550565,
+     "input_margin_percent": 11.467023361141422,
+     "sound": true
+    },
+    "1-0": {
+     "tasks": [
+      "FBU4",
+      "BFE4"
+     ],
+     "static": 152607,
+     "measured": 142967.5,
+     "attributed": 142972,
+     "window_max": 142982.8,
+     "phase_busy_max": 143044,
+     "estimated_input": 161998,
+     "static_margin_percent": 6.742441463969084,
+     "input_margin_percent": 13.311067200587546,
+     "sound": true
+    },
+    "2-0": {
+     "tasks": [
+      "FBU1",
+      "BFE1"
+     ],
+     "static": 180607,
+     "measured": 171044,
+     "attributed": 171044,
+     "window_max": 171044,
+     "phase_busy_max": 171044,
+     "estimated_input": 190000,
+     "static_margin_percent": 5.590959051472136,
+     "input_margin_percent": 11.082528472205983,
+     "sound": true
+    },
+    "3-0": {
+     "tasks": [
+      "FBU2",
+      "BFE2"
+     ],
+     "static": 180607,
+     "measured": 170891,
+     "attributed": 170891,
+     "window_max": 170891,
+     "phase_busy_max": 170891,
+     "estimated_input": 190000,
+     "static_margin_percent": 5.6854954327612335,
+     "input_margin_percent": 11.181981496977606,
+     "sound": true
+    },
+    "0-1": {
+     "tasks": [
+      "FBU3",
+      "VOD1"
+     ],
+     "static": 182289,
+     "measured": 172271,
+     "attributed": 172271,
+     "window_max": 172271,
+     "phase_busy_max": 172271,
+     "estimated_input": 190000,
+     "static_margin_percent": 5.815256195180849,
+     "input_margin_percent": 10.291343290513202,
+     "sound": true
+    },
+    "1-1": {
+     "tasks": [
+      "FBU8",
+      "VOD2"
+     ],
+     "static": 182289,
+     "measured": 172118,
+     "attributed": 172118,
+     "window_max": 172118,
+     "phase_busy_max": 172118,
+     "estimated_input": 190000,
+     "static_margin_percent": 5.909318026005415,
+     "input_margin_percent": 10.389384027237128,
+     "sound": true
+    },
+    "2-1": {
+     "tasks": [
+      "BFE3"
+     ],
+     "static": 92204,
+     "measured": 86531,
+     "attributed": 86531,
+     "window_max": 86531,
+     "phase_busy_max": 86531,
+     "estimated_input": 95000,
+     "static_margin_percent": 6.556031942309692,
+     "input_margin_percent": 9.787243877916584,
+     "sound": true
+    },
+    "3-1": {
+     "tasks": [
+      "FBU5",
+      "BFE5"
+     ],
+     "static": 180607,
+     "measured": 170891,
+     "attributed": 170891,
+     "window_max": 170891,
+     "phase_busy_max": 170891,
+     "estimated_input": 190000,
+     "static_margin_percent": 5.6854954327612335,
+     "input_margin_percent": 11.181981496977606,
+     "sound": true
+    },
+    "0-2": {
+     "tasks": [
+      "FBU7"
+     ],
+     "static": 88403,
+     "measured": 85563,
+     "attributed": 85563,
+     "window_max": 85563,
+     "phase_busy_max": 85563,
+     "estimated_input": 95000,
+     "static_margin_percent": 3.3191917066956513,
+     "input_margin_percent": 11.029300047917909,
+     "sound": true
+    },
+    "1-2": {
+     "tasks": [
+      "BFE8"
+     ],
+     "static": 92204,
+     "measured": 86531,
+     "attributed": 86531,
+     "window_max": 86531,
+     "phase_busy_max": 86531,
+     "estimated_input": 95000,
+     "static_margin_percent": 6.556031942309692,
+     "input_margin_percent": 9.787243877916584,
+     "sound": true
+    },
+    "2-2": {
+     "tasks": [
+      "BFE7"
+     ],
+     "static": 92204,
+     "measured": 86378,
+     "attributed": 86378,
+     "window_max": 86378,
+     "phase_busy_max": 86378,
+     "estimated_input": 95000,
+     "static_margin_percent": 6.744772974600014,
+     "input_margin_percent": 9.98170830535553,
+     "sound": true
+    },
+    "3-2": {
+     "tasks": [
+      "FBU6",
+      "BFE6"
+     ],
+     "static": 180607,
+     "measured": 170967.5,
+     "attributed": 170972,
+     "window_max": 170982.8,
+     "phase_busy_max": 171044,
+     "estimated_input": 190000,
+     "static_margin_percent": 5.638206091801074,
+     "input_margin_percent": 11.132232734291605,
+     "sound": true
+    },
+    "0-3": {
+     "tasks": [
+      "STPH"
+     ],
+     "static": 96360,
+     "measured": 86185,
+     "attributed": 86185,
+     "window_max": 103422,
+     "phase_busy_max": 172370,
+     "estimated_input": 95000,
+     "static_margin_percent": 11.805998723675813,
+     "input_margin_percent": 10.227997911469513,
+     "sound": true
+    },
+    "1-3": {
+     "tasks": [
+      "FDF2"
+     ],
+     "static": 104630,
+     "measured": 88583.5,
+     "attributed": 88651.875,
+     "window_max": 106300.2,
+     "phase_busy_max": 177167,
+     "estimated_input": 95000,
+     "static_margin_percent": 18.114547291538493,
+     "input_margin_percent": 7.243448271969385,
+     "sound": true
+    },
+    "2-3": {
+     "tasks": [
+      "FDF1"
+     ],
+     "static": 104630,
+     "measured": 88675,
+     "attributed": 88765.625,
+     "window_max": 106410,
+     "phase_busy_max": 177350,
+     "estimated_input": 95000,
+     "static_margin_percent": 17.992669861855088,
+     "input_margin_percent": 7.132788271778968,
+     "sound": true
+    },
+    "3-3": {
+     "tasks": [
+      "OBMG"
+     ],
+     "static": 90530,
+     "measured": 84669.5,
+     "attributed": 84669.5,
+     "window_max": 101603.4,
+     "phase_busy_max": 169339,
+     "estimated_input": 95000,
+     "static_margin_percent": 6.921618764726377,
+     "input_margin_percent": 12.200969652590366,
+     "sound": true
+    }
+   },
+   "summary": {
+    "static_margin_percent": {
+     "min": 3.3191917066956513,
+     "max": 18.114547291538493,
+     "mean": 8.136039401072969
+    },
+    "input_margin_percent": {
+     "min": 7.132788271778968,
+     "max": 13.311067200587546,
+     "mean": 10.464265143552934
+    },
+    "run_margin_percent": {
+     "min": 0.13058903745478498,
+     "max": 1.8735404119330652,
+     "mean": 0.884181965312541
+    },
+    "all_groups_sound": true,
+    "all_runs_sound": true
+   }
+  },
+  "WCET-E": {
+   "image": {
+    "file": "wcet_e.elf",
+    "kind": "elf",
+    "sha256": "e39bd92400cfed853c24d4422782b243787299c3fe8734de8885ec67bcaf6f19"
+   },
+   "kernel": {
+    "yield_save": 487,
+    "yield_resume": 8,
+    "dispatch": 495,
+    "tick_dispatch_save": 513,
+    "tick_dispatch_resume": 8,
+    "tick": 1953,
+    "send_isr": 235,
+    "receive_isr_size": 3169,
+    "receive_isr_end": 1011,
+    "receive_isr": 4180,
+    "release": 283
+   },
+   "params": {
+    "tcb": 5,
+    "heap_blocks": 32,
+    "ddma_wait": 1,
+    "name_len": 5
+   },
+   "t": {
+    "A": 9317,
+    "B": 37033,
+    "C": 26419,
+    "D": 12145,
+    "E": 39473,
+    "F": 18653,
+    "G": 63175,
+    "H": 13399,
+    "I": 18653,
+    "J": 46396
+   },
+   "terms": {
+    "A": {
+     "body": 3303,
+     "send": 2768,
+     "receive": 42,
+     "dispatch": 498,
+     "send_isr": 470,
+     "receive_isr": 0,
+     "tick": 1953,
+     "release": 283
+    },
+    "B": {
+     "body": 28583,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "C": {
+     "body": 17969,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "D": {
+     "body": 3695,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "E": {
+     "body": 29404,
+     "send": 2768,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 470,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "F": {
+     "body": 10203,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "G": {
+     "body": 54725,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "H": {
+     "body": 4949,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "I": {
+     "body": 10203,
+     "send": 1384,
+     "receive": 200,
+     "dispatch": 498,
+     "send_isr": 235,
+     "receive_isr": 4180,
+     "tick": 1953,
+     "release": 0
+    },
+    "J": {
+     "body": 30893,
+     "send": 0,
+     "receive": 512,
+     "dispatch": 498,
+     "send_isr": 0,
+     "receive_isr": 12540,
+     "tick": 1953,
+     "release": 0
+    }
+   },
+   "csv_equals_static": true,
+   "csv_t": {
+    "A": 9317,
+    "B": 37033,
+    "C": 26419,
+    "D": 12145,
+    "E": 39473,
+    "F": 18653,
+    "G": 63175,
+    "H": 13399,
+    "I": 18653,
+    "J": 46396
+   }
+  }
+ },
+ "bodies": {
+  "sort": {
+   "calls": 12,
+   "measured_max": 25341,
+   "measured_min": 1275,
+   "wcet_wrapper": 26134,
+   "wcet_body": 26105,
+   "margin_percent": 3.1293161280138904,
+   "sound": true
+  },
+  "search": {
+   "calls": 12,
+   "measured_max": 601,
+   "measured_min": 27,
+   "wcet_wrapper": 620,
+   "wcet_body": 588,
+   "margin_percent": 3.1613976705490847,
+   "sound": true
+  },
+  "count": {
+   "calls": 12,
+   "measured_max": 3852,
+   "measured_min": 30,
+   "wcet_wrapper": 3886,
+   "wcet_body": 3857,
+   "margin_percent": 0.8826583592938733,
+   "sound": true
+  }
+ },
+ "flow": {
+  "synthetic-app-e-ONTO-hermes2x2.map": {
+   "static": {
+    "f_cpu_hz": 409954000.0,
+    "f_star_hz": 288146972.65625,
+    "frequency_hz": 409954000.0,
+    "binding": "cpu"
+   },
+   "measured": {
+    "f_cpu_hz": 434900000.0,
+    "f_star_hz": 327690124.51171875,
+    "frequency_hz": 434900000.0,
+    "binding": "cpu"
+   },
+   "cpu_demand_static": {
+    "0": 171473,
+    "1": 87853,
+    "2": 143093,
+    "3": 204977
+   },
+   "cpu_demand_measured": {
+    "0": 181930,
+    "1": 96330,
+    "2": 173370,
+    "3": 217450
+   }
+  },
+  "spiral": {
+   "static": {
+    "f_cpu_hz": 409954000.0,
+    "f_star_hz": 288146972.65625,
+    "frequency_hz": 409954000.0,
+    "binding": "cpu"
+   },
+   "measured": {
+    "f_cpu_hz": 434900000.0,
+    "f_star_hz": 327690124.51171875,
+    "frequency_hz": 434900000.0,
+    "binding": "cpu"
+   },
+   "cpu_demand_static": {
+    "0": 87853,
+    "1": 171473,
+    "2": 204977,
+    "3": 143093
+   },
+   "cpu_demand_measured": {
+    "0": 96330,
+    "1": 181930,
+    "2": 217450,
+    "3": 173370
+   }
+  }
+ }
+}

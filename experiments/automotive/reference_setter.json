@@ -1,0 +1,195 @@
+{
+ "_doc": "rttools.paper.automotive setter --config config.json --first 1 --last 10",
+ "rows": [
+  {
+   "flow": {
+    "f_cpu_hz": 83947000.0,
+    "minimum_hz": 87113457.88574219
+   },
+   "no_chains": {
+    "f_cpu_hz": 83947000.0,
+    "minimum_hz": 87113457.88574219
+   },
+   "no_handlers": {
+    "f_cpu_hz": 83947000.0,
+    "minimum_hz": 83947000.0
+   },
+   "no_wni": {
+    "f_cpu_hz": 83947000.0,
+    "minimum_hz": 87113457.88574219
+   },
+   "seed": 1
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 251643000.0,
+    "minimum_hz": 257690633.74328613
+   },
+   "no_chains": {
+    "f_cpu_hz": 251643000.0,
+    "minimum_hz": 257690633.74328613
+   },
+   "no_handlers": {
+    "f_cpu_hz": 251643000.0,
+    "minimum_hz": 251643000.0
+   },
+   "no_wni": {
+    "f_cpu_hz": 251643000.0,
+    "minimum_hz": 257690633.74328613
+   },
+   "seed": 2
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 157067000.0,
+    "minimum_hz": 310596541.3208008
+   },
+   "no_chains": {
+    "f_cpu_hz": 157067000.0,
+    "minimum_hz": 161874684.35668945
+   },
+   "no_handlers": {
+    "f_cpu_hz": 157067000.0,
+    "minimum_hz": 304552184.4177246
+   },
+   "no_wni": {
+    "f_cpu_hz": 157067000.0,
+    "minimum_hz": 310596541.3208008
+   },
+   "seed": 3
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 309884000.0,
+    "minimum_hz": 320669604.9194336
+   },
+   "no_chains": {
+    "f_cpu_hz": 309884000.0,
+    "minimum_hz": 320669604.9194336
+   },
+   "no_handlers": {
+    "f_cpu_hz": 309884000.0,
+    "minimum_hz": 309884000.0
+   },
+   "no_wni": {
+    "f_cpu_hz": 309884000.0,
+    "minimum_hz": 320669604.9194336
+   },
+   "seed": 4
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 163542000.0,
+    "minimum_hz": 171437612.91503906
+   },
+   "no_chains": {
+    "f_cpu_hz": 163542000.0,
+    "minimum_hz": 171437612.91503906
+   },
+   "no_handlers": {
+    "f_cpu_hz": 163542000.0,
+    "minimum_hz": 163542000.0
+   },
+   "no_wni": {
+    "f_cpu_hz": 163542000.0,
+    "minimum_hz": 171437612.91503906
+   },
+   "seed": 5
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 204855000.0,
+    "minimum_hz": 204855000.0
+   },
+   "no_chains": {
+    "f_cpu_hz": 204855000.0,
+    "minimum_hz": 204855000.0
+   },
+   "no_handlers": {
+    "f_cpu_hz": 204855000.0,
+    "minimum_hz": 204855000.0
+   },
+   "no_wni": {
+    "f_cpu_hz": 204855000.0,
+    "minimum_hz": 213407296.14257812
+   },
+   "seed": 6
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 92066000.0,
+    "minimum_hz": 178490260.25390625
+   },
+   "no_chains": {
+    "f_cpu_hz": 92066000.0,
+    "minimum_hz": 92066000.0
+   },
+   "no_handlers": {
+    "f_cpu_hz": 92066000.0,
+    "minimum_hz": 178490260.25390625
+   },
+   "no_wni": {
+    "f_cpu_hz": 92066000.0,
+    "minimum_hz": 178490260.25390625
+   },
+   "seed": 7
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 240691000.0,
+    "minimum_hz": 340050959.62524414
+   },
+   "no_chains": {
+    "f_cpu_hz": 240691000.0,
+    "minimum_hz": 245494830.38330078
+   },
+   "no_handlers": {
+    "f_cpu_hz": 240691000.0,
+    "minimum_hz": 330446971.5118408
+   },
+   "no_wni": {
+    "f_cpu_hz": 240691000.0,
+    "minimum_hz": 340050959.62524414
+   },
+   "seed": 8
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 233001000.0,
+    "minimum_hz": 402013474.6398926
+   },
+   "no_chains": {
+    "f_cpu_hz": 233001000.0,
+    "minimum_hz": 236783853.14941406
+   },
+   "no_handlers": {
+    "f_cpu_hz": 233001000.0,
+    "minimum_hz": 402013474.6398926
+   },
+   "no_wni": {
+    "f_cpu_hz": 233001000.0,
+    "minimum_hz": 402120134.0332031
+   },
+   "seed": 9
+  },
+  {
+   "flow": {
+    "f_cpu_hz": 88423000.0,
+    "minimum_hz": 100727958.49609375
+   },
+   "no_chains": {
+    "f_cpu_hz": 88423000.0,
+    "minimum_hz": 100727958.49609375
+   },
+   "no_handlers": {
+    "f_cpu_hz": 88423000.0,
+    "minimum_hz": 88423000.0
+   },
+   "no_wni": {
+    "f_cpu_hz": 88423000.0,
+    "minimum_hz": 100690180.1147461
+   },
+   "seed": 10
+  }
+ ]
+}

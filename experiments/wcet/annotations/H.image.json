@@ -1,0 +1,6 @@
+{
+  "_doc": "Targets of the jump table of irq0_handler in the listing of run H (logs/H.image.lst of experiments/exp23, riscv64-elf-gcc 12.2.0). A listing has no .rodata: the targets come from the code of the cases. +0x58 (0x40000eb8): k <<= 1 and the loop test, the target of case 0; +0x84 (0x40000ee4): case MASK_S0CAUSE_TIMER (reads TIMERCAUSE at 0xe1020400), taken once per call (k = 4). The same listing serves run G (G.image.lst equals H.image.lst except the F_CPU constants).",
+  "functions": {
+    "irq0_handler": {"indirect_jumps": [{"at": "all", "targets": ["+0x58", "+0x84"], "max": {"+0x84": 1}}]}
+  }
+}

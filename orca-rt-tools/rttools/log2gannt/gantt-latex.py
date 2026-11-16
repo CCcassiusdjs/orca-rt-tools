@@ -25,9 +25,8 @@ pkts = {
 
 def f2na(flit_addr):
 	addr = int(flit_addr, 16)
-	x = addr & 0x0000FF00
-	x = x >> 16
-	y = addr & 0x000000FF
+	x = (addr >> 8) & 0xFF   # address: (x << 8) | y
+	y = addr & 0xFF
 	return f"{x}-{y}"
 
 def main(argv):

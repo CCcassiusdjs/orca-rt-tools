@@ -1,0 +1,3 @@
+riscv64-unknown-elf-gcc (13.2.0-11ubuntu1+12) 13.2.0 (container; the shim riscv64-elf-* -> riscv64-unknown-elf-* runs build_sw.sh)
+car_v: F_CLK=380000000 APP=car_v experiments/exp23/build_sw.sh
+wcet_e: APP=wcet_e experiments/exp23/build_sw.sh (F_CLK 500000000)

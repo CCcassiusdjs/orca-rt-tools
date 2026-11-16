@@ -1,0 +1,84 @@
+{
+ "_doc": "Reference of make contraction (python -m rttools.paper.figures contraction) on apps/sample-graph-a/sample_graph.txt with N = 4.",
+ "n": 4,
+ "total_demand": 51030,
+ "total_payload": 52260,
+ "criteria": {
+  "MIN_COMM": {
+   "max_demand": 20360,
+   "M2": 5566.656873743881,
+   "w_noc": 7110,
+   "steps": {
+    "E-I": 1,
+    "H-J": 2,
+    "B-D": 3,
+    "F-G": 4,
+    "I-J": 5,
+    "A-B": 6
+   },
+   "clusters": {
+    "C": 7890,
+    "FG": 15790,
+    "EHIJ": 20360,
+    "ABD": 6990
+   }
+  },
+  "MAX_COMM": {
+   "max_demand": 19470,
+   "M2": 6013.79819664744,
+   "w_noc": 38250,
+   "steps": {
+    "C-E": 1,
+    "A-C": 2,
+    "G-J": 3,
+    "E-H": 4,
+    "D-F": 5,
+    "A-B": 6
+   },
+   "clusters": {
+    "I": 5670,
+    "GJ": 17910,
+    "DF": 7980,
+    "ABCEH": 19470
+   }
+  },
+  "MIN_PROC": {
+   "max_demand": 44040,
+   "M2": 18112.515527943655,
+   "w_noc": 17130,
+   "steps": {
+    "G-J": 1,
+    "F-G": 2,
+    "I-J": 3,
+    "E-I": 4,
+    "C-E": 5,
+    "E-H": 6
+   },
+   "clusters": {
+    "A": 1230,
+    "B": 4560,
+    "D": 1200,
+    "CEFGHIJ": 44040
+   }
+  },
+  "MAX_PROC": {
+   "max_demand": 17910,
+   "M2": 3638.319495316485,
+   "w_noc": 23780,
+   "steps": {
+    "B-D": 1,
+    "E-H": 2,
+    "A-B": 3,
+    "E-I": 4,
+    "D-F": 5,
+    "G-J": 6
+   },
+   "clusters": {
+    "C": 7890,
+    "EHI": 11460,
+    "ABDF": 13770,
+    "GJ": 17910
+   }
+  }
+ }
+}

@@ -1,0 +1,8 @@
+{
+ "_doc": "Composition of the RTL run (rttools.multiapp): CAR-V (16 PEs) and application E (4 PEs) on the 4x5 mesh, both with the Spiral Mapping in this order. CAR-V takes the first 16 nodes of the spiral (outer ring and two inner nodes), E the last four (nodes 9, 10, 13, 14, a 2x2 block inside the ring), so XY routes of CAR-V cross the region of E.",
+ "arch": "../../arch/hermes-4x5.gml",
+ "apps": [
+  {"name": "CARV", "csv": "../../apps/car-v/car-v.csv", "map": "spiral", "pes": 16},
+  {"name": "E", "csv": "../../apps/synthetic-app-e/synthetic-app-e.csv", "map": "spiral", "pes": 4}
+ ]
+}

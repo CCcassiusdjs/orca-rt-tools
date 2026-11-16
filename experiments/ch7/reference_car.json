@@ -1,0 +1,505 @@
+{
+ "_doc": "Reference of make car (python -m rttools.paper.car): CAR on 16 clusters, the criterion of application E on 4 clusters and the Spiral Mapping of CAR on the 4x4 mesh (position, node, mean XY distance, cluster, tasks and volume per position; payload x hops of the Spiral, the reversed spiral and 10,000 random placements with seed 1).",
+ "car": {
+  "total_volume": 10687488,
+  "rows": {
+   "Reference": {
+    "V": 16,
+    "E": 38,
+    "noc_volume": 10687488,
+    "noc_volume_percent": 100.0,
+    "M1": 408093.3486736702,
+    "M2": 0.4841229182759271,
+    "M3": 1.0479545801595287,
+    "largest_load": 700002,
+    "largest_load_percent": 70.0002,
+    "loads_above_capacity": 0,
+    "contractions": 0
+   },
+   "MAX_PROC": {
+    "V": 16,
+    "E": 20,
+    "noc_volume": 2636800,
+    "noc_volume_percent": 24.6718405672128,
+    "M1": 279775.7229324946,
+    "M2": 214330.42053505697,
+    "M3": 4.2475735740291265,
+    "largest_load": 1050000,
+    "largest_load_percent": 105.0,
+    "loads_above_capacity": 2,
+    "contractions": 17
+   },
+   "MIN_COMM": {
+    "V": 16,
+    "E": 21,
+    "noc_volume": 370688,
+    "noc_volume_percent": 3.468429625371275,
+    "M1": 18229.486630754625,
+    "M2": 987368.2528148929,
+    "M3": 30.214093793162984,
+    "largest_load": 4433334,
+    "largest_load_percent": 443.3334,
+    "loads_above_capacity": 2,
+    "contractions": 17
+   },
+   "MAX_COMM": {
+    "V": 16,
+    "E": 17,
+    "noc_volume": 10316800,
+    "noc_volume_percent": 96.53157037462873,
+    "M1": 424256.797601899,
+    "M2": 1079561.0270435084,
+    "M3": 1.0856081343052109,
+    "largest_load": 4666668,
+    "largest_load_percent": 466.6668,
+    "loads_above_capacity": 2,
+    "contractions": 17
+   },
+   "MIN_PROC": {
+    "V": 16,
+    "E": 18,
+    "noc_volume": 4649984,
+    "noc_volume_percent": 43.50867107406343,
+    "M1": 379546.4446306966,
+    "M2": 1446619.5825671428,
+    "M3": 2.4086108683384717,
+    "largest_load": 6300000,
+    "largest_load_percent": 630.0,
+    "loads_above_capacity": 1,
+    "contractions": 17
+   }
+  }
+ },
+ "appe": {
+  "total_volume": 52260,
+  "chosen": "MAX_PROC",
+  "rows": {
+   "MIN_COMM": {
+    "E": 4,
+    "noc_volume": 7110,
+    "M1": 965.6959925359533,
+    "M2": 55666.568737438814,
+    "M3": 71.77215189873418,
+    "largest_load": 203600,
+    "clusters": [
+     {
+      "tasks": [
+       "E",
+       "I",
+       "H",
+       "J"
+      ],
+      "load": 203600
+     },
+     {
+      "tasks": [
+       "F",
+       "G"
+      ],
+      "load": 157900
+     },
+     {
+      "tasks": [
+       "C"
+      ],
+      "load": 78900
+     },
+     {
+      "tasks": [
+       "A",
+       "B",
+       "D"
+      ],
+      "load": 69900
+     }
+    ]
+   },
+   "MAX_COMM": {
+    "E": 5,
+    "noc_volume": 38250,
+    "M1": 1276.4795337176386,
+    "M2": 60137.9819664744,
+    "M3": 13.341176470588236,
+    "largest_load": 194700,
+    "clusters": [
+     {
+      "tasks": [
+       "A",
+       "C",
+       "E",
+       "H",
+       "B"
+      ],
+      "load": 194700
+     },
+     {
+      "tasks": [
+       "G",
+       "J"
+      ],
+      "load": 179100
+     },
+     {
+      "tasks": [
+       "D",
+       "F"
+      ],
+      "load": 79800
+     },
+     {
+      "tasks": [
+       "I"
+      ],
+      "load": 56700
+     }
+    ]
+   },
+   "MIN_PROC": {
+    "E": 4,
+    "noc_volume": 17130,
+    "M1": 2403.2204955018174,
+    "M2": 181125.15527943656,
+    "M3": 29.78984238178634,
+    "largest_load": 440400,
+    "clusters": [
+     {
+      "tasks": [
+       "C",
+       "E",
+       "I",
+       "F",
+       "G",
+       "J",
+       "H"
+      ],
+      "load": 440400
+     },
+     {
+      "tasks": [
+       "B"
+      ],
+      "load": 45600
+     },
+     {
+      "tasks": [
+       "A"
+      ],
+      "load": 12300
+     },
+     {
+      "tasks": [
+       "D"
+      ],
+      "load": 12000
+     }
+    ]
+   },
+   "MAX_PROC": {
+    "E": 5,
+    "noc_volume": 23780,
+    "M1": 3071.8893209228745,
+    "M2": 36383.19495316485,
+    "M3": 21.459209419680402,
+    "largest_load": 179100,
+    "clusters": [
+     {
+      "tasks": [
+       "G",
+       "J"
+      ],
+      "load": 179100
+     },
+     {
+      "tasks": [
+       "A",
+       "B",
+       "D",
+       "F"
+      ],
+      "load": 137700
+     },
+     {
+      "tasks": [
+       "E",
+       "H",
+       "I"
+      ],
+      "load": 114600
+     },
+     {
+      "tasks": [
+       "C"
+      ],
+      "load": 78900
+     }
+    ]
+   }
+  }
+ },
+ "spiral": {
+  "criterion": "MAX_PROC",
+  "order": [
+   0,
+   1,
+   2,
+   3,
+   7,
+   11,
+   15,
+   14,
+   13,
+   12,
+   8,
+   4,
+   5,
+   6,
+   10,
+   9
+  ],
+  "rows": [
+   {
+    "position": 1,
+    "node": 0,
+    "x": 0,
+    "y": 0,
+    "mean_xy": 3.2,
+    "cluster": "TPRC",
+    "tasks": [
+     "TPRC"
+    ],
+    "volume": 2048
+   },
+   {
+    "position": 2,
+    "node": 1,
+    "x": 1,
+    "y": 0,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "SPES",
+    "tasks": [
+     "SPES"
+    ],
+    "volume": 15360
+   },
+   {
+    "position": 3,
+    "node": 2,
+    "x": 2,
+    "y": 0,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "THRC",
+    "tasks": [
+     "THRC"
+    ],
+    "volume": 20480
+   },
+   {
+    "position": 4,
+    "node": 3,
+    "x": 3,
+    "y": 0,
+    "mean_xy": 3.2,
+    "cluster": "VIBS:TPMS:STAC",
+    "tasks": [
+     "VIBS",
+     "TPMS",
+     "STAC"
+    ],
+    "volume": 22528
+   },
+   {
+    "position": 5,
+    "node": 7,
+    "x": 3,
+    "y": 1,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "FBU4:BFE4",
+    "tasks": [
+     "FBU4",
+     "BFE4"
+    ],
+    "volume": 51200
+   },
+   {
+    "position": 6,
+    "node": 11,
+    "x": 3,
+    "y": 2,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "FBU1:BFE1",
+    "tasks": [
+     "FBU1",
+     "BFE1"
+    ],
+    "volume": 51200
+   },
+   {
+    "position": 7,
+    "node": 15,
+    "x": 3,
+    "y": 3,
+    "mean_xy": 3.2,
+    "cluster": "FBU2:BFE2",
+    "tasks": [
+     "FBU2",
+     "BFE2"
+    ],
+    "volume": 51200
+   },
+   {
+    "position": 8,
+    "node": 14,
+    "x": 2,
+    "y": 3,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "FBU5:BFE5",
+    "tasks": [
+     "FBU5",
+     "BFE5"
+    ],
+    "volume": 51200
+   },
+   {
+    "position": 9,
+    "node": 13,
+    "x": 1,
+    "y": 3,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "FBU6:BFE6",
+    "tasks": [
+     "FBU6",
+     "BFE6"
+    ],
+    "volume": 51200
+   },
+   {
+    "position": 10,
+    "node": 12,
+    "x": 0,
+    "y": 3,
+    "mean_xy": 3.2,
+    "cluster": "FBU7:BFE7",
+    "tasks": [
+     "FBU7",
+     "BFE7"
+    ],
+    "volume": 51200
+   },
+   {
+    "position": 11,
+    "node": 8,
+    "x": 0,
+    "y": 2,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "POSI:NAVC:DIRC",
+    "tasks": [
+     "POSI",
+     "NAVC",
+     "DIRC"
+    ],
+    "volume": 79872
+   },
+   {
+    "position": 12,
+    "node": 4,
+    "x": 0,
+    "y": 1,
+    "mean_xy": 2.6666666666666665,
+    "cluster": "OBDB:USOS:OBMG",
+    "tasks": [
+     "OBDB",
+     "USOS",
+     "OBMG"
+    ],
+    "volume": 141312
+   },
+   {
+    "position": 13,
+    "node": 5,
+    "x": 1,
+    "y": 1,
+    "mean_xy": 2.1333333333333333,
+    "cluster": "FBU3:VOD1",
+    "tasks": [
+     "FBU3",
+     "VOD1"
+    ],
+    "volume": 972800
+   },
+   {
+    "position": 14,
+    "node": 6,
+    "x": 2,
+    "y": 1,
+    "mean_xy": 2.1333333333333333,
+    "cluster": "FBU8:VOD2",
+    "tasks": [
+     "FBU8",
+     "VOD2"
+    ],
+    "volume": 972800
+   },
+   {
+    "position": 15,
+    "node": 10,
+    "x": 2,
+    "y": 2,
+    "mean_xy": 2.1333333333333333,
+    "cluster": "BFE8:FDF2",
+    "tasks": [
+     "BFE8",
+     "FDF2"
+    ],
+    "volume": 1318400
+   },
+   {
+    "position": 16,
+    "node": 9,
+    "x": 1,
+    "y": 2,
+    "mean_xy": 2.1333333333333333,
+    "cluster": "BFE3:FDF1:STPH",
+    "tasks": [
+     "BFE3",
+     "FDF1",
+     "STPH"
+    ],
+    "volume": 1420800
+   }
+  ],
+  "volume_sum": 5273600,
+  "w_noc": 2636800,
+  "inner_nodes": [
+   5,
+   6,
+   9,
+   10
+  ],
+  "inner_volume": 4684800,
+  "inner_volume_percent": 88.83495145631068,
+  "mean_xy": {
+   "outer": {
+    "min": 2.6666666666666665,
+    "max": 3.2
+   },
+   "inner": {
+    "min": 2.1333333333333333,
+    "max": 2.1333333333333333
+   }
+  },
+  "payload_hops": {
+   "spiral": 3242496,
+   "spiral_mean_hops": 1.2297087378640776,
+   "reverse_spiral": 5537280,
+   "random": {
+    "permutations": 10000,
+    "seed": 1,
+    "min": 3166720,
+    "median": 6920192,
+    "max": 13508096,
+    "below_spiral": 5,
+    "equal_spiral": 0
+   }
+  }
+ }
+}

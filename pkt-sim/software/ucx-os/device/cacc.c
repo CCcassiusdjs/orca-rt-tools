@@ -7,6 +7,9 @@ volatile uint32_t* CACC_COUNTER2 = (volatile uint32_t *)(0x20000030);
 volatile uint32_t* CACC_COUNTER3 = (volatile uint32_t *)(0x20000034);
 volatile uint32_t* CACC_COUNTER4 = (volatile uint32_t *)(0x20000038);
 
+// iteration marker (see include/device/cacc.h)
+volatile uint32_t* CACC_ITER = (volatile uint32_t *)(0x2000003C);
+
 void set_cacc(uint32_t v){
   *CACC_REGISTER = v;
 }
@@ -45,4 +48,8 @@ void set_counter_4(uint32_t v){
 
 uint32_t get_counter_4(){
   return *CACC_COUNTER4;
+}
+
+void set_iter_mark(uint32_t v){
+  *CACC_ITER = v;
 }

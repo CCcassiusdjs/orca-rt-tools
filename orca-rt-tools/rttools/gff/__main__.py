@@ -12,10 +12,10 @@ def convert_graph(ifile: str, iformat: str, oformat: str, ofile: str) -> None:
     graph: Graph = None
 
     if(iformat not in ["ORCA", "DOT"]):
-        raise error("Invalid input format.")
+        raise ValueError("Invalid input format: " + str(iformat))
 
     if(iformat != "DOT" and oformat not in ["ORCA", "DOT"]):
-        raise error("Invalid output format.")
+        raise ValueError("Invalid output format: " + str(oformat))
 
     match iformat:
         case "ORCA":
@@ -28,7 +28,7 @@ def convert_graph(ifile: str, iformat: str, oformat: str, ofile: str) -> None:
     if(iformat != "DOT"):
         match oformat:
             case "ORCA":
-                orca_export(graph, ofile)
+                orca_export(ofile, graph)
             case "DOT":
                 dot_export(graph, ofile)
 

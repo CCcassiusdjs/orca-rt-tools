@@ -1,0 +1,10 @@
+{
+ "_doc": "rttools.wcet spec of CAR-V on the image of run TCV (experiments/car-v-rtl/logs/TCV.image.elf, riscv64-elf-gcc 12.2.0, tag r11-rc3: release by tick, kernel without nested interrupts).",
+ "image": "../../car-v-rtl/logs/TCV.image.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+  "../annotations/car_v.json"
+ ],
+ "manifest": "../../../pkt-sim/software/ucx-os/app/car_v.json"
+}

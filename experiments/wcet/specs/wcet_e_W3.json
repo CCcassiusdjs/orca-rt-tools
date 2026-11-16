@@ -1,0 +1,10 @@
+{
+ "_doc": "rttools.wcet spec of WCET-E on the image of run W3 (logs/W3.image.elf, riscv64-elf-gcc 12.2.0, tag r11-rc5: release by tick, kernel without nested interrupts, crt0=guard_readback).",
+ "image": "../logs/W3.image.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+  "../annotations/wcet_e.json"
+ ],
+ "manifest": "../../../pkt-sim/software/ucx-os/app/wcet_e.json"
+}

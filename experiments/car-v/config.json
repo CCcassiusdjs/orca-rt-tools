@@ -1,0 +1,52 @@
+{
+ "_doc": "make (CAR-V): generation of apps/car-v/car-v.csv from apps/shi-2010 and the analysis flow of the paper on it (rttools/paper/carv.py). Paths relative to apps/.",
+ "source": {
+  "graph": "shi-2010/shi-2010.txt",
+  "flows": "shi-2010/SHI2010.csv",
+  "period_s": null,
+  "_doc": "period_s null: the shortest period of the flows of SHI2010.csv (0.04 s)"
+ },
+ "scale": {
+  "_doc": "T = period_s (period of application E); c^(v) = cost_factor round(w(v) T_src / hyperperiod_s) + scheduler_cycles, w(v) in cycles per hyperperiod_s on the base_hz basis of shi-2010.txt; payload = floor(bytes / payload_divisor). cost_factor: the candidate of carv.choose (largest with f_CPU / clock <= max_utilization); the run evaluates every pair of cost_factor_candidates x payload_divisor_candidates.",
+  "period_s": 0.0005,
+  "hyperperiod_s": 1,
+  "base_hz": 1000000,
+  "cost_factor": 6,
+  "cost_factor_candidates": [
+   6,
+   8
+  ],
+  "payload_divisor": 16,
+  "payload_divisor_candidates": [
+   8,
+   16
+  ],
+  "scheduler_cycles": 11000
+ },
+ "app": {
+  "dir": "car-v",
+  "csv": "car-v.csv",
+  "map": "car-v-ONTO-hermes4x4.map"
+ },
+ "platform": {
+  "_doc": "clock and tick of the ORCA2 platform (pkt-sim/software/ucx-os/arch/riscv/hf-riscv-e/arch.mak: F_CLK = 500 MHz, F_TICK = 2000; tick of F_CLK / F_TICK = 250,000 cycles, hal.c TIMER1CTC = F_CPU / F_TIMER / 16 - 1, setup of the paper); f0_hz: first frequency of the search, as experiments/exp23 (make frequency); max_utilization: limit of f_CPU / clock for the choice of the cost factor, the utilization of application E (f_CPU 434.9 MHz / 500 MHz, experiments/exp23/reference_frequency.json).",
+  "clock_hz": 500000000,
+  "tick_cycles": 250000,
+  "f0_hz": 500000000,
+  "max_utilization": 0.8698
+ },
+ "memory": {
+  "_doc": "Heap model of rttools/paper/carv.py (memory). heap_bytes: _heap_size of the weird_a.c image (make weird_a, ARCH=riscv/hf-riscv-e, build/target/image.map: 0xc62c). Struct sizes checked with riscv64-unknown-elf-gcc -march=rv32e -mabi=ilp32e (_Static_assert on sizeof).",
+  "heap_bytes": 50732,
+  "tcb_bytes": 112,
+  "rt_bytes": 12,
+  "stack_bytes": 2048,
+  "queue_bytes": 24,
+  "queue_slots": 8,
+  "block_header_bytes": 8,
+  "packet_header_bytes": 12,
+  "receive_buffers": 2,
+  "max_payload_bytes": 65535,
+  "max_tasks": 16
+ }
+}

@@ -3,7 +3,8 @@ from rttools.bench.kernel import TaskControlBlock
 class RateMonotonicScheduling():
     @classmethod
     def schedule(self: "RateMonotonicScheduling", r: "list[TaskControlBlock]"):
-        return sorted(r, key=lambda e: (1 / e._next_deadline), reverse=False)
+        # RM: shortest period first; a task without a period goes last
+        return sorted(r, key=lambda e: e._period if e._period is not None else float("inf"))
 
 class LeastSlackTimeScheduling():
     @classmethod
@@ -18,19 +19,18 @@ class LeastLaxityFirstScheduling():
 class EarliestDeadlineFirst():
     @classmethod
     def schedule(self: "EarliestDeadlineFirst", r: "list[TaskControlBlock]"):
-        return sorted(r, key=lambda e: e._next_deadline, reverse=False)
+        return sorted(r, key=lambda e: e._next_deadline if e._next_deadline is not None else float("inf"))
 
 class DeadlineMonotonicSchedule():
     @classmethod
     def schedule(self: "DeadlineMonotonicSchedule", r: "list[TaskControlBlock]"):
-        return sorted(r, key=lambda e: e._deadline, reverse=False)
+        return sorted(r, key=lambda e: e._deadline if e._deadline is not None else float("inf"))
 
 class RoundRobinSchedule():
     @classmethod
     def schedule(self: "RoundRobinSchedule", r: "list[TaskControlBlock]"):
-        top_element = r[0]
-        r = r[1::]
-        r.append(top_element)
-        return r
+        # the engine already puts the preempted task at the queue tail: the
+        # arrival order (FIFO) produces the round robin
+        return list(r)
         
 

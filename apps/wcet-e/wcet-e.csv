@@ -1,0 +1,36 @@
+# Application WCET-E: the task graph, payloads, release period, deadline and mapping of application E (apps/synthetic-app-e) with bodies whose paths depend on the input data (wcet-e.bodies.json; generated code pkt-sim/software/ucx-os/app/wcet_e.c, rttools.ucxgen --bodies)
+# Task rows: Capacity = t(v) in cycles from the static WCET analysis of the image of experiments/wcet (rttools.wcet: experiments/wcet/build/WCET-E/costs.json, written into this column by make -C experiments/wcet csv; make -C experiments/wcet compares them); the code does not depend on it (no ucx_sleep body)
+# Flow rows and #parameters: as apps/synthetic-app-e/synthetic-app-e.csv
+#tasks,,,,,
+Task,Period,Capacity,Deadline,Acronym,Description
+1,0.0005,9317,0.002,A,Task A
+2,0.0005,37033,0.002,B,Task B
+3,0.0005,26419,0.002,C,Task C
+4,0.0005,12145,0.002,D,Task D
+5,0.0005,39473,0.002,E,Task E
+6,0.0005,18653,0.002,F,Task F
+7,0.0005,63175,0.002,G,Task G
+8,0.0005,13399,0.002,H,Task H
+9,0.0005,18653,0.002,I,Task I
+10,0.0005,46396,0.002,J,Task J
+#flows,,,,,
+Flow,Period,Data,Deadline,Source,Target
+1,0.0005,1230,0.0005,A,C
+2,0.0005,4560,0.0005,A,B
+3,0.0005,7890,0.0005,B,D
+4,0.0005,1200,0.0005,C,E
+5,0.0005,3450,0.0005,D,F
+6,0.0005,6780,0.0005,F,G
+7,0.0005,9010,0.0005,E,I
+8,0.0005,2340,0.0005,E,H
+9,0.0005,5670,0.0005,I,J
+10,0.0005,8900,0.0005,H,J
+11,0.0005,1230,0.0005,G,J
+#parameters,,,,,
+Parameter,Value,,,,
+release_model,phase,,,,
+scheduler_cycles,11000,,,,
+creation,0,F,D,B,A,
+creation,1,C,,,
+creation,2,H,I,E,
+creation,3,J,G,,

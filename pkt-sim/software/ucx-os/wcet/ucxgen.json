@@ -1,0 +1,7 @@
+{
+  "_doc": "Flow facts of the applications that rttools.ucxgen generates (run_task of rttools/ucxgen/emit.py), for rttools.wcet. a0 at the entry of run_task points to the const descriptor struct task_s of the task (TASKS[i], .rodata): n_in at byte 12 and n_out at byte 13 (char name[5], char letter, uint16_t port, int32_t workload, uint8_t n_in, uint8_t n_out). The loop that sends one packet per output edge runs n_out times; every other loop of run_task without a counted bound (the loop over the input edges and the wait for the packet of an input) runs at most n_in + 1 times per entry (the receives of a job sum to n_in, rttools.wcet.ucx).",
+  "functions": {
+    "run_task": {"loops": [{"select": {"contains_call": "ucx_noc_send"}, "bound": "u8(a0 + 13)"},
+                           {"select": "rest", "bound": "u8(a0 + 12) + 1"}]}
+  }
+}

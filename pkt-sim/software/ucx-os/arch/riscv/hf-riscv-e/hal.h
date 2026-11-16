@@ -354,6 +354,7 @@ extern uint32_t _end;			/* Start address of the heap memory, defined in linker s
 
 
 /* hardware dependent C library stuff */
+#define CONTEXT_S0	0
 #define CONTEXT_SP	4
 #define CONTEXT_RA	5
 

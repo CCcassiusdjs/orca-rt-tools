@@ -1,0 +1,43 @@
+{
+ "_doc": "experiments/wcet, runs of tag r11-rc5 (release by tick, kernel without nested interrupts, crt0.s with the return test of _isr and the read back of _interrupt_set(0)): static t(v) (rttools.wcet) of the image of each run against its CPU time: E on run UH, CAR-V on run UCV, WCET-E on run W3; flow of E with the static costs of the image of UH. make analyze-r11e check-r11e; rttools/paper/wcet.py. Paths relative to this file.",
+ "apps": {
+  "E": {
+   "spec": "specs/weird_a_UH.json",
+   "measured": "exp23",
+   "log": "../exp23/logs/UH.events.txt",
+   "exp23_config": "../exp23/config.json"
+  },
+  "CAR-V": {
+   "spec": "specs/car_v_UCV.json",
+   "measured": "rtlapp",
+   "log": "../car-v-rtl/logs/UCV.events.txt",
+   "manifest": "../../pkt-sim/software/ucx-os/app/car_v.json",
+   "csv": "../../apps/car-v/car-v.csv",
+   "map": "../../apps/car-v/car-v-ONTO-hermes4x4.map"
+  },
+  "WCET-E": {
+   "spec": "specs/wcet_e_W3.json",
+   "measured": "rtlapp",
+   "log": "logs/W3.events.txt",
+   "manifest": "../../pkt-sim/software/ucx-os/app/wcet_e.json",
+   "csv": "../../apps/wcet-e/wcet-e.csv",
+   "map": "../../apps/wcet-e/wcet-e-ONTO-hermes2x2.map"
+  }
+ },
+ "bodies": {
+  "elf": "../../pkt-sim/tests/rtl/wcet_bodies.elf",
+  "trace": "logs/bodies.trace.txt"
+ },
+ "flow": {
+  "app": "../../apps/synthetic-app-e/synthetic-app-e.csv",
+  "arch": "../../arch/hermes-2x2.gml",
+  "maps": [
+   "../../apps/synthetic-app-e/synthetic-app-e-ONTO-hermes2x2.map",
+   "spiral"
+  ],
+  "f0": 500000000,
+  "header_wait": "bound",
+  "ni": "off",
+  "costs_of": "E"
+ }
+}

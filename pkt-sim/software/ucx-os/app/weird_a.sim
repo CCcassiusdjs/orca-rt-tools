@@ -1,0 +1,8 @@
+# Setup of manycore_top for app/weird_a.c (application E, release by tick,
+# Makefile rule weird_a); read by experiments/exp23/simulate.sh.
+# RELEASE_MASK: bit k = PE with node index k (PEs 0, 1, 2, 3): the release
+# interrupt counts the phases on every PE (lib/tick_release.c). The rule
+# weird_a_data (runs A to H) has no setup file: mesh 2x2, mask 1.
+MESH=2x2
+RELEASE_MASK=15
+TICK_RELEASE=1

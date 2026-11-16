@@ -1,0 +1,8 @@
+repo_commit=69d9cc5c0945e03a630d55b99804073d7523fe11
+repo_state=archive
+repo_tag=exp23-F
+src_sha256=e29a0b0277e10a64c87d75afac3257ea78aa262fc08396462adc29f1c1be8bff
+sim_ns=20000000 monitor=1
+vsim=Questa Sim-64 vsim 2025.3 Simulator 2025.09 Sep 15 2025
+gcc=riscv64-elf-gcc (Arch Linux Repositories) 12.2.0
+date=2026-10-08T14:19:58Z

@@ -1,0 +1,42 @@
+# Table 7.1 (ORT/GCM and ORT/GDE)
+
+| Command | Effect |
+|---|---|
+| `make` | Graphs with \|V\| = 20 to 100 (`graphs/`): metrics of the input, collapse to N clusters with MIN-COMM and MAX-PROC, metrics of the output, comparison with Table 7.1 and check against `reference.json` (seconds) |
+| `make graphs` | Unpacks the 17 graphs of the table (`graphs/10_<|V|>.txt` and `graphs/10_200-900.tar.xz`) into `build/graphs` and checks their SHA-256 (`graphs/SHA256SUMS`) |
+| `make full` | The 17 graphs (20 to 25 minutes on one core; \|V\| = 900 alone takes 7 to 10 minutes) and check against `reference_full.json` |
+| `make stats` | Summary of Table 7.1 over the graphs of `STATS_IN` (default `build/full`, after `make graphs full`): share of edges kept, NoC payload share, M1 and M2 ratios, coefficient of variation of the demands, M3 (minimum, mean, maximum), cluster sizes and the expected share of edges between clusters; check against `reference_stats.json` |
+| `make car` | CAR (`apps/shi-2010/shi-2010.txt`) on 16 clusters: reference mapping of Shi et al. (`shi2010-ONTO-hermes4x4.map`) and the four criteria; application E (`apps/synthetic-app-e/synthetic-app-e.txt`) on 4 clusters with the four criteria and the criterion with the lowest M2; Spiral Mapping of CAR on the 4x4 mesh (steps 1 and 2 of the analysis flow) and the body of its figure; check against `reference_car.json` and `reference_spiral_fig.json` (`car.json` holds the inputs) |
+| `make n16` | \|V\| = 20 to 100 with N = 16 |
+
+The 17 graphs come from `tp-tools/apps/var-nnodes/10_<|V|>.txt` of commit 4e43483 (commit aa7b97d removed the directory). The generator of that commit draws the values and the endpoints without a seed, so it cannot regenerate the files: `graphs/` keeps the nine graphs with \|V\| <= 100 as text (262 KB) and the eight graphs with \|V\| = 200 to 900 in `graphs/10_200-900.tar.xz` (8.6 MB; 22.8 MB unpacked). `python -m rttools.paper.graphs pack` writes the archive from the text files (fixed member order, owner and time).
+
+## Result
+
+| Item | Result |
+|---|---|
+| N = 4 | The 204 cells of the 17 rows agree (\|E\|, M1, M2, M3 of the input and of both outputs; `make full`, 18 minutes on one core) |
+| N = 16 (value stated in the thesis, 4x4 mesh) | Row 1 gives \|E\| = 220 (MIN-COMM) and 222 (MAX-PROC); the table prints 55 and 180 |
+| Value range of the graphs | [2000; 20000] in vertices and edges; the thesis states [200; 2000] |
+| CAR graph (`make car`) | `apps/shi-2010/shi-2010.txt` has the edge FBU8->VOD2 of `SHI2010.csv` (Shi et al.); the file had FBU3->VOD2. With FBU8->VOD2, MAX-PROC puts VOD2 with FBU8: 12 clusters equal clusters of Table 8.1 and 4 differ (FBU3:VOD1, FBU8:VOD2, BFE8:FDF2, BFE3:FDF1:STPH). With FBU3->VOD2 the 16 clusters of Table 8.1 come back, so the thesis used the file with FBU3->VOD2; its volumes still differ from the table for 4 clusters (`tests/test_spiral.py`) |
+| Rounding | Input M1, M2 and M3 with 3 decimals: rows 1 to 15 truncate, rows 16 and 17 round. Output M1 and M2 truncated to integers (the note of the table says "rounded up"); output M3 rounded to 3 decimals |
+
+## Outputs (`build/results`)
+
+| File | Content |
+|---|---|
+| `tab71.tex`, `tab71.csv` | Table in the layout of the thesis, with the values of the run |
+| `metrics.json` | Values of each graph, thesis row and agreement per cell |
+
+## Outputs (`build/stats`, `build/car`)
+
+| File | Content |
+|---|---|
+| `stats/metrics.json`, `table71.csv`, `sizes.csv` | Derived values of each graph, their minimum, mean and maximum, cluster sizes and expected share of edges between clusters |
+| `stats/tab-table71-rows.tex`, `fig-table71-coords.tex` | Rows of the summary table and coordinates of the per-graph figure |
+| `car/metrics.json`, `car.csv`, `appe.csv` | Inter-cluster edges, NoC volume, M1, M2, M3, largest load and loads above the capacity of each clustering of CAR; M2, clusters and NoC volume of each criterion for application E |
+| `car/tab-car-rows.tex` | Rows of the CAR table (Reference, MAX-PROC, MIN-COMM) |
+| `car/spiral.csv`, key `spiral` of `car/metrics.json` | Spiral Mapping of CAR: per position k, node, tile (x, y), mean XY distance to the other 15 nodes, cluster, tasks, network volume, demand and inter-cluster edges; volume share of the inner nodes 5, 6, 9, 10; sum of payload x XY hops of the Spiral, of the reversed spiral (k-th smallest volume on position 17 - k) and of 10,000 random placements (`random.Random(1)`: minimum, median, maximum, placements below the Spiral) |
+| `car/spiral-edges.csv` | Inter-cluster edges of the MAX-PROC clusters with payload, nodes and XY hops under the Spiral |
+| `car/values.tex` | Macros `\ExpCarSpiral...` (criterion, volume sum, inner volume and share, payload x hops, mean hops, reversed spiral, random minimum, median, maximum and count below, mean XY distance of the outer and inner nodes) |
+| `car/fig-spiral-body.tex`, `car/fig-spiral.json` | Body of the Spiral Mapping figure (`python -m rttools.paper.figures spiral`): tiles with shading `cA!p`, p = 3 + 57 volume / largest volume, position, tasks and volume in 10^3 flits, arrows of the spiral order, frame of the inner ring, mesh indices; the styles `sqt`, `sqk`, `sqc`, `sqar`, `sqax` stay in the article |

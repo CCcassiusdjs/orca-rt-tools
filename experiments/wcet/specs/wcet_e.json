@@ -1,0 +1,10 @@
+{
+ "_doc": "rttools.wcet spec of WCET-E on images/wcet_e.elf (wcet_e.c of this tree; images/BUILD.txt). For the image of an RTL run: python -m rttools.paper.wcet run-log ... --image <run>/pkt-sim/software/ucx-os/build/target/image.elf.",
+ "image": "../images/wcet_e.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+  "../annotations/wcet_e.json"
+ ],
+ "manifest": "../../../pkt-sim/software/ucx-os/app/wcet_e.json"
+}

@@ -1,0 +1,20 @@
+# Software of run F for the bound of the instrumentation writes (logs/F.image.lst, logs/F.noinstr.lst)
+#
+# The simulation of run F (logs/F.RUN_INFO) did not keep its image. These listings come from
+# build_sw.sh of this tree (with, and with UCX_CFLAGS=-DUCX_NO_INSTRUMENTATION) with the Arch
+# Linux packages riscv64-elf-gcc 12.2.0-2 and riscv64-elf-binutils 2.39-1 (archive.archlinux.org),
+# the compiler that F.RUN_INFO names. The image with the writes equals, byte for byte, the build
+# of a git archive of tag exp23-F with the same packages (sha256 below). Confirmation on the
+# simulation server: make instrumentation ENV_SETUP="..." (check against reference_head.json).
+gcc=riscv64-elf-gcc (Arch Linux Repositories) 12.2.0
+as=GNU assembler (GNU Binutils) 2.39
+package_gcc_sha256=938e3768575d216bbd4dbd789a434957fc8181df2babd7a15acb5fd3974d2c20  riscv64-elf-gcc-12.2.0-2-x86_64.pkg.tar.zst
+package_binutils_sha256=7a646a415908c843f4e8ea378d5cc9a425732ed2519fc2beeb9008f761ea3f0a  riscv64-elf-binutils-2.39-1-x86_64.pkg.tar.zst
+with_image.elf=313b67751e8805a6c0e92afe98868d6e49f00058ae862427a2f7fe3f70db7f38
+with_image.bin=ecce0c7f7215e18ad906f08840b12f1643499cb5783bee234e97aa48d0735287
+with_image.lst=98d05f18861b5f7c1d695beaa945fdf91bbe24b43004d8adc3bb71f9c56ad96f
+without_image.elf=31430ee04090dc630d2a6069df77674f56d4d3274561a5a124a4f0edc3488bb8
+without_image.bin=634340ba0ac33b1e356836c46fe21a7734a00233d8ae6cb6a18b46e66ca21628
+without_image.lst=0c8c7cad81db2598122a5e289ddce104b1d51edf1c02e00e39c44dffafd2593b
+exp23-F_archive_image.elf=313b67751e8805a6c0e92afe98868d6e49f00058ae862427a2f7fe3f70db7f38
+exp23-F_archive_image.bin=ecce0c7f7215e18ad906f08840b12f1643499cb5783bee234e97aa48d0735287

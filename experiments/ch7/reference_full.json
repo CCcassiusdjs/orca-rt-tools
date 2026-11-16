@@ -1,0 +1,80 @@
+{
+ "_doc": "make full (17 graphs, N = 4): every cell agrees with Table 7.1.",
+ "n": 4,
+ "summary": {
+  "rows": 17,
+  "rows_agree": 17,
+  "cells_agree": 204,
+  "cells": 204
+ },
+ "rows": [
+  {
+   "V": 20,
+   "all_agree": true
+  },
+  {
+   "V": 30,
+   "all_agree": true
+  },
+  {
+   "V": 40,
+   "all_agree": true
+  },
+  {
+   "V": 50,
+   "all_agree": true
+  },
+  {
+   "V": 60,
+   "all_agree": true
+  },
+  {
+   "V": 70,
+   "all_agree": true
+  },
+  {
+   "V": 80,
+   "all_agree": true
+  },
+  {
+   "V": 90,
+   "all_agree": true
+  },
+  {
+   "V": 100,
+   "all_agree": true
+  },
+  {
+   "V": 200,
+   "all_agree": true
+  },
+  {
+   "V": 300,
+   "all_agree": true
+  },
+  {
+   "V": 400,
+   "all_agree": true
+  },
+  {
+   "V": 500,
+   "all_agree": true
+  },
+  {
+   "V": 600,
+   "all_agree": true
+  },
+  {
+   "V": 700,
+   "all_agree": true
+  },
+  {
+   "V": 800,
+   "all_agree": true
+  },
+  {
+   "V": 900,
+   "all_agree": true
+  }
+ ]
+}

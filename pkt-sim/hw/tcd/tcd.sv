@@ -11,9 +11,10 @@ module tcd #(parameter MEMORY_BUS_WIDTH = 32)(
 
   always @(posedge clock) begin
     if (~reset) begin
-      timer = (timer != HYPERPERIOD) ? timer++ : 0;
+      // conta 0, 1, ..., HYPERPERIOD - 1 e volta a 0
+      timer <= (timer >= HYPERPERIOD - 1) ? 0 : timer + 1;
     end else begin
-      timer = 0;
+      timer <= 0;
     end
   end
 
@@ -56,12 +57,12 @@ module tcd #(parameter MEMORY_BUS_WIDTH = 32)(
         end
         WAIT_TIMER: begin
           if(timer_unlock == timer) begin
-            tcd_state = WAIT_DMA_OP;
+            tcd_state <= WAIT_DMA_OP;
           end
         end
         WAIT_DMA_OP: begin
           if (ddma_if.status_out == 0) begin
-            tcd_state = CFG_ADDR;
+            tcd_state <= CFG_ADDR;
           end
         end
       endcase

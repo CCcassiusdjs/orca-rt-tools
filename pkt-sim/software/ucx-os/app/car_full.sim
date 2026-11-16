@@ -1,0 +1,6 @@
+# Setup of manycore_top for app/car_full.c (rttools.ucxgen, time-triggered); read by
+# experiments/exp23/simulate.sh. RELEASE_MASK: bit k = PE with node index k
+# (PEs 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15). The phase is 250000 ns: run simulate.sh with RELEASE_NS=250000
+# (release generator and tick of the kernel), first release at 3000000 ns.
+MESH=4x4
+RELEASE_MASK=65535

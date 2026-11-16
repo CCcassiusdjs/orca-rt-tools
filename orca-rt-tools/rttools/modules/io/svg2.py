@@ -2,11 +2,10 @@ import networkx as nx
 import sys
 import os.path
 from os import path
-import pygraphviz
 import random
 
-# Importing the matplotlib.pyplot
-import matplotlib.pyplot as plt
+# matplotlib is imported inside printSched: the AGS flow does not depend
+# on it. pygraphviz had no use in this module.
 
 def formatSchedData(packets):
 
@@ -31,6 +30,7 @@ def formatSchedData(packets):
   return links
 
 def printSched(packets, hp):
+  import matplotlib.pyplot as plt
 
   YTICKSFACTOR = 1
 

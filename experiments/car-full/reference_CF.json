@@ -1,0 +1,868 @@
+{
+ "_doc": "Reference of make analyze check-run (experiments/car-full) for run CF: car_full of tag r11-multirate-rc1 (commit 48bb43a, git archive), Questa 2025.3, riscv64-elf-gcc 12.2.0, F_CLK 432 MHz, 64 ms (logs/CF.*). The run is not a validation of the model: five PEs (0-1, 0-2, 1-2, 2-0, 3-0, 13 tasks in progress.stalled_tasks) stop after an interrupt taken inside the return of another one (the image of this run enables interrupts inside the handlers; _isr of crt0.s returns through a5, which it does not save: pkt-sim/tests/rtl/tb_cpu_irq.vhd). Every late job, older read, data age above the bound and busy phase above the model belongs to these PEs; the other eleven PEs have none. The reference pins the analysis of the stored log.",
+ "log": "CF.events.txt",
+ "inputs": {
+  "csv": "car-full.csv",
+  "map": "car-full-ONTO-hermes4x4.map",
+  "manifest": "car_full.json",
+  "csv_matches_manifest": true,
+  "map_matches_manifest": true
+ },
+ "clock": {
+  "clock_hz": 432000000,
+  "cycle_hz": 432000152.06405354,
+  "half_period_fs": 1157407,
+  "source": "RUN_INFO",
+  "run_info": "CF.RUN_INFO",
+  "edges_snapped": true,
+  "isr": "nesting",
+  "crt0": "plain"
+ },
+ "model": {
+  "clock_hz": 432000000,
+  "phase_cycles": 108000,
+  "hyper_ticks": 50,
+  "hyper_cycles": 5400000,
+  "cpu_feasible": true,
+  "periodic_from_hyperperiod": 0,
+  "misses": 0,
+  "chains": {
+   "TPMS-STAC-TPRC": 9665000,
+   "TPMS-STAC-THRC": 4482000,
+   "VIBS-STAC-TPRC": 7505000,
+   "VIBS-STAC-THRC": 1242000,
+   "SPES-NAVC-DIRC": 1620000,
+   "SPES-NAVC-THRC": 1242000,
+   "SPES-STAC-TPRC": 7505000,
+   "SPES-STAC-THRC": 1242000,
+   "POSI-NAVC-DIRC": 5184000,
+   "POSI-NAVC-THRC": 5022000,
+   "POSI-OBMG-OBDB-NAVC-DIRC": 15552000,
+   "POSI-OBMG-OBDB-NAVC-THRC": 15282000,
+   "USOS-OBMG-OBDB-NAVC-DIRC": 12852000,
+   "USOS-OBMG-OBDB-NAVC-THRC": 12582000,
+   "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 13230000,
+   "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 13230000,
+   "FBU3-VOD1-NAVC-DIRC": 1404000,
+   "FBU3-VOD1-NAVC-THRC": 1026000,
+   "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 13230000,
+   "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 13230000,
+   "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 13230000,
+   "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 13230000,
+   "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 13230000,
+   "FBU8-VOD2-NAVC-DIRC": 1404000,
+   "FBU8-VOD2-NAVC-THRC": 1026000,
+   "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 13500000,
+   "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 13230000
+  }
+ },
+ "releases": {
+  "count": 244,
+  "first_ms": 3.000364583,
+  "period_cycles_min": 107998,
+  "period_cycles_max": 108002
+ },
+ "markers": {
+  "jobs": 2311,
+  "stray": 0
+ },
+ "jobs": {
+  "complete": 2298,
+  "end_after_model_finish": 5,
+  "deadline_misses": 0,
+  "end_minus_model_max_cycles": 98974,
+  "begin_after_release_min_cycles": 2247,
+  "begin_after_release_max_cycles": 219420
+ },
+ "phases": {
+  "jobs_begun_twice_in_a_phase": 0,
+  "rows": []
+ },
+ "progress": {
+  "stalled_tasks": [
+   "BFE3",
+   "DIRC",
+   "FDF1",
+   "NAVC",
+   "OBDB",
+   "OBMG",
+   "POSI",
+   "STAC",
+   "STPH",
+   "THRC",
+   "TPMS",
+   "USOS",
+   "VIBS"
+  ],
+  "stalled_pes": [
+   "0-1",
+   "0-2",
+   "1-2",
+   "2-0",
+   "3-0"
+  ],
+  "tasks": {
+   "TPMS": {
+    "pe": "3-0",
+    "released": 10,
+    "begun": 1,
+    "ended": 0,
+    "last_end_ms": null,
+    "stalled": true
+   },
+   "VIBS": {
+    "pe": "3-0",
+    "released": 49,
+    "begun": 2,
+    "ended": 1,
+    "last_end_ms": 3.839792824,
+    "stalled": true
+   },
+   "SPES": {
+    "pe": "1-0",
+    "released": 49,
+    "begun": 49,
+    "ended": 49,
+    "last_end_ms": 63.340920139,
+    "stalled": false
+   },
+   "POSI": {
+    "pe": "0-2",
+    "released": 10,
+    "begun": 2,
+    "ended": 1,
+    "last_end_ms": 6.936989583,
+    "stalled": true
+   },
+   "USOS": {
+    "pe": "0-1",
+    "released": 49,
+    "begun": 5,
+    "ended": 4,
+    "last_end_ms": 6.979038194,
+    "stalled": true
+   },
+   "FBU1": {
+    "pe": "3-2",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.639181713,
+    "stalled": false
+   },
+   "FBU2": {
+    "pe": "3-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.639179398,
+    "stalled": false
+   },
+   "FBU3": {
+    "pe": "1-1",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.642855324,
+    "stalled": false
+   },
+   "FBU4": {
+    "pe": "3-1",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.595959491,
+    "stalled": false
+   },
+   "FBU5": {
+    "pe": "2-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.639177083,
+    "stalled": false
+   },
+   "FBU6": {
+    "pe": "1-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.639179398,
+    "stalled": false
+   },
+   "FBU7": {
+    "pe": "0-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.639181713,
+    "stalled": false
+   },
+   "FBU8": {
+    "pe": "2-1",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.642855324,
+    "stalled": false
+   },
+   "STAC": {
+    "pe": "3-0",
+    "released": 49,
+    "begun": 6,
+    "ended": 5,
+    "last_end_ms": 8.842732639,
+    "stalled": true
+   },
+   "TPRC": {
+    "pe": "0-0",
+    "released": 5,
+    "begun": 5,
+    "ended": 5,
+    "last_end_ms": 56.287042824,
+    "stalled": false
+   },
+   "DIRC": {
+    "pe": "0-2",
+    "released": 49,
+    "begun": 1,
+    "ended": 0,
+    "last_end_ms": null,
+    "stalled": true
+   },
+   "NAVC": {
+    "pe": "0-2",
+    "released": 49,
+    "begun": 7,
+    "ended": 6,
+    "last_end_ms": 10.357471065,
+    "stalled": true
+   },
+   "OBDB": {
+    "pe": "0-1",
+    "released": 10,
+    "begun": 2,
+    "ended": 1,
+    "last_end_ms": 6.183012731,
+    "stalled": true
+   },
+   "BFE1": {
+    "pe": "3-2",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.778971065,
+    "stalled": false
+   },
+   "BFE2": {
+    "pe": "3-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.77896875,
+    "stalled": false
+   },
+   "BFE3": {
+    "pe": "1-2",
+    "released": 122,
+    "begun": 2,
+    "ended": 1,
+    "last_end_ms": 3.140413194,
+    "stalled": true
+   },
+   "BFE4": {
+    "pe": "3-1",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.731427083,
+    "stalled": false
+   },
+   "BFE5": {
+    "pe": "2-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.778966435,
+    "stalled": false
+   },
+   "BFE6": {
+    "pe": "1-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.77896875,
+    "stalled": false
+   },
+   "BFE7": {
+    "pe": "0-3",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.778971065,
+    "stalled": false
+   },
+   "BFE8": {
+    "pe": "2-2",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.640003472,
+    "stalled": false
+   },
+   "FDF1": {
+    "pe": "1-2",
+    "released": 122,
+    "begun": 1,
+    "ended": 0,
+    "last_end_ms": null,
+    "stalled": true
+   },
+   "FDF2": {
+    "pe": "2-2",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.790232639,
+    "stalled": false
+   },
+   "STPH": {
+    "pe": "1-2",
+    "released": 122,
+    "begun": 29,
+    "ended": 28,
+    "last_end_ms": 16.642262731,
+    "stalled": true
+   },
+   "THRC": {
+    "pe": "2-0",
+    "released": 49,
+    "begun": 2,
+    "ended": 1,
+    "last_end_ms": 3.333380787,
+    "stalled": true
+   },
+   "VOD1": {
+    "pe": "1-1",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.782998843,
+    "stalled": false
+   },
+   "VOD2": {
+    "pe": "2-1",
+    "released": 122,
+    "begun": 122,
+    "ended": 122,
+    "last_end_ms": 63.782998843,
+    "stalled": false
+   },
+   "OBMG": {
+    "pe": "0-1",
+    "released": 5,
+    "begun": 1,
+    "ended": 0,
+    "last_end_ms": null,
+    "stalled": true
+   }
+  }
+ },
+ "reads": {
+  "older_than_model": 38,
+  "newer_than_model": 9,
+  "equal_to_model": 1674
+ },
+ "cpu_phases": {
+  "first_phase": 0,
+  "pes": {
+   "0-0": {
+    "tasks": [
+     "TPRC"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 1565000,
+    "measured_busy_max": 108002,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "1-0": {
+    "tasks": [
+     "SPES"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 1620000,
+    "measured_busy_max": 105964,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "2-0": {
+    "tasks": [
+     "THRC"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 1620000,
+    "measured_busy_max": 108002,
+    "phases": 243,
+    "phases_above_model": 190
+   },
+   "3-0": {
+    "tasks": [
+     "VIBS",
+     "TPMS",
+     "STAC"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 4349336,
+    "measured_busy_max": 108002,
+    "phases": 243,
+    "phases_above_model": 46
+   },
+   "0-1": {
+    "tasks": [
+     "OBDB",
+     "USOS",
+     "OBMG"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 4283320,
+    "measured_busy_max": 108002,
+    "phases": 243,
+    "phases_above_model": 58
+   },
+   "1-1": {
+    "tasks": [
+     "FBU3",
+     "VOD1"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105484,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "2-1": {
+    "tasks": [
+     "FBU8",
+     "VOD2"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105484,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "3-1": {
+    "tasks": [
+     "FBU4",
+     "BFE4"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3158300,
+    "measured_busy_max": 97664,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "0-2": {
+    "tasks": [
+     "POSI",
+     "NAVC",
+     "DIRC"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 4816000,
+    "measured_busy_max": 108002,
+    "phases": 243,
+    "phases_above_model": 27
+   },
+   "1-2": {
+    "tasks": [
+     "BFE3",
+     "FDF1",
+     "STPH"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 5300000,
+    "measured_busy_max": 108002,
+    "phases": 243,
+    "phases_above_model": 121
+   },
+   "2-2": {
+    "tasks": [
+     "BFE8",
+     "FDF2"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105483,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "3-2": {
+    "tasks": [
+     "FBU1",
+     "BFE1"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105482,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "0-3": {
+    "tasks": [
+     "FBU7",
+     "BFE7"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105482,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "1-3": {
+    "tasks": [
+     "FBU6",
+     "BFE6"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105483,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "2-3": {
+    "tasks": [
+     "FBU5",
+     "BFE5"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105484,
+    "phases": 243,
+    "phases_above_model": 0
+   },
+   "3-3": {
+    "tasks": [
+     "FBU2",
+     "BFE2"
+    ],
+    "model_busy_max": 108000,
+    "model_busy_hyperperiod": 3625000,
+    "measured_busy_max": 105483,
+    "phases": 243,
+    "phases_above_model": 0
+   }
+  },
+  "phases_above_model": 442
+ },
+ "data_age": {
+  "chains": 34,
+  "measured_chains": 1,
+  "above_bound": 3,
+  "margin_min_cycles": -15514845,
+  "rows": [
+   {
+    "chain": "TPMS-STAC-TPRC",
+    "bound_cycles": 9665000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "TPMS-STAC-THRC",
+    "bound_cycles": 4482000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "VIBS-STAC-TPRC",
+    "bound_cycles": 7505000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "VIBS-STAC-THRC",
+    "bound_cycles": 1242000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "SPES-NAVC-DIRC",
+    "bound_cycles": 1620000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "SPES-NAVC-THRC",
+    "bound_cycles": 1242000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "SPES-STAC-TPRC",
+    "bound_cycles": 7505000,
+    "measured_max_cycles": 23019845,
+    "jobs": 4,
+    "above_bound": 3,
+    "margin_cycles": -15514845
+   },
+   {
+    "chain": "SPES-STAC-THRC",
+    "bound_cycles": 1242000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "POSI-NAVC-DIRC",
+    "bound_cycles": 5184000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "POSI-NAVC-THRC",
+    "bound_cycles": 5022000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 15552000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "POSI-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 15282000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "USOS-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 12852000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "USOS-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 12582000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU3-VOD1-NAVC-DIRC",
+    "bound_cycles": 1404000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU3-VOD1-NAVC-THRC",
+    "bound_cycles": 1026000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU8-VOD2-NAVC-DIRC",
+    "bound_cycles": 1404000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU8-VOD2-NAVC-THRC",
+    "bound_cycles": 1026000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC",
+    "bound_cycles": 13500000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   },
+   {
+    "chain": "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC",
+    "bound_cycles": 13230000,
+    "measured_max_cycles": null,
+    "jobs": 0,
+    "above_bound": 0,
+    "margin_cycles": null
+   }
+  ]
+ },
+ "packets": {
+  "remote_received": 1478,
+  "after_deadline": 0,
+  "min_slack_cycles": 73350,
+  "tags": {
+   "unknown_tags": 0,
+   "lane_errors": 0,
+   "repeated": 0,
+   "fifo_mismatch": 2
+  }
+ },
+ "monitor": {
+  "send_err": 0,
+  "send_incomplete": 0,
+  "recv_err": 0,
+  "recv_spurious": 0,
+  "recv_missing": 0,
+  "send_pkts": 1484,
+  "recv_pkts": 1479,
+  "nodes": 16,
+  "errors": 0
+ }
+}

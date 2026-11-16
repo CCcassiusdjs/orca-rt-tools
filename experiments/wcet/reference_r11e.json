@@ -1,0 +1,2213 @@
+{
+ "_doc": "Reference of make analyze-r11e (config_r11e.json, rttools.paper.wcet analyze): static t(v) (rttools.wcet) of the images of the runs of tag r11-rc5 (release by tick, UCX-OS kernel without nested interrupts, the crt0.s with the return test of _isr and the read back of _interrupt_set(0) (crt0=guard_readback), riscv64-elf-gcc 12.2.0): E on ../exp23/logs/UH.image.elf against run UH (434.912 MHz), CAR-V on ../car-v-rtl/logs/UCV.image.elf against run UCV (380 MHz), WCET-E on logs/W3.image.elf against run W3 (500 MHz); bodies of WCET-E against logs/bodies.trace.txt; flow of E with the static costs of the image of UH. make analyze-r11e check-r11e",
+ "apps": {
+  "E": {
+   "image": {
+    "file": "UH.image.elf",
+    "kind": "elf",
+    "sha256": "00b2d7c94835a9d4e7a632636961a2b0d09f0ee1b8f98575236565aaccd30b6a"
+   },
+   "kernel": {
+    "yield_save": 519,
+    "yield_resume": 39,
+    "dispatch": 558,
+    "tick_dispatch_save": 663,
+    "tick_dispatch_resume": 8,
+    "tick": 2136,
+    "send_isr": 243,
+    "receive_isr_size": 3174,
+    "receive_isr_end": 1037,
+    "receive_isr": 4211,
+    "release": 249
+   },
+   "params": {
+    "tcb": 5,
+    "heap_blocks": 32,
+    "ddma_wait": 1,
+    "name_len": 5
+   },
+   "t": {
+    "A": 18792,
+    "B": 55319,
+    "C": 88618,
+    "D": 21718,
+    "E": 45856,
+    "F": 77521,
+    "G": 99818,
+    "H": 33119,
+    "I": 66421,
+    "J": 106731
+   },
+   "terms": {
+    "A": {
+     "body": 12590,
+     "send": 2770,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 486,
+     "receive_isr": 0,
+     "tick": 2136,
+     "release": 249
+    },
+    "B": {
+     "body": 46334,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "C": {
+     "body": 79633,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "D": {
+     "body": 12733,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "E": {
+     "body": 35243,
+     "send": 2770,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 486,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "F": {
+     "body": 68536,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "G": {
+     "body": 90833,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "H": {
+     "body": 24134,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "I": {
+     "body": 57436,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "J": {
+     "body": 90640,
+     "send": 0,
+     "receive": 512,
+     "dispatch": 561,
+     "send_isr": 0,
+     "receive_isr": 12633,
+     "tick": 2136,
+     "release": 249
+    }
+   },
+   "clock_hz": 434912000,
+   "windows": 7,
+   "tasks": {
+    "A": {
+     "t_static": 18792,
+     "run_static": 15921,
+     "terms": {
+      "body": 12590,
+      "send": 2770,
+      "receive": 0,
+      "dispatch": 561,
+      "send_isr": 486,
+      "receive_isr": 0,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 14583,
+     "measured_run_min": 14583,
+     "measured_per_iteration": 14583,
+     "single_runs": 28,
+     "run_margin_percent": 9.175066858671055,
+     "per_iteration_margin_percent": 9.175066858671055,
+     "run_sound": true,
+     "runs_with_receptions": 28,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 38.05115545498183,
+     "run_with_receptions_sound": true
+    },
+    "B": {
+     "t_static": 55319,
+     "run_static": 48480,
+     "terms": {
+      "body": 46334,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 47107,
+     "measured_run_min": 47107,
+     "measured_per_iteration": 47107,
+     "single_runs": 28,
+     "run_margin_percent": 2.91464113613688,
+     "per_iteration_margin_percent": 2.91464113613688,
+     "run_sound": true,
+     "runs_with_receptions": 28,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 11.853864606109495,
+     "run_with_receptions_sound": true
+    },
+    "C": {
+     "t_static": 88618,
+     "run_static": 81779,
+     "terms": {
+      "body": 79633,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 81775,
+     "measured_run_min": 81775,
+     "measured_per_iteration": 81775,
+     "single_runs": 28,
+     "run_margin_percent": 0.004891470498318557,
+     "per_iteration_margin_percent": 0.004891470498318557,
+     "run_sound": true,
+     "runs_with_receptions": 28,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 5.154387037603179,
+     "run_with_receptions_sound": true
+    },
+    "D": {
+     "t_static": 21718,
+     "run_static": 14879,
+     "terms": {
+      "body": 12733,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 13346,
+     "measured_run_min": 13346,
+     "measured_per_iteration": 13346,
+     "single_runs": 28,
+     "run_margin_percent": 11.486587741645437,
+     "per_iteration_margin_percent": 11.486587741645437,
+     "run_sound": true,
+     "runs_with_receptions": 28,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 43.03911284279934,
+     "run_with_receptions_sound": true
+    },
+    "E": {
+     "t_static": 45856,
+     "run_static": 38774,
+     "terms": {
+      "body": 35243,
+      "send": 2770,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 486,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 36384,
+     "measured_run_min": 36384,
+     "measured_per_iteration": 36384,
+     "single_runs": 28,
+     "run_margin_percent": 6.56882145998241,
+     "per_iteration_margin_percent": 6.56882145998241,
+     "run_sound": true,
+     "runs_with_receptions": 28,
+     "receptions_per_run_max": 2,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 29.71635883905013,
+     "run_with_receptions_sound": true
+    },
+    "F": {
+     "t_static": 77521,
+     "run_static": 70682,
+     "terms": {
+      "body": 68536,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 69750,
+     "measured_run_min": 69750,
+     "measured_per_iteration": 69750,
+     "single_runs": 28,
+     "run_margin_percent": 1.336200716845878,
+     "per_iteration_margin_percent": 1.336200716845878,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 1.336200716845878,
+     "run_with_receptions_sound": true
+    },
+    "G": {
+     "t_static": 99818,
+     "run_static": 92979,
+     "terms": {
+      "body": 90833,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 93245,
+     "measured_run_min": 92401,
+     "measured_per_iteration": 93214.85714285714,
+     "single_runs": 28,
+     "run_margin_percent": -0.28526998766689904,
+     "per_iteration_margin_percent": -0.2530252688106149,
+     "run_sound": false,
+     "runs_with_receptions": 28,
+     "receptions_per_run_max": 3,
+     "runs_above_run_static": 27,
+     "run_with_receptions_margin_percent": 9.74015432733412,
+     "run_with_receptions_sound": true
+    },
+    "H": {
+     "t_static": 33119,
+     "run_static": 26280,
+     "terms": {
+      "body": 24134,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 25244,
+     "measured_run_min": 25244,
+     "measured_per_iteration": 25244,
+     "single_runs": 28,
+     "run_margin_percent": 4.103945491998099,
+     "per_iteration_margin_percent": 4.103945491998099,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 4.103945491998099,
+     "run_with_receptions_sound": true
+    },
+    "I": {
+     "t_static": 66421,
+     "run_static": 59582,
+     "terms": {
+      "body": 57436,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 59797,
+     "measured_run_min": 59797,
+     "measured_per_iteration": 59797,
+     "single_runs": 28,
+     "run_margin_percent": -0.35954981019114673,
+     "per_iteration_margin_percent": -0.35954981019114673,
+     "run_sound": false,
+     "runs_with_receptions": 28,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 28,
+     "run_with_receptions_margin_percent": 6.682609495459638,
+     "run_with_receptions_sound": true
+    },
+    "J": {
+     "t_static": 106731,
+     "run_static": 91713,
+     "terms": {
+      "body": 90640,
+      "send": 0,
+      "receive": 512,
+      "dispatch": 561,
+      "send_isr": 0,
+      "receive_isr": 12633,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 91761,
+     "measured_run_min": 91202,
+     "measured_per_iteration": 91476.4074074073,
+     "single_runs": 27,
+     "run_margin_percent": -0.05230980481904077,
+     "per_iteration_margin_percent": 0.2586378272804167,
+     "run_sound": false,
+     "runs_with_receptions": 27,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 1,
+     "run_with_receptions_margin_percent": 4.53678578045139,
+     "run_with_receptions_sound": true
+    }
+   },
+   "groups": {
+    "ABDF": {
+     "tasks": [
+      "F",
+      "D",
+      "B",
+      "A"
+     ],
+     "static": 173350,
+     "measured": 146490,
+     "window_max": 146490,
+     "phase_busy_max": 146490,
+     "estimated_input": 181930,
+     "static_margin_percent": 18.33572257491979,
+     "input_margin_percent": 24.192777664004367,
+     "sound": true
+    },
+    "C": {
+     "tasks": [
+      "C"
+     ],
+     "static": 88618,
+     "measured": 81775,
+     "window_max": 81775,
+     "phase_busy_max": 81775,
+     "estimated_input": 96330,
+     "static_margin_percent": 8.368083154998471,
+     "input_margin_percent": 17.798838275756648,
+     "sound": true
+    },
+    "EHI": {
+     "tasks": [
+      "H",
+      "I",
+      "E"
+     ],
+     "static": 145396,
+     "measured": 122534,
+     "window_max": 122534,
+     "phase_busy_max": 122534,
+     "estimated_input": 173370,
+     "static_margin_percent": 18.657678685099647,
+     "input_margin_percent": 41.487260678668775,
+     "sound": true
+    },
+    "GJ": {
+     "tasks": [
+      "J",
+      "G"
+     ],
+     "static": 206549,
+     "measured": 181424.24999999994,
+     "window_max": 184721,
+     "phase_busy_max": 185006,
+     "estimated_input": 217450,
+     "static_margin_percent": 13.848617260371789,
+     "input_margin_percent": 19.857185574695812,
+     "sound": true
+    }
+   },
+   "summary": {
+    "static_margin_percent": {
+     "min": 8.368083154998471,
+     "max": 18.657678685099647,
+     "mean": 14.802525418847424
+    },
+    "input_margin_percent": {
+     "min": 17.798838275756648,
+     "max": 41.487260678668775,
+     "mean": 25.8340155482814
+    },
+    "run_margin_percent": {
+     "min": -0.35954981019114673,
+     "max": 11.486587741645437,
+     "mean": 3.489302527310099
+    },
+    "run_with_receptions_margin_percent": {
+     "min": 1.336200716845878,
+     "max": 43.03911284279934,
+     "mean": 15.421457459263312
+    },
+    "all_groups_sound": true,
+    "all_runs_sound": false,
+    "all_runs_with_receptions_sound": true
+   }
+  },
+  "CAR-V": {
+   "image": {
+    "file": "UCV.image.elf",
+    "kind": "elf",
+    "sha256": "cc47b676b00d17c51c8a8c40ee1d3f3be60d95ee0ecbfb22ddecd740547b302d"
+   },
+   "kernel": {
+    "yield_save": 433,
+    "yield_resume": 39,
+    "dispatch": 472,
+    "tick_dispatch_save": 523,
+    "tick_dispatch_resume": 8,
+    "tick": 1996,
+    "send_isr": 243,
+    "receive_isr_size": 2470,
+    "receive_isr_end": 1019,
+    "receive_isr": 3489,
+    "release": 249
+   },
+   "params": {
+    "tcb": 3,
+    "heap_blocks": 24,
+    "ddma_wait": 1,
+    "name_len": 5
+   },
+   "t": {
+    "FBU1": 88728,
+    "FBU2": 88728,
+    "FBU3": 90397,
+    "FBU4": 60728,
+    "FBU5": 88728,
+    "FBU6": 88728,
+    "FBU7": 88728,
+    "FBU8": 90397,
+    "NAVC": 95449,
+    "BFE1": 92966,
+    "BFE2": 92966,
+    "BFE3": 92966,
+    "BFE4": 92966,
+    "BFE5": 92966,
+    "BFE6": 92966,
+    "BFE7": 92966,
+    "BFE8": 92966,
+    "FDF1": 105462,
+    "FDF2": 105462,
+    "STPH": 97132,
+    "VOD1": 92966,
+    "VOD2": 92966,
+    "OBMG": 91283
+   },
+   "terms": {
+    "FBU1": {
+     "body": 84380,
+     "send": 1385,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "FBU2": {
+     "body": 84380,
+     "send": 1385,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "FBU3": {
+     "body": 84421,
+     "send": 2770,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 486,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "FBU4": {
+     "body": 56380,
+     "send": 1385,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "FBU5": {
+     "body": 84380,
+     "send": 1385,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "FBU6": {
+     "body": 84380,
+     "send": 1385,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "FBU7": {
+     "body": 84380,
+     "send": 1385,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "FBU8": {
+     "body": 84421,
+     "send": 2770,
+     "receive": 0,
+     "dispatch": 475,
+     "send_isr": 486,
+     "receive_isr": 0,
+     "tick": 1996,
+     "release": 249
+    },
+    "NAVC": {
+     "body": 85395,
+     "send": 0,
+     "receive": 356,
+     "dispatch": 475,
+     "send_isr": 0,
+     "receive_isr": 6978,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE1": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE2": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE3": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE4": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE5": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE6": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE7": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "BFE8": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "FDF1": {
+     "body": 86490,
+     "send": 1385,
+     "receive": 668,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 13956,
+     "tick": 1996,
+     "release": 249
+    },
+    "FDF2": {
+     "body": 86490,
+     "send": 1385,
+     "receive": 668,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 13956,
+     "tick": 1996,
+     "release": 249
+    },
+    "STPH": {
+     "body": 85450,
+     "send": 1385,
+     "receive": 356,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 6978,
+     "tick": 1996,
+     "release": 249
+    },
+    "VOD1": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "VOD2": {
+     "body": 84929,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 243,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    },
+    "OBMG": {
+     "body": 84874,
+     "send": 0,
+     "receive": 200,
+     "dispatch": 475,
+     "send_isr": 0,
+     "receive_isr": 3489,
+     "tick": 1996,
+     "release": 249
+    }
+   },
+   "clock_hz": 380000000,
+   "windows": 2,
+   "tasks": {
+    "FBU1": {
+     "t_static": 88728,
+     "run_static": 86240,
+     "terms": {
+      "body": 84380,
+      "send": 1385,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 85193,
+     "measured_run_min": 85193,
+     "measured_per_iteration": 85193,
+     "single_runs": 10,
+     "run_margin_percent": 1.2289742114962496,
+     "per_iteration_margin_percent": 1.2289742114962496,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 5.324381111124153,
+     "run_with_receptions_sound": true
+    },
+    "FBU2": {
+     "t_static": 88728,
+     "run_static": 86240,
+     "terms": {
+      "body": 84380,
+      "send": 1385,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 85193,
+     "measured_run_min": 85193,
+     "measured_per_iteration": 85193,
+     "single_runs": 10,
+     "run_margin_percent": 1.2289742114962496,
+     "per_iteration_margin_percent": 1.2289742114962496,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 5.324381111124153,
+     "run_with_receptions_sound": true
+    },
+    "FBU3": {
+     "t_static": 90397,
+     "run_static": 87666,
+     "terms": {
+      "body": 84421,
+      "send": 2770,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 486,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86265,
+     "measured_run_min": 86265,
+     "measured_per_iteration": 86265,
+     "single_runs": 10,
+     "run_margin_percent": 1.6240653799339246,
+     "per_iteration_margin_percent": 1.6240653799339246,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 5.668579377499565,
+     "run_with_receptions_sound": true
+    },
+    "FBU4": {
+     "t_static": 60728,
+     "run_static": 58240,
+     "terms": {
+      "body": 56380,
+      "send": 1385,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 57193,
+     "measured_run_min": 57193,
+     "measured_per_iteration": 57193,
+     "single_runs": 10,
+     "run_margin_percent": 1.8306436102320214,
+     "per_iteration_margin_percent": 1.8306436102320214,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 7.931040511950763,
+     "run_with_receptions_sound": true
+    },
+    "FBU5": {
+     "t_static": 88728,
+     "run_static": 86240,
+     "terms": {
+      "body": 84380,
+      "send": 1385,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 85193,
+     "measured_run_min": 85193,
+     "measured_per_iteration": 85193,
+     "single_runs": 10,
+     "run_margin_percent": 1.2289742114962496,
+     "per_iteration_margin_percent": 1.2289742114962496,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 5.324381111124153,
+     "run_with_receptions_sound": true
+    },
+    "FBU6": {
+     "t_static": 88728,
+     "run_static": 86240,
+     "terms": {
+      "body": 84380,
+      "send": 1385,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 85193,
+     "measured_run_min": 85193,
+     "measured_per_iteration": 85193,
+     "single_runs": 10,
+     "run_margin_percent": 1.2289742114962496,
+     "per_iteration_margin_percent": 1.2289742114962496,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 5.324381111124153,
+     "run_with_receptions_sound": true
+    },
+    "FBU7": {
+     "t_static": 88728,
+     "run_static": 86240,
+     "terms": {
+      "body": 84380,
+      "send": 1385,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 85806,
+     "measured_run_min": 85806,
+     "measured_per_iteration": 85806,
+     "single_runs": 10,
+     "run_margin_percent": 0.5057921357480829,
+     "per_iteration_margin_percent": 0.5057921357480829,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.5057921357480829,
+     "run_with_receptions_sound": true
+    },
+    "FBU8": {
+     "t_static": 90397,
+     "run_static": 87666,
+     "terms": {
+      "body": 84421,
+      "send": 2770,
+      "receive": 0,
+      "dispatch": 475,
+      "send_isr": 486,
+      "receive_isr": 0,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86265,
+     "measured_run_min": 86265,
+     "measured_per_iteration": 86265,
+     "single_runs": 10,
+     "run_margin_percent": 1.6240653799339246,
+     "per_iteration_margin_percent": 1.6240653799339246,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 5.668579377499565,
+     "run_with_receptions_sound": true
+    },
+    "NAVC": {
+     "t_static": 95449,
+     "run_static": 86226,
+     "terms": {
+      "body": 85395,
+      "send": 0,
+      "receive": 356,
+      "dispatch": 475,
+      "send_isr": 0,
+      "receive_isr": 6978,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 85425,
+     "measured_run_min": 85425,
+     "measured_per_iteration": 85425,
+     "single_runs": 10,
+     "run_margin_percent": 0.9376646180860404,
+     "per_iteration_margin_percent": 0.9376646180860404,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9376646180860404,
+     "run_with_receptions_sound": true
+    },
+    "BFE1": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86156,
+     "measured_run_min": 86156,
+     "measured_per_iteration": 86156,
+     "single_runs": 10,
+     "run_margin_percent": 0.9668508287292817,
+     "per_iteration_margin_percent": 0.9668508287292817,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9668508287292817,
+     "run_with_receptions_sound": true
+    },
+    "BFE2": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86156,
+     "measured_run_min": 86156,
+     "measured_per_iteration": 86156,
+     "single_runs": 10,
+     "run_margin_percent": 0.9668508287292817,
+     "per_iteration_margin_percent": 0.9668508287292817,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9668508287292817,
+     "run_with_receptions_sound": true
+    },
+    "BFE3": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86155,
+     "measured_run_min": 86155,
+     "measured_per_iteration": 86155,
+     "single_runs": 10,
+     "run_margin_percent": 0.9680227496953165,
+     "per_iteration_margin_percent": 0.9680227496953165,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9680227496953165,
+     "run_with_receptions_sound": true
+    },
+    "BFE4": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86156,
+     "measured_run_min": 86156,
+     "measured_per_iteration": 86156,
+     "single_runs": 10,
+     "run_margin_percent": 0.9668508287292817,
+     "per_iteration_margin_percent": 0.9668508287292817,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9668508287292817,
+     "run_with_receptions_sound": true
+    },
+    "BFE5": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86156,
+     "measured_run_min": 86156,
+     "measured_per_iteration": 86156,
+     "single_runs": 10,
+     "run_margin_percent": 0.9668508287292817,
+     "per_iteration_margin_percent": 0.9668508287292817,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9668508287292817,
+     "run_with_receptions_sound": true
+    },
+    "BFE6": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86156,
+     "measured_run_min": 86156,
+     "measured_per_iteration": 86156,
+     "single_runs": 10,
+     "run_margin_percent": 0.9668508287292817,
+     "per_iteration_margin_percent": 0.9668508287292817,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9668508287292817,
+     "run_with_receptions_sound": true
+    },
+    "BFE7": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86579,
+     "measured_run_min": 86579,
+     "measured_per_iteration": 86579,
+     "single_runs": 10,
+     "run_margin_percent": 0.47355594312708627,
+     "per_iteration_margin_percent": 0.47355594312708627,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.47355594312708627,
+     "run_with_receptions_sound": true
+    },
+    "BFE8": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86155,
+     "measured_run_min": 86155,
+     "measured_per_iteration": 86155,
+     "single_runs": 10,
+     "run_margin_percent": 0.9680227496953165,
+     "per_iteration_margin_percent": 0.9680227496953165,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.9680227496953165,
+     "run_with_receptions_sound": true
+    },
+    "FDF1": {
+     "t_static": 105462,
+     "run_static": 89018,
+     "terms": {
+      "body": 86490,
+      "send": 1385,
+      "receive": 668,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 13956,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 88223,
+     "measured_run_min": 88143,
+     "measured_per_iteration": 88178.2,
+     "single_runs": 10,
+     "run_margin_percent": 0.9011255568275847,
+     "per_iteration_margin_percent": 0.9523895928925777,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 4.855876585470909,
+     "run_with_receptions_sound": true
+    },
+    "FDF2": {
+     "t_static": 105462,
+     "run_static": 89018,
+     "terms": {
+      "body": 86490,
+      "send": 1385,
+      "receive": 668,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 13956,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 88993,
+     "measured_run_min": 88923,
+     "measured_per_iteration": 88959.79999999996,
+     "single_runs": 10,
+     "run_margin_percent": 0.02809209713123504,
+     "per_iteration_margin_percent": 0.06542280895420266,
+     "run_sound": true,
+     "runs_with_receptions": 10,
+     "receptions_per_run_max": 2,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 7.869158248401559,
+     "run_with_receptions_sound": true
+    },
+    "STPH": {
+     "t_static": 97132,
+     "run_static": 87666,
+     "terms": {
+      "body": 85450,
+      "send": 1385,
+      "receive": 356,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 6978,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86510,
+     "measured_run_min": 86510,
+     "measured_per_iteration": 86510,
+     "single_runs": 10,
+     "run_margin_percent": 1.336261703849266,
+     "per_iteration_margin_percent": 1.336261703849266,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 1.336261703849266,
+     "run_with_receptions_sound": true
+    },
+    "VOD1": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86318,
+     "measured_run_min": 86318,
+     "measured_per_iteration": 86318,
+     "single_runs": 10,
+     "run_margin_percent": 0.7773581408281007,
+     "per_iteration_margin_percent": 0.7773581408281007,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.7773581408281007,
+     "run_with_receptions_sound": true
+    },
+    "VOD2": {
+     "t_static": 92966,
+     "run_static": 86989,
+     "terms": {
+      "body": 84929,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 243,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 86318,
+     "measured_run_min": 86318,
+     "measured_per_iteration": 86318,
+     "single_runs": 10,
+     "run_margin_percent": 0.7773581408281007,
+     "per_iteration_margin_percent": 0.7773581408281007,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.7773581408281007,
+     "run_with_receptions_sound": true
+    },
+    "OBMG": {
+     "t_static": 91283,
+     "run_static": 85549,
+     "terms": {
+      "body": 84874,
+      "send": 0,
+      "receive": 200,
+      "dispatch": 475,
+      "send_isr": 0,
+      "receive_isr": 3489,
+      "tick": 1996,
+      "release": 249
+     },
+     "measured_run_max": 85070,
+     "measured_run_min": 85070,
+     "measured_per_iteration": 85070,
+     "single_runs": 10,
+     "run_margin_percent": 0.5630657105912777,
+     "per_iteration_margin_percent": 0.5630657105912777,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 0.5630657105912777,
+     "run_with_receptions_sound": true
+    }
+   },
+   "groups": {
+    "0-0": {
+     "tasks": [
+      "NAVC"
+     ],
+     "static": 95449,
+     "measured": 85425,
+     "attributed": 85425,
+     "window_max": 85425,
+     "phase_busy_max": 85425,
+     "estimated_input": 95000,
+     "static_margin_percent": 11.734269827333918,
+     "input_margin_percent": 11.208662569505414,
+     "sound": true
+    },
+    "1-0": {
+     "tasks": [
+      "FBU4",
+      "BFE4"
+     ],
+     "static": 153694,
+     "measured": 143349,
+     "attributed": 143349,
+     "window_max": 143349,
+     "phase_busy_max": 143349,
+     "estimated_input": 161998,
+     "static_margin_percent": 7.216653063502362,
+     "input_margin_percent": 13.009508263050318,
+     "sound": true
+    },
+    "2-0": {
+     "tasks": [
+      "FBU1",
+      "BFE1"
+     ],
+     "static": 181694,
+     "measured": 171349,
+     "attributed": 171349,
+     "window_max": 171349,
+     "phase_busy_max": 171349,
+     "estimated_input": 190000,
+     "static_margin_percent": 6.0373856865228275,
+     "input_margin_percent": 10.884802362429895,
+     "sound": true
+    },
+    "3-0": {
+     "tasks": [
+      "FBU2",
+      "BFE2"
+     ],
+     "static": 181694,
+     "measured": 171349,
+     "attributed": 171349,
+     "window_max": 171349,
+     "phase_busy_max": 171349,
+     "estimated_input": 190000,
+     "static_margin_percent": 6.0373856865228275,
+     "input_margin_percent": 10.884802362429895,
+     "sound": true
+    },
+    "0-1": {
+     "tasks": [
+      "FBU3",
+      "VOD1"
+     ],
+     "static": 183363,
+     "measured": 172583,
+     "attributed": 172583,
+     "window_max": 172583,
+     "phase_busy_max": 172583,
+     "estimated_input": 190000,
+     "static_margin_percent": 6.246269910709629,
+     "input_margin_percent": 10.091955754622413,
+     "sound": true
+    },
+    "1-1": {
+     "tasks": [
+      "FBU8",
+      "VOD2"
+     ],
+     "static": 183363,
+     "measured": 172583,
+     "attributed": 172583,
+     "window_max": 172583,
+     "phase_busy_max": 172583,
+     "estimated_input": 190000,
+     "static_margin_percent": 6.246269910709629,
+     "input_margin_percent": 10.091955754622413,
+     "sound": true
+    },
+    "2-1": {
+     "tasks": [
+      "BFE3"
+     ],
+     "static": 92966,
+     "measured": 86155,
+     "attributed": 86155,
+     "window_max": 86155,
+     "phase_busy_max": 86155,
+     "estimated_input": 95000,
+     "static_margin_percent": 7.905519122511752,
+     "input_margin_percent": 10.266380360977308,
+     "sound": true
+    },
+    "3-1": {
+     "tasks": [
+      "FBU5",
+      "BFE5"
+     ],
+     "static": 181694,
+     "measured": 171349,
+     "attributed": 171349,
+     "window_max": 171349,
+     "phase_busy_max": 171349,
+     "estimated_input": 190000,
+     "static_margin_percent": 6.0373856865228275,
+     "input_margin_percent": 10.884802362429895,
+     "sound": true
+    },
+    "0-2": {
+     "tasks": [
+      "FBU7"
+     ],
+     "static": 88728,
+     "measured": 85806,
+     "attributed": 85806,
+     "window_max": 85806,
+     "phase_busy_max": 85806,
+     "estimated_input": 95000,
+     "static_margin_percent": 3.405356268792392,
+     "input_margin_percent": 10.714868424119526,
+     "sound": true
+    },
+    "1-2": {
+     "tasks": [
+      "BFE8"
+     ],
+     "static": 92966,
+     "measured": 86155,
+     "attributed": 86155,
+     "window_max": 86155,
+     "phase_busy_max": 86155,
+     "estimated_input": 95000,
+     "static_margin_percent": 7.905519122511752,
+     "input_margin_percent": 10.266380360977308,
+     "sound": true
+    },
+    "2-2": {
+     "tasks": [
+      "BFE7"
+     ],
+     "static": 92966,
+     "measured": 86579,
+     "attributed": 86579,
+     "window_max": 86579,
+     "phase_busy_max": 86579,
+     "estimated_input": 95000,
+     "static_margin_percent": 7.3770775823236585,
+     "input_margin_percent": 9.726377066032178,
+     "sound": true
+    },
+    "3-2": {
+     "tasks": [
+      "FBU6",
+      "BFE6"
+     ],
+     "static": 181694,
+     "measured": 171349,
+     "attributed": 171349,
+     "window_max": 171349,
+     "phase_busy_max": 171349,
+     "estimated_input": 190000,
+     "static_margin_percent": 6.0373856865228275,
+     "input_margin_percent": 10.884802362429895,
+     "sound": true
+    },
+    "0-3": {
+     "tasks": [
+      "STPH"
+     ],
+     "static": 97132,
+     "measured": 86510,
+     "attributed": 86510,
+     "window_max": 86510,
+     "phase_busy_max": 86510,
+     "estimated_input": 95000,
+     "static_margin_percent": 12.278349323777597,
+     "input_margin_percent": 9.81389434747428,
+     "sound": true
+    },
+    "1-3": {
+     "tasks": [
+      "FDF2"
+     ],
+     "static": 105462,
+     "measured": 88959.8,
+     "attributed": 88956.466667,
+     "window_max": 88969.8,
+     "phase_busy_max": 88993,
+     "estimated_input": 95000,
+     "static_margin_percent": 18.550176596620044,
+     "input_margin_percent": 6.7898084303247055,
+     "sound": true
+    },
+    "2-3": {
+     "tasks": [
+      "FDF1"
+     ],
+     "static": 105462,
+     "measured": 88178.2,
+     "attributed": 88176.733333,
+     "window_max": 88195.8,
+     "phase_busy_max": 88223,
+     "estimated_input": 95000,
+     "static_margin_percent": 19.60098981380886,
+     "input_margin_percent": 7.7363792864903145,
+     "sound": true
+    },
+    "3-3": {
+     "tasks": [
+      "OBMG"
+     ],
+     "static": 91283,
+     "measured": 85070,
+     "attributed": 85070,
+     "window_max": 85070,
+     "phase_busy_max": 85070,
+     "estimated_input": 95000,
+     "static_margin_percent": 7.303397202303985,
+     "input_margin_percent": 11.672740096391207,
+     "sound": true
+    }
+   },
+   "summary": {
+    "static_margin_percent": {
+     "min": 3.405356268792392,
+     "max": 19.60098981380886,
+     "mean": 8.744961905687305
+    },
+    "input_margin_percent": {
+     "min": 6.7898084303247055,
+     "max": 13.009508263050318,
+     "mean": 10.308007510269185
+    },
+    "run_margin_percent": {
+     "min": 0.02809209713123504,
+     "max": 1.8306436102320214,
+     "mean": 1.002836735049508
+    },
+    "run_with_receptions_margin_percent": {
+     "min": 0.47355594312708627,
+     "max": 7.931040511950763,
+     "mean": 2.844874547017999
+    },
+    "all_groups_sound": true,
+    "all_runs_sound": true,
+    "all_runs_with_receptions_sound": true
+   }
+  },
+  "WCET-E": {
+   "image": {
+    "file": "W3.image.elf",
+    "kind": "elf",
+    "sha256": "b1bdc0383ec215a39d29c4efa20393961876b215421c1d6529bce67ab5d039da"
+   },
+   "kernel": {
+    "yield_save": 519,
+    "yield_resume": 39,
+    "dispatch": 558,
+    "tick_dispatch_save": 663,
+    "tick_dispatch_resume": 8,
+    "tick": 2136,
+    "send_isr": 243,
+    "receive_isr_size": 3174,
+    "receive_isr_end": 1037,
+    "receive_isr": 4211,
+    "release": 249
+   },
+   "params": {
+    "tcb": 5,
+    "heap_blocks": 32,
+    "ddma_wait": 1,
+    "name_len": 5
+   },
+   "t": {
+    "A": 9688,
+    "B": 37854,
+    "C": 27237,
+    "D": 12963,
+    "E": 40303,
+    "F": 19471,
+    "G": 63999,
+    "H": 14217,
+    "I": 19471,
+    "J": 47251
+   },
+   "terms": {
+    "A": {
+     "body": 3486,
+     "send": 2770,
+     "receive": 0,
+     "dispatch": 561,
+     "send_isr": 486,
+     "receive_isr": 0,
+     "tick": 2136,
+     "release": 249
+    },
+    "B": {
+     "body": 28869,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "C": {
+     "body": 18252,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "D": {
+     "body": 3978,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "E": {
+     "body": 29690,
+     "send": 2770,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 486,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "F": {
+     "body": 10486,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "G": {
+     "body": 55014,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "H": {
+     "body": 5232,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "I": {
+     "body": 10486,
+     "send": 1385,
+     "receive": 200,
+     "dispatch": 561,
+     "send_isr": 243,
+     "receive_isr": 4211,
+     "tick": 2136,
+     "release": 249
+    },
+    "J": {
+     "body": 31160,
+     "send": 0,
+     "receive": 512,
+     "dispatch": 561,
+     "send_isr": 0,
+     "receive_isr": 12633,
+     "tick": 2136,
+     "release": 249
+    }
+   },
+   "clock_hz": 500000000,
+   "windows": 2,
+   "tasks": {
+    "A": {
+     "t_static": 9688,
+     "run_static": 6817,
+     "terms": {
+      "body": 3486,
+      "send": 2770,
+      "receive": 0,
+      "dispatch": 561,
+      "send_isr": 486,
+      "receive_isr": 0,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 5639,
+     "measured_run_min": 5182,
+     "measured_per_iteration": 5538.250000000001,
+     "single_runs": 8,
+     "run_margin_percent": 20.890228763965244,
+     "per_iteration_margin_percent": 23.089423554371848,
+     "run_sound": true,
+     "runs_with_receptions": 8,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 95.56658982089023,
+     "run_with_receptions_sound": true
+    },
+    "B": {
+     "t_static": 37854,
+     "run_static": 31015,
+     "terms": {
+      "body": 28869,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 18010,
+     "measured_run_min": 14772,
+     "measured_per_iteration": 16834.5,
+     "single_runs": 8,
+     "run_margin_percent": 72.20988339811215,
+     "per_iteration_margin_percent": 84.23475600700941,
+     "run_sound": true,
+     "runs_with_receptions": 8,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 95.59133814547474,
+     "run_with_receptions_sound": true
+    },
+    "C": {
+     "t_static": 27237,
+     "run_static": 20398,
+     "terms": {
+      "body": 18252,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 15573,
+     "measured_run_min": 7413,
+     "measured_per_iteration": 10053,
+     "single_runs": 8,
+     "run_margin_percent": 30.98311179605728,
+     "per_iteration_margin_percent": 102.90460559037103,
+     "run_sound": true,
+     "runs_with_receptions": 8,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 58.02350221537276,
+     "run_with_receptions_sound": true
+    },
+    "D": {
+     "t_static": 12963,
+     "run_static": 6124,
+     "terms": {
+      "body": 3978,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 4540,
+     "measured_run_min": 3966,
+     "measured_per_iteration": 4255.375,
+     "single_runs": 8,
+     "run_margin_percent": 34.88986784140969,
+     "per_iteration_margin_percent": 43.91211115354111,
+     "run_sound": true,
+     "runs_with_receptions": 8,
+     "receptions_per_run_max": 1,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 127.6431718061674,
+     "run_with_receptions_sound": true
+    },
+    "E": {
+     "t_static": 40303,
+     "run_static": 33221,
+     "terms": {
+      "body": 29690,
+      "send": 2770,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 486,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 21078,
+     "measured_run_min": 18344,
+     "measured_per_iteration": 19610.375000000004,
+     "single_runs": 8,
+     "run_margin_percent": 57.60983015466363,
+     "per_iteration_margin_percent": 69.40522555025079,
+     "run_sound": true,
+     "runs_with_receptions": 8,
+     "receptions_per_run_max": 3,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 117.54435904734794,
+     "run_with_receptions_sound": true
+    },
+    "F": {
+     "t_static": 19471,
+     "run_static": 12632,
+     "terms": {
+      "body": 10486,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 11469,
+     "measured_run_min": 4089,
+     "measured_per_iteration": 8356.5,
+     "single_runs": 8,
+     "run_margin_percent": 10.14037841136978,
+     "per_iteration_margin_percent": 51.16376473403937,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 10.14037841136978,
+     "run_with_receptions_sound": true
+    },
+    "G": {
+     "t_static": 63999,
+     "run_static": 57160,
+     "terms": {
+      "body": 55014,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 21720,
+     "measured_run_min": 9558,
+     "measured_per_iteration": 14999.625,
+     "single_runs": 8,
+     "run_margin_percent": 163.16758747697975,
+     "per_iteration_margin_percent": 281.07619357150594,
+     "run_sound": true,
+     "runs_with_receptions": 8,
+     "receptions_per_run_max": 4,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 240.4868767684652,
+     "run_with_receptions_sound": true
+    },
+    "H": {
+     "t_static": 14217,
+     "run_static": 7378,
+     "terms": {
+      "body": 5232,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 6291,
+     "measured_run_min": 5539,
+     "measured_per_iteration": 6006.125,
+     "single_runs": 8,
+     "run_margin_percent": 17.27865204260054,
+     "per_iteration_margin_percent": 22.841266207413266,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 17.27865204260054,
+     "run_with_receptions_sound": true
+    },
+    "I": {
+     "t_static": 19471,
+     "run_static": 12632,
+     "terms": {
+      "body": 10486,
+      "send": 1385,
+      "receive": 200,
+      "dispatch": 561,
+      "send_isr": 243,
+      "receive_isr": 4211,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 11655,
+     "measured_run_min": 4185,
+     "measured_per_iteration": 8122.5,
+     "single_runs": 8,
+     "run_margin_percent": 8.382668382668383,
+     "per_iteration_margin_percent": 55.51862111418898,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 8.382668382668383,
+     "run_with_receptions_sound": true
+    },
+    "J": {
+     "t_static": 47251,
+     "run_static": 32233,
+     "terms": {
+      "body": 31160,
+      "send": 0,
+      "receive": 512,
+      "dispatch": 561,
+      "send_isr": 0,
+      "receive_isr": 12633,
+      "tick": 2136,
+      "release": 249
+     },
+     "measured_run_max": 17081,
+     "measured_run_min": 5479,
+     "measured_per_iteration": 9864.75,
+     "single_runs": 8,
+     "run_margin_percent": 88.70675019026989,
+     "per_iteration_margin_percent": 226.74928406700627,
+     "run_sound": true,
+     "runs_with_receptions": 0,
+     "receptions_per_run_max": 0,
+     "runs_above_run_static": 0,
+     "run_with_receptions_margin_percent": 88.70675019026989,
+     "run_with_receptions_sound": true
+    }
+   },
+   "groups": {
+    "0-0": {
+     "tasks": [
+      "A",
+      "B",
+      "D",
+      "F"
+     ],
+     "static": 79976,
+     "measured": 36748.625,
+     "attributed": 36481.785714,
+     "window_max": 38036.25,
+     "phase_busy_max": 41422,
+     "estimated_input": 77148,
+     "static_margin_percent": 117.62991132321277,
+     "input_margin_percent": 109.93438530013027,
+     "sound": true
+    },
+    "1-0": {
+     "tasks": [
+      "C"
+     ],
+     "static": 27237,
+     "measured": 10053,
+     "attributed": 9849.923077,
+     "window_max": 11013,
+     "phase_busy_max": 16533,
+     "estimated_input": 26419,
+     "static_margin_percent": 170.9340495374515,
+     "input_margin_percent": 162.797174972645,
+     "sound": true
+    },
+    "0-1": {
+     "tasks": [
+      "E",
+      "H",
+      "I"
+     ],
+     "static": 73991,
+     "measured": 34888,
+     "attributed": 34246.333333,
+     "window_max": 36956.75,
+     "phase_busy_max": 40154,
+     "estimated_input": 71525,
+     "static_margin_percent": 112.08151800045862,
+     "input_margin_percent": 105.01318504930062,
+     "sound": true
+    },
+    "1-1": {
+     "tasks": [
+      "J",
+      "G"
+     ],
+     "static": 111250,
+     "measured": 24864.375,
+     "attributed": 25749.335664,
+     "window_max": 24982.5,
+     "phase_busy_max": 38801,
+     "estimated_input": 109571,
+     "static_margin_percent": 347.42729306487695,
+     "input_margin_percent": 340.67466003066636,
+     "sound": true
+    }
+   },
+   "summary": {
+    "static_margin_percent": {
+     "min": 112.08151800045862,
+     "max": 347.42729306487695,
+     "mean": 187.01819298149996
+    },
+    "input_margin_percent": {
+     "min": 105.01318504930062,
+     "max": 340.67466003066636,
+     "mean": 179.60485133818557
+    },
+    "run_margin_percent": {
+     "min": 8.382668382668383,
+     "max": 163.16758747697975,
+     "mean": 50.425895845809634
+    },
+    "run_with_receptions_margin_percent": {
+     "min": 8.382668382668383,
+     "max": 240.4868767684652,
+     "mean": 85.93642868306269
+    },
+    "all_groups_sound": true,
+    "all_runs_sound": true,
+    "all_runs_with_receptions_sound": true
+   }
+  }
+ },
+ "bodies": {
+  "sort": {
+   "calls": 12,
+   "measured_max": 25341,
+   "measured_min": 1275,
+   "wcet_wrapper": 26134,
+   "wcet_body": 26105,
+   "margin_percent": 3.1293161280138904,
+   "sound": true
+  },
+  "search": {
+   "calls": 12,
+   "measured_max": 601,
+   "measured_min": 27,
+   "wcet_wrapper": 620,
+   "wcet_body": 588,
+   "margin_percent": 3.1613976705490847,
+   "sound": true
+  },
+  "count": {
+   "calls": 12,
+   "measured_max": 3852,
+   "measured_min": 30,
+   "wcet_wrapper": 3886,
+   "wcet_body": 3857,
+   "margin_percent": 0.8826583592938733,
+   "sound": true
+  }
+ },
+ "flow": {
+  "synthetic-app-e-ONTO-hermes2x2.map": {
+   "static": {
+    "f_cpu_hz": 413098000.0,
+    "f_star_hz": 292625427.24609375,
+    "frequency_hz": 413098000.0,
+    "binding": "cpu"
+   },
+   "measured": {
+    "f_cpu_hz": 434900000.0,
+    "f_star_hz": 327690124.51171875,
+    "frequency_hz": 434900000.0,
+    "binding": "cpu"
+   },
+   "cpu_demand_static": {
+    "0": 173350,
+    "1": 88618,
+    "2": 145396,
+    "3": 206549
+   },
+   "cpu_demand_measured": {
+    "0": 181930,
+    "1": 96330,
+    "2": 173370,
+    "3": 217450
+   }
+  },
+  "spiral": {
+   "static": {
+    "f_cpu_hz": 413098000.0,
+    "f_star_hz": 292625427.24609375,
+    "frequency_hz": 413098000.0,
+    "binding": "cpu"
+   },
+   "measured": {
+    "f_cpu_hz": 434900000.0,
+    "f_star_hz": 327690124.51171875,
+    "frequency_hz": 434900000.0,
+    "binding": "cpu"
+   },
+   "cpu_demand_static": {
+    "0": 88618,
+    "1": 173350,
+    "2": 206549,
+    "3": 145396
+   },
+   "cpu_demand_measured": {
+    "0": 96330,
+    "1": 181930,
+    "2": 217450,
+    "3": 173370
+   }
+  }
+ }
+}

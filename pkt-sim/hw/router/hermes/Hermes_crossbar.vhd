@@ -41,18 +41,21 @@ begin
 			data_av(WEST)  when tab_out(LOCAL)="001" and free(LOCAL)='0' else
 			data_av(NORTH) when tab_out(LOCAL)="010" and free(LOCAL)='0' else
 			data_av(SOUTH) when tab_out(LOCAL)="011" and free(LOCAL)='0' else
+			data_av(LOCAL) when tab_out(LOCAL)="100" and free(LOCAL)='0' else -- loopback
 			'0';
 
 	data_out(LOCAL) <= data_in(EAST) when tab_out(LOCAL)="000" and free(LOCAL)='0' else
 			data_in(WEST)  when tab_out(LOCAL)="001" and free(LOCAL)='0' else
 			data_in(NORTH) when tab_out(LOCAL)="010" and free(LOCAL)='0' else
 			data_in(SOUTH) when tab_out(LOCAL)="011" and free(LOCAL)='0' else
+			data_in(LOCAL) when tab_out(LOCAL)="100" and free(LOCAL)='0' else -- loopback
 			(others=>'0');
 
 	data_ack(LOCAL) <= credit_i(EAST) when tab_in(LOCAL)="000" and data_av(LOCAL)='1' else
 			credit_i(WEST)  when tab_in(LOCAL)="001" and data_av(LOCAL)='1' else
 			credit_i(NORTH) when tab_in(LOCAL)="010" and data_av(LOCAL)='1' else
 			credit_i(SOUTH) when tab_in(LOCAL)="011" and data_av(LOCAL)='1' else
+			credit_i(LOCAL) when tab_in(LOCAL)="100" and data_av(LOCAL)='1' else -- loopback
 			'0';
 ----------------------------------------------------------------------------------
 -- PORTA EAST

@@ -30,8 +30,9 @@ volatile uint32_t* DDMA_RECV_SIZE_OUT = (volatile uint32_t*)(0x20000020);
 volatile uint32_t* DDMA_RECV_CMD_IN   = (volatile uint32_t*)(0x20000024);
 
 
+// linear node address: a = y * DIMX + x (inverse of _ddma_atox/_ddma_atoy)
 uint32_t _ddma_node_addr(){
-  return DDMA_NODE_Y * DDMA_NODE_DIMY + DDMA_NODE_X;
+  return DDMA_NODE_Y * DDMA_NODE_DIMX + DDMA_NODE_X;
 }
 
 uint32_t _ddma_atox(uint32_t addr){
@@ -39,11 +40,11 @@ uint32_t _ddma_atox(uint32_t addr){
 }
 
 uint32_t _ddma_atoy(uint32_t addr){
-  return (addr / DDMA_NODE_DIMY);
+  return (addr / DDMA_NODE_DIMX);
 }
 
 uint32_t _ddma_xyta(uint32_t x, uint32_t y){
-  return (x << 8) & y;
+  return (x << 8) | y;
 }
 
 void _ddma_init(){
@@ -57,10 +58,34 @@ uint32_t _ddma_send(uint32_t dest, uint32_t size, uint32_t* payload){
   // size is measured in flits, not bytes
   uint32_t data_size = (size % 4 == 0) ? (size / 4) : ((size / 4) + 1);
 
+  // a size flit equal to 0 corrupts the router input port (the Hermes
+  // buffer reads the next flit as the size); refuse empty packets
+  if (data_size == 0)
+    return 1;
+
   *DDMA_SEND_SIZE_IN = data_size;
   *DDMA_SEND_ADDR_IN = (uint32_t) payload;
   *DDMA_SEND_CMD_IN  = 0x1; // starts dma copy
   return 0;
+}
+
+// XY address of node `dest` for DDMA_SEND_DEST_IN and number of flits of
+// a packet of `size` bytes: the conversions of _ddma_send, for a send that
+// a handler issues later with _ddma_send_xy (lib/noc_tt.c)
+uint32_t _ddma_dest_xy(uint32_t dest){
+  return (_ddma_atox(dest) << 8) | _ddma_atoy(dest);
+}
+
+uint32_t _ddma_flits(uint32_t size){
+  return (size % 4 == 0) ? (size / 4) : ((size / 4) + 1);
+}
+
+// _ddma_send with the XY address and the size in flits (at least 1)
+void _ddma_send_xy(uint32_t xy, uint32_t flits, uint32_t* payload){
+  *DDMA_SEND_DEST_IN = xy;
+  *DDMA_SEND_SIZE_IN = flits;
+  *DDMA_SEND_ADDR_IN = (uint32_t) payload;
+  *DDMA_SEND_CMD_IN  = 0x1; // starts dma copy
 }
 
 void _ddma_send_ack(){
