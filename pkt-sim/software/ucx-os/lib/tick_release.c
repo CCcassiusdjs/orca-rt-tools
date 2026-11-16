@@ -29,6 +29,10 @@ static volatile uint32_t tr_pending = 0;   /* release interrupts not applied yet
 static volatile uint32_t tr_phase = 0;     /* phase index of this PE */
 static uint32_t tr_wait[MAX_TASKS];        /* phase a blocked task waits for (0: none) */
 static uint32_t tr_last[MAX_TASKS];        /* phase of the previous start of each task */
+#ifdef UCX_NOC_TT
+static uint32_t tr_phase_tick = 0;         /* tick (lib/noc_tt.c) at which tr_phase took its value */
+static uint32_t tr_tick[MAX_TASKS];        /* tick of the phase of the current job of each task */
+#endif
 
 /* release interrupt (manycore_pe.sv, wake-up generator); interrupts stay
  * disabled until the return of _isr (kernel/sched.c, UCX_ISR_NESTING) */
@@ -53,10 +57,21 @@ void ucx_app_tick(void)
 {
 	struct tcb_s *p;
 
+#ifdef UCX_NOC_TT
+	/* the release generator raises its request before the tick of its
+	 * phase, and the link schedule keeps any handler that runs at the
+	 * request from reaching the tick (premise (ii) of the analysis); a
+	 * request pending here is served first */
+	if (IRQ_CAUSE & MASK_IRQ4)
+		irq4_handler();
+#endif
 	if (!tr_pending)
 		return;
 	tr_phase += tr_pending;
 	tr_pending = 0;
+#ifdef UCX_NOC_TT
+	tr_phase_tick = ucx_noc_tt_ticks();
+#endif
 
 	p = kcb_p->tcb_first;
 	do {
@@ -72,6 +87,16 @@ uint32_t ucx_phase(void)
 {
 	return tr_phase;
 }
+
+#ifdef UCX_NOC_TT
+/* tick of the phase of the current job of the calling task, recorded by
+ * ucx_phase_wait with interrupts disabled (a tick between the reads of
+ * tr_phase and tr_phase_tick cannot mix two phases) */
+uint32_t ucx_job_tick(void)
+{
+	return tr_tick[ucx_task_id()];
+}
+#endif
 
 int ucx_phase_waiting(uint16_t task_id)
 {
@@ -93,6 +118,9 @@ uint32_t ucx_phase_wait(uint32_t phase)
 	}
 	tr_wait[id] = 0;
 	tr_last[id] = tr_phase;
+#ifdef UCX_NOC_TT
+	tr_tick[id] = tr_phase_tick;
+#endif
 	now = tr_phase;
 	_ei();
 

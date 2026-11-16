@@ -90,7 +90,7 @@ def load_mapping(map_arg, app, appname, noc, noc_file):
     """Mapping entries ({"node", "tasks"}) for the <map> argument: a .map
     file (rttools.modules.io.mapparser), or the word `spiral`, which runs
     ORT/GCM (criteria of Chapter 7, smallest deviation of the cluster WCET
-    sums) and the Spiral Mapping (thesis, Section 8.1.2) and saves the
+    sums) and the Spiral Mapping (ORCA RT-Tools reference, Section 8.1.2) and saves the
     result as `<app>-SPIRAL-<arch>.map` in the current directory.
 
     Returns (entries, problems). `problems` lists a task on two nodes, a
@@ -215,7 +215,7 @@ def main():
     info("Loading application file `" + app_file + "`")
     app, appname = appparser.loadFromFile(app_file)
     if costs_file is not None:
-        info("Task costs t(v) from `" + costs_file + "` (static WCET, rttools.wcet)")
+        info("Task costs t(v) = max(CSV, static WCET of `" + costs_file + "`) (rttools.wcet)")
         try:
             for label, (old, new) in sorted(wcosts.apply(app, costs_file).items()):
                 info("  t(" + label + ") = " + str(new) + " cycles (application: " + str(old) + ")")
@@ -228,14 +228,23 @@ def main():
     info("Loading NoC file `" + noc_file + "`")
     noc = nocparser.loadFromFile(noc_file)
 
-    # link occupancy o_i = L0 + w_h (m + 1); w_h from RTTOOLS_HEADER_WAIT (default 0)
+    # link occupancy o_i = L0 + w_h (m + 1) + w_NI; w_h from RTTOOLS_HEADER_WAIT
+    # (default HEADER_WAIT_CYCLES), w_NI from RTTOOLS_NI (default tt, NI_WAIT_CYCLES)
     try:
         w_h = router.header_wait()
     except ValueError as e:
         error(str(e) + " (" + router.HEADER_WAIT_ENV + ")")
         return 1
+    try:
+        ni_res, w_ni = router.ni_model()
+    except ValueError as e:
+        error(str(e) + " (" + router.NI_ENV + ")")
+        return 1
     info("Link occupancy o_i = " + ("L0 + " + str(w_h) + " (m + 1)" if w_h else "L0")
-         + " (" + router.HEADER_WAIT_ENV + "; header wait bound " + str(router.HEADER_WAIT_CYCLES) + " cycles)")
+         + (" + " + str(w_ni) if w_ni else "")
+         + " (" + router.HEADER_WAIT_ENV + "; header wait bound " + str(router.HEADER_WAIT_CYCLES) + " cycles; "
+         + router.NI_ENV + ": network interface " + ("as a resource, w_NI = " + str(w_ni) + " cycles" if ni_res
+                                                     else "off") + ")")
 
     mapping, bad = load_mapping(map_file, app, appname, noc, noc_file)
     for p in bad:
@@ -277,7 +286,7 @@ def main():
 
     else:
         info("Target frequency is " + str(RTTOOLS_DEFAULT_FREQUENCY) + "Hz")
-        cpu = search.cpu_check(app, mapping)
+        cpu = search.cpu_check(app, mapping, noc)
         if cpu is not None:
             info("CPU test: f_CPU = " + str(cpu["f_cpu_hz"]) + "Hz; the target frequency "
                  + ("meets" if RTTOOLS_DEFAULT_FREQUENCY >= cpu["f_cpu_hz"] else "does not meet")

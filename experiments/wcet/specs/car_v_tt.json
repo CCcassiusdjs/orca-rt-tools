@@ -1,0 +1,10 @@
+{
+ "_doc": "rttools.wcet spec of CAR-V on images/tt/car_v.elf (car_v.c with the time-triggered injection, INJECTION=tt, riscv64-elf-gcc 12.2.0; images/tt/BUILD.txt).",
+ "image": "../images/tt/car_v.elf",
+ "annotations": [
+  "../../../pkt-sim/software/ucx-os/wcet/ucx-os.json",
+  "../../../pkt-sim/software/ucx-os/wcet/ucxgen.json",
+  "../annotations/car_v.json"
+ ],
+ "manifest": "../../../pkt-sim/software/ucx-os/app/car_v.json"
+}

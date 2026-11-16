@@ -70,6 +70,18 @@
 #               to tag r11-rc3; default with ISR_NESTING=1). RUN_INFO has
 #               crt0=<value> (a RUN_INFO without the line is of a run up to
 #               tag r11-rc4: plain, or guard for car_full of r11-rc4)
+#   INJECTION   injection of the packets between PEs (build_sw.sh): tt
+#               (default) at the instants of the link schedule
+#               (lib/noc_tt.c), finish when the job sends it (the images up
+#               to tag r11-rc5). RUN_INFO has injection=tt when the image
+#               has the time-triggered injection (timer1ocr_handler in
+#               image.lst), otherwise injection=finish (a RUN_INFO without
+#               the line is of a run up to tag r11-rc5, finish);
+#               RUN_INFO has deadline=tick when the table of the image has the
+#               line "Deadline: tick" (rttools.ucxgen tt from tag r11-rc9:
+#               deadline of each packet at the tick of the release of the job
+#               that reads it), otherwise deadline=start (a RUN_INFO without
+#               the line is of a run up to tag r11-rc8, start)
 #   REQUIRE_CLEAN
 #               1 stops before the build unless the source is a clean git
 #               checkout at a tag or a `git archive` of a commit (see
@@ -100,6 +112,12 @@
 #   release      tick (TICK_RELEASE=1 in app/<app>.sim) or data
 # and the crt0.s of the image (rttools.paper.exp23.crt0_rule):
 #   crt0         guard_readback, guard or plain (CRT0 above)
+# and the injection of the packets between PEs (rttools.paper.ttcheck):
+#   injection    tt or finish (INJECTION above)
+#   costs        costs of the link schedule of the injection table of the image:
+#                max_csv_static (t(v) = max of the CSV and the static t(v) of the
+#                image, experiments/wcet costs/tt; costs_file and costs_sha256
+#                name the file) or csv
 set -euo pipefail
 
 OUT=${1:?usage: simulate.sh <out_dir> [<sim_ns> [<app> [<mesh>]]]}
@@ -116,6 +134,11 @@ if [ "${ISR_NESTING:-0}" = 1 ]; then CRT0=${CRT0:-plain}; else CRT0=${CRT0:-guar
 case $CRT0 in
 	guard_readback|guard|plain) export CRT0 ;;
 	*) echo "CRT0 must be guard_readback, guard or plain: $CRT0" >&2; exit 2 ;;
+esac
+INJECTION=${INJECTION:-tt}
+case $INJECTION in
+	tt|finish) export INJECTION ;;
+	*) echo "INJECTION must be tt or finish: $INJECTION" >&2; exit 2 ;;
 esac
 
 # clock of the run (before any tool check, so a wrong value stops at once)
@@ -246,7 +269,24 @@ fi
 	echo "warmup_cycles=$WARMUP_CYCLES"
 	if [ "${ISR_NESTING:-0}" = 1 ]; then echo "isr=nesting"; else echo "isr=no_nesting"; fi
 	echo "crt0=$CRT0"
+	LST="$OUT/pkt-sim/software/ucx-os/build/target/image.lst"
+	if [ -f "$LST" ] && grep -q "<timer1ocr_handler>:" "$LST"; then
+		echo "injection=tt"
+	else
+		echo "injection=finish"
+	fi
+	# costs of the link schedule of the table of the image (line "Costs:" of app/<app>_tt.h,
+	# rttools.ucxgen tt --costs); the images without a table take the costs of the CSV
+	TT_H="$UCX_APP/${APP}_tt.h"
+	if [ -f "$TT_H" ] && grep -q "^ \* Costs: max(CSV, static) " "$TT_H"; then
+		sed -n 's/^ \* Costs: max(CSV, static) \([^ ]*\) sha256 \([0-9a-f]*\)$/costs=max_csv_static costs_file=\1 costs_sha256=\2/p' "$TT_H" | head -1
+	else
+		echo "costs=csv"
+	fi
 	if [ "$(setup TICK_RELEASE)" = 1 ]; then echo "release=tick"; else echo "release=data"; fi
+	# deadline model of the link schedule (line "Deadline:" of app/<app>_tt.h, rttools.ucxgen tt):
+	# tick from tag r11-rc9, start for the tables before it and the images without a table
+	if [ -f "$TT_H" ] && grep -q "^ \* Deadline: tick " "$TT_H"; then echo "deadline=tick"; else echo "deadline=start"; fi
 } >> "$OUT/RUN_INFO"
 
 if command -v /usr/bin/time > /dev/null; then
@@ -255,7 +295,7 @@ else
 	vsim -batch -do run.do > "$OUT/sim.log" 2> "$OUT/time.log"
 fi
 
-grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG| ITER (begin|end) |CHKSUM|FLIT (TX|RX) |^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
+grep -E "Time scale of|TRIGGER|scheduled|-> TAG|<- TAG| ITER (begin|end) |CHKSUM|FLIT (TX|RX|END) |TIMER t=|^# END at" "$OUT/sim.log" > "$OUT/events.txt" || true
 if grep -qE "\*\* (Error|Fatal)" "$OUT/sim.log"; then
 	grep -E "\*\* (Error|Fatal)" "$OUT/sim.log" | head -5 >&2
 	exit 1

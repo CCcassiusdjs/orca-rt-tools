@@ -93,9 +93,10 @@ def toolchain(tmp_path):
     return f"{b}:{os.environ['PATH']}"
 
 
-def build(ucx, target, path):
+def build(ucx, target, path, extra=()):
+    """Builds `target` (make variables in `extra`); returns code.txt."""
     env = {**os.environ, "PATH": path}
-    for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", target]):
+    for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", target, *extra]):
         r = subprocess.run(args, cwd=ucx, env=env, capture_output=True, text=True, timeout=600)
         assert r.returncode == 0, (r.stdout + r.stderr)[-3000:]
     return open(os.path.join(ucx, "build", "target", "code.txt")).read()
@@ -115,13 +116,18 @@ def test_build_car_full_and_weird_a(tmp_path):
     ucx = tmp_path / "ucx-os"
     shutil.copytree(UCX, ucx, ignore=shutil.ignore_patterns("*.o", "*.pack", "image.*", "code.txt"))
     weird_a = build(ucx, "weird_a", path)
-    build(ucx, "car_full", path)
+    # the clock of run CF6 (experiments/tt) and the phase of experiments/car-full:
+    # app/car_full_tt.h has the injection instants of that clock (a phase of
+    # 0.25 ms at the default 500 MHz is not a multiple of the 16-cycle step of TIMER1)
+    build(ucx, "car_full", path, ("F_CLK=526080000", "F_TICK=4000"))
     target = ucx / "build" / "target"
     env = {**os.environ, "PATH": path}
     syms = subprocess.run(["riscv64-elf-nm", str(target / "image.elf")], capture_output=True, text=True,
                           env=env).stdout
     # tick hook in dispatch and latest-value delivery in the driver
     assert re.search(r" T ucx_app_tick$", syms, re.M) and re.search(r" t pktdrv_put_latest$", syms, re.M)
+    # time-triggered injection (INJECTION=tt, the default)
+    assert re.search(r" T ucx_noc_send_at$", syms, re.M) and re.search(r" T timer1ocr_handler$", syms, re.M)
     with open(os.path.join(APP_DIR, "car_full.json")) as f:
         m = json.load(f)
     rows = memory.report(m, memory.heap_size(str(target / "image.map")), 2, (1,))

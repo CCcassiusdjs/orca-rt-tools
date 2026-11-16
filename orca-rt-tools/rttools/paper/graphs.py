@@ -1,4 +1,4 @@
-"""The 17 ORT/RGG graphs of Table 7.1 stored in the repository.
+"""The 17 ORT/RGG graphs of the table of the random graphs stored in the repository.
 
     python -m rttools.paper.graphs extract --src <graphs dir> --out <dir>
     python -m rttools.paper.graphs verify <dir> --sums <SHA256SUMS>

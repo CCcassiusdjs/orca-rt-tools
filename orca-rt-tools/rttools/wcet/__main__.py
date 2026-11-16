@@ -90,6 +90,12 @@ def run_spec(spec, image=None, params=None):
                       iteration_calls=spec.get("iteration_calls"))
     res["image"] = {"file": os.path.basename(path), "kind": img.kind, "sha256": ucx.sha256(path)}
     res["scheduler_cycles"] = res["kernel"]["dispatch"]
+    if res.get("injection") == "tt":
+        # a scheduler event of the phase model at a tick costs the tick term
+        # and the release interrupt of the phase (every PE of the release
+        # mask), at a job end the dispatch of yield
+        k = res["kernel"]
+        res["scheduler_cycles"] = max(k["dispatch"], k["tick"] + k.get("release", 0))
     res["annotations"] = [os.path.basename(a) for a in spec["annotations"]]
     res["generator"] = "rttools.wcet"
     res["_doc"] = ("t(v) of each task from the static WCET of its code and of the kernel "

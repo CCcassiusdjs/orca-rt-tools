@@ -69,6 +69,25 @@ uint32_t _ddma_send(uint32_t dest, uint32_t size, uint32_t* payload){
   return 0;
 }
 
+// XY address of node `dest` for DDMA_SEND_DEST_IN and number of flits of
+// a packet of `size` bytes: the conversions of _ddma_send, for a send that
+// a handler issues later with _ddma_send_xy (lib/noc_tt.c)
+uint32_t _ddma_dest_xy(uint32_t dest){
+  return (_ddma_atox(dest) << 8) | _ddma_atoy(dest);
+}
+
+uint32_t _ddma_flits(uint32_t size){
+  return (size % 4 == 0) ? (size / 4) : ((size / 4) + 1);
+}
+
+// _ddma_send with the XY address and the size in flits (at least 1)
+void _ddma_send_xy(uint32_t xy, uint32_t flits, uint32_t* payload){
+  *DDMA_SEND_DEST_IN = xy;
+  *DDMA_SEND_SIZE_IN = flits;
+  *DDMA_SEND_ADDR_IN = (uint32_t) payload;
+  *DDMA_SEND_CMD_IN  = 0x1; // starts dma copy
+}
+
 void _ddma_send_ack(){
   *DDMA_SEND_CMD_IN  = 0x0; // flag down 
 }

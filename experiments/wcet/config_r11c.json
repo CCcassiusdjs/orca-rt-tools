@@ -37,6 +37,7 @@
   ],
   "f0": 500000000,
   "header_wait": "bound",
+  "ni": "off",
   "costs_of": "E"
  }
 }

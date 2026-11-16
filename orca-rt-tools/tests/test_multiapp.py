@@ -1,3 +1,4 @@
+
 """Several applications on one NoC (rttools.multiapp): union of the packet
 instances, placement on disjoint PEs, equality with the flow of one
 application, interference of the schedules of each application alone."""
@@ -15,6 +16,10 @@ from rttools.modules.unwrapper import flowUnwrapper
 from rttools.multiapp import compose
 from rttools.paper.frequency import search_config
 from rttools.tui.model import network
+
+# the stored references of experiments/exp23, car-v and multiapp: network-interface
+# model off (NI ?= off in their Makefiles)
+pytestmark = pytest.mark.usefixtures("ni_off")
 
 APPS = os.path.join(REPO_ROOT, "apps")
 ARCH = os.path.join(REPO_ROOT, "arch")

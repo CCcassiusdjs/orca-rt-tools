@@ -39,7 +39,8 @@ def test_kernel_sources():
     hal = read("arch", "riscv", "hf-riscv-e", "hal.c")
     assert "ctx_p[CONTEXT_RA] = (uint32_t)_task_start;" in hal
     mk = read("Makefile")
-    assert "TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST\n" in mk
+    # INJ_DEFS: -DUCX_NOC_TT with INJECTION=tt (the default), empty with INJECTION=finish
+    assert "TT_DEFS = -DUCX_APP_IRQ4 -DUCX_APP_TICK -DUCX_NOC_LATEST $(INJ_DEFS)\n" in mk
     assert "UCX_ISR_NO_NESTING" not in mk and "TT_ASDEFS" not in mk
 
 
@@ -88,8 +89,8 @@ def test_simulate_isr_line(tmp_path):
 
 
 @pytest.mark.parametrize("log,ref", [
-    ("exp23/logs/D.events.txt", "exp23/reference_D.json"),
-    ("exp23/logs/E.events.txt", "exp23/reference_E.json"),
+    ("exp23/logs/D.events.txt", "exp23/reference_D.json"),  # anon:drop-line
+    ("exp23/logs/E.events.txt", "exp23/reference_E.json"),  # anon:drop-line
     ("exp23/logs/F.events.txt", "exp23/reference_head.json"),
     ("exp23/logs/G.events.txt", "exp23/reference_G.json"),
     ("exp23/logs/H.events.txt", "exp23/reference_H.json"),
@@ -193,11 +194,16 @@ def calls(funcs, fname, target):
     return sum(1 for ln in funcs.get(fname, []) if re.search(rf"\bjal\b.*<{target}>", ln))
 
 
-def make(ucx, path, target, cc=None, asdefs=None):
+def make(ucx, path, target, cc=None, asdefs=None, injection=None, f_clk=None):
     env = {**os.environ, "PATH": path}
-    extra = ([f"CC={cc}"] if cc else []) + ([f"UCX_ASDEFS={asdefs}"] if asdefs else [])
+    extra = ([f"CC={cc}"] if cc else []) + ([f"UCX_ASDEFS={asdefs}"] if asdefs else []) \
+        + ([f"INJECTION={injection}"] if injection else [])
+    # weird_a: a clock of its injection table (app/weird_a_tt.h, run VH); weird_a_data: the clock of
+    # the stored image of images/tick (434.912 MHz)
+    # the clock of a stored image (BUILD.txt of experiments/wcet/images) when `f_clk` is given
+    f_clk = f_clk or ("449152000" if target == "weird_a" else "434912000")
     for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", "clean"],
-                 ["make", "-s", *extra, target, "F_CLK=434912000"]):
+                 ["make", "-s", *extra, target, "F_CLK=" + f_clk]):
         r = subprocess.run(args, cwd=ucx, env=env, capture_output=True, text=True, timeout=600)
         assert r.returncode == 0, (r.stdout + r.stderr)[-3000:]
     return ucx / "build" / "target" / "image.elf"

@@ -3,8 +3,14 @@ experiments/exp23 make frequency)."""
 import json
 import os
 
+import pytest
+
 from tests.conftest import REPO_ROOT
 from rttools.paper import exp23, frequency
+
+# reference_frequency*.json of experiments/exp23: network-interface model off
+# (make frequency, NI ?= off)
+pytestmark = pytest.mark.usefixtures("ni_off")
 
 EXP = os.path.join(REPO_ROOT, "experiments", "exp23")
 APP_E = os.path.join(REPO_ROOT, "apps", "synthetic-app-e")

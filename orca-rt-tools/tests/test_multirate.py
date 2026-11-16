@@ -163,7 +163,7 @@ def test_cpu_test_threshold_and_phase_rule():
 
 
 @pytest.mark.parametrize("paths,clock", [(APP_E, 500e6), (CAR_V, 500e6)])
-def test_one_period_matches_phase_model(paths, clock):
+def test_one_period_matches_phase_model(paths, clock, deadline_start):
     g, _, noc, entries = load(paths)
     assert multirate.graph_rates(g) is None          # the flow keeps estimate.py
     old = release.cpu_bound(g, entries)

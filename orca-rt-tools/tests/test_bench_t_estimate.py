@@ -8,7 +8,7 @@ import pytest
 from tests.conftest import REPO_ROOT
 from rttools.bench_t import estimate, main as bench_t
 
-# application E in real cycles (thesis scale / 10)
+# application E in real cycles (scale of the ORCA RT-Tools reference / 10)
 SETS = {c: [(n, w // 10) for n, w in ts] for c, ts in bench_t.TASK_SETS.items()}
 SIGMA = bench_t.SCHEDULER_CYCLES // 10
 

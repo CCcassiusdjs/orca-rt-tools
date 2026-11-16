@@ -23,6 +23,17 @@ extern volatile uint32_t host_irq_mask;
 #define MASK_IRQ2 0x04
 #define MASK_IRQ3 0x08
 
+/* TIMER1 and the timer causes of segment 0 (lib/noc_tt.c) and the cause
+ * register of the interrupt controller */
+extern volatile uint32_t host_timer1, host_timer1ocr, host_timercauseinv, host_timermask, host_irq_cause;
+#define TIMER1         host_timer1
+#define TIMER1OCR      host_timer1ocr
+#define TIMERCAUSEINV  host_timercauseinv
+#define TIMERMASK      host_timermask
+#define MASK_TIMER1OCR (1 << 3)
+#define IRQ_CAUSE      host_irq_cause
+#define MASK_IRQ4      0x10
+
 void set_counter_3(uint32_t v);
 void set_counter_4(uint32_t v);
 #endif

@@ -1,4 +1,4 @@
-"""Table 7.1 pipeline (rttools/paper/ch7.py) on the stored graphs."""
+"""the table of the random graphs pipeline (rttools/paper/ch7.py) on the stored graphs."""
 import json
 import os
 

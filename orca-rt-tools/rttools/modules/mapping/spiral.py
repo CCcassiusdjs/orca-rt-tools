@@ -1,4 +1,4 @@
-"""ORT/SM: Spiral Mapping (thesis, Section 8.1.2 and Fig. 8.2).
+"""ORT/SM: Spiral Mapping (ORCA RT-Tools reference, Section 8.1.2 and Fig. 8.2).
 
 Input: the clusters of an application (one cluster per node, output of
 ORT/GCM), the network volume of each cluster and the mesh dimensions.

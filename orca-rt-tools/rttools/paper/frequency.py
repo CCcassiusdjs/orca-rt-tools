@@ -73,13 +73,14 @@ def mapping_entries(map_arg, app, noc):
     return mapparser.loadFromFile(map_arg), None
 
 
-def run_one(app_file, map_arg, arch_file, f0, costs=None):
+def run_one(app_file, map_arg, arch_file, f0, costs=None, cost_rule="max"):
     with network.quiet():
         app, appname = appparser.loadFromFile(app_file)
     if costs is not None:
-        # static t(v) of rttools.wcet in place of the Capacity column
+        # t(v) of the costs file of rttools.wcet under cost_rule
+        # (rttools/wcet/costs.py: max of the CSV and the file, or the file)
         from rttools.wcet import costs as wcosts
-        wcosts.apply(app, costs)
+        wcosts.apply(app, costs, cost_rule)
     with network.quiet():
         noc = nocparser.loadFromFile(arch_file)
         entries, criterion = mapping_entries(map_arg, app, noc)
@@ -115,11 +116,12 @@ def run_one(app_file, map_arg, arch_file, f0, costs=None):
     }
 
 
-def run(app_file, maps, arch_file, f0, out_dir, config=None, header_wait=None, costs=None):
+def run(app_file, maps, arch_file, f0, out_dir, config=None, header_wait=None, costs=None, cost_rule="max"):
     """Runs every mapping of `maps`; `header_wait` selects w_h of the link
     occupancy for this run (router.parse_header_wait; None keeps the
     selection of the process); `costs`: costs file of rttools.wcet (static
-    t(v), rttools/wcet/costs.py) in place of the costs of the CSV."""
+    t(v), rttools/wcet/costs.py) under `cost_rule` ("max": the larger of
+    the CSV and the static cost; "static": the static cost)."""
     prev = router.set_header_wait(header_wait) if header_wait is not None else None
     try:
         w = router.header_wait()
@@ -129,8 +131,9 @@ def run(app_file, maps, arch_file, f0, out_dir, config=None, header_wait=None, c
              "occupancy": "L0 + %d (m + 1)" % w if w else "L0", "runs": {}}
         if costs is not None:
             m["costs"] = os.path.basename(costs)
+            m["cost_rule"] = cost_rule
         for mp in maps:
-            r = run_one(app_file, mp, arch_file, f0, costs)
+            r = run_one(app_file, mp, arch_file, f0, costs, cost_rule)
             m["runs"][r["map"]] = r
     finally:
         if header_wait is not None:

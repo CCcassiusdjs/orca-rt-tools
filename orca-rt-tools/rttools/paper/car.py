@@ -10,7 +10,7 @@ criterion. Application E (apps/synthetic-app-e/synthetic-app-e.txt):
 the same metrics for |V| = 4; the chosen criterion is the one with the
 lowest M2.
 
-M1, M2, M3 are the functions of rttools/gde that reproduce Table 7.1
+M1, M2, M3 are the functions of rttools/gde that reproduce the table of the random graphs
 (population standard deviations; parallel edges between two clusters
 count as separate edges). NoC volume is the sum of the inter-cluster edge
 values; load is the sum of the WCETs of a cluster divided by the cycles

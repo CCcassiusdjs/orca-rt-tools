@@ -166,6 +166,12 @@ def build(img, name, indirect=None):
             if ins.kind == "jal":
                 t = ins.target
                 if ins.rd == RA:
+                    if not func.contains(nxt):
+                        # the last instruction of the function is a call:
+                        # the callee does not return (the compiler leaves
+                        # no code after a call of a function that loops
+                        # forever, run_task of car_full.c)
+                        break
                     leaders.add(nxt)
                     pc = nxt
                     continue
@@ -229,7 +235,7 @@ def build(img, name, indirect=None):
             if f is None:
                 raise CFGError(f"{name}: call at {ins.addr:08x} to {ins.target:08x}, not a function entry")
             b.callee = f.name
-            b.succs = [(nxt, "fall")]
+            b.succs = [(nxt, "fall")] if func.contains(nxt) else []
         elif ins.kind == "jal":
             t = ins.target
             if func.contains(t) and t != func.start:

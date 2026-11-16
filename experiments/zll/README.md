@@ -9,7 +9,8 @@
 | `make` or `make zll` | 8x3 mesh: from nodes (0,0) and (7,2) to every node; 2x2 mesh: from every node to every node; `p` in {1, 4, 16, 64}; fails if a point differs from the model | GHDL (tested with GHDL 4.1.0, mcode backend), about 30 s |
 | `./run.sh <out>` | One sweep; `XR`, `YR`, `SRCS`, `PS` and `GHDL` select the mesh, the sources, the payload sizes and the simulator | GHDL |
 | `make contention` | Header wait at one router (`tb_cont.vhd`, `contention.py`): 2624 runs, check against `reference_contention.json` | GHDL and Python 3 (standard library), 2 to 6 min on 2 vCPU (`--jobs` = number of CPUs) |
-| `make check` | `zll` and `contention` | GHDL and Python 3 |
+| `make polling` | Event-triggered bound of `orca-rt-tools/rttools/modules/routing/wctt.py` against GHDL (`tb_poll.vhd`, `polling.py`): 1000 random cases of packets from four input ports to the LOCAL output of router 4 of a 3x3 mesh, every latency against the bound (polling rule) and the rule of one packet per input port; check against `reference_polling.json` | GHDL and Python 3, about 1 min on 2 vCPU |
+| `make check` | `zll`, `contention` and `polling` | GHDL and Python 3 |
 
 ## Outputs (`build/<mesh>/`)
 

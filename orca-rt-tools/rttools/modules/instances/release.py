@@ -4,7 +4,7 @@ Packet k of flow i = (u, v), with period P_i in cycles:
 
 | Model | Release | Absolute deadline |
 |---|---|---|
-| phase | k P_i + f^(u) | (k + 1) P_i + s^(v) |
+| phase | k P_i + f^(u) | (k + 1) P_i + s^(v); time-triggered platform: the tick of the phase of v (phase_flows) |
 | cpa | k P_i + CP(u) | release + D_i |
 
 phase: the analysis flow of the article. s^ and f^ are the start and
@@ -16,7 +16,7 @@ count cycles from the start of the phase in which the source sends, so
 the packets of all flows share the window of one hyperperiod. The relative
 deadline of the input is not used.
 
-cpa: model of ORT/FNS in the thesis (Ch. 6). CP(u) is the critical path up
+cpa: model of ORT/FNS in the ORCA RT-Tools reference (Ch. 6). CP(u) is the critical path up
 to u computed by ORT/GCPA on the whole application, and D_i the relative
 deadline of the flow in the input.
 
@@ -50,7 +50,7 @@ from rttools.modules.mapping import mapper
 PHASE = "phase"
 CPA = "cpa"
 MODELS = (PHASE, CPA)
-# applications without the parameter keep the model of the thesis (Ch. 6)
+# applications without the parameter keep the model of the ORCA RT-Tools reference (Ch. 6)
 DEFAULT_MODEL = CPA
 
 
@@ -67,6 +67,9 @@ def settings(app_graph_attrs):
         "sequences": {str(k): list(v) for k, v in sequences.items()} if sequences else None,
         "creation": {str(k): list(v) for k, v in creation.items()} if creation else None,
         "feedback": [tuple(e) for e in app_graph_attrs.get("feedback") or []],
+        # handlers of the packet events of the time-triggered images (rttools/wcet/costs.py,
+        # graph_handlers): {"inject", "receive", "budget": {task: cycles}}
+        "handlers": app_graph_attrs.get("handlers"),
         # scheduler cost per PE (general phase model of a composition of
         # applications, rttools/multiapp/compose.py union_graph)
         "scheduler_cycles_pe": {str(k): int(v) for k, v in (app_graph_attrs.get("scheduler_cycles_pe") or {}).items()}
@@ -144,9 +147,9 @@ def matching_sequence(node, tasks, sequences, what="sequence"):
     return None
 
 
-def task_windows(instance, mapping):
-    """Start s^ and finish f^ of each task in the sequence of its PE, in
-    cycles from the start of the phase."""
+def _sequences(instance, mapping):
+    """(release settings, dispatch order of each PE, ORT/BENCH sequence of
+    each task with its node: {task: {"start", "finish", "cost", "node"}})."""
     rel = instance.get("release") or settings({})
     cost = {t: d["wcet"] for t, d in instance["tasks"]}
     edges = [(s, t) for s, t, _ in instance["flows"]]
@@ -156,21 +159,182 @@ def task_windows(instance, mapping):
         seq = estimate.sequence([(t, cost[t]) for t in ts], rel["scheduler_cycles"])
         for t in ts:
             out[t] = dict(seq[t], node=node)
+    return rel, seqs, out
+
+
+def _deadlines(instance, seqs, base):
+    """End of the window of each flow from the start of the phase of its
+    source: P + s^(target) (the target reads in the phase after the source
+    phase); with the time-triggered platform (router.tick_deadline), a flow
+    between PEs whose target runs n(v) - n(u) = d phases after its source
+    ends at min(P + s^(target), d P), the tick of the phase of the target:
+    the earliest start of the job that reads it (the tick dispatches it
+    when the tasks before it end at once), so the job never waits for the
+    packet (a blocked task runs again at the next tick, since the idle
+    task does not yield)."""
+    from rttools.modules.routing import router
+    edges = [(s, t) for s, t, _ in instance["flows"]]
+    node_of = {t: base[t]["node"] for t in base}
+    tick = router.tick_deadline()
+    phi = estimate.phases(edges, node_of, sequence_positions(seqs)) if tick else None
+    out = {}
+    for s, t, d in instance["flows"]:
+        end = d["period"] + base[t]["start"]
+        if tick and node_of[s] != node_of[t]:
+            end = min(end, (phi[t] - phi[s]) * d["period"])
+        out[d["label"]] = end
     return out
+
+
+def _instances(a, b, lo, hi, P):
+    """Number of windows [a + k P, b + k P], k integer, that meet (lo, hi)."""
+    n = 0
+    k = (lo - b) // P
+    while a + k * P < hi:
+        if b + k * P > lo:
+            n += 1
+        k += 1
+    return n
+
+
+def handler_windows(instance, mapping, base, seqs, ends):
+    """Finish of each task with the handlers of the packet events of its PE
+    (time-triggered images: rttools/wcet/costs.py, handlers file). Every
+    packet between PEs costs `inject` on the PE of its source and `receive`
+    on the PE of its target, inside the window of the packet [f(u), end of
+    the flow] of every phase; t(v) holds the handlers of the own packets of
+    v (budget B_v). The window holds every instant at which the handler of
+    the event can start (the compare interrupt at s16 <= s + 15, its wait
+    within NI_INJECT_CYCLES, the receive handlers up to the end of the
+    occupancy, s + o_i <= the end of the flow). The tasks of a PE run in
+    their sequence from the tick (the phase starts with the idle task and
+    no job waits for a packet), so the handlers that delay the finish of
+    task y are those of the events that start in (-c_e, F(y)) (a handler
+    that starts before the tick delays the tick), whatever task holds the
+    CPU:
+
+        F(y) = f^(y) + max(0, sum of the events that start in (-c_e, F(y)) - sum of B_z for z <= y in the sequence)
+
+    a fixed point over every PE (the windows start at F of the sources).
+    With a skew bound sigma (router.skew), the receive handlers start up
+    to sigma before or after the window in the time of the target. With
+    instance["release"]["handler_schedule"] ({flow label: (s, s + o_i)}, the
+    reservation of the packet in a link schedule: search.schedule_windows_fit),
+    the window of the flow is that interval instead of [F(u), end of the flow].
+    Returns {task: F(y)}."""
+    h = instance["release"]["handlers"]
+    budget = h.get("budget") or {}
+    P = {s: d["period"] for s, _, d in instance["flows"]}
+    fin = {t: base[t]["finish"] for t in base}
+    cross = [(s, t, d["label"]) for s, t, d in instance["flows"] if base[s]["node"] != base[t]["node"]]
+    period = next(iter(P.values()), None)
+    from rttools.modules.routing import router
+    sigma = router.skew()
+    fixed = instance["release"].get("handler_schedule") or {}
+    for _ in range(1000):
+        ev = {}
+        for s, t, label in cross:
+            a, b = fixed.get(label, (fin[s], ends[label]))
+            ev.setdefault(base[s]["node"], []).append((a, b, h["inject"]))
+            ev.setdefault(base[t]["node"], []).append((a - sigma, b + sigma, h["receive"]))
+        new = dict(fin)
+        for node, ts in seqs.items():
+            pool = 0
+            for y in ts:
+                pool += budget.get(y, 0)
+                F = fin[y]
+                while True:
+                    load = sum(c * _instances(a, b, -c, F, period) for a, b, c in ev.get(node, []))
+                    G = max(F, base[y]["finish"] + max(0, load - pool))
+                    if G == F:
+                        break
+                    F = G
+                new[y] = F
+        if new == fin:
+            return fin
+        fin = new
+    raise ValueError("handlers of the packet events: no fixed point of the finish of the tasks")
+
+
+def task_windows(instance, mapping):
+    """Start s^ and finish f^ of each task in the sequence of its PE, in
+    cycles from the start of the phase. With the handlers of the
+    time-triggered images in the release settings (rttools/wcet/costs.py)
+    and the time-triggered platform (router.tick_deadline), finish is F of
+    handler_windows, start moves with the finish of the task before it,
+    and "sequence_finish" keeps f^."""
+    rel, seqs, base = _sequences(instance, mapping)
+    if not (rel.get("handlers") and _tick()):
+        return base
+    fin = handler_windows(instance, mapping, base, seqs, _deadlines(instance, seqs, base))
+    out = {}
+    for node, ts in seqs.items():
+        prev = None
+        for t in ts:
+            shift = 0 if prev is None else fin[prev] - base[prev]["finish"]
+            out[t] = dict(base[t], start=base[t]["start"] + shift, finish=fin[t], sequence_finish=base[t]["finish"])
+            prev = t
+    return out
+
+
+def deadline_fits(instance, mapping):
+    """False when, in the phase model of one period, a task v with an
+    end-to-end deadline D(v) (instance["deadlines"], cycles) has n(v) P +
+    F(v) > D(v), with F of task_windows (the handlers included) and n(v) of
+    the sequences (rttools/bench_t/estimate.py, phases); the largest of
+    these sums is R_bound. True without deadlines, with several periods
+    (the general phase model bounds the data age of the chains) and outside
+    the phase model."""
+    dl = instance.get("deadlines")
+    rel = instance.get("release") or settings({})
+    if not dl or rel["model"] != PHASE or instance.get("rates") is not None or not instance["flows"]:
+        return True
+    from rttools.bench_t import estimate
+    win = task_windows(instance, mapping)
+    edges = [(s, t) for s, t, _ in instance["flows"]]
+    seqs = pe_sequences(list(win), edges, mapping, rel["sequences"], rel.get("creation"))
+    pe_of = {t: win[t]["node"] for t in win}
+    phi = estimate.phases(edges, pe_of, sequence_positions(seqs))
+    P = instance["flows"][0][2]["period"]
+    return all(phi[t] * P + win[t]["finish"] <= d for t, d in dl.items() if t in win)
+
+
+def handlers_fit(instance, mapping):
+    """False when, in the phase model with the handlers of the
+    time-triggered images (task_windows), a task finishes after the end of
+    its phase (P cycles): the next phase would not start with the idle
+    task. True otherwise (also without handlers and in the other models)."""
+    rel = instance.get("release") or settings({})
+    if rel["model"] != PHASE or instance.get("rates") is not None or not instance["flows"]:
+        return True
+    if not (rel.get("handlers") and _tick()):
+        return True
+    P = instance["flows"][0][2]["period"]
+    return all(w["finish"] <= P for w in task_windows(instance, mapping).values())
+
+
+def _tick():
+    from rttools.modules.routing import router
+    return router.tick_deadline()
 
 
 def phase_flows(instance, mapping):
     """phase model: {flow label: (offset, end)}; packet k of the flow has
     release k P + offset and absolute deadline k P + end, with
-    offset = f^(source) and end = P + s^(target)."""
+    offset = f^(source) (task_windows: F with the handlers of the
+    time-triggered images) and end = P + s^(target), or the tick of the
+    phase of the target for a flow between PEs on the time-triggered
+    platform (_deadlines)."""
+    rel, seqs, base = _sequences(instance, mapping)
+    ends = _deadlines(instance, seqs, base)
     win = task_windows(instance, mapping)
     out = {}
     for s, t, d in instance["flows"]:
-        out[d["label"]] = (win[s]["finish"], d["period"] + win[t]["start"])
+        out[d["label"]] = (win[s]["finish"], ends[d["label"]])
     return out
 
 
-def cpu_bound(app, mapping, period_s=None):
+def cpu_bound(app, mapping, period_s=None, noc=None):
     """CPU test of the analysis flow, computed once from the application
     graph (task wcet = c^ in cycles) and the mapping, outside the
     frequency search: {"demand": {node: c^(V_k)}, "period_s": T,
@@ -186,7 +350,7 @@ def cpu_bound(app, mapping, period_s=None):
         from rttools.bench_t import multirate
         r = multirate.graph_rates(app)
         if r is not None:
-            spec = multirate.spec_from_graph(app, mapping, r)
+            spec = multirate.spec_from_graph(app, mapping, r, noc)
             test = multirate.cpu_test(spec)
             members = pe_members(list(spec.tasks), mapping)
             demand = {node: sum(spec.cost[t] * (spec.hyper_ticks // spec.ticks[t]) for t in ts)

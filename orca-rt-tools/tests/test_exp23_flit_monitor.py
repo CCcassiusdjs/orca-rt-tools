@@ -203,7 +203,7 @@ def test_log_f_has_no_flit_lines(tmp_path):
 def test_simulate_keeps_flit_lines_in_events():
     with open(os.path.join(EXP, "simulate.sh")) as f:
         s = f.read()
-    assert "FLIT (TX|RX) " in s
+    assert "FLIT (TX|RX|END) |TIMER t=" in s
 
 
 def test_monitor_testbench_verilator(tmp_path):
@@ -238,3 +238,11 @@ def test_monitor_testbench_verilator(tmp_path):
     assert (p1["L0"], p1["latency_min"], p1["header_minus_model_max"], p1["latency_minus_L0_min"]) == (21, 31, 0, 10)
     assert (p2["L0"], p2["latency_min"], p2["header_minus_model_max"], p2["latency_minus_L0_min"]) == (18, 19, 0, 1)
     assert p1["tag_mismatch"] == 0 and p2["tag_mismatch"] == 0
+    # handshake of each received packet (5 and 4 edges after its last flit)
+    # and the rises of the timer line of the source PE (edges 20 and 40
+    # after the release of reset)
+    from rttools.paper import ttcheck
+    ends, timers = ttcheck.parse_lines(r.stdout.splitlines())
+    assert [(e["src"], e["dst"], e["tag"], e["cyc"] - x["last"]) for e, x in zip(ends, rx)] == \
+        [("0-0", "1-0", 18, 6), ("0-0", "1-0", 5, 5)]
+    assert [(x["pe"], x["cyc"]) for x in timers] == [("0-0", 24), ("0-0", 44)]

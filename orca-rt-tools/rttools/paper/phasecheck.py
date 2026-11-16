@@ -29,7 +29,13 @@ serve every iteration whose packets are in its queue.
 | CPU of PE k in phase p | non-IDLE time of the PE in phase p, cycles at F_CLK, against t(V_k) (one period) or the busy time of the PE in that phase of the hyperperiod of the model (general model) |
 
 The run conforms when no task runs twice in a phase, no execution is
-early and no phase exceeds the CPU bound.
+early and no phase exceeds the CPU bound. A run with the time-triggered
+injection (RUN_INFO injection=tt; metrics.json "tt", rttools.paper.
+ttcheck) conforms also when no packet between PEs breaks the link
+schedule: injection at or after its instant s and within the injection
+bound, header wait, receive waits, latency and occupancy within the
+model, arrival before its deadline, no overlap at a network interface,
+the phases one tick apart and the ticks of every PE recovered.
 """
 from __future__ import annotations
 
@@ -192,6 +198,13 @@ def main(argv=None):
                   f"CPU above {' '.join(r['cpu_above']) or '-'}")
         if not pc["conforms"]:
             status = max(status, 1)
+        if m.get("injection") == "tt":
+            from rttools.paper import ttcheck
+            t = m.get("tt")
+            for line in ttcheck.summary_lines(t):
+                print(f"{path}: {line}" if line[0] != " " else line)
+            if t is None or t["violations"] or t["unchecked"] or not t["packets"]:
+                status = max(status, 1)
     return status
 
 

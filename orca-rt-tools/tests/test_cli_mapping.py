@@ -1,5 +1,5 @@
 """<map> argument of the command line (rttools/__main__.py): a .map file
-or `spiral` (ORT/GCM clustering and Spiral Mapping, thesis Section 8.1).
+or `spiral` (ORT/GCM clustering and Spiral Mapping, ORCA RT-Tools reference Section 8.1).
 The command line checks that the mapping puts every task of the
 application on exactly one node of the architecture; before, a task
 mapped twice or not mapped reached the router (None node)."""
@@ -64,16 +64,27 @@ def test_missing_map_file(work):
     assert "Could not locate file" in r.stdout
 
 
+# f* of application E: the default network-interface model (tt, w_NI =
+# NI_WAIT_CYCLES and the network interface of each PE as a resource) and
+# the model off of the stored references (RTTOOLS_NI=off, experiments/exp23
+# make frequency)
+F_STAR = {None: "413921356.2011719Hz (413.9 MHz)", "off": "327690124.51171875Hz (327.7 MHz)"}
+
+
+@pytest.mark.parametrize("ni", [None, "off"])
 @pytest.mark.parametrize("mapping", [MAP, "spiral"])
-def test_app_e_minimum_frequency(work, mapping):
+def test_app_e_minimum_frequency(work, mapping, ni, monkeypatch):
     """f* from the bisection (phase model), f_CPU from the CPU test and the
-    maximum; experiments/exp23 make frequency keeps the same numbers
-    (default link occupancy o_i = L0 + 20 (m + 1))."""
+    maximum; experiments/exp23 make frequency (RTTOOLS_NI=off) keeps the
+    numbers of the model off (default link occupancy o_i = L0 + 20 (m + 1)
+    + w_NI)."""
+    if ni:
+        monkeypatch.setenv("RTTOOLS_NI", ni)
     r = run(work, mapping, "500000000")
     assert r.returncode == 0, r.stderr[-2000:]
-    # dispatch order of the kernel rule (E, H, I and J, G): I->J sets f*,
-    # with the default occupancy o_i = L0 + 20 (m + 1)
-    assert "Network frequency f* = 327690124.51171875Hz (327.7 MHz)" in r.stdout
+    # dispatch order of the kernel rule (E, H, I and J, G): I->J sets f*
+    assert "Network frequency f* = " + F_STAR[ni] in r.stdout
+    assert ("w_NI = 15169 cycles" if ni is None else "network interface off") in r.stdout
     assert "CPU frequency f_CPU = 434900000.0Hz (434.9 MHz)" in r.stdout
     assert "Minimum frequency max(f*, f_CPU) = 434900000.0Hz (434.9 MHz)" in r.stdout
     # f_CPU > f*: one network evaluation at f_CPU with the phase model

@@ -4,7 +4,7 @@ The file holds application E for the analysis flow of the paper: the graph of
 synthetic-app-e.txt, release period 0.5 ms, end-to-end deadline 2 ms
 (task rows), the payloads of the exp-23 application (pkt-sim/software/
 ucx-os/app/weird_a.c, E->I with 9010 bytes), the characterized costs
-c^(v) of rttools/bench_t/main.py (thesis scale / 10) as task capacity and
+c^(v) of rttools/bench_t/main.py (scale of the ORCA RT-Tools reference / 10) as task capacity and
 the #parameters section of the phase model (scheduler cost and the
 creation order of each PE, the source of the dispatch order of the
 analysis; weird_a.c and the log table of experiments/exp23/config.json

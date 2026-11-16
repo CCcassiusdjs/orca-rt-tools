@@ -42,6 +42,16 @@ ghdl_timer1() { # ghdl_timer1 <CTC> <expected tick in cycles>
 		| grep -E "TICK|PASS|FAIL" | sed 's/.*(report note): //' || true
 }
 
+ghdl_timer1_ocr() { # ghdl_timer1_ocr <CTC> <OCR>
+	W="$OUT/ghdl_timer1_ocr"
+	mkdir -p "$W"
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$HW/peripherals/peripherals_minimal.vhd"
+	ghdl -a --workdir="$W" -fsynopsys -fexplicit "$T/tb_timer1_ocr.vhd"
+	ghdl -e --workdir="$W" -fsynopsys -fexplicit tb_timer1_ocr
+	(cd "$W" && ghdl -r --workdir="$W" -fsynopsys -fexplicit tb_timer1_ocr -gCTC="$1" -gOCR="$2" 2>&1) \
+		| grep -E "TICK|OCR|PASS|FAIL" | sed 's/.*(report note): //' || true
+}
+
 ghdl_cpu() { # cycles per instruction of the HF-RISC core (tb_cpu_cycles.vhd)
 	W="$OUT/ghdl_cpu"
 	mkdir -p "$W"
@@ -108,7 +118,7 @@ PE_SRC="$MC/orca_pkg.sv $HW/ddma/interface_router_port.sv $HW/ddma/interface_ddm
 	$HW/peripherals/interface_peripherals.sv $HW/tcd/interface_tcd.sv $HW/interface_pe.sv \
 	$T/pe_stubs.sv $MC/manycore_pe.sv"
 
-for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release tb_cpu_cycles tb_release_mask tb_release_mask_4x5 tb_cpu_irq}; do
+for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb_timer1 tb_release tb_cpu_cycles tb_release_mask tb_release_mask_4x5 tb_cpu_irq tb_timer1_ocr}; do
 	case $t in
 	tb_ddma_*) vl "$t" $DDMA_SRC "$T/$t.sv" ;;
 	tb_tcd) vl tb_tcd "$T/legacy_ddma_if.svh" "$HW/tcd/interface_tcd.sv" "$HW/tcd/tcd.sv" "$T/tb_tcd.sv" ;;
@@ -143,6 +153,10 @@ for t in ${*:-tb_ddma_send tb_ddma_recv tb_hermes_local tb_tcd tb_manycore_pe tb
 		# TB_TIMER1_CTC, TB_TIMER1_EXPECT: TIMER1CTC and the expected tick
 		# (default: hal.c at 500 MHz and F_TICK = 2000, 250000 cycles)
 		ghdl_timer1 "${TB_TIMER1_CTC:-15624}" "${TB_TIMER1_EXPECT:-250000}" ;;
+	tb_timer1_ocr)
+		# compare interrupt of TIMER1 at steps 1, 5 and 15 of a tick of 16
+		# steps, and at step 0 (pending from the write of TIMER1OCR)
+		for o in 1 5 15 0; do ghdl_timer1_ocr 15 "$o"; done ;;
 	tb_cpu_cycles) ghdl_cpu ;;
 	tb_cpu_trace) ghdl_trace ;;
 	tb_cpu_irq) ghdl_cpu_irq ;;

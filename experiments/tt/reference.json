@@ -1,0 +1,2722 @@
+{
+ "_doc": "rttools.paper.ttflow run",
+ "ni": "tt",
+ "w_ni_cycles": 15169,
+ "header_wait_cycles": 20,
+ "cost_rule": "max",
+ "apps": {
+  "E": {
+   "kind": "single",
+   "costs": {
+    "tasks": {
+     "A": {
+      "pe": "0",
+      "csv": 28530,
+      "static": 19295,
+      "used": 28530,
+      "source": "csv"
+     },
+     "B": {
+      "pe": "0",
+      "csv": 58600,
+      "static": 53972,
+      "used": 58600,
+      "source": "csv"
+     },
+     "C": {
+      "pe": "1",
+      "csv": 96330,
+      "static": 88375,
+      "used": 96330,
+      "source": "csv"
+     },
+     "D": {
+      "pe": "0",
+      "csv": 14000,
+      "static": 20371,
+      "used": 20371,
+      "source": "static"
+     },
+     "E": {
+      "pe": "2",
+      "csv": 52700,
+      "static": 44590,
+      "used": 52700,
+      "source": "csv"
+     },
+     "F": {
+      "pe": "0",
+      "csv": 80800,
+      "static": 77278,
+      "used": 80800,
+      "source": "csv"
+     },
+     "G": {
+      "pe": "3",
+      "csv": 109880,
+      "static": 98471,
+      "used": 109880,
+      "source": "csv"
+     },
+     "H": {
+      "pe": "2",
+      "csv": 45300,
+      "static": 32876,
+      "used": 45300,
+      "source": "csv"
+     },
+     "I": {
+      "pe": "2",
+      "csv": 75370,
+      "static": 66178,
+      "used": 75370,
+      "source": "csv"
+     },
+     "J": {
+      "pe": "3",
+      "csv": 107570,
+      "static": 103957,
+      "used": 107570,
+      "source": "csv"
+     }
+    },
+    "scheduler_cycles": {
+     "csv": 11000,
+     "static": 1610,
+     "used": 11000
+    },
+    "file": "weird_a.json",
+    "sha256": "a863a70d841eb37807c65eb5848919127c536d3754892bdd7138186aaca01654"
+   },
+   "pes": {
+    "0": {
+     "tasks": [
+      "A",
+      "B",
+      "D",
+      "F"
+     ],
+     "csv": 181930,
+     "static": 170916,
+     "used": 188301,
+     "static_above_csv": [
+      "D"
+     ],
+     "source": "csv"
+    },
+    "1": {
+     "tasks": [
+      "C"
+     ],
+     "csv": 96330,
+     "static": 88375,
+     "used": 96330,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "2": {
+     "tasks": [
+      "E",
+      "H",
+      "I"
+     ],
+     "csv": 173370,
+     "static": 143644,
+     "used": 173370,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "3": {
+     "tasks": [
+      "G",
+      "J"
+     ],
+     "csv": 217450,
+     "static": 202428,
+     "used": 217450,
+     "static_above_csv": [],
+     "source": "csv"
+    }
+   },
+   "f_cpu_hz": 434900000.0,
+   "f_noc_hz": 449150085.44921875,
+   "minimum_hz": 449150085.44921875,
+   "binding": "f_noc",
+   "runs": {
+    "VH": {
+     "clock_hz": 449152000,
+     "rule": "flow",
+     "cpu_feasible": true,
+     "link_schedule_feasible": true,
+     "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
+      "section_max_cycles": 1151,
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
+      "checks": 5,
+      "violations": 0,
+      "after_request": 0,
+      "margin_min_cycles": 6720,
+      "holds": true
+     },
+     "period_cycles": 224576,
+     "response_bound": {
+      "cycles": 785171,
+      "task": "J",
+      "phase": 3,
+      "ms": 1.7481186769734967
+     },
+     "tasks": {
+      "A": {
+       "pe": "0",
+       "start": 11000,
+       "finish": 28530,
+       "phase": 0
+      },
+      "B": {
+       "pe": "0",
+       "start": 39530,
+       "finish": 87130,
+       "phase": 0
+      },
+      "D": {
+       "pe": "0",
+       "start": 98130,
+       "finish": 107501,
+       "phase": 0
+      },
+      "F": {
+       "pe": "0",
+       "start": 118501,
+       "finish": 188301,
+       "phase": 0
+      },
+      "C": {
+       "pe": "1",
+       "start": 11000,
+       "finish": 100825,
+       "phase": 1
+      },
+      "E": {
+       "pe": "2",
+       "start": 11000,
+       "finish": 52700,
+       "phase": 2
+      },
+      "H": {
+       "pe": "2",
+       "start": 63700,
+       "finish": 98000,
+       "phase": 2
+      },
+      "I": {
+       "pe": "2",
+       "start": 109000,
+       "finish": 173370,
+       "phase": 2
+      },
+      "J": {
+       "pe": "3",
+       "start": 11000,
+       "finish": 111443,
+       "phase": 3
+      },
+      "G": {
+       "pe": "3",
+       "start": 122443,
+       "finish": 224574,
+       "phase": 1
+      }
+     },
+     "sequences": {
+      "0": [
+       "A",
+       "B",
+       "D",
+       "F"
+      ],
+      "1": [
+       "C"
+      ],
+      "2": [
+       "E",
+       "H",
+       "I"
+      ],
+      "3": [
+       "J",
+       "G"
+      ]
+     },
+     "sim_ns": 20000000,
+     "sim_ns_min": 10248119,
+     "sim_fits": true,
+     "feasible": true,
+     "table": {
+      "clock": true,
+      "costs": true
+     }
+    },
+    "VG": {
+     "clock_hz": 500000000,
+     "rule": "kept",
+     "cpu_feasible": true,
+     "link_schedule_feasible": true,
+     "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
+      "section_max_cycles": 1151,
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
+      "checks": 5,
+      "violations": 0,
+      "after_request": 0,
+      "margin_min_cycles": 32144,
+      "holds": true
+     },
+     "period_cycles": 250000,
+     "response_bound": {
+      "cycles": 861443,
+      "task": "J",
+      "phase": 3,
+      "ms": 1.7228860000000001
+     },
+     "tasks": {
+      "A": {
+       "pe": "0",
+       "start": 11000,
+       "finish": 28530,
+       "phase": 0
+      },
+      "B": {
+       "pe": "0",
+       "start": 39530,
+       "finish": 87130,
+       "phase": 0
+      },
+      "D": {
+       "pe": "0",
+       "start": 98130,
+       "finish": 107501,
+       "phase": 0
+      },
+      "F": {
+       "pe": "0",
+       "start": 118501,
+       "finish": 188301,
+       "phase": 0
+      },
+      "C": {
+       "pe": "1",
+       "start": 11000,
+       "finish": 100825,
+       "phase": 1
+      },
+      "E": {
+       "pe": "2",
+       "start": 11000,
+       "finish": 52700,
+       "phase": 2
+      },
+      "H": {
+       "pe": "2",
+       "start": 63700,
+       "finish": 98000,
+       "phase": 2
+      },
+      "I": {
+       "pe": "2",
+       "start": 109000,
+       "finish": 173370,
+       "phase": 2
+      },
+      "J": {
+       "pe": "3",
+       "start": 11000,
+       "finish": 111443,
+       "phase": 3
+      },
+      "G": {
+       "pe": "3",
+       "start": 122443,
+       "finish": 224574,
+       "phase": 1
+      }
+     },
+     "sequences": {
+      "0": [
+       "A",
+       "B",
+       "D",
+       "F"
+      ],
+      "1": [
+       "C"
+      ],
+      "2": [
+       "E",
+       "H",
+       "I"
+      ],
+      "3": [
+       "J",
+       "G"
+      ]
+     },
+     "sim_ns": 20000000,
+     "sim_ns_min": 10222886,
+     "sim_fits": true,
+     "feasible": true,
+     "table": {
+      "clock": true,
+      "costs": true
+     }
+    }
+   }
+  },
+  "CAR-V": {
+   "kind": "single",
+   "costs": {
+    "tasks": {
+     "FBU1": {
+      "pe": "2",
+      "csv": 95000,
+      "static": 89190,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU2": {
+      "pe": "3",
+      "csv": 95000,
+      "static": 89190,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU3": {
+      "pe": "4",
+      "csv": 95000,
+      "static": 89812,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU4": {
+      "pe": "1",
+      "csv": 66998,
+      "static": 61190,
+      "used": 66998,
+      "source": "csv"
+     },
+     "FBU5": {
+      "pe": "7",
+      "csv": 95000,
+      "static": 89190,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU6": {
+      "pe": "11",
+      "csv": 95000,
+      "static": 89190,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU7": {
+      "pe": "8",
+      "csv": 95000,
+      "static": 89190,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU8": {
+      "pe": "5",
+      "csv": 95000,
+      "static": 89812,
+      "used": 95000,
+      "source": "csv"
+     },
+     "NAVC": {
+      "pe": "0",
+      "csv": 95000,
+      "static": 93348,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE1": {
+      "pe": "2",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE2": {
+      "pe": "3",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE3": {
+      "pe": "6",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE4": {
+      "pe": "1",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE5": {
+      "pe": "7",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE6": {
+      "pe": "11",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE7": {
+      "pe": "10",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE8": {
+      "pe": "9",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FDF1": {
+      "pe": "14",
+      "csv": 95000,
+      "static": 103242,
+      "used": 103242,
+      "source": "static"
+     },
+     "FDF2": {
+      "pe": "13",
+      "csv": 95000,
+      "static": 103242,
+      "used": 103242,
+      "source": "static"
+     },
+     "STPH": {
+      "pe": "12",
+      "csv": 95000,
+      "static": 96258,
+      "used": 96258,
+      "source": "static"
+     },
+     "VOD1": {
+      "pe": "4",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "VOD2": {
+      "pe": "5",
+      "csv": 95000,
+      "static": 92765,
+      "used": 95000,
+      "source": "csv"
+     },
+     "OBMG": {
+      "pe": "15",
+      "csv": 95000,
+      "static": 89855,
+      "used": 95000,
+      "source": "csv"
+     }
+    },
+    "scheduler_cycles": {
+     "csv": 11000,
+     "static": 1470,
+     "used": 11000
+    },
+    "file": "car_v.json",
+    "sha256": "e2f7ef03a6e10d52da056e977c841f7f39922e7f66f6e5597a68ca630bdabc9d"
+   },
+   "pes": {
+    "2": {
+     "tasks": [
+      "BFE1",
+      "FBU1"
+     ],
+     "csv": 190000,
+     "static": 181955,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "3": {
+     "tasks": [
+      "BFE2",
+      "FBU2"
+     ],
+     "csv": 190000,
+     "static": 181955,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "6": {
+     "tasks": [
+      "BFE3"
+     ],
+     "csv": 95000,
+     "static": 92765,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "1": {
+     "tasks": [
+      "BFE4",
+      "FBU4"
+     ],
+     "csv": 161998,
+     "static": 153955,
+     "used": 161998,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "7": {
+     "tasks": [
+      "BFE5",
+      "FBU5"
+     ],
+     "csv": 190000,
+     "static": 181955,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "11": {
+     "tasks": [
+      "BFE6",
+      "FBU6"
+     ],
+     "csv": 190000,
+     "static": 181955,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "10": {
+     "tasks": [
+      "BFE7"
+     ],
+     "csv": 95000,
+     "static": 92765,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "9": {
+     "tasks": [
+      "BFE8"
+     ],
+     "csv": 95000,
+     "static": 92765,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "4": {
+     "tasks": [
+      "FBU3",
+      "VOD1"
+     ],
+     "csv": 190000,
+     "static": 182577,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "8": {
+     "tasks": [
+      "FBU7"
+     ],
+     "csv": 95000,
+     "static": 89190,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "5": {
+     "tasks": [
+      "FBU8",
+      "VOD2"
+     ],
+     "csv": 190000,
+     "static": 182577,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "14": {
+     "tasks": [
+      "FDF1"
+     ],
+     "csv": 95000,
+     "static": 103242,
+     "used": 103242,
+     "static_above_csv": [
+      "FDF1"
+     ],
+     "source": "static"
+    },
+    "13": {
+     "tasks": [
+      "FDF2"
+     ],
+     "csv": 95000,
+     "static": 103242,
+     "used": 103242,
+     "static_above_csv": [
+      "FDF2"
+     ],
+     "source": "static"
+    },
+    "0": {
+     "tasks": [
+      "NAVC"
+     ],
+     "csv": 95000,
+     "static": 93348,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "15": {
+     "tasks": [
+      "OBMG"
+     ],
+     "csv": 95000,
+     "static": 89855,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "12": {
+     "tasks": [
+      "STPH"
+     ],
+     "csv": 95000,
+     "static": 96258,
+     "used": 96258,
+     "static_above_csv": [
+      "STPH"
+     ],
+     "source": "static"
+    }
+   },
+   "f_cpu_hz": 380000000.0,
+   "f_noc_hz": 441082000.7324219,
+   "minimum_hz": 441082000.7324219,
+   "binding": "f_noc",
+   "runs": {
+    "VCV": {
+     "clock_hz": 441088000,
+     "rule": "flow",
+     "cpu_feasible": true,
+     "link_schedule_feasible": true,
+     "packets_between_pes": 16,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 685,
+      "section_max_cycles": 1098,
+      "required_margin_cycles": 998,
+      "activity_in_lead_cycles": 1411,
+      "checks": 16,
+      "violations": 0,
+      "after_request": 0,
+      "margin_min_cycles": 3296,
+      "holds": true
+     },
+     "period_cycles": 220544,
+     "response_bound": {
+      "cycles": 977176,
+      "task": "OBMG",
+      "phase": 4,
+      "ms": 2.2153765235055136
+     },
+     "tasks": {
+      "NAVC": {
+       "pe": "0",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 1
+      },
+      "FBU4": {
+       "pe": "1",
+       "start": 11000,
+       "finish": 66998,
+       "phase": 0
+      },
+      "BFE4": {
+       "pe": "1",
+       "start": 77998,
+       "finish": 161998,
+       "phase": 0
+      },
+      "FBU1": {
+       "pe": "2",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 0
+      },
+      "BFE1": {
+       "pe": "2",
+       "start": 106000,
+       "finish": 190000,
+       "phase": 0
+      },
+      "FBU2": {
+       "pe": "3",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 0
+      },
+      "BFE2": {
+       "pe": "3",
+       "start": 106000,
+       "finish": 190000,
+       "phase": 0
+      },
+      "FBU3": {
+       "pe": "4",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 0
+      },
+      "VOD1": {
+       "pe": "4",
+       "start": 106000,
+       "finish": 190000,
+       "phase": 0
+      },
+      "FBU8": {
+       "pe": "5",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 0
+      },
+      "VOD2": {
+       "pe": "5",
+       "start": 106000,
+       "finish": 190000,
+       "phase": 0
+      },
+      "BFE3": {
+       "pe": "6",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 1
+      },
+      "FBU5": {
+       "pe": "7",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 0
+      },
+      "BFE5": {
+       "pe": "7",
+       "start": 106000,
+       "finish": 190000,
+       "phase": 0
+      },
+      "FBU7": {
+       "pe": "8",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 0
+      },
+      "BFE8": {
+       "pe": "9",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 1
+      },
+      "BFE7": {
+       "pe": "10",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 1
+      },
+      "FBU6": {
+       "pe": "11",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 0
+      },
+      "BFE6": {
+       "pe": "11",
+       "start": 106000,
+       "finish": 190000,
+       "phase": 0
+      },
+      "STPH": {
+       "pe": "12",
+       "start": 11000,
+       "finish": 96258,
+       "phase": 3
+      },
+      "FDF2": {
+       "pe": "13",
+       "start": 11000,
+       "finish": 110166,
+       "phase": 2
+      },
+      "FDF1": {
+       "pe": "14",
+       "start": 11000,
+       "finish": 107015,
+       "phase": 2
+      },
+      "OBMG": {
+       "pe": "15",
+       "start": 11000,
+       "finish": 95000,
+       "phase": 4
+      }
+     },
+     "sequences": {
+      "0": [
+       "NAVC"
+      ],
+      "1": [
+       "FBU4",
+       "BFE4"
+      ],
+      "2": [
+       "FBU1",
+       "BFE1"
+      ],
+      "3": [
+       "FBU2",
+       "BFE2"
+      ],
+      "4": [
+       "FBU3",
+       "VOD1"
+      ],
+      "5": [
+       "FBU8",
+       "VOD2"
+      ],
+      "6": [
+       "BFE3"
+      ],
+      "7": [
+       "FBU5",
+       "BFE5"
+      ],
+      "8": [
+       "FBU7"
+      ],
+      "9": [
+       "BFE8"
+      ],
+      "10": [
+       "BFE7"
+      ],
+      "11": [
+       "FBU6",
+       "BFE6"
+      ],
+      "12": [
+       "STPH"
+      ],
+      "13": [
+       "FDF2"
+      ],
+      "14": [
+       "FDF1"
+      ],
+      "15": [
+       "OBMG"
+      ]
+     },
+     "sim_ns": 11500000,
+     "sim_ns_min": 11215377,
+     "sim_fits": true,
+     "feasible": true,
+     "table": {
+      "clock": true,
+      "costs": true
+     }
+    }
+   }
+  },
+  "WCET-E": {
+   "kind": "single",
+   "costs": {
+    "tasks": {
+     "A": {
+      "pe": "0",
+      "csv": 9317,
+      "static": 11377,
+      "used": 11377,
+      "source": "static"
+     },
+     "B": {
+      "pe": "0",
+      "csv": 37033,
+      "static": 37653,
+      "used": 37653,
+      "source": "static"
+     },
+     "C": {
+      "pe": "1",
+      "csv": 26419,
+      "static": 27036,
+      "used": 27036,
+      "source": "static"
+     },
+     "D": {
+      "pe": "0",
+      "csv": 12145,
+      "static": 12762,
+      "used": 12762,
+      "source": "static"
+     },
+     "E": {
+      "pe": "2",
+      "csv": 39473,
+      "static": 41329,
+      "used": 41329,
+      "source": "static"
+     },
+     "F": {
+      "pe": "0",
+      "csv": 18653,
+      "static": 19270,
+      "used": 19270,
+      "source": "static"
+     },
+     "G": {
+      "pe": "3",
+      "csv": 63175,
+      "static": 63798,
+      "used": 63798,
+      "source": "static"
+     },
+     "H": {
+      "pe": "2",
+      "csv": 13399,
+      "static": 14016,
+      "used": 14016,
+      "source": "static"
+     },
+     "I": {
+      "pe": "2",
+      "csv": 18653,
+      "static": 19270,
+      "used": 19270,
+      "source": "static"
+     },
+     "J": {
+      "pe": "3",
+      "csv": 46396,
+      "static": 44477,
+      "used": 46396,
+      "source": "csv"
+     }
+    },
+    "scheduler_cycles": {
+     "csv": 11000,
+     "static": 1610,
+     "used": 11000
+    },
+    "file": "wcet_e.json",
+    "sha256": "23c7616402d24def7badf95e31871176d6613bbb2f3ba5ebb8623e75ac342cb7"
+   },
+   "pes": {
+    "0": {
+     "tasks": [
+      "A",
+      "B",
+      "D",
+      "F"
+     ],
+     "csv": 77148,
+     "static": 81062,
+     "used": 81062,
+     "static_above_csv": [
+      "A",
+      "B",
+      "D",
+      "F"
+     ],
+     "source": "static"
+    },
+    "1": {
+     "tasks": [
+      "C"
+     ],
+     "csv": 26419,
+     "static": 27036,
+     "used": 27036,
+     "static_above_csv": [
+      "C"
+     ],
+     "source": "static"
+    },
+    "2": {
+     "tasks": [
+      "E",
+      "H",
+      "I"
+     ],
+     "csv": 71525,
+     "static": 74615,
+     "used": 74615,
+     "static_above_csv": [
+      "E",
+      "H",
+      "I"
+     ],
+     "source": "static"
+    },
+    "3": {
+     "tasks": [
+      "G",
+      "J"
+     ],
+     "csv": 109571,
+     "static": 108275,
+     "used": 110194,
+     "static_above_csv": [
+      "G"
+     ],
+     "source": "csv"
+    }
+   },
+   "f_cpu_hz": 220388000.0,
+   "f_noc_hz": 234638214.11132812,
+   "minimum_hz": 234638214.11132812,
+   "binding": "f_noc",
+   "runs": {
+    "W5": {
+     "clock_hz": 234656000,
+     "rule": "flow",
+     "cpu_feasible": true,
+     "link_schedule_feasible": true,
+     "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
+      "section_max_cycles": 1151,
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
+      "checks": 5,
+      "violations": 0,
+      "after_request": 0,
+      "margin_min_cycles": 6227,
+      "holds": true
+     },
+     "period_cycles": 117328,
+     "response_bound": {
+      "cycles": 398380,
+      "task": "J",
+      "phase": 3,
+      "ms": 1.6977192145097506
+     },
+     "tasks": {
+      "A": {
+       "pe": "0",
+       "start": 11000,
+       "finish": 11377,
+       "phase": 0
+      },
+      "B": {
+       "pe": "0",
+       "start": 22377,
+       "finish": 49030,
+       "phase": 0
+      },
+      "D": {
+       "pe": "0",
+       "start": 60030,
+       "finish": 61792,
+       "phase": 0
+      },
+      "F": {
+       "pe": "0",
+       "start": 72792,
+       "finish": 81062,
+       "phase": 0
+      },
+      "C": {
+       "pe": "1",
+       "start": 11000,
+       "finish": 31531,
+       "phase": 1
+      },
+      "E": {
+       "pe": "2",
+       "start": 11000,
+       "finish": 45202,
+       "phase": 2
+      },
+      "H": {
+       "pe": "2",
+       "start": 56202,
+       "finish": 55345,
+       "phase": 2
+      },
+      "I": {
+       "pe": "2",
+       "start": 66345,
+       "finish": 74615,
+       "phase": 2
+      },
+      "J": {
+       "pe": "3",
+       "start": 11000,
+       "finish": 46396,
+       "phase": 3
+      },
+      "G": {
+       "pe": "3",
+       "start": 57396,
+       "finish": 117318,
+       "phase": 1
+      }
+     },
+     "sequences": {
+      "0": [
+       "A",
+       "B",
+       "D",
+       "F"
+      ],
+      "1": [
+       "C"
+      ],
+      "2": [
+       "E",
+       "H",
+       "I"
+      ],
+      "3": [
+       "J",
+       "G"
+      ]
+     },
+     "sim_ns": 10500000,
+     "sim_ns_min": 10197720,
+     "sim_fits": true,
+     "feasible": true,
+     "table": {
+      "clock": true,
+      "costs": true
+     }
+    },
+    "W4": {
+     "clock_hz": 500000000,
+     "rule": "kept",
+     "cpu_feasible": true,
+     "link_schedule_feasible": true,
+     "packets_between_pes": 5,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
+      "section_max_cycles": 1151,
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
+      "checks": 5,
+      "violations": 0,
+      "after_request": 0,
+      "margin_min_cycles": 138899,
+      "holds": true
+     },
+     "period_cycles": 250000,
+     "response_bound": {
+      "cycles": 796396,
+      "task": "J",
+      "phase": 3,
+      "ms": 1.592792
+     },
+     "tasks": {
+      "A": {
+       "pe": "0",
+       "start": 11000,
+       "finish": 11377,
+       "phase": 0
+      },
+      "B": {
+       "pe": "0",
+       "start": 22377,
+       "finish": 49030,
+       "phase": 0
+      },
+      "D": {
+       "pe": "0",
+       "start": 60030,
+       "finish": 61792,
+       "phase": 0
+      },
+      "F": {
+       "pe": "0",
+       "start": 72792,
+       "finish": 81062,
+       "phase": 0
+      },
+      "C": {
+       "pe": "1",
+       "start": 11000,
+       "finish": 31531,
+       "phase": 1
+      },
+      "E": {
+       "pe": "2",
+       "start": 11000,
+       "finish": 45202,
+       "phase": 2
+      },
+      "H": {
+       "pe": "2",
+       "start": 56202,
+       "finish": 55345,
+       "phase": 2
+      },
+      "I": {
+       "pe": "2",
+       "start": 66345,
+       "finish": 74615,
+       "phase": 2
+      },
+      "J": {
+       "pe": "3",
+       "start": 11000,
+       "finish": 46396,
+       "phase": 3
+      },
+      "G": {
+       "pe": "3",
+       "start": 57396,
+       "finish": 117318,
+       "phase": 1
+      }
+     },
+     "sequences": {
+      "0": [
+       "A",
+       "B",
+       "D",
+       "F"
+      ],
+      "1": [
+       "C"
+      ],
+      "2": [
+       "E",
+       "H",
+       "I"
+      ],
+      "3": [
+       "J",
+       "G"
+      ]
+     },
+     "sim_ns": 10500000,
+     "sim_ns_min": 10092792,
+     "sim_fits": true,
+     "feasible": true,
+     "table": {
+      "clock": true,
+      "costs": true
+     }
+    }
+   }
+  },
+  "CARV-E": {
+   "kind": "composition",
+   "costs": {
+    "tasks": {
+     "FBU1": {
+      "pe": "2",
+      "csv": 95000,
+      "static": 89416,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU2": {
+      "pe": "3",
+      "csv": 95000,
+      "static": 89416,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU3": {
+      "pe": "12",
+      "csv": 95000,
+      "static": 90038,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU4": {
+      "pe": "1",
+      "csv": 66998,
+      "static": 61416,
+      "used": 66998,
+      "source": "csv"
+     },
+     "FBU5": {
+      "pe": "7",
+      "csv": 95000,
+      "static": 89416,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU6": {
+      "pe": "11",
+      "csv": 95000,
+      "static": 89416,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU7": {
+      "pe": "16",
+      "csv": 95000,
+      "static": 89416,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FBU8": {
+      "pe": "8",
+      "csv": 95000,
+      "static": 90038,
+      "used": 95000,
+      "source": "csv"
+     },
+     "NAVC": {
+      "pe": "0",
+      "csv": 95000,
+      "static": 95018,
+      "used": 95018,
+      "source": "static"
+     },
+     "BFE1": {
+      "pe": "2",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE2": {
+      "pe": "3",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE3": {
+      "pe": "4",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE4": {
+      "pe": "1",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE5": {
+      "pe": "7",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE6": {
+      "pe": "11",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE7": {
+      "pe": "5",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "BFE8": {
+      "pe": "6",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "FDF1": {
+      "pe": "19",
+      "csv": 95000,
+      "static": 106356,
+      "used": 106356,
+      "source": "static"
+     },
+     "FDF2": {
+      "pe": "18",
+      "csv": 95000,
+      "static": 106356,
+      "used": 106356,
+      "source": "static"
+     },
+     "STPH": {
+      "pe": "17",
+      "csv": 95000,
+      "static": 97928,
+      "used": 97928,
+      "source": "static"
+     },
+     "VOD1": {
+      "pe": "12",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "VOD2": {
+      "pe": "8",
+      "csv": 95000,
+      "static": 93713,
+      "used": 95000,
+      "source": "csv"
+     },
+     "OBMG": {
+      "pe": "15",
+      "csv": 95000,
+      "static": 90803,
+      "used": 95000,
+      "source": "csv"
+     },
+     "A": {
+      "pe": "14",
+      "csv": 28530,
+      "static": 23568,
+      "used": 28530,
+      "source": "csv"
+     },
+     "B": {
+      "pe": "14",
+      "csv": 58600,
+      "static": 57313,
+      "used": 58600,
+      "source": "csv"
+     },
+     "C": {
+      "pe": "10",
+      "csv": 96330,
+      "static": 95043,
+      "used": 96330,
+      "source": "csv"
+     },
+     "D": {
+      "pe": "14",
+      "csv": 14000,
+      "static": 12713,
+      "used": 14000,
+      "source": "csv"
+     },
+     "E": {
+      "pe": "13",
+      "csv": 52700,
+      "static": 54309,
+      "used": 54309,
+      "source": "static"
+     },
+     "F": {
+      "pe": "14",
+      "csv": 80800,
+      "static": 79513,
+      "used": 80800,
+      "source": "csv"
+     },
+     "G": {
+      "pe": "9",
+      "csv": 109880,
+      "static": 108593,
+      "used": 109880,
+      "source": "csv"
+     },
+     "H": {
+      "pe": "13",
+      "csv": 45300,
+      "static": 44013,
+      "used": 45300,
+      "source": "csv"
+     },
+     "I": {
+      "pe": "13",
+      "csv": 75370,
+      "static": 74083,
+      "used": 75370,
+      "source": "csv"
+     },
+     "J": {
+      "pe": "9",
+      "csv": 107570,
+      "static": 111793,
+      "used": 111793,
+      "source": "static"
+     }
+    },
+    "file": "carv_e.json",
+    "sha256": "d198619e24f835e34592399170784a2e5c315ff88de1fc771b31f618c3d89512"
+   },
+   "pes": {
+    "14": {
+     "tasks": [
+      "A",
+      "B",
+      "D",
+      "F"
+     ],
+     "csv": 181930,
+     "static": 173107,
+     "used": 181930,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "2": {
+     "tasks": [
+      "BFE1",
+      "FBU1"
+     ],
+     "csv": 190000,
+     "static": 183129,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "3": {
+     "tasks": [
+      "BFE2",
+      "FBU2"
+     ],
+     "csv": 190000,
+     "static": 183129,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "4": {
+     "tasks": [
+      "BFE3"
+     ],
+     "csv": 95000,
+     "static": 93713,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "1": {
+     "tasks": [
+      "BFE4",
+      "FBU4"
+     ],
+     "csv": 161998,
+     "static": 155129,
+     "used": 161998,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "7": {
+     "tasks": [
+      "BFE5",
+      "FBU5"
+     ],
+     "csv": 190000,
+     "static": 183129,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "11": {
+     "tasks": [
+      "BFE6",
+      "FBU6"
+     ],
+     "csv": 190000,
+     "static": 183129,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "5": {
+     "tasks": [
+      "BFE7"
+     ],
+     "csv": 95000,
+     "static": 93713,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "6": {
+     "tasks": [
+      "BFE8"
+     ],
+     "csv": 95000,
+     "static": 93713,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "10": {
+     "tasks": [
+      "C"
+     ],
+     "csv": 96330,
+     "static": 95043,
+     "used": 96330,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "13": {
+     "tasks": [
+      "E",
+      "H",
+      "I"
+     ],
+     "csv": 173370,
+     "static": 172405,
+     "used": 174979,
+     "static_above_csv": [
+      "E"
+     ],
+     "source": "csv"
+    },
+    "12": {
+     "tasks": [
+      "FBU3",
+      "VOD1"
+     ],
+     "csv": 190000,
+     "static": 183751,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "16": {
+     "tasks": [
+      "FBU7"
+     ],
+     "csv": 95000,
+     "static": 89416,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "8": {
+     "tasks": [
+      "FBU8",
+      "VOD2"
+     ],
+     "csv": 190000,
+     "static": 183751,
+     "used": 190000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "19": {
+     "tasks": [
+      "FDF1"
+     ],
+     "csv": 95000,
+     "static": 106356,
+     "used": 106356,
+     "static_above_csv": [
+      "FDF1"
+     ],
+     "source": "static"
+    },
+    "18": {
+     "tasks": [
+      "FDF2"
+     ],
+     "csv": 95000,
+     "static": 106356,
+     "used": 106356,
+     "static_above_csv": [
+      "FDF2"
+     ],
+     "source": "static"
+    },
+    "9": {
+     "tasks": [
+      "G",
+      "J"
+     ],
+     "csv": 217450,
+     "static": 220386,
+     "used": 221673,
+     "static_above_csv": [
+      "J"
+     ],
+     "source": "static"
+    },
+    "0": {
+     "tasks": [
+      "NAVC"
+     ],
+     "csv": 95000,
+     "static": 95018,
+     "used": 95018,
+     "static_above_csv": [
+      "NAVC"
+     ],
+     "source": "static"
+    },
+    "15": {
+     "tasks": [
+      "OBMG"
+     ],
+     "csv": 95000,
+     "static": 90803,
+     "used": 95000,
+     "static_above_csv": [],
+     "source": "csv"
+    },
+    "17": {
+     "tasks": [
+      "STPH"
+     ],
+     "csv": 95000,
+     "static": 97928,
+     "used": 97928,
+     "static_above_csv": [
+      "STPH"
+     ],
+     "source": "static"
+    }
+   },
+   "f_cpu_hz": 443346000.0,
+   "f_noc_hz": 457595825.1953125,
+   "minimum_hz": 457595825.1953125,
+   "binding": "f_noc",
+   "runs": {
+    "VMA": {
+     "clock_hz": 457600000,
+     "rule": "flow",
+     "cpu_feasible": true,
+     "apps": {
+      "CARV": {
+       "period_cycles": 228800,
+       "response_bound": {
+        "cycles": 1010200,
+        "task": "OBMG",
+        "phase": 4,
+        "ms": 2.2076048951048954
+       },
+       "tasks": {
+        "NAVC": {
+         "pe": "0",
+         "start": 11000,
+         "finish": 95018,
+         "phase": 1
+        },
+        "FBU4": {
+         "pe": "1",
+         "start": 11000,
+         "finish": 66998,
+         "phase": 0
+        },
+        "BFE4": {
+         "pe": "1",
+         "start": 77998,
+         "finish": 161998,
+         "phase": 0
+        },
+        "FBU1": {
+         "pe": "2",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 0
+        },
+        "BFE1": {
+         "pe": "2",
+         "start": 106000,
+         "finish": 190000,
+         "phase": 0
+        },
+        "FBU2": {
+         "pe": "3",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 0
+        },
+        "BFE2": {
+         "pe": "3",
+         "start": 106000,
+         "finish": 190000,
+         "phase": 0
+        },
+        "BFE3": {
+         "pe": "4",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 1
+        },
+        "BFE7": {
+         "pe": "5",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 1
+        },
+        "BFE8": {
+         "pe": "6",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 1
+        },
+        "FBU5": {
+         "pe": "7",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 0
+        },
+        "BFE5": {
+         "pe": "7",
+         "start": 106000,
+         "finish": 190000,
+         "phase": 0
+        },
+        "FBU8": {
+         "pe": "8",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 0
+        },
+        "VOD2": {
+         "pe": "8",
+         "start": 106000,
+         "finish": 190000,
+         "phase": 0
+        },
+        "FBU6": {
+         "pe": "11",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 0
+        },
+        "BFE6": {
+         "pe": "11",
+         "start": 106000,
+         "finish": 190000,
+         "phase": 0
+        },
+        "FBU3": {
+         "pe": "12",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 0
+        },
+        "VOD1": {
+         "pe": "12",
+         "start": 106000,
+         "finish": 190000,
+         "phase": 0
+        },
+        "OBMG": {
+         "pe": "15",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 4
+        },
+        "FBU7": {
+         "pe": "16",
+         "start": 11000,
+         "finish": 95000,
+         "phase": 0
+        },
+        "STPH": {
+         "pe": "17",
+         "start": 11000,
+         "finish": 97928,
+         "phase": 3
+        },
+        "FDF2": {
+         "pe": "18",
+         "start": 11000,
+         "finish": 114724,
+         "phase": 2
+        },
+        "FDF1": {
+         "pe": "19",
+         "start": 11000,
+         "finish": 110851,
+         "phase": 2
+        }
+       },
+       "sequences": {
+        "0": [
+         "NAVC"
+        ],
+        "1": [
+         "FBU4",
+         "BFE4"
+        ],
+        "2": [
+         "FBU1",
+         "BFE1"
+        ],
+        "3": [
+         "FBU2",
+         "BFE2"
+        ],
+        "4": [
+         "BFE3"
+        ],
+        "5": [
+         "BFE7"
+        ],
+        "6": [
+         "BFE8"
+        ],
+        "7": [
+         "FBU5",
+         "BFE5"
+        ],
+        "8": [
+         "FBU8",
+         "VOD2"
+        ],
+        "11": [
+         "FBU6",
+         "BFE6"
+        ],
+        "12": [
+         "FBU3",
+         "VOD1"
+        ],
+        "15": [
+         "OBMG"
+        ],
+        "16": [
+         "FBU7"
+        ],
+        "17": [
+         "STPH"
+        ],
+        "18": [
+         "FDF2"
+        ],
+        "19": [
+         "FDF1"
+        ]
+       }
+      },
+      "E": {
+       "period_cycles": 228800,
+       "response_bound": {
+        "cycles": 802066,
+        "task": "J",
+        "phase": 3,
+        "ms": 1.7527666083916085
+       },
+       "tasks": {
+        "J": {
+         "pe": "9",
+         "start": 11000,
+         "finish": 115666,
+         "phase": 3
+        },
+        "G": {
+         "pe": "9",
+         "start": 126666,
+         "finish": 228797,
+         "phase": 1
+        },
+        "C": {
+         "pe": "10",
+         "start": 11000,
+         "finish": 100825,
+         "phase": 1
+        },
+        "E": {
+         "pe": "13",
+         "start": 11000,
+         "finish": 54309,
+         "phase": 2
+        },
+        "H": {
+         "pe": "13",
+         "start": 65309,
+         "finish": 99609,
+         "phase": 2
+        },
+        "I": {
+         "pe": "13",
+         "start": 110609,
+         "finish": 174979,
+         "phase": 2
+        },
+        "A": {
+         "pe": "14",
+         "start": 11000,
+         "finish": 28530,
+         "phase": 0
+        },
+        "B": {
+         "pe": "14",
+         "start": 39530,
+         "finish": 87130,
+         "phase": 0
+        },
+        "D": {
+         "pe": "14",
+         "start": 98130,
+         "finish": 101130,
+         "phase": 0
+        },
+        "F": {
+         "pe": "14",
+         "start": 112130,
+         "finish": 181930,
+         "phase": 0
+        }
+       },
+       "sequences": {
+        "9": [
+         "J",
+         "G"
+        ],
+        "10": [
+         "C"
+        ],
+        "13": [
+         "E",
+         "H",
+         "I"
+        ],
+        "14": [
+         "A",
+         "B",
+         "D",
+         "F"
+        ]
+       }
+      }
+     },
+     "link_schedule_feasible": true,
+     "packets_between_pes": 21,
+     "premise_release": {
+      "lead_cycles": 1861,
+      "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 703,
+      "section_max_cycles": 1151,
+      "required_margin_cycles": 1016,
+      "activity_in_lead_cycles": 1464,
+      "checks": 21,
+      "violations": 0,
+      "after_request": 0,
+      "margin_min_cycles": 11526,
+      "holds": true
+     },
+     "period_cycles": 228800,
+     "sim_ns": 11500000,
+     "sim_ns_min": 11207605,
+     "sim_fits": true,
+     "feasible": true,
+     "table": {
+      "clock": true,
+      "costs": true
+     }
+    }
+   }
+  },
+  "CAR-FULL": {
+   "kind": "multirate",
+   "costs": {
+    "tasks": {
+     "TPMS": {
+      "pe": "3",
+      "csv": 477668,
+      "static": 474662,
+      "used": 477668,
+      "source": "csv"
+     },
+     "VIBS": {
+      "pe": "3",
+      "csv": 151000,
+      "static": 147992,
+      "used": 151000,
+      "source": "csv"
+     },
+     "SPES": {
+      "pe": "1",
+      "csv": 151000,
+      "static": 152974,
+      "used": 152974,
+      "source": "static"
+     },
+     "POSI": {
+      "pe": "8",
+      "csv": 711000,
+      "static": 712974,
+      "used": 712974,
+      "source": "static"
+     },
+     "USOS": {
+      "pe": "4",
+      "csv": 104332,
+      "static": 101322,
+      "used": 104332,
+      "source": "csv"
+     },
+     "FBU1": {
+      "pe": "11",
+      "csv": 67000,
+      "static": 63992,
+      "used": 67000,
+      "source": "csv"
+     },
+     "FBU2": {
+      "pe": "15",
+      "csv": 67000,
+      "static": 63992,
+      "used": 67000,
+      "source": "csv"
+     },
+     "FBU3": {
+      "pe": "5",
+      "csv": 67000,
+      "static": 68974,
+      "used": 68974,
+      "source": "static"
+     },
+     "FBU4": {
+      "pe": "7",
+      "csv": 48332,
+      "static": 45322,
+      "used": 48332,
+      "source": "csv"
+     },
+     "FBU5": {
+      "pe": "14",
+      "csv": 67000,
+      "static": 63992,
+      "used": 67000,
+      "source": "csv"
+     },
+     "FBU6": {
+      "pe": "13",
+      "csv": 67000,
+      "static": 63992,
+      "used": 67000,
+      "source": "csv"
+     },
+     "FBU7": {
+      "pe": "12",
+      "csv": 67000,
+      "static": 63992,
+      "used": 67000,
+      "source": "csv"
+     },
+     "FBU8": {
+      "pe": "6",
+      "csv": 67000,
+      "static": 68974,
+      "used": 68974,
+      "source": "static"
+     },
+     "STAC": {
+      "pe": "3",
+      "csv": 151000,
+      "static": 168470,
+      "used": 168470,
+      "source": "static"
+     },
+     "TPRC": {
+      "pe": "0",
+      "csv": 1411000,
+      "static": 1408005,
+      "used": 1411000,
+      "source": "csv"
+     },
+     "DIRC": {
+      "pe": "8",
+      "csv": 151000,
+      "static": 148005,
+      "used": 151000,
+      "source": "csv"
+     },
+     "NAVC": {
+      "pe": "8",
+      "csv": 151000,
+      "static": 183740,
+      "used": 183740,
+      "source": "static"
+     },
+     "OBDB": {
+      "pe": "4",
+      "csv": 711000,
+      "static": 723326,
+      "used": 723326,
+      "source": "static"
+     },
+     "BFE1": {
+      "pe": "11",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "BFE2": {
+      "pe": "15",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "BFE3": {
+      "pe": "9",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "BFE4": {
+      "pe": "7",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "BFE5": {
+      "pe": "14",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "BFE6": {
+      "pe": "13",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "BFE7": {
+      "pe": "12",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "BFE8": {
+      "pe": "10",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "FDF1": {
+      "pe": "9",
+      "csv": 67000,
+      "static": 84632,
+      "used": 84632,
+      "source": "static"
+     },
+     "FDF2": {
+      "pe": "10",
+      "csv": 67000,
+      "static": 84632,
+      "used": 84632,
+      "source": "static"
+     },
+     "STPH": {
+      "pe": "9",
+      "csv": 67000,
+      "static": 74344,
+      "used": 74344,
+      "source": "static"
+     },
+     "THRC": {
+      "pe": "2",
+      "csv": 151000,
+      "static": 153349,
+      "used": 153349,
+      "source": "static"
+     },
+     "VOD1": {
+      "pe": "5",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "VOD2": {
+      "pe": "6",
+      "csv": 67000,
+      "static": 69000,
+      "used": 69000,
+      "source": "static"
+     },
+     "OBMG": {
+      "pe": "4",
+      "csv": 1411000,
+      "static": 1428632,
+      "used": 1428632,
+      "source": "static"
+     }
+    },
+    "scheduler_cycles": {
+     "csv": 11000,
+     "static": 1852,
+     "used": 11000
+    },
+    "file": "car_full.json",
+    "sha256": "390624704f2dc3ec4527c2a6b2455acaa00cdad54e73bb9eececa97613e201ce"
+   },
+   "pes": {
+    "11": {
+     "tasks": [
+      "BFE1",
+      "FBU1"
+     ],
+     "csv": 134000,
+     "static": 132992,
+     "used": 136000,
+     "static_above_csv": [
+      "BFE1"
+     ],
+     "source": "csv"
+    },
+    "15": {
+     "tasks": [
+      "BFE2",
+      "FBU2"
+     ],
+     "csv": 134000,
+     "static": 132992,
+     "used": 136000,
+     "static_above_csv": [
+      "BFE2"
+     ],
+     "source": "csv"
+    },
+    "9": {
+     "tasks": [
+      "BFE3",
+      "FDF1",
+      "STPH"
+     ],
+     "csv": 201000,
+     "static": 227976,
+     "used": 227976,
+     "static_above_csv": [
+      "BFE3",
+      "FDF1",
+      "STPH"
+     ],
+     "source": "static"
+    },
+    "7": {
+     "tasks": [
+      "BFE4",
+      "FBU4"
+     ],
+     "csv": 115332,
+     "static": 114322,
+     "used": 117332,
+     "static_above_csv": [
+      "BFE4"
+     ],
+     "source": "csv"
+    },
+    "14": {
+     "tasks": [
+      "BFE5",
+      "FBU5"
+     ],
+     "csv": 134000,
+     "static": 132992,
+     "used": 136000,
+     "static_above_csv": [
+      "BFE5"
+     ],
+     "source": "csv"
+    },
+    "13": {
+     "tasks": [
+      "BFE6",
+      "FBU6"
+     ],
+     "csv": 134000,
+     "static": 132992,
+     "used": 136000,
+     "static_above_csv": [
+      "BFE6"
+     ],
+     "source": "csv"
+    },
+    "12": {
+     "tasks": [
+      "BFE7",
+      "FBU7"
+     ],
+     "csv": 134000,
+     "static": 132992,
+     "used": 136000,
+     "static_above_csv": [
+      "BFE7"
+     ],
+     "source": "csv"
+    },
+    "10": {
+     "tasks": [
+      "BFE8",
+      "FDF2"
+     ],
+     "csv": 134000,
+     "static": 153632,
+     "used": 153632,
+     "static_above_csv": [
+      "BFE8",
+      "FDF2"
+     ],
+     "source": "static"
+    },
+    "8": {
+     "tasks": [
+      "DIRC",
+      "NAVC",
+      "POSI"
+     ],
+     "csv": 1013000,
+     "static": 1044719,
+     "used": 1047714,
+     "static_above_csv": [
+      "NAVC",
+      "POSI"
+     ],
+     "source": "static"
+    },
+    "5": {
+     "tasks": [
+      "FBU3",
+      "VOD1"
+     ],
+     "csv": 134000,
+     "static": 137974,
+     "used": 137974,
+     "static_above_csv": [
+      "FBU3",
+      "VOD1"
+     ],
+     "source": "static"
+    },
+    "6": {
+     "tasks": [
+      "FBU8",
+      "VOD2"
+     ],
+     "csv": 134000,
+     "static": 137974,
+     "used": 137974,
+     "static_above_csv": [
+      "FBU8",
+      "VOD2"
+     ],
+     "source": "static"
+    },
+    "4": {
+     "tasks": [
+      "OBDB",
+      "OBMG",
+      "USOS"
+     ],
+     "csv": 2226332,
+     "static": 2253280,
+     "used": 2256290,
+     "static_above_csv": [
+      "OBDB",
+      "OBMG"
+     ],
+     "source": "static"
+    },
+    "1": {
+     "tasks": [
+      "SPES"
+     ],
+     "csv": 151000,
+     "static": 152974,
+     "used": 152974,
+     "static_above_csv": [
+      "SPES"
+     ],
+     "source": "static"
+    },
+    "3": {
+     "tasks": [
+      "STAC",
+      "TPMS",
+      "VIBS"
+     ],
+     "csv": 779668,
+     "static": 791124,
+     "used": 797138,
+     "static_above_csv": [
+      "STAC"
+     ],
+     "source": "static"
+    },
+    "2": {
+     "tasks": [
+      "THRC"
+     ],
+     "csv": 151000,
+     "static": 153349,
+     "used": 153349,
+     "static_above_csv": [
+      "THRC"
+     ],
+     "source": "static"
+    },
+    "0": {
+     "tasks": [
+      "TPRC"
+     ],
+     "csv": 1411000,
+     "static": 1408005,
+     "used": 1411000,
+     "static_above_csv": [],
+     "source": "csv"
+    }
+   },
+   "f_cpu_hz": 477952000.0,
+   "f_noc_hz": 526056421.875,
+   "minimum_hz": 526056421.875,
+   "binding": "f_noc",
+   "runs": {
+    "CF6": {
+     "clock_hz": 526080000,
+     "rule": "flow",
+     "cpu_feasible": true,
+     "period_cycles": 131520,
+     "hyper_cycles": 6576000,
+     "periodic_from_hyperperiod": 0,
+     "link_schedule_feasible": true,
+     "packets_between_pes": 347,
+     "premise_release": {
+      "lead_cycles": 1621,
+      "entry_cycles": 60,
+      "release_cycles": 253,
+      "end_cycles": 929,
+      "section_max_cycles": 1191,
+      "required_margin_cycles": 1242,
+      "activity_in_lead_cycles": 1504,
+      "checks": 347,
+      "violations": 0,
+      "after_request": 0,
+      "margin_min_cycles": 2940,
+      "holds": true
+     },
+     "chains": 34,
+     "packets_per_hyperperiod": 347,
+     "data_age": {
+      "TPMS-STAC-TPRC": 11396000,
+      "TPMS-STAC-THRC": 4767549,
+      "VIBS-STAC-TPRC": 8765600,
+      "VIBS-STAC-THRC": 1479549,
+      "SPES-NAVC-DIRC": 1972782,
+      "SPES-NAVC-THRC": 1479549,
+      "SPES-STAC-TPRC": 8765600,
+      "SPES-STAC-THRC": 1479549,
+      "POSI-NAVC-DIRC": 6294974,
+      "POSI-NAVC-THRC": 6082749,
+      "POSI-OBMG-OBDB-NAVC-DIRC": 14975294,
+      "POSI-OBMG-OBDB-NAVC-THRC": 14631549,
+      "USOS-OBMG-OBDB-NAVC-DIRC": 12344894,
+      "USOS-OBMG-OBDB-NAVC-THRC": 12001149,
+      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU1-BFE1-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU2-BFE2-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU3-VOD1-NAVC-DIRC": 1955436,
+      "FBU3-VOD1-NAVC-THRC": 1479549,
+      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU3-BFE3-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU4-BFE4-FDF1-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU5-BFE5-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU6-BFE6-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU7-BFE7-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709,
+      "FBU8-VOD2-NAVC-DIRC": 1955436,
+      "FBU8-VOD2-NAVC-THRC": 1479549,
+      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-DIRC": 12739454,
+      "FBU8-BFE8-FDF2-STPH-OBMG-OBDB-NAVC-THRC": 12395709
+     },
+     "data_age_max": {
+      "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+      "cycles": 14975294,
+      "ms": 28.46581128345499
+     },
+     "sim_ns_min": 31465812,
+     "sim_ns": 64000000,
+     "sim_fits": true,
+     "feasible": true,
+     "table": {
+      "clock": true,
+      "costs": true
+     }
+    }
+   },
+   "model": {
+    "phase_ms": 0.25,
+    "hyperperiod_ms": 12.5,
+    "phases_per_hyperperiod": 50,
+    "flows": 38,
+    "flows_on_one_pe": 18,
+    "p_min_cycles": 119488,
+    "f_cpu_hz": 477952000.0,
+    "utilization_bound_cycles": 113988,
+    "utilization_bound_hz": 455952000.0,
+    "f_cpu_phase_hz": 9025160000.0,
+    "data_age_max_at_minimum": {
+     "chain": "POSI-OBMG-OBDB-NAVC-DIRC",
+     "cycles": 14974628,
+     "ms": 28.46582111216623
+    }
+   }
+  }
+ }
+}

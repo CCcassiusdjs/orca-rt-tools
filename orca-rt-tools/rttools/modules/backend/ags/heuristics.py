@@ -1,4 +1,4 @@
-"""Criteria of the AGS (Sec. 6.3.4 of the thesis; ICECS 2022).
+"""Criteria of the AGS (Sec. 6.3.4 of the ORCA RT-Tools reference; ICECS 2022).
 
 Each criterion takes the problem (tables link x packet min_start,
 occupancy and deadline, list of packets, hyperperiod) and returns the
@@ -7,7 +7,7 @@ Ties keep the order of the packets in the problem.
 
 Quantities per packet i:
   o_i   occupancy of each link of the path (cycles), the size of the
-        packet in the unit of the period (the thesis uses "size" with
+        packet in the unit of the period (the ORCA RT-Tools reference uses "size" with
         the period in Eq. 6.2, so both are in cycles);
   T_i   period of the flow of i, in cycles: the "period" key of the packet
         when present, otherwise HP / n_f, with n_f the number of packets
@@ -77,7 +77,7 @@ def mbcf(problem):
 
 
 def mcpf(problem):
-    """Most Critical Path First (Sec. 6.3.4, no equation in the thesis):
+    """Most Critical Path First (Sec. 6.3.4, no equation in the ORCA RT-Tools reference):
     the usage of link l is the time it is occupied in the hyperperiod,
     u(l) = sum of o_k over the packets k that use l; the score of packet i
     is the sum of u(l) over the links of its path. Largest score (path

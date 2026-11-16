@@ -9,7 +9,7 @@ application E); this module does not compose them.
 |---|---|
 | dispatch_order | Order of the tasks of one PE in one phase by the rule of the UCX/OS kernel: round robin over the circular queue in creation order, with the idle task |
 | sequence | Start and finish of each task of one PE: ORT/BENCH (SingleCoreEngine) with round robin, one job per task and quantum >= the largest cost |
-| demand | c^(V_k), sum of the costs of the tasks of one PE |
+| demand | c^(V_k), CPU time estimate of one PE by ORT/GCPA: sum of the costs of its tasks |
 | cpu_frequency | f_CPU = max_k c^(V_k) / T, the lowest frequency at which every PE meets the release period T |
 | phases | Phase index phi(v) of each task (a packet between two PEs reaches its target in the next phase; inside a PE, in the same phase when the target runs after the source) |
 | response_bound | R^ = phi(v_out) P + f^(v_out), in cycles, with P the phase length in cycles |
@@ -72,8 +72,10 @@ def sequence(costs, scheduler_cycles=0):
 
 
 def demand(costs):
-    """c^(V_k): sum of the costs of the tasks of one PE (cycles)."""
-    return sum(int(c) for _, c in costs)
+    """c^(V_k): CPU time estimate of one PE by ORT/GCPA (the CPA rule sums the
+    costs of the tasks of one processor, rttools/gcpa/method.cluster_time), in cycles."""
+    from rttools.gcpa.method import cluster_time
+    return cluster_time(c for _, c in costs)
 
 
 def cpu_frequency(demands, period_s):

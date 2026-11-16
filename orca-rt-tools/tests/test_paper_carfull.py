@@ -19,6 +19,9 @@ from rttools.paper import carfull, exp23
 from rttools.paper.frequency import search_config
 from rttools.tui.model import network
 
+# reference.json of experiments/car-full: network-interface model off (NI ?= off)
+pytestmark = pytest.mark.usefixtures("ni_off")
+
 APPS = os.path.join(REPO_ROOT, "apps")
 EXP = os.path.join(REPO_ROOT, "experiments", "car-full")
 ARCH = os.path.join(REPO_ROOT, "arch", "hermes-4x4.gml")
@@ -129,7 +132,7 @@ def test_car_full_data_age():
 
 
 @pytest.fixture(scope="module")
-def run(tmp_path_factory):
+def run(tmp_path_factory, ni_off_module):
     out = tmp_path_factory.mktemp("carfull")
     m = carfull.run(config(), APPS, ARCH, str(out))
     return m, out

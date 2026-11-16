@@ -33,6 +33,13 @@ def loadFromFile(app_csv):
     if periods:
       graph.graph["task_periods"] = periods
 
+    # end-to-end deadline of each task (Deadline column of the task rows):
+    # the analysis requires n(v) P + F(v) <= D(v) at every candidate
+    # frequency (rttools/modules/instances/release.py, deadline_fits)
+    deadlines = readTaskDeadlines(app_csv)
+    if deadlines:
+      graph.graph["task_deadlines"] = deadlines
+
     # for n in graph.nodes(data=True):
     #   print(n)
 
@@ -209,6 +216,35 @@ def readTaskPeriods(filename):
           continue
         if period > 0:
           out[row[4].strip()] = row[1].strip()
+  return out
+
+# End-to-end deadline of each task (s) from the Deadline column of the task
+# rows of the old schema, by task label; rows with deadline 0 and the wcet
+# schema give no value.
+def readTaskDeadlines(filename):
+  out = {}
+  mode = 0
+  legacy = False
+  with open(filename) as csvfile:
+    for row in csv.reader(csvfile):
+      if not row:
+        continue
+      head = row[0].strip()
+      if mode == 0:
+        if head == "#tasks":
+          mode = 1
+      elif mode == 1:
+        legacy = selectTaskRowParser(row) is parseTaskRowLegacy
+        mode = 2
+      elif head.startswith("#"):
+        break
+      elif legacy:
+        try:
+          d = float(row[3].replace(',', ''))
+        except ValueError:
+          continue
+        if d > 0:
+          out[row[4].strip()] = row[3].strip()
   return out
 
 # Exports a graph to a png file. By design, dot generates

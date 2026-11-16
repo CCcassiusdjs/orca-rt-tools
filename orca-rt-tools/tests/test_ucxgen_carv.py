@@ -94,9 +94,10 @@ def toolchain(tmp_path):
     return f"{b}:{os.environ['PATH']}"
 
 
-def build(ucx, target, path):
+def build(ucx, target, path, extra=()):
+    """Builds `target` (make variables in `extra`); returns code.txt."""
     env = {**os.environ, "PATH": path}
-    for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", target]):
+    for args in (["make", "-s", "ARCH=riscv/hf-riscv-e", "incl"], ["make", "-s", target, *extra]):
         r = subprocess.run(args, cwd=ucx, env=env, capture_output=True, text=True, timeout=600)
         assert r.returncode == 0, (r.stdout + r.stderr)[-3000:]
     return open(os.path.join(ucx, "build", "target", "code.txt")).read()

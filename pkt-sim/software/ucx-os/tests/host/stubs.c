@@ -80,6 +80,7 @@ void host_isr(void (*handler)(void))
 		host_isr_nested++;
 	host_irq_enabled = 1;
 }
+volatile uint32_t host_timer1, host_timer1ocr, host_timercauseinv, host_timermask, host_irq_cause;
 void set_counter_3(uint32_t v) { host_counter3 = v; }
 void set_counter_4(uint32_t v) { host_counter4 = v; }
 /* iteration markers (device/cacc.c), in the order of the writes */

@@ -56,8 +56,24 @@
  * the tick of phase k + n(v). Without the macro, the code is the pattern
  * above (data-driven release of the runs CV, CV2 and MA: a run serves
  * every iteration whose packets are in the queue).
+ *
+ * Time-triggered injection (built with -DUCX_NOC_TT: Makefile of UCX-OS,
+ * INJECTION=tt; lib/noc_tt.c): a job hands each packet to the kernel with
+ * ucx_noc_send_at; a packet to a task of another PE leaves at its instant
+ * in the link schedule of the analysis flow, counted from the tick of the
+ * phase of the job (ucx_job_tick, lib/tick_release.c; app/wcet_e_tt.h of
+ * rttools.ucxgen tt: TT_AT, one table per clock F_CPU), and a packet to a
+ * task of the same PE goes to the queue of the task at once. Without the
+ * macro the job sends the packet at once (the code above).
  */
 #include <ucx.h>
+#ifdef UCX_NOC_TT
+#ifndef UCX_TICK_RELEASE
+#error "the time-triggered injection counts the instants from the tick of the phase (build with UCX_TICK_RELEASE)"
+#endif
+/* instants of the packets between PEs (rttools.ucxgen tt) */
+#include "wcet_e_tt.h"
+#endif
 #include <lib/wcet.h>
 
 #define N_TASKS     10
@@ -298,6 +314,20 @@ static void receive_one(const struct task_s *t, uint32_t *received, uint32_t *w)
   printf("%s: packet from unknown port %d\n", t->name, port);
 }
 
+#ifdef UCX_NOC_TT
+/* ucx_noc_send with the time-triggered injection: hands the packet to
+ * the kernel (lib/noc_tt.c) with the instant of its flow (tag / TAG_MOD)
+ * from the tick of the phase of the job. The arguments of ucx_noc_send
+ * and a call that the compiler treats as the call of ucx_noc_send (noipa:
+ * no inlining, no clone, no knowledge of its registers) keep the code
+ * of run_task as in the build without UCX_NOC_TT (the static analysis
+ * follows t and its fields in the same registers) */
+static __attribute__((noipa)) uint32_t tt_send(uint16_t cpu, uint16_t port, noc_packet_t *pkt, uint16_t tag)
+{
+  return ucx_noc_send_at(cpu, port, pkt, tag, ucx_job_tick(), &TT_AT[tag / TAG_MOD]);
+}
+
+#endif
 static void run_task(const struct task_s *t)
 {
   noc_packet_t *pkt[MAX_OUT];
@@ -339,7 +369,11 @@ static void run_task(const struct task_s *t)
 
     for (int o = 0; o < t->n_out; o++) {
       emit(pkt[o], work, t->out[o].bytes);
+#ifdef UCX_NOC_TT
+      tt_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+#else
       ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+#endif
     }
     ITER_END(t->letter, done);
   } while (--it);

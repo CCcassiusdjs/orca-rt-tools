@@ -1,4 +1,4 @@
-"""Adaptive Guided Search (AGS): Fig. 6.6 of the thesis (Domingues, 2024)
+"""Adaptive Guided Search (AGS): Fig. 6.6 of the ORCA RT-Tools reference (2024)
 and Fig. 3 of Domingues et al., ICECS 2022.
 
 Published pseudocode, as this module reads it:
@@ -50,6 +50,11 @@ from rttools.terminal.terminal import debug, error, info, warn
 
 # search counters of the last run
 hsearch = SimpleNamespace(entered=0, ignored=0, skipped=[], resets=0)
+# predicate (start, occupancy) -> True for a release that the platform excludes
+# (rttools.modules.routing.router.release_guard), or None
+GUARD = None
+# per packet index: such a predicate, or None (applications with distinct ticks); used in place of GUARD
+GUARDS = None
 
 
 '''
@@ -89,14 +94,14 @@ def packet_view(p, j):
   return links, o, a, b
 
 
-def allocate(placed, view, step):
+def allocate(placed, view, step, guard=None):
   """First release of the window of the packet whose interval overlaps no
   interval in `placed` (link -> list of (start, end)) on its links, or
   None. Counts the rejected candidates in hsearch.ignored."""
   links, o, a, b = view
   for k in candidates(a, b, step):
     rng = (k, k + o)
-    if any(overleap(rng, iv) for l in links for iv in placed[l]):
+    if (guard is not None and guard(k, o)) or any(overleap(rng, iv) for l in links for iv in placed[l]):
       hsearch.ignored += 1
       continue
     return k
@@ -135,7 +140,7 @@ def search3(p, heuristic, tries, step):
     while i < len(R):
       r = R[i]
       hsearch.entered += 1
-      k = allocate(placed, views[r], step)
+      k = allocate(placed, views[r], step, GUARDS[r] if GUARDS is not None else GUARD)
       if k is not None:
         release[r] = k
         for l in views[r][0]:

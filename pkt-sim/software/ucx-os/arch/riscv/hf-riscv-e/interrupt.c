@@ -169,6 +169,30 @@ void dummy_handler(void)
 	printf("irq!");
 }
 
+#ifdef UCX_NOC_TT
+/* Segment 0 of the PE of the manycore (hw/peripherals/peripherals_minimal.vhd)
+ * raises the timer cause; the GPIO cause stays masked (GPIOMASK = 0). The
+ * kernel of the time-triggered injection (lib/noc_tt.c) uses two timer
+ * causes, the tick (TIMER1 CTC, bit 2) and the compare register (TIMER1
+ * OCR, bit 3). The handler tests the four bits of TIMERCAUSE once each,
+ * reading the cause again before each bit: a task that the tick preempted
+ * resumes inside the call of bit 2 and tests bit 3 with its value at that
+ * time. A cause raised after its bit was tested interrupts the CPU again
+ * after the return of _isr. */
+void irq0_handler(void)
+{
+	uint32_t i;
+
+	for (i = 0; i < 4; i++) {
+		if ((TIMERCAUSE ^ TIMERCAUSEINV) & TIMERMASK & (1 << i)) {
+			/* toggle interrupt cause */
+			TIMERCAUSEINV ^= 1 << i;
+			/* call irq handler */
+			timer_vector[i]();
+		}
+	}
+}
+#else
 void irq0_handler(void)
 {
 	uint32_t irq, k, i, pins;
@@ -241,6 +265,7 @@ void irq0_handler(void)
 		k <<= 1;
 	} while (S0CAUSE && k);
 }
+#endif
 
 void irq_enable(void)
 {

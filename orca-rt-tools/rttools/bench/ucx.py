@@ -25,9 +25,36 @@ start S of a job is its first dispatch plus sigma (the instant at which
 the job reads its inputs, as estimate.sequence); the finish F is the end
 of its last slice.
 
+Platform accounting (`tick_sigma`, for the check of the bound): each tick
+costs its event to the job that it dispatches (the tick interrupt, the
+save of the running context and the resume of the dispatched one: tick
+term of rttools/wcet/ucx.py), and each job carries its own work and the
+switch at its end (its yield and the resume of the next task: dispatch
+term), so a dispatch at the end of a job costs nothing more and a job
+that starts there reads its inputs at once. The model (default
+accounting) charges c^(v) with one dispatch and sigma per later dispatch;
+with c^(v) >= work + dispatch term + tick term (the static t(v) holds the
+three) and sigma >= tick term, a simulation with the platform accounting
+and the table of the model ends every job at or before its F
+(tests/test_tick_owner.py; the hook in C: pkt-sim/software/ucx-os/tests/host/
+test_car_full_tt.c); without the table, a job that ends early can
+move a later job by a whole phase.
+
 When a completion and a tick fall on the same cycle, the completion is
 handled first (the released jobs of the tick are not ready yet), and the
 tick then schedules from the position that the completion left.
+
+The position that each tick dispatches (`owners`: 0 for the idle task)
+is the table of the time-triggered applications (rttools.ucxgen tt,
+TT_TICK of app/<app>_tt.h): their tick hook starts the search of the
+scheduler at that position, so a job that ends before its F does not
+change the task of a later tick. With jobs that end before their
+modeled finish, the round robin of the kernel without the table can give
+a later tick to another task than the simulation does (the task started
+after the early end holds the CPU at the tick and the search starts after
+it); with the table, the tasks of each phase run in the circular order
+from the position of the simulation, each with at most its remaining
+work, so no job ends after its F.
 
 With one period (k_v = 1 for every task) and c^(V_k) <= P, every phase
 starts with the idle task and the jobs run in creation order without
@@ -67,18 +94,27 @@ def released(task, phase):
     return phase >= task["offset"] and (phase - task["offset"]) % task["period"] == 0
 
 
-def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None):
+def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None, owner_of=None, tick_sigma=False):
     """Simulates one PE.
 
     `tasks`: creation order, [{"name", "cost", "period" (ticks), "offset"
-    (ticks, default 0)}]; `tick`: P in cycles; `phases`: releases happen at
+    (ticks, default 0), "extra" (optional: cycles added to job j, list
+    indexed by j modulo its length)}]; `tick`: P in cycles; `phases`: releases happen at
     ticks 0 .. phases - 1; the simulation continues with ticks and no new
     release until every job finishes, at most `tail` more ticks (default:
     phases). `boundary`: tick period (in ticks) at which the state of the
     PE is recorded before the tick is handled (hyperperiod H / P).
+    `owner_of`: the kernel with the table of the time-triggered applications
+    (TT_TICK): at tick t with owner_of(t) = p > 0, the search of the
+    scheduler starts at position p (the task of p when it has a pending
+    job, else the next one after it), whatever task runs; None: the round
+    robin from the position of the running task. `tick_sigma`: the
+    platform accounting (see above); False: the accounting of the model
+    (the first dispatch of a job is part of c^(v)).
 
     Returns {"jobs": {name: [Job]}, "slices": [(begin, end, name)],
-    "states": {tick index: state tuple}, "complete": bool}."""
+    "states": {tick index: state tuple}, "owners": [position that each
+    tick dispatches, 0: idle task], "complete": bool}."""
     if tick <= 0:
         raise ValueError("tick must be positive")
     names = [t["name"] for t in tasks]
@@ -89,13 +125,14 @@ def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None):
         c, k, o = int(t["cost"]), int(t["period"]), int(t.get("offset", 0))
         if c < 0 or k < 1 or not 0 <= o < k:
             raise ValueError(f"task {t['name']}: cost >= 0, period >= 1 and 0 <= offset < period required")
-        spec[t["name"]] = {"cost": c, "period": k, "offset": o}
+        spec[t["name"]] = {"cost": c, "period": k, "offset": o, "extra": list(t.get("extra") or [])}
     order = [None] + names
     pending = {n: deque() for n in names}
     jobs = {n: [] for n in names}
     count = {n: 0 for n in names}
     slices = []
     states = {}
+    owners = []
     cur = 0          # position of the current task (0: idle)
     running = None   # name of the running task, None: idle
     time = 0
@@ -111,9 +148,17 @@ def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None):
                 return p
         return None
 
-    def dispatch(name, now):
+    def dispatch(name, now, at_tick=False):
         job = pending[name][0]
         job.dispatches += 1
+        if tick_sigma:
+            if at_tick:
+                job.left += sigma
+            if not job.started:
+                job.started = True
+                job.first = now
+                job.start = now + sigma if at_tick else now
+            return job
         if not job.started:
             job.started = True
             job.first = now
@@ -171,12 +216,14 @@ def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None):
                 for n in names:
                     s = spec[n]
                     if released(s, nxt):
-                        j = Job(n, count[n], time, time + s["period"] * tick, s["cost"])
+                        x = s["extra"][count[n] % len(s["extra"])] if s["extra"] else 0
+                        j = Job(n, count[n], time, time + s["period"] * tick, s["cost"] + x)
                         count[n] += 1
                         jobs[n].append(j)
                         pending[n].append(j)
             prev = running
-            p = next_ready(cur)
+            o = owner_of(nxt) if owner_of is not None else 0
+            p = next_ready((o - 1) % len(order)) if o else next_ready(cur)
             if p is None:
                 cur, running = 0, None
             else:
@@ -185,10 +232,11 @@ def simulate(tasks, tick, phases, sigma=0, tail=None, boundary=None):
                     pending[running][0].left += sigma   # the tick lets the same job continue
                     pending[running][0].dispatches += 1
                 else:
-                    dispatch(running, time)
+                    dispatch(running, time, True)
+            owners.append(cur)
             nxt += 1
     complete = not any(pending.values())
-    return {"jobs": jobs, "slices": slices, "states": states, "complete": complete}
+    return {"jobs": jobs, "slices": slices, "states": states, "owners": owners, "complete": complete}
 
 
 def busy_per_phase(slices, tick, phases):

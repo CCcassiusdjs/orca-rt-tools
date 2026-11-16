@@ -1,0 +1,111 @@
+{
+ "_doc": "handlers of one packet event and the handler cycles in t(v) of each task (rttools.wcet, terms send_isr and receive_isr) of the image of the costs file next to this file",
+ "image": {
+  "file": "car_full.elf",
+  "kind": "elf",
+  "sha256": "a84ad666ab192cc3e6230755f0d6f5bf195a6087a4654fa5a60fd044d00dffbd"
+ },
+ "inject": 622,
+ "receive": 4803,
+ "tasks": {
+  "TPMS": {
+   "isr": 622
+  },
+  "VIBS": {
+   "isr": 622
+  },
+  "SPES": {
+   "isr": 1244
+  },
+  "POSI": {
+   "isr": 1244
+  },
+  "USOS": {
+   "isr": 622
+  },
+  "FBU1": {
+   "isr": 622
+  },
+  "FBU2": {
+   "isr": 622
+  },
+  "FBU3": {
+   "isr": 1244
+  },
+  "FBU4": {
+   "isr": 622
+  },
+  "FBU5": {
+   "isr": 622
+  },
+  "FBU6": {
+   "isr": 622
+  },
+  "FBU7": {
+   "isr": 622
+  },
+  "FBU8": {
+   "isr": 1244
+  },
+  "STAC": {
+   "isr": 15653
+  },
+  "TPRC": {
+   "isr": 4803
+  },
+  "DIRC": {
+   "isr": 4803
+  },
+  "NAVC": {
+   "isr": 25881
+  },
+  "OBDB": {
+   "isr": 10850
+  },
+  "BFE1": {
+   "isr": 5425
+  },
+  "BFE2": {
+   "isr": 5425
+  },
+  "BFE3": {
+   "isr": 5425
+  },
+  "BFE4": {
+   "isr": 5425
+  },
+  "BFE5": {
+   "isr": 5425
+  },
+  "BFE6": {
+   "isr": 5425
+  },
+  "BFE7": {
+   "isr": 5425
+  },
+  "BFE8": {
+   "isr": 5425
+  },
+  "FDF1": {
+   "isr": 19834
+  },
+  "FDF2": {
+   "isr": 19834
+  },
+  "STPH": {
+   "isr": 10228
+  },
+  "THRC": {
+   "isr": 9606
+  },
+  "VOD1": {
+   "isr": 5425
+  },
+  "VOD2": {
+   "isr": 5425
+  },
+  "OBMG": {
+   "isr": 19834
+  }
+ }
+}

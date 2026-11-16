@@ -27,6 +27,12 @@
 #               runs up to r11 and TG, TH, TCV, TMA, W2, CF2), the default
 #               with ISR_NESTING=1. Passed to make as UCX_ASDEFS (--defsym
 #               UCX_ISR_NO_RETURN_GUARD=1, UCX_ISR_NO_DI_READBACK=1)
+#   INJECTION   injection of the packets between PEs of the applications
+#               with the release by tick or time-triggered tasks (make
+#               INJECTION=; pkt-sim/software/ucx-os/Makefile): tt (default)
+#               at the instants of the link schedule (lib/noc_tt.c, table
+#               app/<APP>_tt.h), finish when the job sends it (the images up
+#               to tag r11-rc5)
 #   APP         application of pkt-sim/software/ucx-os (Makefile target and
 #               app/<APP>.c; default weird_a, application E of run F)
 #   F_CLK, F_TICK
@@ -82,6 +88,11 @@ fi
 if [ -n "$ASDEFS" ]; then
 	set -- "$@" UCX_ASDEFS="$ASDEFS"
 fi
+INJECTION=${INJECTION:-tt}
+case $INJECTION in
+	tt|finish) ;;
+	*) echo "INJECTION must be tt or finish: $INJECTION" >&2; exit 2 ;;
+esac
 # clock of the software, for the build of the application only
 CLK=()
 for v in F_CLK F_TICK; do
@@ -91,7 +102,7 @@ for v in F_CLK F_TICK; do
 	fi
 done
 ( cd "$OUT/pkt-sim/software/ucx-os" && make -s ARCH=riscv/hf-riscv-e "$@" incl \
-	&& make -s "$@" "$APP" ${CLK[@]+"${CLK[@]}"} ) > "$OUT/build_sw.log" 2>&1 \
+	&& make -s "$@" "$APP" ${CLK[@]+"${CLK[@]}"} INJECTION="$INJECTION" ) > "$OUT/build_sw.log" 2>&1 \
 	|| { tail -20 "$OUT/build_sw.log" >&2; echo "build of $APP failed" >&2; exit 4; }
 ( cd "$OUT/pkt-sim/software/hfrisc-software" && make -s boot_sim ) > "$OUT/build_boot.log" 2>&1
 riscv64-elf-gcc --version | head -1 > "$OUT/gcc.txt"

@@ -115,6 +115,22 @@ void sleep_forever()
 #define PHASE_WAIT(n, j)
 #endif
 
+// Time-triggered injection (built with -DUCX_NOC_TT, Makefile INJECTION=tt;
+// lib/noc_tt.c): a packet to a task of another PE (A->C, C->E, F->G, H->J,
+// I->J) leaves at the instant of the link schedule of the analysis flow,
+// counted from the tick of the phase of the job that sends it
+// (ucx_job_tick, lib/tick_release.c); app/weird_a_tt.h (rttools.ucxgen tt)
+// holds the instant of each of these flows for the clock F_CPU of the
+// build. Without the macro the job sends the packet at once (the images up
+// to tag r11-rc5).
+#ifdef UCX_NOC_TT
+#include "weird_a_tt.h"
+#define SEND_REMOTE(cpu, port, pkt, tag, at) \
+  ucx_noc_send_at(cpu, port, pkt, tag, ucx_job_tick(), &(at))
+#else
+#define SEND_REMOTE(cpu, port, pkt, tag, at) ucx_noc_send(cpu, port, pkt, tag)
+#endif
+
 // Iteration markers (include/device/cacc.h): each task writes
 // ITER_BEGIN(task, k) after it has the input of iteration k and
 // ITER_END(task, k) after its last send of iteration k. The packets carry
@@ -151,7 +167,7 @@ void task_a()
     ucx_noc_send(CPU_B, PORT_B, pkt1, COMM_AB_WORKLOAD);
 
     // tprintf("A->C\n");
-    ucx_noc_send(CPU_C, PORT_C, pkt2, COMM_AC_WORKLOAD);
+    SEND_REMOTE(CPU_C, PORT_C, pkt2, COMM_AC_WORKLOAD, TT_AT_A_C);
     ITER_END('A', k);
   } while (--it);
 
@@ -208,7 +224,7 @@ void task_c()
     ucx_sleep(TASK_C_WORKLOAD);
 
     // tprintf("C->E\n");
-    ucx_noc_send(CPU_E, PORT_E, pkt, COMM_CE_WORKLOAD);
+    SEND_REMOTE(CPU_E, PORT_E, pkt, COMM_CE_WORKLOAD, TT_AT_C_E);
     ITER_END('C', k);
 
   }while (--it);
@@ -296,7 +312,7 @@ void task_f()
     ucx_sleep(TASK_F_WORKLOAD);
 
     // tprintf("F->G\n");
-    ucx_noc_send(CPU_G, PORT_G, pkt, COMM_FG_WORKLOAD);
+    SEND_REMOTE(CPU_G, PORT_G, pkt, COMM_FG_WORKLOAD, TT_AT_F_G);
     ITER_END('F', k);
     
   }while (--it);
@@ -352,7 +368,7 @@ void task_h()
     ucx_sleep(TASK_H_WORKLOAD);
 
     // tprintf("H->J\n");
-    ucx_noc_send(CPU_J, PORT_J, pkt, COMM_HJ_WORKLOAD);
+    SEND_REMOTE(CPU_J, PORT_J, pkt, COMM_HJ_WORKLOAD, TT_AT_H_J);
     ITER_END('H', k);
 
   } while (--it);
@@ -381,7 +397,7 @@ void task_i()
     ucx_sleep(TASK_I_WORKLOAD);
 
     // tprintf("I->J\n");
-    ucx_noc_send(CPU_J, PORT_J, pkt, COMM_IJ_WORKLOAD);
+    SEND_REMOTE(CPU_J, PORT_J, pkt, COMM_IJ_WORKLOAD, TT_AT_I_J);
     ITER_END('I', k);
 
   }  while (--it);

@@ -37,8 +37,24 @@
  * ITER_END(letter, j) after the last send. The markers of one job start
  * are written with interrupts disabled, so the read markers follow the
  * begin marker of their job on the PE.
+ *
+ * Time-triggered injection (built with -DUCX_NOC_TT: Makefile of UCX-OS,
+ * INJECTION=tt; lib/noc_tt.c): a job hands each packet to a task of
+ * another PE to the kernel with ucx_noc_send_at, which injects it at its
+ * instant in the link schedule of the analysis flow (app/car_full_tt.h of
+ * rttools.ucxgen tt: TT_AT[flow][k] for packet k of the flow in the
+ * hyperperiod), counted from the tick of the phase o_v + (j - 1) k_v that
+ * released job j (phase0_tick: tick of phase 0, lib/noc_tt.c). The packet
+ * of job j is packet ((j - 1) / m_e) mod TT_PACKETS[flow] of the flow. A
+ * job writes its number into one of TT_BUFFERS[flow] buffers of the flow in
+ * turn, so it does not write a packet that waits for its instant. Without
+ * the macro the job sends the packet at once (the code above).
  */
 #include <ucx.h>
+#ifdef UCX_NOC_TT
+/* instants of the packets between PEs (rttools.ucxgen tt) */
+#include "car_full_tt.h"
+#endif
 
 #define N_TASKS     33
 #define MAX_IN      5
@@ -145,6 +161,9 @@ static volatile uint32_t released[MAX_LOCAL];
 static int n_local = 0;
 static volatile uint32_t irq_pending = 0;   /* release interrupts not applied yet */
 static uint32_t phase = 0;                  /* index of the next phase */
+#ifdef UCX_NOC_TT
+static uint32_t phase0_tick = 0;            /* tick of phase 0 (lib/noc_tt.c) */
+#endif
 
 /* release interrupt (manycore_pe.sv, every phase on every PE with a task);
  * interrupts stay disabled until the return of _isr (kernel/sched.c) */
@@ -157,6 +176,53 @@ void irq4_handler(void)
   *irq_flag_down = !(*irq_flag_down);
 }
 
+#ifdef UCX_NOC_TT
+static const uint8_t *tick_row;             /* TT_TICK of this PE (app/<app>_tt.h) */
+static struct tcb_s *owner_pred[MAX_LOCAL + 1];  /* tcb before position p of the circular list */
+static uint32_t tick_idx = 0;               /* index of the next phase in TT_TICK */
+
+/* tick hook (kernel/sched.c, dispatch): the generator raises the release
+ * request before the tick of its phase, and the link schedule keeps any
+ * handler that runs at the request from reaching the tick (premise (ii));
+ * a request pending here is served first; then the hook releases the jobs of the phase (TT_TICK: bit 2 +
+ * i for the task of position i + 1, the phases o_v + j k_v) and sets the
+ * current task of the scheduler to the task before the position that the
+ * model dispatches at this tick (TT_TICK bits 0-1; 0: no change), so that
+ * krnl_schedule dispatches that position or, when its job has ended, the
+ * next ready task after it: the tasks of each phase run in the circular
+ * order of the model, whatever task holds the CPU at the tick */
+void ucx_app_tick(void)
+{
+  uint32_t p = 0;
+
+  if (IRQ_CAUSE & MASK_IRQ4)
+    irq4_handler();
+  while (irq_pending) {
+    uint32_t e = tick_row[tick_idx];
+
+    irq_pending--;
+    if (phase == 0)
+      phase0_tick = ucx_noc_tt_ticks();
+    if (++tick_idx == TT_TICKS)
+      tick_idx = TT_TICK_LOOP;
+    p = e & 3;
+    e >>= 2;
+    for (int i = 0; i < n_local; i++, e >>= 1) {
+      if (e & 1) {
+        released[i]++;
+        if (local_tcb[i]->state == TASK_BLOCKED)
+          local_tcb[i]->state = TASK_READY;
+      }
+    }
+    phase++;
+  }
+  if (p) {
+    if (kcb_p->tcb_p->state == TASK_RUNNING)
+      kcb_p->tcb_p->state = TASK_READY;
+    kcb_p->tcb_p = owner_pred[p];
+  }
+}
+#else
 /* tick hook (kernel/sched.c, dispatch): releases the jobs of each phase
  * whose interrupt came since the previous tick */
 void ucx_app_tick(void)
@@ -174,6 +240,15 @@ void ucx_app_tick(void)
     phase++;
   }
 }
+#endif
+
+#ifdef UCX_NOC_TT
+/* functions that run with interrupts disabled: one function each, for the static
+ * analysis of their length (rttools.wcet, sections) */
+#define TT_SECTION __attribute__((noinline))
+#else
+#define TT_SECTION
+#endif
 
 /* ------------------------------ tasks */
 static noc_packet_t *create_pkt(uint32_t bytes)
@@ -188,7 +263,7 @@ static noc_packet_t *create_pkt(uint32_t bytes)
 
 /* blocks until job done + 1 is released; the test and the block run with
  * interrupts disabled, so a release between them is not lost */
-static void wait_release(int li, uint32_t done)
+static TT_SECTION void wait_release(int li, uint32_t done)
 {
   _di();
   while (released[li] == done) {
@@ -201,6 +276,41 @@ static void wait_release(int li, uint32_t done)
 
 /* latest packet of each input edge (one queued packet per source): keeps
  * the job number of the source (first word of the payload) */
+#ifdef UCX_NOC_TT
+/* first packet of the queue (one queued packet per source), with
+ * interrupts disabled: keeps the job number of the source (first word of
+ * the payload) and frees a packet from another PE; 0 when the queue is
+ * empty */
+static TT_SECTION int read_one(const struct task_s *t, uint32_t *last, uint32_t me)
+{
+  int got = 0;
+
+  _di();
+  if (ucx_noc_probe() > 0) {
+    noc_packet_t *pkt = ucx_noc_receive();
+    uint16_t port = pkt->source_port;
+    uint32_t job = *(volatile uint32_t *)pkt->data;
+
+    for (int i = 0; i < t->n_in; i++)
+      if (t->in_port[i] == port)
+        last[i] = job;
+    if (pkt->source_node != me)
+      ucx_free(pkt);
+    got = 1;
+  }
+  _ei();
+  return got;
+}
+
+/* latest packet of each input edge, one packet per section */
+static void read_inputs(const struct task_s *t, uint32_t *last)
+{
+  uint32_t me = ucx_noc_cpu_id();
+
+  while (read_one(t, last, me))
+    ;
+}
+#else
 static void read_inputs(const struct task_s *t, uint32_t *last)
 {
   _di();
@@ -217,28 +327,67 @@ static void read_inputs(const struct task_s *t, uint32_t *last)
   }
   _ei();
 }
+#endif
+
+#ifdef UCX_NOC_TT
+/* begin marker and read markers of job done + 1, with interrupts disabled */
+static TT_SECTION void begin_marks(const struct task_s *t, const uint32_t *last, uint32_t done)
+{
+  _di();
+  ITER_BEGIN(t->letter, done + 1);
+  for (int i = 0; i < t->n_in; i++)
+    READ_MARK(t->in_letter[i], last[i]);
+  _ei();
+}
+
+/* packet of output edge o to a task of this PE: job number and enqueue
+ * with interrupts disabled (the target reads the buffer of this task) */
+static TT_SECTION void send_local(const struct task_s *t, int o, noc_packet_t *pkt, uint32_t done)
+{
+  _di();
+  *(volatile uint32_t *)pkt->data = done;
+  ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt, TAG(t->out[o].flow, done));
+  _ei();
+}
+#endif
 
 static void run_task(const struct task_s *t, int li)
 {
   noc_packet_t *pkt[MAX_OUT];
   uint32_t last[MAX_IN];
   uint32_t done = 0;
+#ifdef UCX_NOC_TT
+  noc_packet_t *pkt_tt[MAX_OUT][TT_MAX_BUFFERS];   /* buffers of each output edge */
+  uint32_t sent[MAX_OUT];                          /* packets of each output edge */
+#endif
 
   _ei();
   ucx_noc_comm_create(t->port);
   for (int o = 0; o < t->n_out; o++)
     pkt[o] = create_pkt(t->out[o].bytes);
+#ifdef UCX_NOC_TT
+  for (int o = 0; o < t->n_out; o++) {
+    sent[o] = 0;
+    pkt_tt[o][0] = pkt[o];
+    for (int b = 1; b < TT_BUFFERS[t->out[o].flow] && b < TT_MAX_BUFFERS; b++)
+      pkt_tt[o][b] = create_pkt(t->out[o].bytes);
+  }
+#endif
   for (int i = 0; i < MAX_IN; i++)
     last[i] = 0;
 
   for (;;) {
     wait_release(li, done);
     read_inputs(t, last);
+#ifdef UCX_NOC_TT
+    begin_marks(t, last, done);
+#else
     _di();
     ITER_BEGIN(t->letter, done + 1);
     for (int i = 0; i < t->n_in; i++)
       READ_MARK(t->in_letter[i], last[i]);
     _ei();
+#endif
 
     /* simulate processing */
     ucx_sleep(t->workload);
@@ -250,13 +399,28 @@ static void run_task(const struct task_s *t, int li)
       if (t->out[o].cpu == ucx_noc_cpu_id()) {
         /* the target reads the buffer of this task: job number and
          * enqueue with interrupts disabled */
+#ifdef UCX_NOC_TT
+        send_local(t, o, pkt[o], done);
+#else
         _di();
         *(volatile uint32_t *)pkt[o]->data = done;
         ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
         _ei();
+#endif
       } else {
+#ifdef UCX_NOC_TT
+        uint16_t fl = t->out[o].flow;
+        noc_packet_t *b = pkt_tt[o][sent[o] % TT_BUFFERS[fl]];
+        uint32_t k = ((done - 1) / t->out[o].every) % TT_PACKETS[fl];
+
+        sent[o]++;
+        *(volatile uint32_t *)b->data = done;
+        ucx_noc_send_at(t->out[o].cpu, t->out[o].port, b, TAG(fl, done),
+                        phase0_tick + t->offset + (done - 1) * t->period, &TT_AT[fl][k]);
+#else
         *(volatile uint32_t *)pkt[o]->data = done;
         ucx_noc_send(t->out[o].cpu, t->out[o].port, pkt[o], TAG(t->out[o].flow, done));
+#endif
       }
     }
     ITER_END(t->letter, done);
@@ -388,6 +552,14 @@ int32_t app_main(void)
   default:
     break;
   }
+#ifdef UCX_NOC_TT
+  /* positions of the tick hook: the task before position p in the circular list
+   * (idle task, then the tasks in creation order) */
+  tick_row = TT_TICK[ucx_noc_cpu_id()];
+  owner_pred[1] = kcb_p->tcb_first;
+  for (int i = 1; i < n_local; i++)
+    owner_pred[i + 1] = local_tcb[i - 1];
+#endif
 
   return 1;
 }
